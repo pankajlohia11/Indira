@@ -1,0 +1,166 @@
+﻿
+@using System.Globalization;
+@model BusinessEntity.CustomModels.ShipmentView_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <input id="germanformat" style="display:none;" value="@Model.headerObj[0].S_ID" />
+    <table style="width:100%" align="center">
+        <tr>
+            <td style="width:30%;"></td>
+            <td style="width:40%;text-align:center;"><img src="@Model.headerObj[0].imgurl" >
+            @*<h1 style="font-size:large"><label><strong>@Model.headerObj[0].SystemCompany</strong></label></h1>*@
+            </td>
+            <td style="width:30%;"></td>
+        </tr>
+    </table>
+    <br />
+    <h2 style="text-align:center;font-size:large;font-weight:bold;"><u>Lastschrift</u></h2>
+    <br />
+    <table style="font-size:14px;">
+        <tr>
+            <td><span><strong>@Model.headerObj[0].CompanyName</strong></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.headerObj[0].Street,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.headerObj[0].CityState,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.headerObj[0].CountryZip.</label></span></td>
+        </tr>
+    </table>
+    <table align="right">
+        <tr>
+            <td colspan="2">Lastschrift-Nr:<strong>@Model.headerObj[0].DebitNoteCode</strong></td>
+        </tr>
+        <tr>
+            <td>Datum:<strong>@Model.headerObj[0].DebitNoteDate.ToString("dd-MM-yyyy")</strong></td>
+        </tr>
+        <tr>
+            <td colspan="2">Rechnung-Nr:<strong>@Model.headerObj[0].S_INV_NO</strong></td>
+        </tr>
+        <tr>
+            <td>
+                Rechnungsdatum:<strong>@((Model.headerObj[0].S_INV_DATE ?? DateTime.Now).ToString("dd-MM-yyyy"))</strong><br />
+                <br />
+            </td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td>
+                <br /><br /><br /><br /><br />
+                                        <p>
+                                            Sehr geehrter Herr / Frau,<br /><br />
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Wir weisen Sie darauf hin, dass wir Ihr Konto mit dem unten genannten Betrag belastet haben.
+
+                                        </p>
+            </td>
+        </tr>
+    </table>
+    <br />
+    <table style="width:100%" border="1">
+        <thead>
+            <tr>
+                <th>Best.-Nr</th>
+                @if (Model.headerObj[0].isfob == 0)
+    {
+                <th>Bestellbetrag</th>
+}
+else
+{
+            <th>FOB Amount</th>
+}
+                <th>Kommission(%)</th>
+                <th>Provisionsbetrag</th>
+            </tr>
+
+        </thead>
+        <tbody>
+            @{ decimal total = 0;}
+            @foreach (var item in Model.detailsObj)
+            {
+                <tr>
+                    <td>@item.popupOrderNo</td>
+                    <td style="text-align:right">@(Convert.ToDecimal(item.OrderAmt).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    <td style="text-align:right">@(Convert.ToDecimal(item.popupCommissionPer).ToString("0"))</td>
+                    <td style="text-align:right">@(Convert.ToDecimal(item.popupCommissionPer * item.OrderAmt / 100).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))
+                </tr>
+                total = total + ((item.popupCommissionPer ?? 0) * (item.OrderAmt ?? 0) / 100);
+            }
+            <tr>
+                <td colspan="3" style="text-align:center;"><strong>Gesamt</strong></td>
+                <td style="text-align:right"><br /><strong> @total.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))</strong><br /></td>
+            </tr>
+        </tbody>
+    </table>
+    <table>
+        <tr>
+            <td style="line-height:9px;">
+                <br />
+                <p>
+                    <strong>
+                        Gesamtbetrag in Worten :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EURO &nbsp;@Model.headerObj[0].AmtInWords &nbsp; CENTS ONLY
+                    </strong>
+
+                </p>
+            </td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td style="font-size:13px;line-height:14px;">
+                <br />
+                <p>
+                    Bitte vereinbaren Sie den genannten Betrag bei Demand Draft mit dem Namen "@Model.headerObj[0].SystemCompany" und senden Sie ihn frühestens per Kurier an unser Büro.
+                </p>
+                <br />
+            </td>
+        </tr>
+    </table>
+    <table style="width:100%">
+        <tr>
+            <td colspan="2" style="line-height: 14px;font-size:13px;">
+                <strong><u>Our Bank Details:</u></strong>
+                <br />
+            </td>
+        </tr>
+        <tr>
+            <td style="font-size:11px;line-height:13px">
+                Naspa - Nassauische Sparkasse<br />
+                Frankfurter Str. 7 <br />
+                61462 Konigstein Ts. <br />
+                Germany <br />
+                Bank Code: 510 500 15 <br />
+                USDAccount No. - 263710659<br />
+                IBAN No. - DE98510500150263710659 <br />
+                Swift-Code: NASSDE55 <br />
+                Recipient: Eurotextiles GmbH& Co. KG <br />
+                Address:  Mammolshainer Weg 14,61462 Königstein<br />
+            </td>
+            <td style="font-size:11px;line-height:13px">
+                Naspa - Nassauische Sparkasse <br />
+                Frankfurter Str. 7 <br />
+                61462 Konigstein Ts. <br />
+                Germany <br />
+                Bank Code: 510 500 15 <br />
+                EURO Account No. - 270060706 <br />
+                IBAN No. - DE15 5105 0015 0270 060706 <br />
+                Swift-Code: NASSDE55 <br />
+                Recipient: Eurotextiles GmbH& Co. KG<br />
+                Address:   Mammolshainer Weg 14, 61462 Königstein, Germany
+            </td>
+        </tr>
+
+    </table>
+    <table>
+        <tr>
+            <td style="line-height: 14px;">
+                <br />  
+                                    <p>
+                                        Mit freundlichen Grüßen, <br /><br /><strong>@Model.headerObj[0].SystemCompany</strong>
+                                    </p>
+            </td>
+        </tr>
+    </table>
+</div>

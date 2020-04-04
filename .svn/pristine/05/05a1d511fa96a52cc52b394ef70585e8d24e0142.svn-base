@@ -1,0 +1,69 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class tbl_PurchaseOrderHeader
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal PP_ID { get; set; }
+
+        [StringLength(15)]
+        public string PO_Code { get; set; }
+
+        public DateTime? PO_Date { get; set; }
+
+        public decimal? PO_Type { get; set; }
+
+        public decimal? PO_OrderReference { get; set; }
+
+        [StringLength(50)]
+        public string Po_CurrencyKey { get; set; }
+
+        public decimal? Po_Supplierkey { get; set; }
+
+        public bool? Po_DeliveryShedule { get; set; }
+
+        public decimal? Po_PaymentTerms { get; set; }
+
+        public DateTime? Po_DeliveryDate { get; set; }
+
+        public decimal? Po_TotalAmount { get; set; }
+
+        [StringLength(500)]
+        public string Po_ShippingAddress { get; set; }
+
+        public decimal? Po_ApprovalStatus { get; set; }
+
+        [StringLength(500)]
+        public string Po_SupplierAddress { get; set; }
+
+        [StringLength(500)]
+        public string Po_SpecialInstruction { get; set; }
+
+        [Column(TypeName = "text")]
+        public string Po_TermsandConditions { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+
+        public decimal? PO_Approver { get; set; }
+    }
+}

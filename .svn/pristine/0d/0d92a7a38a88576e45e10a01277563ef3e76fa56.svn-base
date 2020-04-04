@@ -1,0 +1,55 @@
+﻿@using System.Globalization;
+@model IEnumerable<BusinessEntity.CustomModels.Product_Catalog_Details>
+
+
+@foreach (var item in Model)
+{
+    BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+    <div class="col-md-12" id="div_company_view">
+        <div class="tile-body">
+            <div name="form1" role="form" id="form1" data-parsley-validate>
+                <h5><label><strong>Product Catalog Info</strong></label></h5>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Email">Product Name</label>
+                        <input type="text" name="CompanyName" value="@item.P_Name" class="form-control" disabled>
+                        <input type="text" name="txtComID" id="txtComID" hidden>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Price Book Code</label>
+                        <input type="text" name="CompanyName" value="@item.PC_CODE" class="form-control" disabled>
+                        <input type="text" name="txtComID" id="txtComID" hidden>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Product Code</label>
+
+                        <input type="text" name="DisplayName" value="@item.PRODUCT_CODE" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Product Specification</label>
+                        <input type="text" name="UstId" value="@item.PRODUCT_SPECIFICATION" class="form-control" disabled>
+                    </div>
+
+
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">UOM</label>
+
+                        <input type="text" name="TaxNo" value="@item.UOM_NAME" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Unit Price</label>
+
+                        <input type="text" name="TaxNo" style="text-align:right;" value="@(Convert.ToDecimal(item.UNIT_PRICE).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))" class="form-control" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

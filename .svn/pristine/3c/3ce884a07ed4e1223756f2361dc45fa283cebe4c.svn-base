@@ -1,0 +1,63 @@
+﻿@model BusinessEntity.CustomModels.OneToOneInvoiceView_CM
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.objHeader)
+    {
+        <h5><label><strong>Enquiry Details</strong></label></h5>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Email">Invoice Code</label>
+                <input type="text" value="@item.OTOI_Code" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Url">Invoice Date</label>
+                <input type="text" value="@item.OTOI_InvoiceDate" class="form-control" disabled>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">Shipment Code</label>
+                <input type="text" value="@item.S_Code" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">Cumstomer</label>
+                <input type="text" value="@item.COM_DISPLAYNAME" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">Sales Person</label>
+                <input type="text" value="@item.USER_NAME" class="form-control" disabled>
+            </div>
+          </div>
+            }
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>UOM</th>
+                        <th>Quantity</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.objDetail)
+            {
+                <tr>
+                    <td>@item.ArticleNo</td>
+                    <td>@item.ProductName</td>
+                    <td>@item.UOM</td>
+                    <td>@item.SD_Quantity</td>
+                </tr>
+    }
+                </tbody>
+            </table>
+        </div>
+        </div>
+</div>

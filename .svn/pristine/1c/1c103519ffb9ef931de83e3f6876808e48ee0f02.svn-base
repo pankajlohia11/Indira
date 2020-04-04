@@ -1,0 +1,26 @@
+﻿@using System.Globalization;
+@model IEnumerable<BusinessEntity.CustomModels.OneToManyInvoice_CM>
+@foreach (var item in Model)
+{
+
+    <tr>
+        <td>
+            <input type='text' id='txtDespatch_Code' class='form-control' readonly='readonly' value="@item.Despatch_Code" />
+        </td>
+        <td>
+            <input type='text' id='txtProductName' class='form-control' readonly='readonly' value="@item.ArticleNo" />
+        </td>
+        <td>
+            <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.ProductName" />
+        </td>
+        <td>
+            <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.UOM" />
+        </td>
+        <td>
+            <input style="text-align:right;" type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@(Convert.ToDecimal(item.SD_Quantity).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))" />
+        </td>
+        <td>
+            <input style="text-align:right;" type='text' id='txtprice' class='form-control' readonly='readonly' value="@(Convert.ToDecimal(item.price).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))" />
+        </td>
+    </tr>
+}

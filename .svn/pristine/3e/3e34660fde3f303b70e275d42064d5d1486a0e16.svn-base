@@ -1,0 +1,346 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+    }
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Roles and Privilege <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Roles and Privilege</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Roles and Privilege</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Bank Name</th>
+                                    <th>Diaplay Name</th>
+                                    <th>City</th>
+                                    <th>Country</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong> Bank Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <a tabindex="0" onclick="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <form  name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="BankInfo"><strong>Bank Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="BankName">Bank Name</label>
+                                    <input type="text" name="BankName1" class="form-control" placeholder="Bank Name"
+                                           data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/"
+                                           required>
+                                </div>
+
+
+
+                                <div class="form-group col-md-6">
+                                    <label for="DisplayName">Display Name</label>
+
+                                    <input type="text" name="DisplayName1" class="form-control" placeholder="Display Name"
+                                           data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/"
+                                           required>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="AdressInfo"><strong>Address Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Address">Address</label>
+                                    <textarea name="Address1" rows="4" cols="80" class="form-control" placeholder="Address" data-parsley-trigger="change"
+                                              data-parsley-type="alphanum"
+                                              required></textarea>
+                                   
+
+
+                                </div>
+
+
+                                <div class="form-group col-md-6">
+                                    <label for="CityName">City Name</label>
+
+                                    <input type="text" name="CityName1" class="form-control" placeholder="City Name"
+                                           data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/"
+                                           required>
+
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="ZipCode">Zip Code</label>
+
+                                    <input type="text" name="ZipCode1" class="form-control" placeholder="Zip Code"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits"
+                                           required>
+
+
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="Country">Country</label>
+
+                                    <input type="text" name="Country1" class="form-control" placeholder="Country"
+                                           data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/"
+                                           required>
+
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="AccountsInfo"><strong>Accounts Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="SWIFT">SWIFT</label>
+
+                                    <input type="text" name="SWIFT1" class="form-control" placeholder="SWIFT"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum"
+                                           >
+
+
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="BLZ">BLZ</label>
+
+                                    <input type="text" name="BLZ1" class="form-control" placeholder="BLZ"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum"
+                                           >
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="BIC">BIC</label>
+
+                                    <input type="text" name="BIC1" class="form-control" placeholder="BIC"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum"
+                                           >
+
+                                </div>
+
+
+
+                                <div class="form-group col-md-6">
+                                    <label for="IBAN">IBAN</label>
+
+                                    <input type="text" name="IBAN1" class="form-control" placeholder="IBAN"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum"
+                                           >
+                                </div>
+
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="AccountNo">Account No</label>
+                                    <input type="text" name="AccountNo1" class="form-control" placeholder="Account No"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum"
+                                           required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="ContactPersonInfo"><strong>Contact Person Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="ContactName">Contact Name</label>
+
+                                    <input type="text" name="ContactName1" class="form-control" placeholder="Contact Name"
+                                           data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/"
+                                           >
+
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="ContactNo">Contact No</label>
+
+                                    <input type="text" name="ContactNo1" class="form-control" placeholder="Contact No"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits"
+                                           >
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Remarks">Remarks</label>
+                                    <textarea name="Remarks1" rows="4" cols="80" class="form-control" placeholder="Remarks"  data-parsley-trigger="change"
+                                           data-parsley-type="alphanum"
+                                            ></textarea>
+                                   
+                                </div>
+
+                            </div>
+
+
+                        </form>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-right bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <button type="submit" class="btn btn-lightred" id="formSubmit">Submit</button>
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore Bank</strong> Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <a tabindex="0" onclick="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Bank Name</th>
+                                    <th>Display Name</th>
+                                    <th>City</th>
+                                    <th>Country</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>  
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

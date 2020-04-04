@@ -1,0 +1,56 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DataAccess;
+using DataAccess.Admin_DA;
+using BusinessEntity.EntityModels;
+using BusinessLogic.Admin_BL;
+using System.Data;
+
+namespace BusinessLogic.Admin_BL
+{
+    public class ET_General_Order_Details_BL
+    {
+        ET_General_Order_Details_DL ObjDL = new ET_General_Order_Details_DL();
+
+        public List<Tbl_Master_Order> Tbl_Sales_OrderList_BL(int Comkey, bool type)
+        {
+            return ObjDL.Tbl_Sales_OrderList_DL(Comkey, type);
+        }
+        public List<Tbl_Master_User> Sales_person_dropdown_BL(int com_key)
+        {
+            return ObjDL.Sales_person_dropdown_DL(com_key);
+        }
+
+        public List<Tbl_Payment_Terms> Payment_terms_dropdown_BL(int com_key)
+        {
+            return ObjDL.Payment_terms_dropdown_DL(com_key);
+        }
+        public DataTable OrgEmp_BL(int com_key)
+        {
+            return ObjDL.OrgEmp_DL(com_key);
+        }
+
+        public decimal ET_General_Order_Details_Add_BL(Tbl_Master_Order obj, string prefix, bool automanual, string Orderdetails)
+        {
+            return ObjDL.ET_General_Order_Details_Add_BL(obj, prefix, automanual, Orderdetails);
+        }
+
+        public Tbl_Master_Order ET_General_Order_Details_Update_GetbyID_BL(int id)
+        {
+            return ObjDL.ET_General_Order_Details_Update_GetbyID_DL(id);
+        }
+
+        public int ET_General_Order_Details_Restore_Delete_BL(int id, decimal Updatedby, bool type)
+        {
+            return ObjDL.ET_General_Order_Details_Restore_Delete_DL(id, Updatedby, type);
+        }
+        public Tbl_Master_Order ET_General_Order_Details_View_DL(int id)
+        {
+            return ObjDL.ET_General_Order_Details_View_DL(id);
+        }
+
+    }
+}

@@ -1,0 +1,162 @@
+﻿@using System.Globalization;
+@model IEnumerable<BusinessEntity.CustomModels.Tbl_Offer_Details_CM>
+
+
+@{
+    int i = 0;
+}
+
+<div class="col-md-12">
+
+    @foreach (var item in Model)
+    {
+        if (i == 0)
+        {
+            i = 1;
+            BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+
+            var Companyname = dbc.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == item.COM_ID).COM_NAME;
+            var Contactname = dbc.Tbl_Master_CompanyContacts.Single(m => m.CONTACT_ID == item.CONTACT_PERSON).FIRST_NAME;
+            var Customername = "";
+            try { Customername = dbc.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == item.CUST_ID).COM_NAME; }
+            catch { }
+            <div class="row">
+
+                <div class="form-group col-md-6">
+                    <label for="lblSupplier">Supplier:</label>
+                    <input type="text" class="form-control" value="@Companyname" disabled />
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="lblContact">Contact Person</label>
+                    <input type="text" class="form-control" value="@Contactname" disabled />
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="lblOfferNo">Offer No:</label>
+                    <input type="text" name="txtOfferNo" class="form-control" value="@item.OFFER_NO" disabled />
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="lblOfferDate">Offer Date:</label>
+                    <div class='input-group datepicker w-360' style="width:100%">
+                        <input type='text' id="txtOfferdate" class="form-control" value="@item.OFFER_DATE.ToString("dd-MMM-yyyy")" disabled />
+                        <span class="input-group-addon">
+                            <span class="fa fa-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="form-group col-md-6">
+                    <label for="lblorigin">Place of Origin:</label>
+                    <input type="text" name="txtOrigin" class="form-control" id="txtOrigin" value="@item.PLACE_DEST" disabled />
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="lbldest">Place of Destination:</label>
+                    <input type="text" name="txtDest" class="form-control" value="@item.DESTINATION" disabled />
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="form-group col-md-6">
+                    <label for="lblorigin">Payment Details:</label>
+                    <textarea name="ddlDescription" rows="3" cols="80" class="form-control" disabled> @item.DESCRIPTION </textarea>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="lbldest">Shipment Terms:</label>
+                    <textarea name="ddlShmnt" rows="3" cols="80" class="form-control" ng-model="ddlShmnt" placeholder="Shipment Terms"
+                              disabled> @item.SHIPMENT </textarea>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="form-group col-md-6">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label class="control-label" for="lblValidityperiod">Validity period</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="text" name="txtValidityperiod" id="txtValidityperiod" class="form-control" disabled value="@item.VALIDITY_DATE.ToString("dd-MMM-yyyy")" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    @if (item.IS_SPECIFIC != false)
+                    {
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="control-label" for="lblSpecificCustomer">Specific Customer</label><br />
+                                <input type="checkbox" name="chk_SpeCus" checked disabled />
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="txtDt" class="form-control" id="txtDt" value="@Customername" disabled />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="form-group col-md-6">
+                    <label for="lblDescription">Description:</label>
+                    <textarea name="txtDesc" rows="3" cols="80" class="form-control" disabled>@item.DESCRIPTION </textarea>
+                </div>
+            </div>
+        }
+    }
+    <div class="tile-body">
+        <div class="table-responsive">
+            <!-- This table is used for displaying data in the form of grid in the create/edit page-->
+            <table class="table table-custom" id="grd_1">
+                <thead>
+                    <tr>
+                        <th>Product Short Name</th>
+                        <th>Category</th>
+                        <th>Product Name</th>
+                        <th>UOM</th>
+                        <th>Currency</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <input type="text" class="form-control" id="txtDt" value="@item.SHORT_NAME" disabled />
+                            </td>
+
+                            <td>
+                                <input type="text" class="form-control" value="@item.CATEGORY_NAME" disabled />
+                            </td>
+
+                            <td>
+                                <input type="text" class="form-control" value="@item.PRODUCT_NAME" disabled />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" value="@item.UOM_NAME" disabled />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" value="@item.CURRENCY_NAME" disabled />
+
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" value="@(Convert.ToDecimal(item.PRICE).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))" disabled />
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" value="@(Convert.ToDecimal(item.QUANTITY).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))" disabled />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

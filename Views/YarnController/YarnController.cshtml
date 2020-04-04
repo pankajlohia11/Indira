@@ -1,0 +1,1040 @@
+﻿
+@{
+    ViewBag.Title = "YarnCalculation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section angularcontroller
+{
+    <script type="text/javascript">
+        function validateyarncaltable() {
+            var tr = $("#div_yarntablebody tr");
+            var txt = "";
+            for (var i = 0; i < tr.length;) {
+                var td = tr[i].children;
+                if ($(td[3].children).val() == "") {
+                    var no = ((parseInt(i) / 3) + 1);
+                    if (i == 0)
+                        no = 1;
+                    toastr["error"]("Wrap Quantity cannot be empty at row :" + no, "Notification");
+                    return "";
+                }
+                if ($(td[4].children).val() == "") {
+                    var no = ((parseInt(i) / 3) + 1);
+                    if (i == 0)
+                        no = 1;
+                    toastr["error"]("Weft Quantity cannot be empty at row :" + no, "Notification");
+                    return "";
+                }
+                if ($(td[5].children).val() == "") {
+                    var no = ((parseInt(i) / 3) + 1);
+                    if (i == 0)
+                        no = 1;
+                    toastr["error"]("Production Date cannot be empty at row :" + no, "Notification");
+                    return "";
+                }
+                txt = txt + $(td[3].children).val() + "," + $(td[4].children).val() + "," + $(td[5].children).val()+"|";
+                i = i + 3;
+            }
+            var tr1 = $("#div_recieptschedule tr");
+            var txt1 = "";
+            debugger;
+            for (var i = 0; i < tr1.length; i++) {
+                var td = tr1[i].children;
+                if ($(td[0].children[0].children[0]).val() != "") {
+                    if ($(td[1].children).val() == "") {
+                        toastr["error"]("Material Reciept Schedule Wrap Quantity cannot be empty at row :" + (i + 1), "Notification");
+                        return "";
+                    }
+                    if ($(td[2].children).val() == "") {
+                        toastr["error"]("Material Reciept Schedule Weft Quantity cannot be empty at row :" + (i + 1), "Notification");
+                        return "";
+                    }
+                    txt1 = txt1 + $(td[0].children[0].children[0]).val() + "," + $(td[1].children).val() + "," + $(td[2].children).val() + "|";
+                }
+            }
+            return txt + "&" + txt1;
+        }
+        function GenerateProductionPlanning() {
+            //tr_planningheaderwarp
+            //div_yarntablebody
+            debugger;
+            var tr = $("#div_yarntablebody tr");
+            $("#tr_planningheaderwarp").html("");
+            $("#tr_planningheaderweft").html("");
+            $("#body_planningheaderwarp").html("");
+            $("#body_planningheaderweft").html("");
+            var txt = validateyarncaltable();
+            if (txt != "") {
+
+                 $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetData", "YarnController")',
+                     data: { txt: txt },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                     success: function (result) {
+                         debugger;
+                         var res = JSON.parse(result);
+                    //Warp.................................................................................................
+                    //Header
+
+                    $("#tr_planningheaderwarp").append("<th>Production Start Date</th>");
+                         for (var i = 0; i < res.length;i++) {
+                        $("#tr_planningheaderwarp").append("<th style='text-align:center;color:red;'>" + res[i].Date + "</th>");
+                    }
+                    //Warp Demand
+                    var wrapdata = "<tr><td>Wrap Demand</td>";
+                         for (var i = 0; i < res.length; i++) {
+                        if (i == (res.length - 1)) {
+                            wrapdata = wrapdata + "<td><input type='text' style='text-align:right;min-width:130px;' value='" + res[i].Warp + "' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            wrapdata = wrapdata + "<td><input type='text' style='text-align:right;min-width:130px;' value='" + res[i].Warp + "' class='form-control' readonly/></td>";
+                        }
+                    }
+                    $("#body_planningheaderwarp").append(wrapdata);
+
+                    //Opening Stock
+                    var OpeningStock = "<tr><td>Opening Stock</td>";
+                         for (var i = 0; i < res.length; i++) {
+                        if (i == 0) {
+                            OpeningStock = OpeningStock + "<td><input type='text' style='text-align:right;' onchange='GenProdPlanWrapCal(this,0);' value='0' class='form-control' /></td>";
+                        }
+                        else if (i == (res.length - 1)) {
+                            OpeningStock = OpeningStock + "<td><input type='text' style='text-align:right;'  value='0' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            OpeningStock = OpeningStock + "<td><input type='text' style='text-align:right;'  value='0' class='form-control' readonly/></td>";
+                        } 
+                    }
+                    $("#body_planningheaderwarp").append(OpeningStock);
+
+                    //Stock In Transit
+                         var StockInHand = "<tr><td>Stock In Transit</td>";
+                         for (var i = 0; i < res.length; i++) {
+                        if (i == (res.length - 1)) {
+                            StockInHand = StockInHand + "<td><input type='text' style='text-align:right;' onchange='GenProdPlanWrapCal(this,0);' value='" + res[i].TransitWarp +"' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            StockInHand = StockInHand + "<td><input type='text' style='text-align:right;' onchange='GenProdPlanWrapCal(this,0);' value='" + res[i].TransitWarp +"' class='form-control' readonly/></td>";
+                        }
+                    }
+                    $("#body_planningheaderwarp").append(StockInHand);
+
+                    //Closing Balance
+                    var ClosingBalance = "<tr><td>Closing Balance</td>";
+                         for (var i = 0; i < res.length; i++) {
+                        if (i == (res.length - 1)) {
+                            ClosingBalance = ClosingBalance + "<td><input type='text' style='text-align:right;' value='0' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            ClosingBalance = ClosingBalance + "<td><input type='text' style='text-align:right;' value='0' class='form-control' readonly/></td>";
+                        }
+                    }
+                    $("#body_planningheaderwarp").append(ClosingBalance);
+
+                    //OrderScheduleDate
+                    var OrderScheduleDate = "<tr><td>Order Schedule Date</td>";
+                         for (var i = 0; i < res.length; i++) {
+                             var productiondate = new Date(toValidDate(res[i].Date));
+                        productiondate.setDate(productiondate.getDate() - 90);
+                             var dte = productiondate.getDate() + '-' + (productiondate.getMonth() + 1) + '-' + productiondate.getFullYear();
+
+                             var dt1 = new Date();
+                             var diff = new Date(productiondate - dt1);
+                             var dt1 = diff / 1000 / 60 / 60 / 24;
+                             var color = "green";
+                             if (dt1 < 0) {
+                                 color = "red";
+                             }
+                        if (i == (res.length - 1)) {
+                            OrderScheduleDate = OrderScheduleDate + "<td><input type='text' style='text-align:center;font-weight:bold;color:white;background-color:" + color +"' value='" + dte + "' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            OrderScheduleDate = OrderScheduleDate + "<td><input type='text' style='text-align:center;font-weight:bold;color:white;background-color:" + color +"' value='" + dte + "' class='form-control' readonly/></td>";
+                        }
+                    }
+                    $("#body_planningheaderwarp").append(OrderScheduleDate);
+
+                    //Order Quantity
+                    var OrderQuantity = "<tr><td>Order Quantity</td>";
+                         for (var i = 0; i < res.length; i++) {
+                             var productiondate = new Date(toValidDate(res[i].Date));
+                             productiondate.setDate(productiondate.getDate() - 90);
+                             var dte = productiondate.getDate() + '-' + (productiondate.getMonth() + 1) + '-' + productiondate.getFullYear();
+
+                             var dt1 = new Date();
+                             var diff = new Date(productiondate - dt1);
+                             var dt1 = diff / 1000 / 60 / 60 / 24;
+                             var color = "green";
+                             if (dt1 < 0) {
+                                 color = "red";
+                             }
+                        if (i == (res.length - 1)) {
+                            OrderQuantity = OrderQuantity + "<td><input type='text' style='text-align:right;font-weight:bold;color:white;background-color:" + color +"' value='0' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            OrderQuantity = OrderQuantity + "<td><input type='text' style='text-align:right;font-weight:bold;color:white;background-color:" + color +"' value='0' class='form-control' readonly/></td>";
+                        }
+                    }
+                    $("#body_planningheaderwarp").append(OrderQuantity);
+
+
+
+
+                    //Weft.................................................................................................
+                    //Header
+                    $("#tr_planningheaderweft").append("<th>Production Start Date</th>");
+                         for (var i = 0; i < res.length; i++) {
+                        $("#tr_planningheaderweft").append("<th style='text-align:center;color:red;'>" + res[i].Date + "</th>");
+                    }
+                    //Weft Demand
+                    var wrapdata = "<tr><td>Weft Demand</td>";
+                         for (var i = 0; i < res.length; i++) {
+                        if (i == (res.length -1)) {
+                            wrapdata = wrapdata + "<td><input type='text' style='text-align:right;min-width:130px;' value='" + res[i].Weft + "' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            wrapdata = wrapdata + "<td><input type='text' style='text-align:right;min-width:130px;' value='" + res[i].Weft + "' class='form-control' readonly/></td>";
+                        }
+                    }
+                    $("#body_planningheaderweft").append(wrapdata);
+
+                    //Opening Stock
+                    var OpeningStock = "<tr><td>Opening Stock</td>";
+                         for (var i = 0; i < res.length; i++) {
+                        if (i == 0) {
+                            OpeningStock = OpeningStock + "<td><input type='text' style='text-align:right;' onchange='GenProdPlanWrapCal(this,1);' value='0' class='form-control' /></td>";
+                        }
+                        else if (i == (res.length - 1)) {
+                            OpeningStock = OpeningStock + "<td><input type='text' style='text-align:right;'  value='0' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            OpeningStock = OpeningStock + "<td><input type='text' style='text-align:right;'  value='0' class='form-control' readonly/></td>";
+                        }
+                    }
+                    $("#body_planningheaderweft").append(OpeningStock);
+
+                    //Stock In Transit
+                         var StockInHand = "<tr><td>Stock In Transit</td>";
+                         for (var i = 0; i < res.length; i++) {
+                        if (i == (res.length - 1)) {
+                            StockInHand = StockInHand + "<td><input type='text' style='text-align:right;' onchange='GenProdPlanWrapCal(this,1);' value='" + res[i].TransitWeft +"' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            StockInHand = StockInHand + "<td><input type='text' style='text-align:right;' onchange='GenProdPlanWrapCal(this,1);' value='" + res[i].TransitWeft +"' class='form-control' readonly/></td>";
+                        }
+                    }
+                    $("#body_planningheaderweft").append(StockInHand);
+
+                    //Closing Balance
+                    var ClosingBalance = "<tr><td>Closing Balance</td>";
+                         for (var i = 0; i < res.length; i++) {
+                        if (i == (res.length -1)) {
+                            ClosingBalance = ClosingBalance + "<td><input type='text' style='text-align:right;' value='0' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            ClosingBalance = ClosingBalance + "<td><input type='text' style='text-align:right;' value='0' class='form-control' readonly/></td>";
+                        }
+                    }
+                    $("#body_planningheaderweft").append(ClosingBalance);
+
+                         //OrderScheduleDate
+                         debugger;
+                    var OrderScheduleDate = "<tr><td>Order Schedule Date</td>";
+                         for (var i = 0; i < res.length; i++) {
+                             var productiondate = new Date(toValidDate(res[i].Date));
+                             productiondate.setDate(productiondate.getDate() - 90);
+                             var dte = productiondate.getDate() + '-' + (productiondate.getMonth() + 1) + '-' + productiondate.getFullYear();
+
+                             var dt1 = new Date();
+                             var diff = new Date(productiondate - dt1);
+                             var dt1 = diff / 1000 / 60 / 60 / 24;
+                             var color = "green";
+                             if (dt1 < 0) {
+                                 color = "red";
+                             }
+                             if (i == (res.length - 1)) {
+                                 OrderScheduleDate = OrderScheduleDate + "<td><input type='text' style='text-align:center;font-weight:bold;color:white;background-color:" + color+"' value='" + dte + "' class='form-control' readonly/></td></tr>";
+                             }
+                             else {
+                                 OrderScheduleDate = OrderScheduleDate + "<td><input type='text' style='text-align:center;font-weight:bold;color:white;background-color:" + color +"' value='" + dte + "' class='form-control' readonly/></td>";
+                             }
+                         }
+                    $("#body_planningheaderweft").append(OrderScheduleDate);
+
+                    //Order Quantity
+                    var OrderQuantity = "<tr><td>Order Quantity</td>";
+                         for (var i = 0; i < res.length; i++) {
+                             var productiondate = new Date(toValidDate(res[i].Date));
+                             productiondate.setDate(productiondate.getDate() - 90);
+                             var dte = productiondate.getDate() + '-' + (productiondate.getMonth() + 1) + '-' + productiondate.getFullYear();
+
+                             var dt1 = new Date();
+                             var diff = new Date(productiondate - dt1);
+                             var dt1 = diff / 1000 / 60 / 60 / 24;
+                             var color = "green";
+                             if (dt1 < 0) {
+                                 color = "red";
+                             }
+                        if (i == (res.length - 1)) {
+                            OrderQuantity = OrderQuantity + "<td><input type='text' style='text-align:right;font-weight:bold;color:white;background-color:" + color +"' value='0' class='form-control' readonly/></td></tr>";
+                        }
+                        else {
+                            OrderQuantity = OrderQuantity + "<td><input type='text' style='text-align:right;font-weight:bold;color:white;background-color:" + color +"' value='0' class='form-control' readonly/></td>";
+                        }
+                    }
+                         $("#body_planningheaderweft").append(OrderQuantity);
+                         GenProdPlanWrapCal(1,0);
+                         GenProdPlanWrapCal(1,1);
+                },
+                error: function (response) {
+                    
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+
+               
+
+            }
+        }
+        function GenProdPlanWrapCal(s, bodyid) {
+            debugger;
+            if (s != 1)
+                MoneyValidation1(s);
+            if (bodyid == 0)
+                bodyid = "body_planningheaderwarp";
+            else
+                bodyid = "body_planningheaderweft";
+            var tr = $("#" + bodyid + " tr");
+            var colcount = tr[0].children.length;
+            var openingstock = parseFloat($(tr[1].children[1].children).val());;
+            for (var i = 1; i < colcount; i++) {
+                var demand = parseFloat($(tr[0].children[i].children).val());
+                var openingstock = parseFloat($(tr[1].children[i].children).val());
+                var stockinhand = parseFloat($(tr[2].children[i].children).val());
+                var closingbal = (openingstock + stockinhand - demand);
+                $(tr[3].children[i].children).val(closingbal.toFixed(3));
+                if (closingbal < 0) {
+                    if ((i + 1) < colcount) {
+                        $(tr[1].children[i + 1].children).val((0).toFixed(3));
+                    }
+                    $(tr[4].children[i].children).css("display", "block");
+                    $(tr[5].children[i].children).val((closingbal * (-1)).toFixed(3));
+                    $(tr[5].children[i].children).css("display", "block");
+                }
+                else {
+                    if ((i + 1) < colcount) {
+                        $(tr[1].children[i + 1].children).val((closingbal).toFixed(3));
+                    }
+                    $(tr[4].children[i].children).css("display", "none");
+                    $(tr[5].children[i].children).val("0");
+                    $(tr[5].children[i].children).css("display", "none");
+                }
+               
+                  
+
+            }
+
+        }
+        function MoneyValidation1(s) {
+            var re = /^[\d,]+(\.\d*)?$/;
+            var txt = s.value;
+            if (txt != "") {
+                if (!re.test(txt)) {
+                    toastr["error"]("Only Numerics are allowed", "Notification");
+                    $(s).css("border", "1px solid red");
+                    s.value = '0';
+                    return false;
+                }
+                else {
+                    $(s).css("border", "1px solid #efefef");
+                    //s.value = parseFloat(s.value).toFixed(3);
+                }
+            }
+            else
+                s.value = '0';
+            return true;
+        }
+       
+        window.onload = function () {
+            var data = $("#div_trdata").html();
+            var s1 = data.replace(/\id0/g, 'id1');
+            $("#div_yarntablebody").append(s1);
+
+        };
+        function addnewrow() {
+            id = 1;
+            while (document.getElementById("txtdeliverydate_id" + id)) {
+                id++;
+            }
+            var data = $("#div_trdata").html();
+            var s1 = data.replace(/\id0/g, 'id' + id);
+            $("#div_yarntablebody").append(s1);
+        }
+        function deleterow(e, f) {
+            if ($('[id="btnYarnCalCollapse"]').length > 2) {
+                $("#collapseExample_" + f).parent().parent().fadeOut(300, function () { $(this).remove(); });
+                $(e).parent().parent().fadeOut(300, function () { $(this).remove(); });
+            }
+        }
+        function addnewrowRS() {
+            
+            var data = $("#div_trRSdata").html();
+            $("#div_recieptschedule").append(data);
+        }
+        function deleterowRS(e) {
+            if ($("#div_recieptschedule tr").length != 1) {
+                $(e).parent().parent().fadeOut(300, function () { $(this).remove(); });
+            }
+        }
+        function FabricQuantityChange(id, e) {
+            var res = MoneyValidation(e);
+            if (res) {
+                var qty = $("#txtMainFabricQuantity_" + id).val();
+                $("#txtFabricQuantity_" + id).val(qty);
+                $("#txtQuantityoffabric_" + id).val(qty);
+            }
+            else {
+                $("#txtFabricQuantity_" + id).val("");
+                $("#txtQuantityoffabric_" + id).val("");
+            }
+            $("#txtYarnWrapQuantity_" + id).val("");
+            $("#txtYarnWeftQuantity_" + id).val("");
+            $("#txtProductionStartDate_" + id).val("");
+        }
+        function LoomQuantityChange(id, e) {
+            var res = MoneyValidation(e);
+            if (res) {
+                var qty = $("#txtMainNoOfLooms_" + id).val();
+                $("#txtNoOfLooms_" + id).val(qty);
+            }
+            else {
+                $("#txtNoOfLooms_" + id).val("");
+            }
+            $("#txtYarnWrapQuantity_" + id).val("");
+            $("#txtYarnWeftQuantity_" + id).val("");
+            $("#txtProductionStartDate_" + id).val("");
+        }
+        function DateChange(s) {
+            debugger;
+            var date = new Date(toValidDate($(s).val()));
+            var actdate = new Date();
+            var diff = new Date(date - actdate);
+            var dt1 = diff / 1000 / 60 / 60 / 24;
+            if (dt1<0) {
+                $(s).val("");
+                toastr["error"]("Past dates are restricted", "Notification");
+            }
+            var x = s.id.split('_');
+            var id = x[1].toString();
+            $("#txtYarnWrapQuantity_" + id).val("");
+            $("#txtYarnWeftQuantity_" + id).val("");
+            $("#txtProductionStartDate_" + id).val("");
+        }
+        function MoneyValidation(s) {
+            var re = /^[\d,]+(\.\d*)?$/;
+            var txt = s.value;
+            if (txt != "") {
+                if (!re.test(txt)) {
+                    toastr["error"]("Only Numerics are allowed", "Notification");
+                    $(s).css("border", "1px solid red");
+                    s.value = '';
+                    return false;
+                }
+                else {
+                    $(s).css("border", "1px solid #efefef");
+                    //s.value = parseFloat(s.value).toFixed(3);
+                }
+            }
+            return true;
+        }
+        function validate(id) {
+            if ($("#txtdeliverydate_" + id).val() == "") {
+                toastr["error"]("Enter Delivery Date", "Notification");
+                $("#txtdeliverydate_" + id).css("border", "1px solid red");
+                return false;
+            }
+            if ($("#txtMainFabricQuantity_" + id).val() == "") {
+                toastr["error"]("Enter Fabric Quantity", "Notification");
+                $("#txtMainFabricQuantity_" + id).css("border", "1px solid red");
+                return false;
+            }
+            if ($("#txtMainNoOfLooms_" + id).val() == "") {
+                toastr["error"]("Enter No Of Looms", "Notification");
+                $("#txtMainFabricQuantity_" + id).css("border", "1px solid red");
+                return false;
+            }
+            return true;
+        }
+        function calculate(id) {
+            if (!validate(id))
+                return false;
+            if ($('#txtLoomSpeed_' + id).val() == "")
+                $('#txtLoomSpeed_' + id).val("0");
+            if ($('#txtRunninghoursperday_' + id).val() == "")
+                $('#txtRunninghoursperday_' + id).val("0");
+            if ($('#txtEfficiency_' + id).val() == "")
+                $('#txtEfficiency_' + id).val("0");
+            if ($('#txtWeftpicks_' + id).val() == "")
+                $('#txtWeftpicks_' + id).val("0");
+            //var sVal = (((parseFloat($('#txtLoomSpeed').val()) * 60 * parseFloat(document.getElementById('txtRunninghoursperday').value) * parseFloat(document.getElementById('txtEfficiency').value) / 100) / parseFloat(document.getElementById('txtWeftpicks').value)) / 100);
+            var sVal = (((800 * 60 * 22.5 * parseFloat(document.getElementById('txtEfficiency_' + id).value) / 100) / parseFloat(document.getElementById('txtWeftpicks_' + id).value)) / 100);
+            $("#txtProductionperdayperloom_" + id).val(sVal.toFixed(3));
+
+            if ($('#txtNoofBeams_' + id).val() == "")
+                $('#txtNoofBeams_' + id).val("0");
+            if ($('#txtNoofendsperwrapset_' + id).val() == "")
+                $('#txtNoofendsperwrapset_' + id).val("0");
+
+            var totends = (parseFloat(document.getElementById('txtNoofBeams_' + id).value) * parseFloat(document.getElementById('txtNoofendsperwrapset_' + id).value));
+            $("#txtTotalends_" + id).val(totends.toFixed(3));
+
+            if ($('#txtWarpends_' + id).val() == "")
+                $('#txtWarpends_' + id).val("0");
+            if ($('#txtWidthoffabric_' + id).val() == "")
+                $('#txtWidthoffabric_' + id).val("0");
+            if ($('#txtWarpcrimpstandard_' + id).val() == "")
+                $('#txtWarpcrimpstandard_' + id).val("0");
+            if ($('#txtWarpwaste_' + id).val() == "")
+                $('#txtWarpwaste_' + id).val("0");
+            if ($('#txtWarpCount1_' + id).val() == "")
+                $('#txtWarpCount1_' + id).val("0");
+            var WeightofWarplm = ((((parseFloat(document.getElementById('txtWarpends_' + id).value) * 23.1 * parseFloat(document.getElementById('txtWidthoffabric_' + id).value)) / 100) * (100 + parseFloat(document.getElementById('txtWarpcrimpstandard_' + id).value)) * (100 + parseFloat(document.getElementById('txtWarpwaste_' + id).value)) / 100) / 100) / (parseFloat(document.getElementById('txtWarpCount1_' + id).value) / 1);
+            $("#txtWeightofWarplm_" + id).val(WeightofWarplm.toFixed(3));
+
+            if ($('#txtWeftpicks_' + id).val() == "")
+                $('#txtWeftpicks_' + id).val("0");
+            if ($('#txtWidthoffabric_' + id).val() == "")
+                $('#txtWidthoffabric_' + id).val("0");
+            if ($('#txtWeftcrimpstandard_' + id).val() == "")
+                $('#txtWeftcrimpstandard_' + id).val("0");
+            if ($('#txtWeftwaste_' + id).val() == "")
+                $('#txtWeftwaste_' + id).val("0");
+            if ($('#txtWeftCount1_' + id).val() == "")
+                $('#txtWeftCount1_' + id).val("0");
+            if ($('#txtQuantityoffabric_' + id).val() == "")
+                $('#txtQuantityoffabric_' + id).val("0");
+            if ($('#txtConeweight_' + id).val() == "")
+                $('#txtConeweight_' + id).val("0");
+            if ($('#txtNoofendsperwrapset_' + id).val() == "")
+                $('#txtNoofendsperwrapset_' + id).val("0");
+            if ($('#txtProductionperdayperloom_' + id).val() == "")
+                $('#txtProductionperdayperloom_' + id).val("0");
+            var WeightofWeftlm = ((((parseFloat(document.getElementById('txtWeftpicks_' + id).value) * 23.1 * parseFloat(document.getElementById('txtWidthoffabric_' + id).value)) / 100) * (100 + parseFloat(document.getElementById('txtWeftcrimpstandard_' + id).value)) * (100 + parseFloat(document.getElementById('txtWeftwaste_' + id).value)) / 100) / 100) / (parseFloat(document.getElementById('txtWeftCount1_' + id).value) / 1);
+            $("#txtWeightofWeftlm_" + id).val(WeightofWeftlm.toFixed(3));
+            var x1 = document.getElementById('txtWeightofWarplm_' + id).value;
+            var x2 = document.getElementById('txtWeightofWeftlm_' + id).value;
+            var Weightoffabriclm = parseFloat(x1) + parseFloat(x2);
+            $("#txtWeightoffabriclm_" + id).val(Weightoffabriclm.toFixed(3));
+            var TotalWarpyarnrequired = (parseFloat(document.getElementById('txtWeightofWarplm_' + id).value) * parseFloat(document.getElementById('txtQuantityoffabric_' + id).value) / 1000);
+            $("#txtTotalWarpyarnrequired_" + id).val(TotalWarpyarnrequired.toFixed(3));
+            var TotalWeftyarnrequired = (parseFloat(document.getElementById('txtWeightofWeftlm_' + id).value) * parseFloat(document.getElementById('txtQuantityoffabric_' + id).value) / 1000);
+            $("#txtTotalWeftyarnrequired_" + id).val(TotalWeftyarnrequired.toFixed(3));
+            var Warpweightrequirement = parseFloat(document.getElementById('txtTotalWarpyarnrequired_' + id).value);
+            $("#txtWarpweightrequirement_" + id).val(Warpweightrequirement.toFixed(3));
+            var Noofcones = (parseFloat(document.getElementById('txtWarpweightrequirement_' + id).value) / parseFloat(document.getElementById('txtConeweight_' + id).value));
+            $("#txtNoofcones_" + id).val(Noofcones.toFixed(3));
+            var weftNoofcones = (parseFloat(document.getElementById('txtNoofcones_' + id).value) / parseFloat(document.getElementById('txtNoofendsperwrapset_' + id).value));
+            $("#txtweftNoofcones_" + id).val(weftNoofcones.toFixed(3));
+            var Nooffullsets = (parseFloat(document.getElementById('txtNoofcones_' + id).value) / parseFloat(document.getElementById('txtNoofendsperwrapset_' + id).value));
+            $("#txtNooffullsets_" + id).val(Nooffullsets.toFixed(3));
+            var Productiondaylinearmeters = (parseFloat(document.getElementById('txtProductionperdayperloom_' + id).value) * 2);
+            $("#txtProductiondaylinearmeters_" + id).val(Productiondaylinearmeters.toFixed(3));
+            var Noofdaysrequiredtoproduce = (parseFloat(document.getElementById('txtQuantityoffabric_' + id).value) / (parseFloat(document.getElementById('txtProductiondaylinearmeters_' + id).value) * parseFloat(document.getElementById('txtNoOfLooms_' + id).value)));
+            $("#txtNoofdaysrequiredtoproduce_" + id).val(Noofdaysrequiredtoproduce.toFixed(3));
+
+            $("#txtYarnWrapQuantity_" + id).val(TotalWarpyarnrequired.toFixed(3));
+            $("#txtYarnWeftQuantity_" + id).val(TotalWeftyarnrequired.toFixed(3));
+            $("#txtProductionStartDate_" + id).val("");
+            debugger;
+            var actdate = new Date(toValidDate($("#txtdeliverydate_" + id).val()));
+            var date = new Date(toValidDate($("#txtdeliverydate_" + id).val())),
+                days = parseInt($("#txtNoofdaysrequiredtoproduce_" + id).val());
+            var dt2 = "";
+            if (!isNaN(date.getTime())) {
+                date.setDate(date.getDate() - days);
+                if (date > actdate) {
+                    dt2 = actdate;
+                    var dt1 = actdate.getDate();
+                    if (parseInt(actdate.getDate()) < 10)
+                        dt1 = "0"+actdate.getDate();
+                    var dte = dt1 + '-' + (actdate.getMonth() + 1) + '-' + actdate.getFullYear();
+                    $("#txtProductionStartDate_" + id).val(dte);
+                }
+                else {
+                    dt2 = date;
+                    var dt1 = date.getDate();
+                    if (parseInt(date.getDate()) < 10)
+                        dt1 = "0" + date.getDate();
+                    var dte = dt1 + '-' + (date.getMonth() + 1) + '-' + date.getFullYear();
+                    $("#txtProductionStartDate_" + id).val(dte);
+                }
+
+            } else {
+                alert("Invalid Date");
+            }
+            var dt1 = new Date();
+            var diff = new Date(dt2 - dt1);
+            var dt1 = diff / 1000 / 60 / 60 / 24;
+            if (dt1 < 0) {
+                $("#txtProductionStartDate_" + id).css("background-color", "red");
+            }
+            else
+            {
+                $("#txtProductionStartDate_" + id).css("background-color", "green");
+            }
+            toastr["success"]("Required Yarn successfully calculated", "Notification");
+        }
+        function toValidDate(datestring) {
+            var s = datestring.split('-');
+            var sdf = s[1].toString() + "/" + s[0].toString() + "/" + s[2].toString();
+            return sdf;
+        }
+    </script>
+
+}
+<section id="content" class="tile">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Production Planning<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Production Planning</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="tile-body">
+                    <section class="tile" style="padding:5px;">
+                        <h3>Fabric - Yarn Conversion :</h3>
+                        <br />
+                        <br />
+                        <br />
+                        <table class="table table-custom" id="tblSalesTarget">
+                            <thead>
+                                <tr>
+                                    <th><span id="Target">Shipment Plan Date</span></th>
+                                    <th><span id="Target">Fabric Quantity</span></th>
+                                    <th><span id="Target">No Of Looms</span></th>
+                                    <th><span id="Target">Yarn Wrap Quantity(Kgs)</span></th>
+                                    <th><span id="Target">Yarn Weft Quantity(Kgs)</span></th>
+                                    <th><span id="Target">Production Start Date</span></th>
+                                    <th><span id="Target">Calculate Yarn</span></th>
+                                    <th style="width:70px;"><span id="Action">Action</span></th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="div_yarntablebody"></tbody>
+
+                        </table>
+                        <h3>Material Reciept Schedule:</h3>
+                        <table class="table table-custom" id="tblRecieptSchedule">
+                            <thead>
+                                <tr>
+                                    <th><span id="Target">Date</span></th>
+                                    <th><span id="Target">Warp(Kgs)</span></th>
+                                    <th><span id="Target">Weft(Kgs)</span></th>
+                                    <th style="width:100px;"><span id="Action">Action</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="div_recieptschedule">
+                                <tr>
+                                    <td>
+                                        <div class='input-group datepicker w-360' data-format="DD-MM-YYYY" style="width:300px;">
+                                            <input type='text' id="txtRCdate" name="txtRCdate" is-open="true" onfocus="getdatepic();" onblur="DateChange(this);" class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar" onclick="getdatepic()"></span>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" name="txtRSWarp" id="txtRSWarp" onchange="MoneyValidation(this);">
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" name="txtRSWeft" id="txtRSWeft" onchange="MoneyValidation(this);">
+                                    </td>
+                                    <td>
+                                        <a style="color:green;padding:5px;" onclick="addnewrowRS();"><i class="fa fa-plus"></i></a>
+                                        <a style="color:red;padding:5px;" onclick="deleterowRS(this);"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-primary" onclick="GenerateProductionPlanning();">Generate Production Planning</button>
+                        <br />
+                        <h3>WARP PLANNING</h3>
+                        <div style="width:100%;overflow:auto">
+                            <table class="table table-custom">
+                                <thead>
+                                    <tr id="tr_planningheaderwarp"></tr>
+                                </thead>
+                                <tbody id="body_planningheaderwarp"></tbody>
+                            </table>
+                        </div>
+                        <h3>WEFT PLANNING</h3>
+                        <div style="width:100%;overflow:auto">
+                            <table class="table table-custom" style="overflow:auto;">
+                                <thead>
+                                    <tr id="tr_planningheaderweft"></tr>
+                                </thead>
+                                <tbody id="body_planningheaderweft"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<table style="display:none;">
+    <tbody id="div_trdata">
+        <tr>
+            <td>
+                <div class='input-group datepicker w-360' data-format="DD-MM-YYYY" style="width:166px;">
+                    <input type='text' id="txtdeliverydate_id0" name="txtdeliverydate_id0" is-open="true" onfocus="getdatepic();" onblur="DateChange(this);" class="form-control" />
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar" onclick="getdatepic()"></span>
+                    </span>
+                </div>
+            </td>
+            <td>
+                <input type="text" class="form-control" name="txtMainFabricQuantity_id0" id="txtMainFabricQuantity_id0" onchange="FabricQuantityChange('id0',this);">
+            </td>
+            <td>
+                <input type="text" class="form-control" name="txtMainNoOfLooms_id0" id="txtMainNoOfLooms_id0" onchange="LoomQuantityChange('id0',this);">
+            </td>
+            <td>
+                <input type="text" class="form-control" name="txtYarnWrapQuantity_id0" id="txtYarnWrapQuantity_id0" readonly="readonly">
+            </td>
+            <td>
+                <input type="text" class="form-control" name="txtYarnWeftQuantity_id0" id="txtYarnWeftQuantity_id0" readonly="readonly">
+            </td>
+            <td>
+                <input type="text" class="form-control" name="txtProductionStartDate_id0" id="txtProductionStartDate_id0" style="color:white;" readonly="readonly">
+            </td>
+            <td style="width:15%"><button type="button" class="btn btn-primary btn-xs mb-10" data-toggle="collapse" href="#collapseExample_id0" aria-expanded="false" aria-controls="collapseExample_id0" id="btnYarnCalCollapse">Calculate Yarn Requirement</button></td>
+            <td>
+                <a style="color:green;padding:5px;" onclick="addnewrow();"><i class="fa fa-plus"></i></a>
+                <a style="color:red;padding:5px;" onclick="deleterow(this,'id0');"><i class="fa fa-trash"></i></a>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="8">
+                <div class="collapse" id="collapseExample_id0">
+                    <div class="well">
+                        <table class="table table-custom" id="tblYarnCalculation_id0">
+                            <tr>
+                                <td style="width:50%">
+                                    <h4 style="font-weight:bold;">Calculation for Yarn Requirement</h4>
+                                    <div name="form1" role="form" id="form1" data-parsley-validate>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Construction:</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtConstruction_id0">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Fabric Quantity:</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtFabricQuantity_id0" style="text-align:right" data-parsley-trigger="change" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">No Of Looms:</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtNoOfLooms_id0" style="text-align:right" data-parsley-trigger="change" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Loom Speed:</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtLoomSpeed_id0" value="800" style="text-align:right" data-parsley-trigger="change" onchange="MoneyValidation(this);">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Efficiency%:</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtEfficiency_id0" value="95" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Running hours per day</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtRunninghoursperday_id0" value="22.5" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <h4 style="font-weight:bold;">Warping</h4>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">No of Beams</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtNoofBeams_id0" value="16" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">No of ends per wrap set</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtNoofendsperwrapset_id0" value="784" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Cone weight</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtConeweight_id0" value="1.89" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Rejection Criteria??</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtRejectionCriteria_id0" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Meterage Limitation??</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtMeterageLimitation_id0" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <h4 style="font-weight:bold;">Weft</h4>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Cone weight</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWeftConeweight_id0" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <h4 style="font-weight:bold;">Construction</h4>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Warp Count1</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWarpCount1_id0" value="60" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Warp Count2</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWarpCount2_id0" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Weft Count1</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWeftCount1_id0" value="60" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Weft Count2</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWeftCount2_id0" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Ends/ Picks</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtEndsPicks_id0" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Warp ends</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWarpends_id0" value="198" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Weft picks</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWeftpicks_id0" value="127" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Width of fabric</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWidthoffabric_id0" value="60" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Quantity of fabric</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtQuantityoffabric_id0" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Warp crimp standard%</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWarpcrimpstandard_id0" value="5" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Weft crimp standard%</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWeftcrimpstandard_id0" value="8" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Warp waste%</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWarpwaste_id0" value="5" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-4 control-label">Weft waste%</label>
+                                            <div class="col-sm-8">
+                                                <input type="text" class="form-control" id="txtWeftwaste_id0" value="2" data-parsley-trigger="change" onchange="MoneyValidation(this);" style="text-align:right">
+                                            </div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <!-- SUBMIT BUTTON -->
+                                            <!-- Button used for submitting the record -->
+                                            <button type="submit" class="btn btn-success" onclick="calculate('id0')" id="formSubmiti_d0">Calculate</button>
+                                            <button type="button" class="btn btn-danger" data-toggle="collapse" href="#collapseExample_id0" aria-expanded="false" aria-controls="collapseExample_id0" id="btnYarnCalCollapse">Close</button>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="width:50%">
+                                    <div>
+                                        <h4 style="font-weight:bold;">Warping</h4>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Production per day per loom</label>
+                                            <div class="col-sm-6">
+                                                <input type="number" class="form-control" id="txtProductionperdayperloom_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Cone requirement datewise - Day1</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtConerequirementdatewiseDay1_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Total ends</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtTotalends_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Warp weight requirement</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtWarpweightrequirement_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">No of cones</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtNoofcones_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">No of full sets</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtNooffullsets_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <h4 style="font-weight:bold;">Weft</h4>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">No of cones</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtweftNoofcones_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Production/ day/ linear meters</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtProductiondaylinearmeters_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">No of days required to produce</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtNoofdaysrequiredtoproduce_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <h4 style="font-weight:bold;">Construction</h4>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Weight of Warp/lm</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtWeightofWarplm_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Weight of Weft/lm</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtWeightofWeftlm_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Weight of fabric/lm</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtWeightoffabriclm_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <br />
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Total Warp yarn required</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtTotalWarpyarnrequired_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="input01" class="col-sm-6 control-label">Total Weft yarn required</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" id="txtTotalWeftyarnrequired_id0" style="text-align:right" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table style="display:none">
+    <tbody id="div_trRSdata">
+        <tr>
+            <td>
+                <div class='input-group datepicker w-360' data-format="DD-MM-YYYY" style="width:300px;">
+                    <input type='text' id="txtRCdate" name="txtRCdate" is-open="true" onfocus="getdatepic();" onblur="DateChange(this);" class="form-control" />
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar" onclick="getdatepic()"></span>
+                    </span>
+                </div>
+            </td>
+            <td>
+                <input type="text" class="form-control" name="txtRSWarp" id="txtRSWarp" onchange="MoneyValidation(this);">
+            </td>
+            <td>
+                <input type="text" class="form-control" name="txtRSWeft" id="txtRSWeft" onchange="MoneyValidation(this);">
+            </td>
+            <td>
+                <a style="color:green;padding:5px;" onclick="addnewrowRS();"><i class="fa fa-plus"></i></a>
+                <a style="color:red;padding:5px;" onclick="deleterowRS(this);"><i class="fa fa-trash"></i></a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+

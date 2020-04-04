@@ -1,0 +1,162 @@
+﻿@model BusinessEntity.CustomModels.Tbl_Offer_Details_CM
+
+
+@{ 
+    BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+
+    var Companyname = dbc.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == Model.COM_ID).COM_NAME;
+    var Contactname = dbc.Tbl_Master_CompanyContacts.Single(m => m.CONTACT_ID == Model.CONTACT_PERSON).FIRST_NAME;
+    var Customername = dbc.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == Model.CUST_ID).COM_NAME;
+
+}
+
+<div class="col-md-12">
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblSupplier">Supplier:</label>
+            <input type="text" class="form-control" value="@Companyname" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label for="lblContact">Contact Person</label>
+            <input type="text" class="form-control" value="@Contactname" disabled />
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="lblOfferNo">Offer No:</label>
+            <input type="text" name="txtOfferNo" class="form-control" value="@Model.OFFER_NO" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label for="lblOfferDate">Offer Date:</label>
+            <div class='input-group datepicker w-360' style="width:100%">
+                <input type='text' id="txtOfferdate" class="form-control" value="@Model.OFFER_DATE" disabled />
+                <span class="input-group-addon">
+                    <span class="fa fa-calendar"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblorigin">Place of Origin:</label>
+            <input type="text" name="txtOrigin" class="form-control" id="txtOrigin" value="@Model.PLACE_DEST" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label for="lbldest">Place of Destination:</label>
+            <input type="text" name="txtDest" class="form-control" value="@Model.DESTINATION" disabled />
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblorigin">Payment Details:</label>
+            <textarea name="ddlDescription" rows="3" cols="80" class="form-control" disabled> @Model.DESCRIPTION </textarea>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="lbldest">Shipment Terms:</label>
+            <textarea name="ddlShmnt" rows="3" cols="80" class="form-control" ng-model="ddlShmnt" placeholder="Shipment Terms"
+                      disabled > @Model.SHIPMENT </textarea>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <div class="row">
+                <div class="col-md-8">
+                    <label class="control-label" for="lblValidityperiod">Validity period</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="text" name="txtValidityperiod" id="txtValidityperiod" class="form-control" disabled value="@Model.VALIDITY_DATE" />
+                </div>
+
+                <div class="col-md-1">
+                    Days
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="txtDt" class="form-control" id="txtDt" disabled value="@Model.VALIDITY_DAYS" />
+                </div>
+            </div>
+        </div>
+        <div class="form-group col-md-6">
+            @if (Model.IS_SPECIFIC != false)
+            {
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="control-label" for="lblSpecificCustomer">Specific Customer</label><br />
+                    <input type="checkbox" name="chk_SpeCus" checked disabled />
+                </div>
+                <div class="col-md-6">
+                    <input type="text" name="txtDt" class="form-control" id="txtDt" value="@Customername" disabled />
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblDescription">Description:</label>
+            <textarea name="txtDesc" rows="3" cols="80" class="form-control" disabled >@Model.DESCRIPTION </textarea>
+        </div>
+    </div>
+
+    <div class="tile-body">
+        <div class="table-responsive">
+            <!-- This table is used for displaying data in the form of grid in the create/edit page-->
+            <table class="table table-custom" id="grd_1">
+                <thead>
+                    <tr>
+                        <th>Product Short Name</th>
+                        <th>Category</th>
+                        <th>Product Name</th>
+                        <th>UOM</th>
+                        <th>Currency</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="text" class="form-control" id="txtDt" value="@Model.SHORT_NAME" disabled />
+                        </td>
+
+                        <td>
+                            <input type="text"  class="form-control"  value="@Model.CATEGORY_NAME" disabled />
+                        </td>
+
+                        <td>
+                            <label class="control-label" for="lblProductname"></label>
+                            <input type="text"  class="form-control"  value="@Model.PRODUCT_NAME" disabled />
+                        </td>
+                        <td>
+                            <label class="control-label" for="lbUOM"></label>
+                            <input type="text"  class="form-control"  value="@Model.UOM_NAME" disabled />
+                        </td>
+                        <td>
+                            <input type="text"  class="form-control"  value="@Model.CURRENCY_NAME" disabled />
+
+                        </td>
+                        <td>
+                            <label class="control-label" for="lblPrice"></label>
+                            <input type="text"  class="form-control"  value="@Model.PRICE" disabled />
+                        </td>
+                        <td>
+                            <label class="control-label" for="lblQuantity"
+                                   data-parsley-trigger="change" data-parsley-type="digits">
+                            </label>
+                            <input type="text"  class="form-control"  value="@Model.QUANTITY" disabled />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

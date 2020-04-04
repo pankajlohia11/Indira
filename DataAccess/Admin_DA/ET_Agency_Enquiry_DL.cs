@@ -1,0 +1,300 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+using BusinessEntity.CustomModels;
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_Agency_Enquiry_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+        public List<Enquiry_CM> ET_Admin_EnquiryList_DL(bool deleted, int com_key,int type)
+        {
+            try
+            {
+                dbcontext.Configuration.ProxyCreationEnabled = false;
+                var data = (from a in dbcontext.tbl_EnquiryHeader
+                            join b in dbcontext.Tbl_Master_CompanyDetails on a.E_CustomerID equals b.COM_ID into comp
+                            from x in comp
+                            //join c in dbcontext.Tbl_Master_CompanyContacts on a.E_ContactID equals c.CONTACT_ID into contact
+                            //from y in contact
+                            join d in dbcontext.Tbl_Master_User on a.E_SalesPerson equals d.USER_ID into user
+                            from z in user
+                            where a.DELETED == deleted && a.COM_KEY == com_key  && a.E_Type == type
+                            select new Enquiry_CM
+                            {
+                                E_ID = a.E_ID,
+                                E_Code = a.E_Code,
+                                E_Date= a.E_Date,
+                                E_CustomerName = x.COM_NAME,
+                                E_ContactName = dbcontext.Tbl_Master_CompanyContacts.Where(m=>m.CONTACT_ID==a.E_ContactID).Select(m=>m.FIRST_NAME).FirstOrDefault() +" "+ dbcontext.Tbl_Master_CompanyContacts.Where(m => m.CONTACT_ID == a.E_ContactID).Select(m => m.LAST_NAME).FirstOrDefault(),
+                                E_SalesPersonName = z.DISPLAY_NAME,
+                                ED_Quantity = (from i in dbcontext.tbl_EnquiryDetails
+                                               join j in dbcontext.Tbl_Product_Master on i.ED_ProductID equals j.P_ID
+                                               join k in dbcontext.tbl_LookUp on j.P_UOM equals k.LU_Code
+                                               into m
+                                               from n in m.DefaultIfEmpty()
+                                               where i.ED_PID == a.E_ID && n.LU_Type == 2
+                                               select
+                                                i.ED_Quantity).Sum()
+                            }
+                            ).Distinct().OrderByDescending(m=>m.E_ID).ToList();
+                    //dbcontext.tbl_EnquiryHeader.Where(m => m.DELETED == deleted && m.COM_KEY == com_key).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public decimal ET_Admin_Enquiry_Add_DL(tbl_EnquiryHeader obj, bool automanual, string prefix, string EnquiryDetails,out string EnqCode)
+        {
+            decimal k = 0;
+            var context = new EntityClasses();
+            var transaction = context.Database.BeginTransaction();
+            bool success = true;
+            try
+            {
+                if (obj.E_ID == 0)
+                {
+                    context.tbl_EnquiryHeader.Add(obj);
+                    if (context.SaveChanges() == 0)
+                    {
+                        success = false;
+                    }
+                    if (automanual == true)
+                    {
+                        int len = 10 - (prefix + obj.E_ID).Length;
+                        string code = prefix + new String('0', len) + obj.E_ID;
+                        tbl_EnquiryHeader Obj_tbl_EnquiryHeader = context.tbl_EnquiryHeader.Single(m => m.E_ID == obj.E_ID);
+                        {
+                            Obj_tbl_EnquiryHeader.E_Code = code;
+                        };
+                        if (context.SaveChanges() == 0)
+                        {
+                            success = false;
+                        }
+                    }
+                    k = obj.E_ID;
+                    EnqCode = obj.E_Code;
+                }
+                else
+                {
+                    tbl_EnquiryHeader Obj_tbl_EnquiryHeader = context.tbl_EnquiryHeader.Single(m => m.E_ID == obj.E_ID);
+                    {
+                        Obj_tbl_EnquiryHeader.E_Code = obj.E_Code;
+                        Obj_tbl_EnquiryHeader.E_Type = obj.E_Type;
+                        Obj_tbl_EnquiryHeader.E_ContactID = obj.E_ContactID;
+                        Obj_tbl_EnquiryHeader.E_CustomerID = obj.E_CustomerID;
+                        Obj_tbl_EnquiryHeader.E_Date = obj.E_Date;
+                        Obj_tbl_EnquiryHeader.E_SalesPerson = obj.E_SalesPerson;
+                        Obj_tbl_EnquiryHeader.DELETED = obj.DELETED;
+                        Obj_tbl_EnquiryHeader.COM_KEY = obj.COM_KEY;
+                        Obj_tbl_EnquiryHeader.CREATED_DATE = DateTime.Now;
+                        Obj_tbl_EnquiryHeader.CREATED_BY = obj.CREATED_BY;
+                    };
+                    if (context.SaveChanges() == 0)
+                    {
+                        success = false;
+                    }
+                    k = Obj_tbl_EnquiryHeader.E_ID;
+                    EnqCode = Obj_tbl_EnquiryHeader.E_Code;
+                }
+
+                // Delete previous contact data
+                tbl_EnquiryDetails objdeletecontact = new tbl_EnquiryDetails();
+                context.tbl_EnquiryDetails.RemoveRange(context.tbl_EnquiryDetails.Where(m => m.ED_PID == obj.E_ID));
+                context.SaveChanges();
+
+                // Insert new contacts data
+                string[] ChildRow = EnquiryDetails.Split('|');
+                for (int i = 0; i < ChildRow.Length - 1; i++)
+                {
+                    string[] ChildRecord = ChildRow[i].Split('}');
+                    tbl_EnquiryDetails objenquirydetails = new tbl_EnquiryDetails()
+                    {
+                        ED_PID = obj.E_ID,
+                        ED_ProductID = Convert.ToDecimal(ChildRecord[0]),
+                        ED_Description = ChildRecord[1],
+                        ED_Quantity = Convert.ToDecimal(ChildRecord[2])
+                    };
+                    context.tbl_EnquiryDetails.Add(objenquirydetails);
+                    
+                }
+                if (context.SaveChanges() != ChildRow.Length - 1)
+                {
+                    success = false;
+                }
+                if (success)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    k = 0;
+                    transaction.Rollback();
+                }
+            }
+            catch (Exception ex)
+            {
+                k = 0;
+                transaction.Rollback();
+                throw ex;
+            }
+            finally
+            {
+                transaction.Dispose();
+                context.Dispose();
+            }
+            //catch (System.Data.Entity.Validation.DbEntityValidationException dbEx)
+            //{
+            //    Exception raise = dbEx;
+            //    foreach (var validationErrors in dbEx.EntityValidationErrors)
+            //    {
+            //        foreach (var validationError in validationErrors.ValidationErrors)
+            //        {
+            //            string message = string.Format("{0}:{1}",
+            //                validationErrors.Entry.Entity.ToString(),
+            //                validationError.ErrorMessage);
+            //            // raise a new exception nesting  
+            //            // the current instance as InnerException  
+            //            raise = new InvalidOperationException(message, raise);
+            //        }
+            //    }
+            //    throw raise;
+            //}
+
+            return k;
+        }
+
+        public int ET_Admin_Enquiry_DeletRestore_DL(int id,bool delete,int uid)
+        {
+            int i;
+            try
+            {
+                //var find = dbcontext.tbl_EnquiryHeader.Where(m => m.E_ID == id).ToList();
+                //if (find.Count() != 0)
+                //{
+                    tbl_EnquiryHeader deleted = dbcontext.tbl_EnquiryHeader.Single(m => m.E_ID == id);
+                    deleted.DELETED = delete;
+                    deleted.DELETED_BY = uid;
+                    deleted.DELETED_DATE = DateTime.Now;
+                //};
+                i = dbcontext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return i;
+        }
+        
+        public tbl_EnquiryHeader ET_Admin_Enquiry_Update_GetbyID_DL(int id)
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                //  dbcontext.Configuration.ProxyCreationEnabled = false;
+                return dbcontext.tbl_EnquiryHeader.Single(m => m.E_ID == id);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public List<tbl_EnquiryDetails> ET_Admin_Enquiry_Details_DL(int id)
+        {
+            try
+            {
+                var data = dbcontext.tbl_EnquiryDetails.Where(m => m.ED_PID == id).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        
+    
+        public string CheckDuplicateCode_DL(int ID, string Code)
+        {
+            if (ID == 0)
+            {
+                var count = dbcontext.tbl_EnquiryHeader.Where(m => m.E_Code == Code).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                var count = dbcontext.tbl_EnquiryHeader.Where(m => m.E_ID != ID && m.E_Code == Code).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            return "";
+        }
+        public List<Tbl_Master_CompanyDetails> ET_Admin_CustomerList_DL(int comkey)
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                var data = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_KEY == comkey && m.Cust_Supp != 1).OrderBy(m=>m.COM_DISPLAYNAME).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public List<Tbl_Master_CompanyContacts> ET_Admin_ContactList_DL(int customerid)
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                var data = dbcontext.Tbl_Master_CompanyContacts.Where(m => m.COM_ID == customerid).OrderBy(m=>m.FIRST_NAME).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public List<Tbl_Master_User> ET_Admin_SalesPersonList_DL(int comkey)
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                var ObjSales_Org = dbcontext.Tbl_Sales_Organization.Where(m => m.COM_KEY == comkey && m.DELETED == false).ToList();
+                string s = "";
+                for (int i = 0; i < ObjSales_Org.Count(); i++)
+                {
+                    if (i == 0)
+                    {
+                        s = ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                    }
+                    else
+                    {
+                        s = s + "," + ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                    }
+                }
+                var UID = new HashSet<decimal>(s.Split(',').Select(m => Convert.ToDecimal(m)).ToList());
+                var Users = dbcontext.Tbl_Master_User.Where(m => m.USER_ID > 0 && UID.Contains(m.USER_ID) && m.COM_KEY == comkey).Distinct().ToList();
+
+                return Users;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+    }
+}

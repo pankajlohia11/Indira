@@ -1,0 +1,719 @@
+﻿@model BusinessEntity.CustomModels.CompanyModule__CM
+@{
+    ViewBag.Title = "ET_Admin_CustomerModule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    function ChangeCustomer(e) {
+        if ($(e).val() != "") {
+            window.location.replace("../ET_Admin_CustomerModule/ET_Admin_CustomerModule?id=" + $(e).val() + "");
+        }
+    }
+    function changecolor(e)
+    {
+        $(".myIcon").attr("class", "myIcon inactive");
+        $(e).attr("class", "myIcon active");
+    }
+</script>
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Company Profile <span></span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="index.html"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="shop-single-order.html">Company Profile</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="pagecontent">
+
+
+            <div class="add-nav">
+                <div class="nav-heading">
+                    <h3>Customer : <strong class="text-greensea">@ViewBag.CustomerName</strong></h3>
+                    <span class="col-sm-2 controls pull-right">
+                        @Html.DropDownList("drpCustomers", new SelectList(Model.CustomerMasterList, "COM_ID", "COM_NAME"), "Choose Company", new { @class = "form-control chosen-select", onchange = "ChangeCustomer(this);", @id = "drpCustomers" })
+                    </span>
+                </div>
+
+                <div role="tabpanel">
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_general" aria-controls="general" role="tab" data-toggle="tab" class="myIcon active"><i class="fa fa-home"></i></a><br /><a>GENERAL</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_orders" aria-controls="orders" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-shopping-cart"></i></a><br /><a>ORDERS</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_invoices" aria-controls="invoices" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-newspaper-o"></i></a><br /><a>INVOICES</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_payments" aria-controls="payments" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-money"></i></a><br /><a>PAYMENTS</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_followups" aria-controls="followups" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-phone-square"></i></a><br /><a>FOLLOW UP's</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_shipments" aria-controls="shipments" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-truck"></i></a><br /><a>SHIPMENTS</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_offers" aria-controls="offers" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-trophy"></i></a><br /><a>OFFERS</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_dashboards" aria-controls="dashboards" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-bar-chart-o"></i></a><br /><a>DASH BOARDS</a></p></li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane active" id="litab_general">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+                                    @foreach (var item in Model.CustomerMaster)
+                                    {
+
+                                        <!-- tile -->
+                                        <section class="tile time-simple">
+
+
+                                            <!-- tile body -->
+                                            <div class="tile-body">
+
+
+                                                <!-- row -->
+                                                <div class="row">
+
+                                                    <!-- col -->
+                                                    <div class="col-md-8">
+                                                        <p class="text-default lt">Created:@Convert.ToDateTime(@item.CREATED_DATE).ToString("dd-MMM-yyyy HH:mm") </p>
+                                                        <p class="text-uppercase text-strong mt-40 mb-0 custom-font">Status</p>
+                                                        <h3 class="text-uppercase text-success mt-0 mb-20">
+                                                            @{ string status = "Active"; if (item.DELETED == true) { status = "In Active"; }
+                                                            } @status
+                                                        </h3>
+                                                    </div>
+                                                    <!-- /col -->
+                                                    <!-- col -->
+                                                    <div class="col-md-4">
+                                                        <p class="text-uppercase text-strong mb-10 custom-font">Customer</p>
+                                                        <ul class="list-unstyled text-default lt mb-20">
+                                                            <li><strong class="inline-block w-xs">Name:</strong> @item.COM_DISPLAYNAME</li>
+                                                            <li><strong class="inline-block w-xs">Display Name:</strong> @item.COM_NAME</li>
+                                                            <li><strong class="inline-block w-xs">Phone:</strong> @item.COM_MOBILE</li>
+                                                            <li><strong class="inline-block w-xs">Email:</strong> <a href="javascript:;">@item.COM_EMAIL</a></li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- /col -->
+
+                                                </div>
+                                                <!-- /row -->
+                                                <!-- row -->
+                                                <div class="row b-t pt-20">
+
+                                                    <!-- col -->
+                                                    <div class="col-md-3 b-r">
+                                                        <p class="text-uppercase text-strong mb-10 custom-font">Customer Info</p>
+                                                        <ul class="list-unstyled text-default lt mb-20">
+                                                            <li><strong>Code:</strong> <a href="javascript:;">@item.COMPANY_CODE</a></li>
+                                                            <li>UstId: @item.COM_USTID</li>
+                                                            <li>Tax No: @item.Tax_No</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- /col -->
+                                                    <!-- col -->
+                                                    <div class="col-md-6 b-r">
+                                                        <p class="text-uppercase text-strong mb-10 custom-font">
+                                                            Address
+                                                            <a href="javascript:;" class="btn btn-default btn-rounded-20 btn-xs pull-right"><i class="fa fa-pencil"></i></a>
+                                                        </p>
+
+                                                        <!-- col -->
+                                                        <div class="col-md-6">
+                                                            <ul class="list-unstyled text-default lt mb-20">
+                                                                <li>@item.COM_STREET</li>
+                                                                @{
+                                                                    string state = "";
+                                                                    string country = "";
+                                                                    string city = "";
+                                                                    try
+                                                                    {
+                                                                        BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+                                                                        int con = Convert.ToInt32(item.COM_COUNTRY);
+                                                                        country = dbcontext.locations.Where(m => m.location_id == con).ToList()[0].name;
+                                                                        int sta = Convert.ToInt32(item.COM_STATE);
+                                                                        state = dbcontext.locations.Where(m => m.location_id == sta).ToList()[0].name;
+                                                                        int cit = Convert.ToInt32(item.COM_CITY);
+                                                                        city = dbcontext.locations.Where(m => m.location_id == cit).ToList()[0].name;
+                                                                    }
+                                                                    catch { }
+                                                                }
+                                                                <li>@city</li>
+                                                                <li>@state</li>
+                                                                <li>@country</li>
+                                                                <li>@item.COM_ZIP</li>
+                                                            </ul>
+                                                        </div>
+                                                        <!-- /col -->
+                                                        <!-- col -->
+                                                        <div class="col-md-6">
+                                                            <ul class="list-unstyled text-default lt mb-20">
+                                                                <li>@item.COM_EMAIL</li>
+                                                                <li>@item.COM_MOBILE</li>
+                                                            </ul>
+                                                        </div>
+                                                        <!-- /col -->
+
+                                                    </div>
+                                                    <!-- /col -->
+                                                    <!-- col -->
+                                                    <div class="col-md-3">
+                                                        <p class="text-uppercase text-strong mb-10 custom-font">Customer Type</p>
+                                                        <ul class="list-unstyled text-default lt mb-20">
+                                                            <li>
+                                                                <strong>
+                                                                    @{ string type = "Customer"; if (item.Cust_Supp == 0) { }
+                                                                        type = "Both (Customer and Supplier)";
+                                                                    }@type
+                                                                </strong>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- /col -->
+
+                                                </div>
+                                                <!-- /row -->
+
+
+                                            </div>
+                                            <!-- /tile body -->
+
+                                        </section>
+                                    }
+                                    <!-- /tile -->
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <p class="text-uppercase text-strong mt-40 mb-0 custom-font">Contacts :</p>
+                                            <br />
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Title</th>
+                                                            <th>First Name</th>
+                                                            <th>Last Name</th>
+                                                            <th>Job Title</th>
+                                                            <th>Phone</th>
+                                                            <th>Fax</th>
+                                                            <th>Mobile</th>
+                                                            <th>Email</th>
+                                                            <th>Remark</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in Model.CompanyContacts)
+                                                        {
+                                                            <tr>
+                                                                <td><a href="javascript:;">@item.TITLE</a></td>
+                                                                <td>@item.FIRST_NAME</td>
+                                                                <td>@item.LAST_NAME</td>
+                                                                <td>@item.JOB_TITLE</td>
+                                                                <td>@item.PHONE</td>
+                                                                <td>@item.FAX</td>
+                                                                <td>@item.MOBILE</td>
+                                                                <td>@item.EMAIL</td>
+                                                                <td>@item.REMARKS</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+
+                        </div>
+
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_orders">
+
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- /tile -->
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Order ID</th>
+                                                            <th>Created Date</th>
+                                                            <th>Status</th>
+                                                            <th>Total</th>
+                                                            <th style="width: 260px">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><a href="javascript:;">201500156</a></td>
+                                                            <td>Jan 26, 2015</td>
+                                                            <td><span class="label label-success">Paid</span></td>
+                                                            <td class="ng-binding">$264.00</td>
+                                                            <td>
+                                                                <a href="javascript:;" class="btn btn-xs btn-default"><i class="fa fa-search"></i> View</a>
+                                                                <a href="javascript:;" class="btn btn-xs btn-primary"><i class="fa fa-envelope"></i> Send</a>
+                                                                <a href="javascript:;" class="btn btn-xs btn-lightred"><i class="fa fa-times"></i> Delete</a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+
+
+                        </div>
+
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_invoices">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Invoice ID</th>
+                                                            <th>Created At</th>
+                                                            <th>Status</th>
+                                                            <th>Total</th>
+                                                            <th style="width: 260px">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><a href="javascript:;">201500156</a></td>
+                                                            <td>Jan 26, 2015</td>
+                                                            <td><span class="label label-success">Paid</span></td>
+                                                            <td class="ng-binding">$264.00</td>
+                                                            <td>
+                                                                <a href="javascript:;" class="btn btn-xs btn-default"><i class="fa fa-search"></i> View</a>
+                                                                <a href="javascript:;" class="btn btn-xs btn-primary"><i class="fa fa-envelope"></i> Send</a>
+                                                                <a href="javascript:;" class="btn btn-xs btn-lightred"><i class="fa fa-times"></i> Delete</a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+                        </div>
+
+                        <div role="tabpanel" class="tab-pane" id="litab_payments">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Payment ID</th>
+                                                            <th>Payment Note</th>
+                                                            <th>Payment Date</th>
+                                                            <th>Status</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><a href="javascript:;">201500156</a></td>
+                                                            <td>Payment received for invoice 201500156</td>
+                                                            <td>Jan 27, 2018</td>
+                                                            <td><span class="label label-success">Received</span></td>
+                                                            <td class="ng-binding">$264.00</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><a href="javascript:;">201500156</a></td>
+                                                            <td>Payment request sent for invoice 201500156</td>
+                                                            <td>Jan 26, 2018</td>
+                                                            <td><span class="label label-default">Sent</span></td>
+                                                            <td class="ng-binding">$264.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+                        </div>
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_followups">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Follow Up ID</th>
+                                                            <th>Description</th>
+                                                            <th>Date</th>
+                                                            <th>Status</th>
+                                                            <th>Next Follow Up</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><a href="javascript:;">201500156</a></td>
+                                                            <td>Discussed Product Specification</td>
+                                                            <td>Jan 27, 2018</td>
+                                                            <td><span class="label label-success">Call</span></td>
+                                                            <td class="ng-binding">Jan 30, 2018</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><a href="javascript:;">201500156</a></td>
+                                                            <td>Finalized Specification</td>
+                                                            <td>Jan 30, 2018</td>
+                                                            <td><span class="label label-default">Meeting</span></td>
+                                                            <td class="ng-binding">Feb 10, 2018</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+                                </div>
+                                <!-- /col -->
+
+                            </div>
+                            <!-- /row -->
+
+
+
+                        </div>
+
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_shipments">
+
+
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+
+                                    <!-- tile -->
+                                    <!-- /tile -->
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Schedule No</th>
+                                                            <th>Schedule Date</th>
+                                                            <th>Total Schedule Quantity</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><a href="javascript:;">SCH0000001</a></td>
+                                                            <td>Jan 20, 2018</td>
+                                                            <td>26.000</td>
+                                                            <td><span class="label label-default">Live</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><a href="javascript:;">SCH0000002</a></td>
+                                                            <td>Jan 22, 2018</td>
+                                                            <td>45.000</td>
+                                                            <td><span class="label label-default">Live</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><a href="javascript:;">SCH0000003</a></td>
+                                                            <td>Jan 24, 2018</td>
+                                                            <td>30.000</td>
+                                                            <td><span class="label label-default">Live</span></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><a href="javascript:;">SCH0000004</a></td>
+                                                            <td>Jan 25, 2018</td>
+                                                            <td>28.000</td>
+                                                            <td><span class="label label-default">Live</span></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+
+
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="litab_offers">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Offer No</th>
+                                                            <th>Offer Date</th>
+                                                            <th>Description</th>
+                                                            <th>Place</th>
+                                                            <th>Destination</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><a href="javascript:;">O2011-001</a></td>
+                                                            <td>Jan 27, 2018</td>
+                                                            <td>TB1- greek border</td>
+                                                            <td>Germany</td>
+                                                            <td class="ng-binding">India</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><a href="javascript:;">O2011-002</a></td>
+                                                            <td>Jan 29, 2018</td>
+                                                            <td>Ne 24/2 - 20-Feet-Container</td>
+                                                            <td>Germany</td>
+                                                            <td class="ng-binding">India</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+                                </div>
+                                <!-- /col -->
+
+                            </div>
+                            <!-- /row -->
+
+
+
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="litab_dashboards">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+                                            <div style="width:100%">
+                                                <span id="sparkline02" data-values="5,6,17,2,1,4,2,24,6,28,4,5" data-type="bar" data-height="300px"></span>
+                                            </div>
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+                                </div>
+                                <!-- /col -->
+
+                            </div>
+                            <!-- /row -->
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+</section>
+@section dynamictablecreation
+{
+    <script src="~/Asset/js/vendor/flot/jquery.flot.min.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.resize.min.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.orderBars.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.stack.min.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.pie.min.js"></script>
+    <script src="~/Asset/js/vendor/flot-spline/jquery.flot.spline.min.js"></script>
+    <script src="~/Asset/js/vendor/flot-tooltip/jquery.flot.tooltip.min.js"></script>
+
+    <script src="~/Asset/js/vendor/gaugejs/gauge.min.js"></script>
+
+    <script src="~/Asset/js/vendor/raphael/raphael-min.js"></script>
+    <script src="~/Asset/js/vendor/d3/d3.v2.js"></script>
+    <script src="~/Asset/js/vendor/rickshaw/rickshaw.min.js"></script>
+
+    <script src="~/Asset/js/vendor/morris/morris.min.js"></script>
+
+    <script src="~/Asset/js/vendor/easypiechart/jquery.easypiechart.min.js"></script>
+
+    <script src="~/Asset/js/vendor/countTo/jquery.countTo.js"></script>
+    <script type="text/javascript">
+        var $el = $('#sparkline02');
+
+        var values = $el.data('values').split(',').map(parseFloat);
+        var type = $el.data('type') || 'line';
+        var height = $el.data('height') || 'auto';
+
+        var parentWidth = $(document).width() - 100;
+        var valueCount = values.length;
+        var barSpacing = 5;
+        var barWidth = Math.round((parentWidth - (valueCount - 1) * barSpacing) / valueCount);
+
+        $el.sparkline(values, {
+            width: '100%',
+            type: type,
+            height: height,
+            barWidth: barWidth,
+            barSpacing: barSpacing,
+            barColor: '#16a085',
+            negBarColor: '#FF0066'
+        });
+    </script>
+}

@@ -1,0 +1,2379 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Entity;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+using BusinessLogic.Admin_BL;
+using System.Web.Script.Serialization;
+using BusinessEntity.CustomModels;
+using System.Net.Mail;
+using System.Net;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System.Globalization;
+using System.IO;
+
+namespace Euro.Controllers.Sales
+{
+    public class ET_Sales_OneToOneInvoiceController : Controller
+    {
+        public static string prefix = "";
+        public static bool automanual = false;
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+        EntityClasses dbcontext = new EntityClasses(); 
+        // GET: ET_Sales_OneToOneInvoice
+        public ActionResult ET_Sales_OneToOneInvoice()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    AutoManual();
+                    ViewBag.Login_Name = Session["DisplayName"].ToString();
+                    return View();
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        public ActionResult ET_Sales_ShipmentToOneToOneInvoice()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    AutoManual();
+                    ViewBag.Login_Name = Session["DisplayName"].ToString();
+                    return View();
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Getting whether this document automaic or manual
+        private void AutoManual()
+        {
+
+            ViewBag.AutoManual = false;
+            automanual = false;
+            List<Tbl_Document_Master> ObjDoc = bal.AutoManual_BL(3010);
+            if (ObjDoc.Count > 0)
+            {
+                foreach (var item in ObjDoc)
+                {
+                    if (item.autogen_type == "Automatic")
+                    {
+                        ViewBag.AutoManual = true;
+                        prefix = item.autogen_prefix;
+                        automanual = true;
+                    }
+                    else
+                    {
+                        ViewBag.Required = "required";
+                    }
+                }
+            }
+        }
+        //Get the Privillage access for this document
+        public JsonResult GetPrivilages()
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var privilagelist = bal.GetPrivilages_BL(Convert.ToInt32(Session["UserID"].ToString()), 3010);
+                    var json = new JavaScriptSerializer().Serialize(privilagelist);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the invoice list
+        public JsonResult GetInvoiceList(bool delete)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int com_key = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = (from a in dbcontext.Tbl_OneToOneInvoice
+                                join b in dbcontext.Tbl_Shipment_Header on a.OTOI_ShipmentID equals b.S_ID into comp
+                                from x in comp
+                                join d in dbcontext.Tbl_Master_User on a.OTOI_SalesPerson equals d.USER_ID into user
+                                from z in user
+                                join w in dbcontext.Tbl_Master_CompanyDetails on a.OTOI_CustomerID equals w.COM_ID into p
+                                from enq in p.DefaultIfEmpty()
+                                where a.DELETED == delete && a.COM_KEY == com_key
+                                select new
+                                {
+                                    OTOI_ID = a.OTOI_ID,
+                                    OTOI_Code = a.OTOI_Code,
+                                    OTOI_InvoiceDate = a.OTOI_InvoiceDate.ToString(),
+                                    S_Code = x.S_Code,
+                                    COM_DISPLAYNAME = enq.COM_DISPLAYNAME,
+                                    USER_NAME = z.USER_NAME,
+                                    OTOI_Approval=a.OTOI_Approval
+                                }).ToList();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        // Get the sales person  For Customer
+        public JsonResult GetSalesPersonForCustomer(int custid)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_KEY == comkey && m.DELETED == false && m.COM_ID == custid).Select(n => n.COM_Sales_Person).ToList();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(data, JsonRequestBehavior.AllowGet);
+
+
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the Customers
+        public JsonResult GetCustomers()
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_KEY == comkey && m.Cust_Supp != 1).ToList();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the Tax
+        public JsonResult GetTax(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+
+                    var data1 = dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == id).COM_COUNTRY;
+                    if (data1 == 82)
+                    {
+                        var data = dbcontext.Tbl_SystemSetUp.Single(m => m.COM_KEY == comkey).TAX ?? 0;
+                        return Json(data, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        return Json(0, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the Shipments 
+        public JsonResult GetShipments(int id,string type,int invid)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    if (type == "Submit")
+                    {
+                        int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        var data1 = dbcontext.Tbl_OneToOneInvoice.Select(m => m.OTOI_ShipmentID);
+                        var data = dbcontext.Tbl_Shipment_Header.Where(m => m.COM_KEY == comkey && m.DELETED == false && m.S_Type == 2 && m.S_CustSup == id && !data1.Contains(m.S_ID)).ToList();
+                        var json = new JavaScriptSerializer().Serialize(data);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var data1 = dbcontext.Tbl_OneToOneInvoice.Where(m => m.OTOI_ID == invid).Select(m=>m.OTOI_ShipmentID);
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        var data = dbcontext.Tbl_Shipment_Header.Where(m => data1.Contains(m.S_ID)).ToList();
+                        var json = new JavaScriptSerializer().Serialize(data);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult GetTheShipmentDetails(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                      int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        var data1 = dbcontext.Tbl_OneToOneInvoice.Select(m => m.OTOI_ShipmentID);
+                        var data = dbcontext.Tbl_Shipment_Header.Where(m => m.COM_KEY == comkey && m.DELETED == false && m.S_Type == 2 && m.S_ID == id).ToList();
+                        var json = new JavaScriptSerializer().Serialize(data);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                      
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the ShpmentDetails
+        public ActionResult GetShipmentDetails(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data1 = (from a in dbcontext.Tbl_Shipment_Details
+                                 join b in dbcontext.Tbl_Product_Master on a.SD_ProductID equals b.P_ID into c from d in c
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into f from g in f.DefaultIfEmpty()
+                                 where a.SD_PID == id && g.LU_Type == 2
+                                 select new OneToOneInvoice_CM
+                                 {
+                                     ArticleNo = d.P_ArticleNo,
+                                     ProductName=d.P_ShortName,
+                                     UOM = g.LU_Description,
+                                     SD_Quantity = a.SD_Quantity,
+                                     price = (dbcontext.Tbl_Order_Details.Where(x=>x.ORDER_ID == a.SD_OrderDetailID).Select(x=>x.PRICE)).FirstOrDefault()??0,
+                                     DesignDetail = (dbcontext.Tbl_Order_Details.Where(x=>x.ORDER_ID == a.SD_OrderDetailID).Select(x=>x.DesignDetail)).FirstOrDefault(),
+                                     CustomerDes = (dbcontext.Tbl_Order_Details.Where(x=>x.ORDER_ID == a.SD_OrderDetailID).Select(x=>x.CustomerDes)).FirstOrDefault(),
+                                     OrderDescription = (dbcontext.Tbl_Order_Details.Where(x=>x.ORDER_ID == a.SD_OrderDetailID).Select(x=>x.OrderDescription)).FirstOrDefault()
+                                 }
+                               );
+                    return PartialView("/Views/Sales/ET_Sales_OneToOneInvoice/ET_Sales_OneToOneInvoiceDetails.cshtml", data1);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the Shipment Total
+        public ActionResult GetShipmentTotal(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = (from a in dbcontext.Tbl_Shipment_Header
+                                where a.S_ID == id
+                                select new OneToOneInvoice_CM
+                                {
+                                    OTOI_InvoiceAmount = a.S_INV_AMT ?? 0,
+                                    Bl_no=a.S_BL_NO,
+                                    containerNo=a.S_ContainerNo
+                                }
+                               ).ToList();
+
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the Sales Person
+        public JsonResult GetSalesPerson()
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    var ObjSales_Org = dbcontext.Tbl_Sales_Organization.Where(m => m.COM_KEY == comkey && m.DELETED == false).ToList();
+                    string s = "";
+                    for (int i = 0; i < ObjSales_Org.Count(); i++)
+                    {
+                        if (i == 0)
+                        {
+                            s = ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                        }
+                        else
+                        {
+                            s = s + "," + ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                        }
+                    }
+                    var UID = new HashSet<decimal>(s.Split(',').Select(m => Convert.ToDecimal(m)).ToList());
+                    var Users = dbcontext.Tbl_Master_User.Where(m => m.USER_ID > 0 && m.COM_KEY == comkey).Distinct().ToList();
+                    var json = new JavaScriptSerializer().Serialize(Users);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Validate the data before saving
+        private string Validations(int OTOI_ID, string OTOI_Code, string OTOI_InvoiceDate)
+        {
+            
+            if (!automanual && OTOI_Code == "")
+            {
+                return "Enter Invoice Code";
+            }
+            if (OTOI_InvoiceDate == "")
+            {
+                return "Enter Date";
+            }
+            if (!automanual)
+            {
+                if (OTOI_ID == 0)
+                {
+                    var count = dbcontext.Tbl_OneToOneInvoice.Where(m => m.OTOI_Code == OTOI_Code).ToList().Count();
+                    if (count > 0)
+                    {
+                        return "Invoice Code Already Exist";
+                    }
+                }
+                else
+                {
+                    var count = dbcontext.Tbl_OneToOneInvoice.Where(m => m.OTOI_ID != OTOI_ID && m.OTOI_Code == OTOI_Code).ToList().Count();
+                    if (count > 0)
+                    {
+                        return "Invoice Code Already Exist";
+                    }
+                }
+            }
+
+            return "";
+        }
+        //saving the invoices
+
+        [HttpPost]
+        public JsonResult ET_Sales_Invoice_Add(int OTOI_ID,string OTOI_Code   , int OTOI_CustomerID , int OTOI_SalesPerson, int OTOI_ShipmentID, string OTOI_InvoiceDate, decimal OTOI_ShipmentAmount, int OTOI_TaxPer, decimal OTOI_TaxAmount, decimal OTOI_InvoiceAmount)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    decimal user;
+                    string valid = Validations(OTOI_ID, OTOI_Code, OTOI_InvoiceDate);
+                    if (valid == "")
+                    {
+                        int approvalstatus;
+                        user = Convert.ToInt32(Session["UserID"].ToString());
+                        var isApprovalRequired = dbcontext.Tbl_Document_Master.Single(m => m.auto_key == 3010).workflow_status;
+                        if (isApprovalRequired == 1 && user != OTOI_SalesPerson)
+                        {
+                            approvalstatus = 0;
+                            user = OTOI_SalesPerson;
+                        }
+                        else
+                        {
+                            approvalstatus = 1;
+                        }
+                        DateTime INVDate = DateTime.ParseExact(OTOI_InvoiceDate, "dd-MM-yyyy", null);
+                        Tbl_OneToOneInvoice Objmc = new Tbl_OneToOneInvoice()
+                        {
+                            OTOI_ID = OTOI_ID,
+                            OTOI_Code = OTOI_Code,
+                            OTOI_CustomerID = OTOI_CustomerID,
+                            OTOI_SalesPerson = OTOI_SalesPerson,
+                            OTOI_ShipmentID = OTOI_ShipmentID,
+                            OTOI_InvoiceDate = INVDate,
+                            OTOI_ShipmentAmount = OTOI_ShipmentAmount,
+                            OTOI_TaxPer = OTOI_TaxPer,
+                            OTOI_TaxAmount = OTOI_TaxAmount,
+                            OTOI_InvoiceAmount = OTOI_InvoiceAmount,
+                            CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                            CREATED_DATE = DateTime.Now,
+                            DELETED = false,
+                            OTOI_Approval= approvalstatus,
+                            OTOI_Approver=user,
+                            COM_KEY = Convert.ToInt32(Session["CompanyKey"])
+                        };
+                        decimal data = 0;
+                        if (Objmc.OTOI_ID == 0)
+                        {
+                            dbcontext.Tbl_OneToOneInvoice.Add(Objmc);
+                            data = dbcontext.SaveChanges();
+                            if (automanual == true)
+                            {
+                                int len = 10 - (prefix + Objmc.OTOI_ID).Length;
+                                string code = prefix + new String('0', len) + Objmc.OTOI_ID;
+                                Tbl_OneToOneInvoice _Tbl_OneToOneInvoice = dbcontext.Tbl_OneToOneInvoice.Single(m => m.OTOI_ID == Objmc.OTOI_ID);
+                                {
+                                    _Tbl_OneToOneInvoice.OTOI_Code = code;
+                                };
+                                dbcontext.SaveChanges();
+                                OTOI_Code = code;
+                            }
+
+                        }
+                        else
+                        {
+                            Tbl_OneToOneInvoice _Tbl_OneToOneInvoice = dbcontext.Tbl_OneToOneInvoice.Single(m => m.OTOI_ID == Objmc.OTOI_ID);
+                            {
+                                _Tbl_OneToOneInvoice.OTOI_ID = OTOI_ID;
+                                _Tbl_OneToOneInvoice.OTOI_Code = OTOI_Code;
+                                _Tbl_OneToOneInvoice.OTOI_CustomerID = OTOI_CustomerID;
+                                _Tbl_OneToOneInvoice.OTOI_SalesPerson = OTOI_SalesPerson;
+                                _Tbl_OneToOneInvoice.OTOI_ShipmentID = OTOI_ShipmentID;
+                                _Tbl_OneToOneInvoice.OTOI_InvoiceDate = INVDate;
+                                _Tbl_OneToOneInvoice.OTOI_ShipmentAmount = OTOI_ShipmentAmount;
+                                _Tbl_OneToOneInvoice.OTOI_TaxPer = OTOI_TaxPer;
+                                _Tbl_OneToOneInvoice.OTOI_TaxAmount = OTOI_TaxAmount;
+                                _Tbl_OneToOneInvoice.OTOI_InvoiceAmount = OTOI_InvoiceAmount;
+                                _Tbl_OneToOneInvoice.LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"].ToString());
+                                _Tbl_OneToOneInvoice.LAST_UPDATED_DATE = DateTime.Now;
+                                _Tbl_OneToOneInvoice.OTOI_Approval = approvalstatus;
+                                _Tbl_OneToOneInvoice.OTOI_Approver = user;
+                            };
+                            data = dbcontext.SaveChanges();
+                            // obj.COM_ID = k;
+                        }
+                        Tbl_Shipment_Header despObj = dbcontext.Tbl_Shipment_Header.Single(m => m.S_ID == OTOI_ShipmentID);
+                        despObj.S_STATUS = 1;
+                        data = dbcontext.SaveChanges();
+                        //Send Mail For Approver
+                        try
+                        {
+                            
+                            if (isApprovalRequired == 1 && Convert.ToInt32(Session["UserID"].ToString()) != OTOI_SalesPerson)
+                            {
+                                var uid = Convert.ToInt32(Session["UserID"].ToString());
+                                var settings = dbcontext.Tbl_MailSettings.Where(a => a.MS_UserId == uid);
+                                if (settings.Count() == 1)
+                                {
+                                    string usermail = settings.Select(a => a.MS_EmailID).FirstOrDefault();
+                                    string custmail = dbcontext.Tbl_Master_CompanyDetails.Single(a => a.COM_ID == OTOI_CustomerID).COM_EMAIL;
+                                    MailMessage mm = new MailMessage(usermail, custmail);
+                                    mm.Subject = "Regarding Approval of Quotation";
+                                    string newLine = Environment.NewLine;
+                                    string body = "Dear Sir/Madam, ";
+                                    body = body + newLine;
+                                    body = body + newLine;
+                                    body = body + "Quotation with code " + OTOI_Code + " has been created and send for your approval. With your approval the Quotation will proceed to next step.";
+                                    body = body + newLine;
+                                    body = body + "You can approve the Quotation login to Indra application and follow the below steps.";
+                                    body = body + newLine;
+                                    body = body + "Step 1                    Login to Indra Application.";
+                                    body = body + newLine;
+                                    body = body + "Step 2                    Click on My Approvals.";
+                                    body = body + newLine;
+                                    body = body + "Step 3                    View all pending Approvals.";
+                                    body = body + newLine;
+                                    body = body + "Step 4                    Click Approve or Reject button.";
+                                    body = body + newLine;
+                                    body = body + newLine;
+                                    body = body + "Regards";
+                                    body = body + newLine;
+                                    body = body + newLine;
+                                    body = body + Session["UserName"].ToString();
+                                    mm.Body = string.Format(body);
+                                    SmtpClient smtp = new SmtpClient();
+                                    smtp.Host = settings.Select(a => a.MS_OutGoingHostName).FirstOrDefault();
+                                    NetworkCredential NetworkCred = new NetworkCredential();
+                                    NetworkCred.UserName = settings.Select(a => a.MS_EmailID).FirstOrDefault();
+                                    NetworkCred.Password = settings.Select(a => a.MS_Password).FirstOrDefault();
+                                    smtp.UseDefaultCredentials = true;
+                                    smtp.Credentials = NetworkCred;
+                                    smtp.Port = settings.Select(a => a.MS_OutGoingPort).FirstOrDefault();
+                                    smtp.Send(mm);
+                                }
+                            }
+                        }
+                        catch { }
+                        var json = "Success:"+ OTOI_Code;
+                        if (data == 0)
+                        {
+                            json = "Failed";
+                        }
+                        else
+                        {
+                            objLOG.log_dockey = "3010";
+                            objLOG.log_userid = Session["UserID"].ToString();
+                            objLOG.log_recordkey = data.ToString();
+                            if (OTOI_ID == 0)
+                            {
+                                objLOG.log_operation = "Insert";
+                                objLOG.log_Remarks = "Record Inserted Successfully";
+                            }
+                            else
+                            {
+                                objLOG.log_operation = "Update";
+                                objLOG.log_Remarks = "Record Updated Successfully";
+                            }
+                            bal.OperationInsertLogs_BL(objLOG);
+                        }
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var json = "Validation:" + valid;
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the invoice details for view
+        public ActionResult ET_Sales_Invoice_View(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    OneToOneInvoiceView_CM obj = new OneToOneInvoiceView_CM();
+                    var data1 = (from a in dbcontext.Tbl_OneToOneInvoice
+                                 join b in dbcontext.Tbl_Shipment_Header on a.OTOI_ShipmentID equals b.S_ID into comp
+                                 from x in comp
+                                 join d in dbcontext.Tbl_Master_User on a.OTOI_SalesPerson equals d.USER_ID into user
+                                 from z in user
+                                 join w in dbcontext.Tbl_Master_CompanyDetails on a.OTOI_CustomerID equals w.COM_ID into p
+                                 from enq in p.DefaultIfEmpty()
+                                 where a.OTOI_ID == id
+                                 select new OneToOneInvoice_CM
+                                 {
+                                     OTOI_ID = a.OTOI_ID,
+                                     OTOI_Code = a.OTOI_Code,
+                                     OTOI_InvoiceDate = a.OTOI_InvoiceDate,
+                                     S_Code = x.S_Code,
+                                     COM_DISPLAYNAME = enq.COM_DISPLAYNAME,
+                                     USER_NAME = z.USER_NAME,
+                                     OTOI_ShipmentAmount = a.OTOI_ShipmentAmount,
+                                     OTOI_TaxPer = a.OTOI_TaxPer,
+                                     OTOI_TaxAmount = a.OTOI_TaxAmount,
+                                     OTOI_InvoiceAmount = a.OTOI_InvoiceAmount,
+                                     OTOI_ShipmentID = a.OTOI_ShipmentID
+                                 }).ToList();
+                    decimal pid = Convert.ToDecimal(data1[0].OTOI_ShipmentID);
+                    var data2 = (from a in dbcontext.Tbl_Shipment_Details
+                                 join b in dbcontext.Tbl_Product_Master on a.SD_ProductID equals b.P_ID into c
+                                 from d in c
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into f
+                                 from g in f.DefaultIfEmpty()
+                                 where a.SD_PID == pid && g.LU_Type == 2
+                                 select new OneToOneInvoice_CM
+                                 {
+                                     ArticleNo = d.P_ArticleNo,
+                                     ProductName = d.P_ShortName,
+                                     UOM = g.LU_Description,
+                                     SD_Quantity = a.SD_Quantity,
+                                     price = (dbcontext.Tbl_Order_Details.Where(x => x.ORDER_ID == a.SD_OrderDetailID).Select(x => x.PRICE)).FirstOrDefault() ?? 0
+                                 }).ToList();
+                    obj.objHeader = data1;
+                    obj.objDetail = data2;
+                    return PartialView("/Views/Sales/ET_Sales_OneToOneInvoice/ET_Sales_OneToOneInvoice_View.cshtml", obj);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Get the invoice Details For print
+        public ActionResult ET_Sales_Invoice_Print(int id, string lang)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int com_key = Convert.ToInt32(Session["Companykey"]);
+                    var OrderId=(from a in dbcontext.Tbl_OneToOneInvoice
+                                 join b in dbcontext.Tbl_Shipment_Header on a.OTOI_ShipmentID equals b.S_ID into comp
+                                 from x in comp
+                                 where a.OTOI_ID==id
+                                 select new
+                                 {
+                                     OrderId = dbcontext.Tbl_Schedule.Single(a => a.SH_Code == x.S_ScheduleID).SH_OrderID,
+                                 });
+                    OneToOneInvoiceView_CM obj = new OneToOneInvoiceView_CM();
+
+                    var data1 = (from a in dbcontext.Tbl_OneToOneInvoice
+                                 join b in dbcontext.Tbl_Shipment_Header on a.OTOI_ShipmentID equals b.S_ID into comp
+                                 from x in comp
+                                 join d in dbcontext.Tbl_Master_User on a.OTOI_SalesPerson equals d.USER_ID into user
+                                 from z in user
+                                 join w in dbcontext.Tbl_Master_CompanyDetails on a.OTOI_CustomerID equals w.COM_ID into p
+                                 from enq in p.DefaultIfEmpty()
+                                 where a.OTOI_ID == id
+                                 select new OneToOneInvoice_CM
+                                 {
+                                     OTOI_ID = a.OTOI_ID,
+                                     OTOI_Code = a.OTOI_Code,
+                                     OTOI_InvoiceDate = a.OTOI_InvoiceDate,
+                                     S_Code = x.S_Code,
+                                     COM_DISPLAYNAME = enq.COM_DISPLAYNAME,
+                                     OTOI_CompanyName = enq.COM_NAME,
+                                     OTOI_CustomerName=enq.COM_DISPLAYNAME,
+                                     OTOI_SalesPerson = z.DISPLAY_NAME,
+                                     USER_NAME = z.USER_NAME,
+                                     OTOI_ShipmentAmount = a.OTOI_ShipmentAmount,
+                                     OTOI_TaxPer = a.OTOI_TaxPer,
+                                     OTOI_TaxAmount = a.OTOI_TaxAmount,
+                                     OTOI_InvoiceAmount = a.OTOI_InvoiceAmount,
+                                     OTOI_ShipmentID = a.OTOI_ShipmentID,
+                                     //OrderId = dbcontext.Tbl_Schedule.Single(a => a.SH_Code == x.S_ScheduleID).SH_OrderID,
+                                    // DeliveryTerms=dbcontext.Tbl_Master_Order.Single(a=>a.SO_ID== OrderId),
+                                     CompanyCode = enq.COM_CODE,
+                                     Street = enq.COM_STREET,
+                                     CityState = (enq.COM_CITY + ", " + enq.COM_STATE),
+                                     CountryZip = ((dbcontext.locations.Where(a => a.location_id == enq.COM_COUNTRY).Select(a => a.name).FirstOrDefault()) + ", " + (enq.COM_ZIP)),
+                                     VatPer = (dbcontext.Tbl_SystemSetUp.Where(a => a.COMPANY_ID == com_key).Select(a => a.TAX).FirstOrDefault()),
+                                     imgurl = (dbcontext.Tbl_SystemSetUp.Where(a => a.COMPANY_ID == com_key).Select(a => a.COMPANY_LOGO).FirstOrDefault()),
+                                     SysCompany = (dbcontext.Tbl_SystemSetUp.Where(a => a.COMPANY_ID == com_key).Select(a => a.COMPANY_NAME).FirstOrDefault()),
+                                 }).ToList();
+                    decimal pid = Convert.ToDecimal(data1[0].OTOI_ShipmentID);
+                    var data3 = (from a in dbcontext.Tbl_Schedule
+                                 join e in dbcontext.Tbl_Order_Details on a.SH_OrderDetailID equals e.ORDER_ID into orddet
+                                 from f in orddet
+                                 join c in dbcontext.Tbl_Product_Master on a.SH_ProductID equals c.P_ID into comp
+                                 from x in comp
+                                 join d in dbcontext.Tbl_Shipment_Details on a.SH_ID equals d.SD_ScheduleID into ord
+                                 from y in ord.DefaultIfEmpty()
+                                 from d in comp
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into k
+                                 from g in k.DefaultIfEmpty()
+                                 where y.SD_PID == pid && g.LU_Type == 2
+                                 select new OneToOneInvoice_CM
+                                 {
+                                    
+                                     UOM = g.LU_Description,
+                                     ArticleNo = x.P_ArticleNo,
+                                     ProductName = x.P_ShortName,
+                                     Unit_Price = f.PRICE ?? 0,
+                                     Amt=f.Selling_Price ?? 0,
+                                     SD_Quantity = y.SD_Quantity
+                                 }).ToList();
+                    var data2 = (from a in dbcontext.Tbl_Shipment_Details
+                                 join b in dbcontext.Tbl_Product_Master on a.SD_ProductID equals b.P_ID into c
+                                 from d in c
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into f
+                                 from g in f.DefaultIfEmpty()
+                                 where a.SD_PID == pid && g.LU_Type == 2
+                                 select new OneToOneInvoice_CM
+                                 {
+                                     ArticleNo = d.P_ArticleNo,
+                                     ProductName = d.P_ShortName,
+                                     UOM = g.LU_Description,
+                                     //Unit_Price=a. ?? 0,
+                                     SD_Quantity = a.SD_Quantity
+                                 }).ToList();
+                    obj.objHeader = data1;
+                    obj.objDetail = data3;
+                    if (lang == "E")
+                        return PartialView("/Views/Sales/ET_Sales_OneToOneInvoice/ET_Sales_OneToOneInvoice_Print.cshtml", obj);
+                    else
+                        return PartialView("/Views/Sales/ET_Sales_OneToOneInvoice/ET_OneToOneInvoice_Print_German.cshtml", obj);
+      
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        public ActionResult ET_Sales_InvoicePrint(int id, string lang)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int com_key = Convert.ToInt32(Session["Companykey"]);
+                    var OrderId = (from a in dbcontext.Tbl_OneToOneInvoice
+                                   join b in dbcontext.Tbl_Shipment_Header on a.OTOI_ShipmentID equals b.S_ID into comp
+                                   from x in comp
+                                   where a.OTOI_ID == id
+                                   select new
+                                   {
+                                       OrderId = dbcontext.Tbl_Schedule.Single(a => a.SH_Code == x.S_ScheduleID).SH_OrderID,
+                                   });
+                    OneToOneInvoiceView_CM obj = new OneToOneInvoiceView_CM();
+
+                    var data1 = (from a in dbcontext.Tbl_OneToOneInvoice
+                                 join b in dbcontext.Tbl_Shipment_Header on a.OTOI_ShipmentID equals b.S_ID into comp
+                                 from x in comp
+                                 join a1 in dbcontext.Tbl_Shipment_Details on x.S_ID equals a1.SD_PID
+                                 join d in dbcontext.Tbl_Master_User on a.OTOI_SalesPerson equals d.USER_ID into user
+                                 from z in user
+                                 join w in dbcontext.Tbl_Master_CompanyDetails on a.OTOI_CustomerID equals w.COM_ID into p
+                                 from enq in p.DefaultIfEmpty()
+                                 where a.OTOI_ID == id
+                                 select new OneToOneInvoice_CM
+                                 {
+                                     OTOI_ID = a.OTOI_ID,
+                                     OTOI_Code = a.OTOI_Code,
+                                     OTOI_InvoiceDate = a.OTOI_InvoiceDate,
+                                     S_Code = x.S_Code,
+                                     COM_DISPLAYNAME = enq.COM_DISPLAYNAME,
+                                     OTOI_CompanyName = enq.COM_NAME,
+                                     OTOI_CustomerName = enq.COM_DISPLAYNAME,
+                                     OTOI_SalesPerson = z.DISPLAY_NAME,
+                                     USER_NAME = z.USER_NAME,
+                                     OTOI_ShipmentAmount = a.OTOI_ShipmentAmount,
+                                     OTOI_TaxPer = a.OTOI_TaxPer,
+                                     Zipcode=enq.COM_COUNTRY,
+                                     OTOI_TaxAmount = a.OTOI_TaxAmount,
+                                     OTOI_InvoiceAmount = a.OTOI_InvoiceAmount,
+                                     OTOI_ShipmentID = a.OTOI_ShipmentID,
+                                     Discount = (from b in dbcontext.Tbl_Master_Order
+                                                           join c in dbcontext.Tbl_Order_Details on b.SO_ID equals c.AGEN_TRAD_PO_ID
+                                                           where c.ORDER_ID == a1.SD_OrderDetailID
+                                                           select
+                                                           b.SO_Discount).FirstOrDefault(),
+                                     PaymentTerms = (from b in dbcontext.Tbl_Master_Order
+                                                 join c in dbcontext.Tbl_Order_Details on b.SO_ID equals c.AGEN_TRAD_PO_ID
+                                                 join pay in dbcontext.Tbl_Payment_Terms on b.SO_CusPaymentTermID equals pay.PT_ID
+                                                 where c.ORDER_ID == a1.SD_OrderDetailID
+                                                 select
+                                                 pay.PT_Name).FirstOrDefault(),
+                                     CompanyCode = enq.COM_CODE,
+                                     Street = enq.COM_STREET,
+                                     CityState = (enq.COM_CITY + ", " + enq.COM_STATE),
+                                     CountryZip = ((dbcontext.locations.Where(a => a.location_id == enq.COM_COUNTRY).Select(a => a.name).FirstOrDefault()) + ", " + (enq.COM_ZIP)),
+                                     VatPer = (dbcontext.Tbl_SystemSetUp.Where(a => a.COMPANY_ID == com_key).Select(a => a.TAX).FirstOrDefault()),
+                                     imgurl = (dbcontext.Tbl_SystemSetUp.Where(a => a.COMPANY_ID == com_key).Select(a => a.COMPANY_LOGO).FirstOrDefault()),
+                                     SysCompany = (dbcontext.Tbl_SystemSetUp.Where(a => a.COMPANY_ID == com_key).Select(a => a.COMPANY_NAME).FirstOrDefault()),
+                                 }).ToList();
+                    decimal pid = Convert.ToDecimal(data1[0].OTOI_ShipmentID);
+                    var data3 = (from a in dbcontext.Tbl_Schedule
+                                 join e in dbcontext.Tbl_Order_Details on a.SH_OrderDetailID equals e.ORDER_ID into orddet
+                                 from f in orddet
+                                 join c in dbcontext.Tbl_Product_Master on a.SH_ProductID equals c.P_ID into comp
+                                 from x in comp
+                                 join d in dbcontext.Tbl_Shipment_Details on a.SH_ID equals d.SD_ScheduleID into ord
+                                 from y in ord.DefaultIfEmpty()
+                                 from d in comp
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into k
+                                 from g in k.DefaultIfEmpty()
+                                 where y.SD_PID == pid && g.LU_Type == 2
+                                 select new OneToOneInvoice_CM
+                                 {
+
+                                     UOM = g.LU_Description,
+                                     ArticleNo = x.P_ArticleNo,
+                                     Discount=f.DiscountPer,
+                                     Description=x.P_Description,
+                                     ProductName = x.P_ShortName,
+                                     Unit_Price = f.PRICE ?? 0,
+                                     Amt = f.Selling_Price ?? 0,
+                                     SD_Quantity = y.SD_Quantity
+                                 }).ToList();
+                    var data2 = (from a in dbcontext.Tbl_Shipment_Details
+                                 join b in dbcontext.Tbl_Product_Master on a.SD_ProductID equals b.P_ID into c
+                                 from d in c
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into f
+                                 from g in f.DefaultIfEmpty()
+                                 where a.SD_PID == pid && g.LU_Type == 2
+                                 select new OneToOneInvoice_CM
+                                 {
+                                     ArticleNo = d.P_ArticleNo,
+                                     ProductName = d.P_ShortName,
+                                     UOM = g.LU_Description,
+                                     //Unit_Price=a. ?? 0,
+                                     SD_Quantity = a.SD_Quantity
+                                 }).ToList();
+                    obj.objHeader = data1;
+                    obj.objDetail = data3;
+                    string path = "";
+                    if (lang == "E")
+                    {
+                        for (int i = 0; i < data1.Count; i++)
+                        {
+
+                            var doc1 = new iTextSharp.text.Document(PageSize.A4, 30, 25, 130, 90);
+                            string subPath = "~/Sales/PDFList/OnetoOneInvoice/" + data1[i].OTOI_Code + "/";
+                            bool exists = System.IO.Directory.Exists(HttpContext.Server.MapPath(subPath));
+                            if (!exists)
+                                System.IO.Directory.CreateDirectory(HttpContext.Server.MapPath(subPath));
+                            var output = new FileStream(Server.MapPath(subPath + data1[i].OTOI_Code + ".pdf"), FileMode.Create);
+                            var writer = PdfWriter.GetInstance(doc1, output);
+                            writer.PageEvent = new pdffooterclass();
+                            //PdfWriter.GetInstance(doc1, new FileStream(Request.PhysicalApplicationPath + "\\Invoice_Statement.pdf", FileMode.Create));
+                            doc1.Open();
+                            path = output.Name;
+                            //font size change from default  added by gv on 12/12/18
+                            FontFactory.RegisterDirectories();
+                            Font font = new Font(FontFactory.GetFont("Arial", 10, Font.NORMAL));
+                            Font fontsmall = new Font(FontFactory.GetFont("Arial", 9, Font.NORMAL));
+                            Font fontsmall1 = new Font(FontFactory.GetFont("Arial", 10, Font.NORMAL | Font.UNDERLINE));
+                            Font Fontbigger = new Font(FontFactory.GetFont("Arial", 20, Font.BOLD));
+                            Font Fontsmaller = new Font(FontFactory.GetFont("Arial", 10, Font.BOLD));
+                            Font Fontsmaller1 = new Font(FontFactory.GetFont("Arial", 12, Font.BOLD));
+
+                            PdfPTable table1 = new PdfPTable(1);
+                            table1.DefaultCell.Border = 0;
+                            table1.WidthPercentage = 100f;
+
+
+                            Paragraph pg2 = new Paragraph();
+                            Phrase phraseConstant2 = new Phrase("" + data1[i].OTOI_CompanyName + "\n", font);
+                            Phrase phraseConstant3 = new Phrase("" + data1[i].Street + "\n", font);
+                            Phrase phraseConstant4 = new Phrase("" + data1[i].CityState + "\n", font);
+                            Phrase phraseConstant5 = new Phrase("" + data1[i].CountryZip + "\n", font);
+                            pg2.Add(phraseConstant2);
+                            pg2.Add(phraseConstant3);
+                            pg2.Add(phraseConstant4);
+                            pg2.Add(phraseConstant5);
+                            PdfPCell cell21 = new PdfPCell(pg2);
+                            cell21.HorizontalAlignment = 0;
+                            cell21.PaddingTop = 1.0f;
+                            cell21.PaddingLeft = 1.0f;
+                            cell21.Border = 0;
+                            table1.AddCell(cell21);
+                            doc1.Add(table1);
+
+                            PdfPTable table2 = new PdfPTable(3);
+                            table2.WidthPercentage = 100f;
+                            float[] widthsvalforcus = new float[] { 13f, 4f, 5f };
+                            table2.TotalWidth = 100f;
+                            table2.WidthPercentage = 100f;
+                            table2.SetWidths(widthsvalforcus);
+
+                            Phrase emp1 = new Phrase("", font);
+                            PdfPCell cell26emp = new PdfPCell(emp1);
+                            cell26emp.Border = 0;
+                            cell26emp.HorizontalAlignment = 2;
+                            cell26emp.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26emp);
+                            Phrase cuscode = new Phrase("Customer Code:", font);
+                            PdfPCell cell26 = new PdfPCell(cuscode);
+                            cell26.Border = 0;
+                            cell26.HorizontalAlignment = 0;
+                            cell26.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26);
+                            Phrase cuscodeval = new Phrase("" + data1[i].CompanyCode + "", font);
+                            PdfPCell cell26val = new PdfPCell(cuscodeval);
+                            cell26val.Border = 0;
+                            cell26val.HorizontalAlignment = 0;
+                            cell26val.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26val);
+
+                            Phrase emp2 = new Phrase("", font);
+                            PdfPCell cell26emp1 = new PdfPCell(emp2);
+                            cell26emp1.Border = 0;
+                            cell26emp1.HorizontalAlignment = 0;
+                            cell26emp1.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26emp1);
+                            Phrase Processby = new Phrase("Processed by:", font);
+                            PdfPCell cell26Processby = new PdfPCell(Processby);
+                            cell26Processby.Border = 0;
+                            cell26Processby.HorizontalAlignment = 0;
+                            cell26Processby.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26Processby);
+                            Phrase cuscodeval1 = new Phrase("" + data1[i].OTOI_SalesPerson + "", font);
+                            PdfPCell cell26Processby1 = new PdfPCell(cuscodeval1);
+                            cell26Processby1.Border = 0;
+                            cell26Processby1.HorizontalAlignment = 0;
+                            cell26Processby1.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26Processby1);
+
+                            //Phrase emp2id = new Phrase("", font);
+                            //PdfPCell cell26emp1id = new PdfPCell(emp2id);
+                            //cell26emp1id.Border = 0;
+                            //cell26emp1id.HorizontalAlignment = 0;
+                            //cell26emp1id.PaddingBottom = 2.5f;
+                            //table2.AddCell(cell26emp1id);
+                            //Phrase Processbyid = new Phrase("Customer Vat-ID.:", font);
+                            //PdfPCell cell26Processbyid = new PdfPCell(Processbyid);
+                            //cell26Processbyid.Border = 0;
+                            //cell26Processbyid.HorizontalAlignment = 0;
+                            //cell26Processbyid.PaddingBottom = 2.5f;
+                            //table2.AddCell(cell26Processbyid);
+                            //Phrase cuscodeval1id = new Phrase("" + data1[i].USTID + "", font);
+                            //PdfPCell cell26Processby1id = new PdfPCell(cuscodeval1id);
+                            //cell26Processby1id.Border = 0;
+                            //cell26Processby1id.HorizontalAlignment = 0;
+                            //cell26Processby1id.PaddingBottom = 2.5f;
+                            //table2.AddCell(cell26Processby1id);
+
+                            Phrase emp3 = new Phrase("", font);
+                            PdfPCell cell26emp2 = new PdfPCell(emp3);
+                            cell26emp2.Border = 0;
+                            cell26emp2.HorizontalAlignment = 2;
+                            cell26emp2.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26emp2);
+                            Phrase Datecell = new Phrase("Date:", font);
+                            PdfPCell cell26Datecell = new PdfPCell(Datecell);
+                            cell26Datecell.Border = 0;
+                            cell26Datecell.HorizontalAlignment = 0;
+                            cell26Datecell.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26Datecell);
+                            Phrase cuscodeval2 = new Phrase("" + data1[i].OTOI_InvoiceDate.ToString("dd-MM-yyyy") + "", font);
+                            PdfPCell cell26Processby2 = new PdfPCell(cuscodeval2);
+                            cell26Processby2.Border = 0;
+                            cell26Processby2.HorizontalAlignment = 0;
+                            cell26Processby2.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26Processby2);
+
+                            doc1.Add(table2);
+                            PdfPTable contenttable = new PdfPTable(1);
+                            contenttable.TotalWidth = 100f;
+                            contenttable.WidthPercentage = 100f;
+                            Paragraph pp1con = new Paragraph();
+                            Phrase phar1con = new Phrase("Invoice", Fontsmaller1);
+                            pp1con.Add(phar1con);
+                            PdfPCell cell29Con = new PdfPCell(pp1con);
+                            //cell29Con.AddElement(new Paragraph(new Chunk("" , Fontsmaller)));
+                            cell29Con.PaddingTop = 4.5f;
+                            cell29Con.HorizontalAlignment = 1;
+                            cell29Con.PaddingBottom = 5.5f;
+                            cell29Con.Border = 0;
+                            contenttable.AddCell(cell29Con);
+                            PdfPCell cell29 = new PdfPCell();
+                            cell29.AddElement(new Paragraph(new Chunk("Invoice No:" + data1[i].OTOI_Code + "", Fontsmaller)));
+                            cell29.PaddingTop = 6.5f;
+                            cell29.PaddingBottom = 20.5f;
+                            cell29.Border = 0;
+                            contenttable.AddCell(cell29);
+                            doc1.Add(contenttable);
+                            PdfPTable table4 = new PdfPTable(7);
+                            float[] widths1 = new float[] { 5f, 10f, 10f, 40f, 10f, 10f, 13f };
+                            table4.TotalWidth = 100f;
+                            table4.WidthPercentage = 100f;
+                            table4.HeaderRows = 1;
+                            table4.SetWidths(widths1);
+
+                            Phrase phraseConstantde1 = new Phrase("S.No", Fontsmaller);
+                            PdfPCell cell41 = new PdfPCell(phraseConstantde1);
+
+                            // cell41.AddElement(new Paragraph(new Chunk("Item", Fontsmaller)));
+
+                            cell41.HorizontalAlignment = 1;
+                            cell41.PaddingTop = 2.5f;
+                            cell41.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell41);
+                            Phrase phraseConstantde2 = new Phrase("Quantity", Fontsmaller);
+                            PdfPCell cell42 = new PdfPCell(phraseConstantde2);
+                            cell42.Colspan = 2;
+                            //cell42.AddElement(new Paragraph(new Chunk("Qty", Fontsmaller)));
+                            cell42.HorizontalAlignment = 1;
+                            cell42.PaddingTop = 2.5f;
+                            cell42.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell42);
+                            Phrase phraseConstantde3 = new Phrase("Product Description", Fontsmaller);
+                            PdfPCell cell421 = new PdfPCell(phraseConstantde3);
+                            cell421.HorizontalAlignment = 1;
+                            //cell421.AddElement(new Paragraph(new Chunk("UOM", Fontsmaller)));
+                            cell421.PaddingTop = 2.5f;
+                            cell421.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell421);
+                            Phrase phraseConstantde4 = new Phrase("Price", Fontsmaller);
+                            PdfPCell cell431 = new PdfPCell(phraseConstantde4);
+                            cell431.HorizontalAlignment = 1;
+                            // cell431.Colspan = 2;
+                            //cell431.AddElement(new Paragraph(new Chunk("Product Name", Fontsmaller)));
+
+                            cell431.PaddingTop = 2.5f;
+                            cell431.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell431);
+                            Phrase phraseConstantde4d = new Phrase("Discount", Fontsmaller);
+                            PdfPCell cell431d = new PdfPCell(phraseConstantde4d);
+                            cell431d.HorizontalAlignment = 1;
+                            // cell431d.Colspan = 2;
+                            //cell431.AddElement(new Paragraph(new Chunk("Product Name", Fontsmaller)));
+
+                            cell431d.PaddingTop = 2.5f;
+                            cell431d.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell431d);
+                            Phrase phraseConstantde5 = new Phrase("Total", Fontsmaller);
+                            PdfPCell cell43 = new PdfPCell(phraseConstantde5);
+                            cell43.HorizontalAlignment = 1;
+
+                            // cell43.AddElement(new Paragraph(new Chunk("Description", Fontsmaller)));
+
+                            cell43.PaddingTop = 2.5f;
+                            cell43.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell43);
+                            decimal? total = 0;
+                            for (int j = 0; j < data3.Count; j++)
+                            {
+                                Paragraph Snopp = new Paragraph();
+                                Phrase Snophar = new Phrase("" + (j + 1) + "\n", font);
+                                Snopp.Add(Snophar);
+                                PdfPCell cell51 = new PdfPCell(Snopp);
+                                cell51.HorizontalAlignment = 1;
+                                //cell51.AddElement(new Paragraph(new Chunk("" + (j + 1) + "", font)));
+
+                                // cell51.PaddingTop = 2.5f;
+                                // cell51.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell51);
+                                Paragraph qtypp = new Paragraph();
+                                Phrase qtyphar = new Phrase("" + Convert.ToDecimal(data3[j].SD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", font);
+                                qtypp.Add(qtyphar);
+                                PdfPCell cell52 = new PdfPCell(qtypp);
+                                cell52.HorizontalAlignment = 2;
+                                //  cell52.PaddingTop = 2.5f;
+                                // cell52.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell52);
+                                Paragraph uompp = new Paragraph();
+                                Phrase uomphar = new Phrase("" + data3[j].UOM + "\n", font);
+                                uompp.Add(uomphar);
+                                PdfPCell uomcell = new PdfPCell(uompp);
+
+
+                                uomcell.HorizontalAlignment = 0;
+
+
+                                table4.AddCell(uomcell);
+
+                                Paragraph Productpp = new Paragraph();
+                                Phrase Productphar = new Phrase("" + data3[j].ProductName + "\n", font);
+                                Phrase Productphar1 = new Phrase("" + data3[j].Description + "\n", font);
+
+                                Productpp.Add(Productphar);
+
+                                Productpp.Add(Productphar1);
+                                PdfPCell cell53 = new PdfPCell(Productpp);
+
+                                cell53.HorizontalAlignment = 0;
+                                cell53.PaddingTop = 0f;
+
+
+                                table4.AddCell(cell53);
+
+
+                                Paragraph pp = new Paragraph();
+                                Phrase phar = new Phrase("" + Convert.ToDecimal(data3[j].Unit_Price).ToString("c2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", font);
+                                pp.Add(phar);
+                                PdfPCell cell541 = new PdfPCell(pp);
+                                //cell541.AddElement(pp);
+                                // cell541.Colspan = 2;
+                                cell541.HorizontalAlignment = 2;
+                                cell541.PaddingTop = 2.5f;
+                                cell541.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell541);
+                                decimal? DisPer = 0;
+                                if (data3[j].Discount == 0)
+                                {
+                                    DisPer = 0;
+                                }
+                                else
+                                {
+                                    DisPer = data3[j].Discount;
+                                }
+                                Paragraph ppd = new Paragraph();
+                                Phrase phard = new Phrase("" + DisPer + "\n", font);
+                                ppd.Add(phard);
+                                PdfPCell cell541d = new PdfPCell(ppd);
+                                //cell541.AddElement(pp);
+                                //cell541.Colspan = 2;
+                                cell541d.HorizontalAlignment = 2;
+                                cell541d.PaddingTop = 2.5f;
+                                cell541d.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell541d);
+                                decimal discountAmt = ((Convert.ToDecimal(data3[j].Unit_Price) * Convert.ToDecimal(data3[j].SD_Quantity)) * Convert.ToDecimal(DisPer) / 100);
+                                Paragraph pp12 = new Paragraph();
+                                Phrase phar12 = new Phrase("" + ((Convert.ToDecimal(data3[j].Unit_Price) * Convert.ToDecimal(data3[j].SD_Quantity)) - discountAmt).ToString("c2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", font);
+                                pp12.Add(phar12);
+                                PdfPCell cell54 = new PdfPCell(pp12);
+                                cell54.HorizontalAlignment = 2;
+                                cell54.PaddingTop = 2.5f;
+                                cell54.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell54);
+                                total = total + ((Convert.ToDecimal(data3[j].Unit_Price) * Convert.ToDecimal(data3[j].SD_Quantity)) - discountAmt);
+
+
+
+
+                            }
+
+                            PdfPCell NetValCell = new PdfPCell();
+
+                            NetValCell.AddElement(new Paragraph(new Chunk("Net Value", font)));
+                            NetValCell.Colspan = 6;
+                            NetValCell.PaddingTop = 2.5f;
+                            NetValCell.PaddingBottom = 2.5f;
+
+                            table4.AddCell(NetValCell);
+                            Paragraph pp1 = new Paragraph();
+                            Phrase phar1 = new Phrase("" + Convert.ToDecimal(total).ToString("c2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", font);
+                            pp1.Add(phar1);
+                            PdfPCell NetValCell1 = new PdfPCell(pp1);
+                            NetValCell1.Colspan = 6;
+                            NetValCell1.HorizontalAlignment = 2;
+                            NetValCell1.VerticalAlignment = 2;
+                            NetValCell1.PaddingTop = 2.5f;
+                            NetValCell1.PaddingBottom = 2.5f;
+
+                            table4.AddCell(NetValCell1);
+
+                            if (data1[i].Zipcode == 82)
+                            {
+                                PdfPCell inccell = new PdfPCell();
+
+                                inccell.AddElement(new Paragraph(new Chunk("Incl" + Convert.ToDecimal(data1[i].VatPer).ToString("0") + " % Value", font)));
+                                inccell.Colspan = 6;
+                                inccell.PaddingTop = 2.5f;
+                                inccell.PaddingBottom = 2.5f;
+
+                                table4.AddCell(inccell);
+                                Paragraph pp1inc = new Paragraph();
+                                Phrase phar1inc = new Phrase("" + (Convert.ToDecimal(total * data1[i].VatPer / 100).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))) + "\n", font);
+                                pp1inc.Add(phar1inc);
+                                PdfPCell inccell1 = new PdfPCell(pp1inc);
+                                inccell1.HorizontalAlignment = 2;
+                                inccell1.VerticalAlignment = 2;
+                                inccell1.PaddingTop = 2.5f;
+                                inccell1.PaddingBottom = 2.5f;
+
+                                table4.AddCell(inccell1);
+                            }
+                            else
+                            {
+
+                                PdfPCell inccell = new PdfPCell();
+                                inccell.AddElement(new Paragraph(new Chunk("Incl 0 % Value", font)));
+                                inccell.Colspan = 6;
+                                inccell.PaddingTop = 2.5f;
+                                inccell.PaddingBottom = 2.5f;
+
+                                table4.AddCell(inccell);
+                                Paragraph pp1inc = new Paragraph();
+                                Phrase phar1inc = new Phrase("" + (Convert.ToDecimal(total * 0 / 100).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))) + "\n", font);
+                                pp1inc.Add(phar1inc);
+                                PdfPCell inccell1 = new PdfPCell(pp1inc);
+                                inccell1.HorizontalAlignment = 2;
+                                inccell1.PaddingTop = 2.5f;
+                                inccell1.PaddingBottom = 2.5f;
+
+                                table4.AddCell(inccell1);
+
+                            }
+                            decimal Discountamt = 0;
+
+                            if (data1[i].Zipcode == 82)
+                            {
+
+                                var Vatamount = (Convert.ToDecimal(total + ((total * data1[i].VatPer / 100))));
+                                Vatamount = (total * data1[i].VatPer / 100) ?? 0;
+
+
+                                if (data1[i].Discount != 0)
+                                {
+                                    Discountamt = (Convert.ToDecimal(total * data1[i].Discount / 100));
+                                    PdfPCell AllDiscountcell = new PdfPCell();
+
+                                    AllDiscountcell.AddElement(new Paragraph(new Chunk("Discount", font)));
+                                    AllDiscountcell.Colspan = 6;
+                                    AllDiscountcell.PaddingTop = 2.5f;
+                                    AllDiscountcell.PaddingBottom = 2.5f;
+
+                                    table4.AddCell(AllDiscountcell);
+
+                                    Paragraph pp1discount = new Paragraph();
+                                    Phrase phar1Discount = new Phrase("" + Discountamt.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", Fontsmaller);
+                                    pp1discount.Add(phar1Discount);
+                                    PdfPCell AllDiscountcellde = new PdfPCell(pp1discount);
+                                    AllDiscountcellde.HorizontalAlignment = 2;
+                                    AllDiscountcellde.Colspan = 6;
+                                    AllDiscountcellde.PaddingTop = 2.5f;
+                                    AllDiscountcellde.PaddingBottom = 2.5f;
+                                    AllDiscountcellde.HorizontalAlignment = 2;
+                                    table4.AddCell(AllDiscountcellde);
+                                }
+                                PdfPCell vataddcell = new PdfPCell();
+
+                                vataddcell.AddElement(new Paragraph(new Chunk("Total", font)));
+                                vataddcell.Colspan = 6;
+                                vataddcell.PaddingTop = 2.5f;
+                                vataddcell.PaddingBottom = 2.5f;
+
+                                table4.AddCell(vataddcell);
+                                Paragraph pp1vat = new Paragraph();
+                                Phrase phar1vat = new Phrase("" + ((Convert.ToDecimal(total + Vatamount - Discountamt)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))) + "\n", Fontsmaller);
+                                pp1vat.Add(phar1vat);
+                                PdfPCell vataddcell1 = new PdfPCell(pp1vat);
+                                vataddcell1.HorizontalAlignment = 2;
+                                vataddcell1.Colspan = 6;
+                                vataddcell1.PaddingTop = 2.5f;
+                                vataddcell1.PaddingBottom = 2.5f;
+
+                                table4.AddCell(vataddcell1);
+
+                            }
+                            else
+                            {
+                                var Vatamount = (Convert.ToDecimal(total + ((total * 0 / 100))));
+                                Vatamount = (total * 0 / 100) ?? 0;
+
+                                if (data1[i].Discount != 0)
+                                {
+                                    Discountamt = (Convert.ToDecimal(total * data1[i].Discount / 100));
+                                    PdfPCell AllDiscountcell = new PdfPCell();
+
+                                    AllDiscountcell.AddElement(new Paragraph(new Chunk("Discount", font)));
+                                    AllDiscountcell.Colspan = 6;
+                                    AllDiscountcell.PaddingTop = 2.5f;
+                                    AllDiscountcell.PaddingBottom = 2.5f;
+
+                                    table4.AddCell(AllDiscountcell);
+                                    Paragraph pp1discount = new Paragraph();
+                                    Phrase phar1Discount = new Phrase("" + Discountamt.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", Fontsmaller);
+                                    pp1discount.Add(phar1Discount);
+                                    PdfPCell AllDiscountcellde = new PdfPCell(pp1discount);
+                                    AllDiscountcellde.Colspan = 6;
+                                    AllDiscountcellde.PaddingTop = 2.5f;
+                                    AllDiscountcellde.PaddingBottom = 2.5f;
+                                    AllDiscountcellde.HorizontalAlignment = 2;
+                                    table4.AddCell(AllDiscountcellde);
+                                }
+                                PdfPCell vataddcell = new PdfPCell();
+
+                                vataddcell.AddElement(new Paragraph(new Chunk("Total", font)));
+                                vataddcell.Colspan = 6;
+                                vataddcell.PaddingTop = 2.5f;
+                                vataddcell.PaddingBottom = 2.5f;
+
+                                table4.AddCell(vataddcell);
+                                Paragraph pp1vat = new Paragraph();
+                                Phrase phar1vat = new Phrase("" + ((Convert.ToDecimal(total + Vatamount - Discountamt)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))) + "\n", Fontsmaller);
+                                pp1vat.Add(phar1vat);
+                                PdfPCell vataddcell1 = new PdfPCell(pp1vat);
+                                vataddcell1.HorizontalAlignment = 2;
+                                vataddcell1.Colspan = 6;
+                                vataddcell1.PaddingTop = 2.5f;
+                                vataddcell1.PaddingBottom = 2.5f;
+
+                                table4.AddCell(vataddcell1);
+
+                            }
+                            doc1.Add(table4);
+
+                            PdfPTable table6 = new PdfPTable(1);
+                            PdfPCell cell31 = new PdfPCell();
+                            cell31.Border = 0;
+                            cell31.AddElement(new Paragraph(new Chunk("", font)));
+                            cell31.PaddingTop = 20.5f;
+                            cell31.PaddingBottom = 2.5f;
+                            table6.AddCell(cell31);
+
+                            PdfPCell cell39 = new PdfPCell();
+                            cell39.Border = 0;
+                            cell39.AddElement(new Paragraph(""));
+                            //cell39.PaddingTop = 280.0f;
+                            cell39.PaddingBottom = 2.5f;
+                            table6.AddCell(cell39);
+                            doc1.Add(table6);
+
+                            PdfPTable table7 = new PdfPTable(1);
+                            table7.WidthPercentage = 100f;
+                            PdfPCell cell33 = new PdfPCell();
+                            cell33.AddElement(new Paragraph(new Chunk("Payment Terms: " + data1[i].PaymentTerms + "", font)));
+
+                            cell33.PaddingTop = 2.5f;
+                            cell33.PaddingBottom = 2.5f;
+                            cell33.Border = 0;
+                            table7.AddCell(cell33);
+
+                            PdfPCell signcell = new PdfPCell();
+
+                            signcell.AddElement(new Paragraph(new Chunk("Our general terms of business apply", font)));
+
+                            signcell.PaddingTop = 0f;
+                            signcell.PaddingBottom = 2.5f;
+                            signcell.Border = 0;
+                            table7.AddCell(signcell);
+                            PdfPCell line1 = new PdfPCell();
+
+                            line1.AddElement(new Paragraph(new Chunk("Any general variation have to be notified to us before the goods but not than 7 days on receipt of the goods.", font)));
+
+                            line1.PaddingTop = 6.5f;
+                            line1.PaddingBottom = 2.5f;
+                            line1.Border = 0;
+                            table7.AddCell(line1);
+                            PdfPCell line2 = new PdfPCell();
+
+                            line2.AddElement(new Paragraph(new Chunk("No claims will be accepted after washing/using the goods.", font)));
+
+                            line2.PaddingTop = 6.5f;
+                            line2.PaddingBottom = 2.5f;
+                            line2.Border = 0;
+                            table7.AddCell(line2);
+
+                            doc1.Add(table7);
+
+                            doc1.Close();
+
+                        }
+                    }
+
+                    if (lang == "G")
+                    {
+                        for (int i = 0; i < data1.Count; i++)
+                        {
+
+                            var doc1 = new iTextSharp.text.Document(PageSize.A4, 30, 25, 130, 90);
+                            string subPath = "~/Sales/PDFList/OnetoOneInvoice/" + data1[i].OTOI_Code + "/";
+                            bool exists = System.IO.Directory.Exists(HttpContext.Server.MapPath(subPath));
+                            if (!exists)
+                                System.IO.Directory.CreateDirectory(HttpContext.Server.MapPath(subPath));
+                            var output = new FileStream(Server.MapPath(subPath + data1[i].OTOI_Code + ".pdf"), FileMode.Create);
+                            var writer = PdfWriter.GetInstance(doc1, output);
+                            writer.PageEvent = new pdffooterclass();
+                            //PdfWriter.GetInstance(doc1, new FileStream(Request.PhysicalApplicationPath + "\\Invoice_Statement.pdf", FileMode.Create));
+                            doc1.Open();
+                            path = output.Name;
+                            //font size change from default  added by gv on 12/12/18
+                            FontFactory.RegisterDirectories();
+                            Font font = new Font(FontFactory.GetFont("Arial", 10, Font.NORMAL));
+                            Font fontsmall = new Font(FontFactory.GetFont("Arial", 9, Font.NORMAL));
+                            Font fontsmall1 = new Font(FontFactory.GetFont("Arial", 10, Font.NORMAL | Font.UNDERLINE));
+                            Font Fontbigger = new Font(FontFactory.GetFont("Arial", 20, Font.BOLD));
+                            Font Fontsmaller = new Font(FontFactory.GetFont("Arial", 10, Font.BOLD));
+                            Font Fontsmaller1 = new Font(FontFactory.GetFont("Arial", 12, Font.BOLD));
+
+                            PdfPTable table1 = new PdfPTable(1);
+                            table1.DefaultCell.Border = 0;
+                            table1.WidthPercentage = 100f;
+
+                            PdfPCell Title = new PdfPCell();
+                            Title.Border = 0;
+
+                            Title.AddElement(new Paragraph(new Chunk("Eurotextiles GmbH & Co. KG,Mammolshainer Weg 14,61462 Königstein Ts.", fontsmall1)));
+                            Title.VerticalAlignment = 2;
+                            Title.PaddingTop = 1.0f;
+                            Title.PaddingBottom = 3.0f;
+                            table1.AddCell(Title);
+                            Paragraph pg2 = new Paragraph();
+                            Phrase phraseConstant2 = new Phrase("" + data1[i].OTOI_CompanyName + "\n", font);
+                            Phrase phraseConstant3 = new Phrase("" + data1[i].Street + "\n", font);
+                            Phrase phraseConstant4 = new Phrase("" + data1[i].CityState + "\n", font);
+                            Phrase phraseConstant5 = new Phrase("" + data1[i].CountryZip + "\n", font);
+                            pg2.Add(phraseConstant2);
+                            pg2.Add(phraseConstant3);
+                            pg2.Add(phraseConstant4);
+                            pg2.Add(phraseConstant5);
+                            PdfPCell cell21 = new PdfPCell(pg2);
+                            cell21.HorizontalAlignment = 0;
+                            cell21.PaddingTop = 1.0f;
+                            cell21.PaddingLeft = 1.0f;
+                            cell21.Border = 0;
+                            table1.AddCell(cell21);
+                            doc1.Add(table1);
+
+                            PdfPTable table2 = new PdfPTable(3);
+                            table2.WidthPercentage = 100f;
+                            float[] widthsvalforcus = new float[] { 13f, 4f, 5f };
+                            table2.TotalWidth = 100f;
+                            table2.WidthPercentage = 100f;
+                            table2.SetWidths(widthsvalforcus);
+
+                            Phrase emp1 = new Phrase("", font);
+                            PdfPCell cell26emp = new PdfPCell(emp1);
+                            cell26emp.Border = 0;
+                            cell26emp.HorizontalAlignment = 2;
+                            cell26emp.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26emp);
+                            Phrase cuscode = new Phrase("Kundennummer:", font);
+                            PdfPCell cell26 = new PdfPCell(cuscode);
+                            cell26.Border = 0;
+                            cell26.HorizontalAlignment = 0;
+                            cell26.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26);
+                            Phrase cuscodeval = new Phrase("" + data1[i].CompanyCode + "", font);
+                            PdfPCell cell26val = new PdfPCell(cuscodeval);
+                            cell26val.Border = 0;
+                            cell26val.HorizontalAlignment = 0;
+                            cell26val.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26val);
+
+                            Phrase emp2 = new Phrase("", font);
+                            PdfPCell cell26emp1 = new PdfPCell(emp2);
+                            cell26emp1.Border = 0;
+                            cell26emp1.HorizontalAlignment = 0;
+                            cell26emp1.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26emp1);
+                            Phrase Processby = new Phrase("Verarbeitet Von:", font);
+                            PdfPCell cell26Processby = new PdfPCell(Processby);
+                            cell26Processby.Border = 0;
+                            cell26Processby.HorizontalAlignment = 0;
+                            cell26Processby.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26Processby);
+                            Phrase cuscodeval1 = new Phrase("" + data1[i].OTOI_SalesPerson + "", font);
+                            PdfPCell cell26Processby1 = new PdfPCell(cuscodeval1);
+                            cell26Processby1.Border = 0;
+                            cell26Processby1.HorizontalAlignment = 0;
+                            cell26Processby1.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26Processby1);
+
+                            //Phrase emp2id = new Phrase("", font);
+                            //PdfPCell cell26emp1id = new PdfPCell(emp2id);
+                            //cell26emp1id.Border = 0;
+                            //cell26emp1id.HorizontalAlignment = 0;
+                            //cell26emp1id.PaddingBottom = 2.5f;
+                            //table2.AddCell(cell26emp1id);
+                            //Phrase Processbyid = new Phrase("KD. USt-IdNr.:", font);
+                            //PdfPCell cell26Processbyid = new PdfPCell(Processbyid);
+                            //cell26Processbyid.Border = 0;
+                            //cell26Processbyid.HorizontalAlignment = 0;
+                            //cell26Processbyid.PaddingBottom = 2.5f;
+                            //table2.AddCell(cell26Processbyid);
+                            //Phrase cuscodeval1id = new Phrase("" + data1[i].USTID + "", font);
+                            //PdfPCell cell26Processby1id = new PdfPCell(cuscodeval1id);
+                            //cell26Processby1id.Border = 0;
+                            //cell26Processby1id.HorizontalAlignment = 0;
+                            //cell26Processby1id.PaddingBottom = 2.5f;
+                            //table2.AddCell(cell26Processby1id);
+
+                            Phrase emp3 = new Phrase("", font);
+                            PdfPCell cell26emp2 = new PdfPCell(emp3);
+                            cell26emp2.Border = 0;
+                            cell26emp2.HorizontalAlignment = 2;
+                            cell26emp2.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26emp2);
+                            Phrase Datecell = new Phrase("Datum:", font);
+                            PdfPCell cell26Datecell = new PdfPCell(Datecell);
+                            cell26Datecell.Border = 0;
+                            cell26Datecell.HorizontalAlignment = 0;
+                            cell26Datecell.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26Datecell);
+                            Phrase cuscodeval2 = new Phrase("" + data1[i].OTOI_InvoiceDate.ToString("dd-MM-yyyy") + "", font);
+                            PdfPCell cell26Processby2 = new PdfPCell(cuscodeval2);
+                            cell26Processby2.Border = 0;
+                            cell26Processby2.HorizontalAlignment = 0;
+                            cell26Processby2.PaddingBottom = 2.5f;
+                            table2.AddCell(cell26Processby2);
+
+                            doc1.Add(table2);
+                            PdfPTable contenttable = new PdfPTable(1);
+                            contenttable.TotalWidth = 100f;
+                            contenttable.WidthPercentage = 100f;
+                            Paragraph pp1con = new Paragraph();
+                            Phrase phar1con = new Phrase("Rechnung", Fontsmaller1);
+                            pp1con.Add(phar1con);
+                            PdfPCell cell29Con = new PdfPCell(pp1con);
+                            //cell29Con.AddElement(new Paragraph(new Chunk("" , Fontsmaller)));
+                            cell29Con.PaddingTop = 4.5f;
+                            cell29Con.HorizontalAlignment = 1;
+                            cell29Con.PaddingBottom = 5.5f;
+                            cell29Con.Border = 0;
+                            contenttable.AddCell(cell29Con);
+                            PdfPCell cell29 = new PdfPCell();
+                            cell29.AddElement(new Paragraph(new Chunk("Rechnung Nr:" + data1[i].OTOI_Code + "", Fontsmaller)));
+                            cell29.PaddingTop = 6.5f;
+                            cell29.PaddingBottom = 20.5f;
+                            cell29.Border = 0;
+                            contenttable.AddCell(cell29);
+                            doc1.Add(contenttable);
+                            PdfPTable table4 = new PdfPTable(7);
+                            float[] widths1 = new float[] { 5f, 10f, 10f, 40f, 10f, 10f, 13f };
+                            table4.TotalWidth = 100f;
+                            table4.WidthPercentage = 100f;
+                            table4.HeaderRows = 1;
+                            table4.SetWidths(widths1);
+
+                            Phrase phraseConstantde1 = new Phrase("Pos", Fontsmaller);
+                            PdfPCell cell41 = new PdfPCell(phraseConstantde1);
+
+                            // cell41.AddElement(new Paragraph(new Chunk("Item", Fontsmaller)));
+
+                            cell41.HorizontalAlignment = 1;
+                            cell41.PaddingTop = 2.5f;
+                            cell41.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell41);
+                            Phrase phraseConstantde2 = new Phrase("Menge", Fontsmaller);
+                            PdfPCell cell42 = new PdfPCell(phraseConstantde2);
+                            cell42.Colspan = 2;
+                            //cell42.AddElement(new Paragraph(new Chunk("Qty", Fontsmaller)));
+                            cell42.HorizontalAlignment = 1;
+                            cell42.PaddingTop = 2.5f;
+                            cell42.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell42);
+                            Phrase phraseConstantde3 = new Phrase("Text", Fontsmaller);
+                            PdfPCell cell421 = new PdfPCell(phraseConstantde3);
+                            cell421.HorizontalAlignment = 1;
+                            //cell421.AddElement(new Paragraph(new Chunk("UOM", Fontsmaller)));
+                            cell421.PaddingTop = 2.5f;
+                            cell421.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell421);
+                            Phrase phraseConstantde4 = new Phrase("Einzelpreis EUR", Fontsmaller);
+                            PdfPCell cell431 = new PdfPCell(phraseConstantde4);
+                            cell431.HorizontalAlignment = 1;
+                            // cell431.Colspan = 2;
+                            //cell431.AddElement(new Paragraph(new Chunk("Product Name", Fontsmaller)));
+
+                            cell431.PaddingTop = 2.5f;
+                            cell431.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell431);
+                            Phrase phraseConstantde4d = new Phrase("Discount", Fontsmaller);
+                            PdfPCell cell431d = new PdfPCell(phraseConstantde4d);
+                            cell431d.HorizontalAlignment = 1;
+                            // cell431d.Colspan = 2;
+                            //cell431.AddElement(new Paragraph(new Chunk("Product Name", Fontsmaller)));
+
+                            cell431d.PaddingTop = 2.5f;
+                            cell431d.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell431d);
+                            Phrase phraseConstantde5 = new Phrase("Gesamtpreis EUR", Fontsmaller);
+                            PdfPCell cell43 = new PdfPCell(phraseConstantde5);
+                            cell43.HorizontalAlignment = 1;
+
+                            // cell43.AddElement(new Paragraph(new Chunk("Description", Fontsmaller)));
+
+                            cell43.PaddingTop = 2.5f;
+                            cell43.PaddingBottom = 2.5f;
+
+                            table4.AddCell(cell43);
+                            decimal? total = 0;
+                            for (int j = 0; j < data2.Count; j++)
+                            {
+                                Paragraph Snopp = new Paragraph();
+                                Phrase Snophar = new Phrase("" + (j + 1) + "\n", font);
+                                Snopp.Add(Snophar);
+                                PdfPCell cell51 = new PdfPCell(Snopp);
+                                cell51.HorizontalAlignment = 1;
+                                //cell51.AddElement(new Paragraph(new Chunk("" + (j + 1) + "", font)));
+
+                                // cell51.PaddingTop = 2.5f;
+                                // cell51.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell51);
+                                Paragraph qtypp = new Paragraph();
+                                Phrase qtyphar = new Phrase("" + Convert.ToDecimal(data2[j].SD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", font);
+                                qtypp.Add(qtyphar);
+                                PdfPCell cell52 = new PdfPCell(qtypp);
+                                cell52.HorizontalAlignment = 2;
+                                //  cell52.PaddingTop = 2.5f;
+                                // cell52.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell52);
+                                Paragraph uompp = new Paragraph();
+                                Phrase uomphar = new Phrase("" + data2[j].UOM + "\n", font);
+                                uompp.Add(uomphar);
+                                PdfPCell uomcell = new PdfPCell(uompp);
+
+
+                                uomcell.HorizontalAlignment = 0;
+
+
+                                table4.AddCell(uomcell);
+
+                                Paragraph Productpp = new Paragraph();
+                                Phrase Productphar = new Phrase("" + data2[j].ProductName + "\n", font);
+                                Phrase Productphar1 = new Phrase("" + data2[j].Description + "\n", font);
+
+                                Productpp.Add(Productphar);
+
+                                Productpp.Add(Productphar1);
+                                PdfPCell cell53 = new PdfPCell(Productpp);
+
+                                cell53.HorizontalAlignment = 0;
+                                cell53.PaddingTop = 0f;
+
+
+                                table4.AddCell(cell53);
+
+
+                                Paragraph pp = new Paragraph();
+                                Phrase phar = new Phrase("" + Convert.ToDecimal(data2[j].price).ToString("c2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", font);
+                                pp.Add(phar);
+                                PdfPCell cell541 = new PdfPCell(pp);
+                                //cell541.AddElement(pp);
+                                // cell541.Colspan = 2;
+                                cell541.HorizontalAlignment = 2;
+                                cell541.PaddingTop = 2.5f;
+                                cell541.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell541);
+                                decimal? DisPer = 0;
+                                if (data2[j].Discount == 0)
+                                {
+                                    DisPer = 0;
+                                }
+                                else
+                                {
+                                    DisPer = data2[j].Discount;
+                                }
+                                Paragraph ppd = new Paragraph();
+                                Phrase phard = new Phrase("" + DisPer + "\n", font);
+                                ppd.Add(phard);
+                                PdfPCell cell541d = new PdfPCell(ppd);
+                                //cell541.AddElement(pp);
+                                //cell541.Colspan = 2;
+                                cell541d.HorizontalAlignment = 2;
+                                cell541d.PaddingTop = 2.5f;
+                                cell541d.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell541d);
+                                decimal discountAmt = ((Convert.ToDecimal(data2[j].price) * Convert.ToDecimal(data2[j].SD_Quantity)) * Convert.ToDecimal(DisPer) / 100);
+                                Paragraph pp12 = new Paragraph();
+                                Phrase phar12 = new Phrase("" + ((Convert.ToDecimal(data2[j].price) * Convert.ToDecimal(data2[j].SD_Quantity)) - discountAmt).ToString("c2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", font);
+                                pp12.Add(phar12);
+                                PdfPCell cell54 = new PdfPCell(pp12);
+                                cell54.HorizontalAlignment = 2;
+                                cell54.PaddingTop = 2.5f;
+                                cell54.PaddingBottom = 2.5f;
+
+                                table4.AddCell(cell54);
+                                total = total + ((Convert.ToDecimal(data2[j].price) * Convert.ToDecimal(data2[j].SD_Quantity)) - discountAmt);
+
+
+
+
+                            }
+
+                            PdfPCell NetValCell = new PdfPCell();
+
+                            NetValCell.AddElement(new Paragraph(new Chunk("Gesamt Netto", font)));
+                            NetValCell.Colspan = 6;
+                            NetValCell.PaddingTop = 2.5f;
+                            NetValCell.PaddingBottom = 2.5f;
+
+                            table4.AddCell(NetValCell);
+                            Paragraph pp1 = new Paragraph();
+                            Phrase phar1 = new Phrase("" + Convert.ToDecimal(total).ToString("c2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", font);
+                            pp1.Add(phar1);
+                            PdfPCell NetValCell1 = new PdfPCell(pp1);
+                            NetValCell1.Colspan = 6;
+                            NetValCell1.HorizontalAlignment = 2;
+                            NetValCell1.VerticalAlignment = 2;
+                            NetValCell1.PaddingTop = 2.5f;
+                            NetValCell1.PaddingBottom = 2.5f;
+
+                            table4.AddCell(NetValCell1);
+
+                            if (data1[i].Zipcode == 82)
+                            {
+                                PdfPCell inccell = new PdfPCell();
+
+                                inccell.AddElement(new Paragraph(new Chunk("zzgl." + Convert.ToDecimal(data1[i].VatPer).ToString("0") + " % USt. auf", font)));
+                                inccell.Colspan = 6;
+                                inccell.PaddingTop = 2.5f;
+                                inccell.PaddingBottom = 2.5f;
+
+                                table4.AddCell(inccell);
+                                Paragraph pp1inc = new Paragraph();
+                                Phrase phar1inc = new Phrase("" + (Convert.ToDecimal(total * data1[i].VatPer / 100).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))) + "\n", font);
+                                pp1inc.Add(phar1inc);
+                                PdfPCell inccell1 = new PdfPCell(pp1inc);
+                                inccell1.HorizontalAlignment = 2;
+                                inccell1.VerticalAlignment = 2;
+                                inccell1.PaddingTop = 2.5f;
+                                inccell1.PaddingBottom = 2.5f;
+
+                                table4.AddCell(inccell1);
+                            }
+                            else
+                            {
+
+                                PdfPCell inccell = new PdfPCell();
+                                inccell.AddElement(new Paragraph(new Chunk("zzgl. 0 % USt. auf", font)));
+                                inccell.Colspan = 6;
+                                inccell.PaddingTop = 2.5f;
+                                inccell.PaddingBottom = 2.5f;
+
+                                table4.AddCell(inccell);
+                                Paragraph pp1inc = new Paragraph();
+                                Phrase phar1inc = new Phrase("" + (Convert.ToDecimal(total * 0 / 100).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))) + "\n", font);
+                                pp1inc.Add(phar1inc);
+                                PdfPCell inccell1 = new PdfPCell(pp1inc);
+                                inccell1.HorizontalAlignment = 2;
+                                inccell1.PaddingTop = 2.5f;
+                                inccell1.PaddingBottom = 2.5f;
+
+                                table4.AddCell(inccell1);
+
+                            }
+                            decimal Discountamt = 0;
+
+                            if (data1[i].Zipcode == 82)
+                            {
+
+                                var Vatamount = (Convert.ToDecimal(total + ((total * data1[i].VatPer / 100))));
+                                Vatamount = (total * data1[i].VatPer / 100) ?? 0;
+
+
+                                if (data1[i].Discount != 0)
+                                {
+                                    Discountamt = (Convert.ToDecimal(total * data1[i].Discount / 100));
+                                    PdfPCell AllDiscountcell = new PdfPCell();
+
+                                    AllDiscountcell.AddElement(new Paragraph(new Chunk("Discount", font)));
+                                    AllDiscountcell.Colspan = 6;
+                                    AllDiscountcell.PaddingTop = 2.5f;
+                                    AllDiscountcell.PaddingBottom = 2.5f;
+
+                                    table4.AddCell(AllDiscountcell);
+
+                                    Paragraph pp1discount = new Paragraph();
+                                    Phrase phar1Discount = new Phrase("" + Discountamt.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", Fontsmaller);
+                                    pp1discount.Add(phar1Discount);
+                                    PdfPCell AllDiscountcellde = new PdfPCell(pp1discount);
+                                    AllDiscountcellde.HorizontalAlignment = 2;
+                                    AllDiscountcellde.Colspan = 6;
+                                    AllDiscountcellde.PaddingTop = 2.5f;
+                                    AllDiscountcellde.PaddingBottom = 2.5f;
+                                    AllDiscountcellde.HorizontalAlignment = 2;
+                                    table4.AddCell(AllDiscountcellde);
+                                }
+                                PdfPCell vataddcell = new PdfPCell();
+
+                                vataddcell.AddElement(new Paragraph(new Chunk("Gesamtbetrag", font)));
+                                vataddcell.Colspan = 6;
+                                vataddcell.PaddingTop = 2.5f;
+                                vataddcell.PaddingBottom = 2.5f;
+
+                                table4.AddCell(vataddcell);
+                                Paragraph pp1vat = new Paragraph();
+                                Phrase phar1vat = new Phrase("" + ((Convert.ToDecimal(total + Vatamount - Discountamt)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))) + "\n", Fontsmaller);
+                                pp1vat.Add(phar1vat);
+                                PdfPCell vataddcell1 = new PdfPCell(pp1vat);
+                                vataddcell1.HorizontalAlignment = 2;
+                                vataddcell1.Colspan = 6;
+                                vataddcell1.PaddingTop = 2.5f;
+                                vataddcell1.PaddingBottom = 2.5f;
+
+                                table4.AddCell(vataddcell1);
+
+                            }
+                            else
+                            {
+                                var Vatamount = (Convert.ToDecimal(total + ((total * 0 / 100))));
+                                Vatamount = (total * 0 / 100) ?? 0;
+
+                                if (data1[i].Discount != 0)
+                                {
+                                    Discountamt = (Convert.ToDecimal(total * data1[i].Discount / 100));
+                                    PdfPCell AllDiscountcell = new PdfPCell();
+
+                                    AllDiscountcell.AddElement(new Paragraph(new Chunk("Discount", font)));
+                                    AllDiscountcell.Colspan = 6;
+                                    AllDiscountcell.PaddingTop = 2.5f;
+                                    AllDiscountcell.PaddingBottom = 2.5f;
+
+                                    table4.AddCell(AllDiscountcell);
+                                    Paragraph pp1discount = new Paragraph();
+                                    Phrase phar1Discount = new Phrase("" + Discountamt.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")) + "\n", Fontsmaller);
+                                    pp1discount.Add(phar1Discount);
+                                    PdfPCell AllDiscountcellde = new PdfPCell(pp1discount);
+                                    AllDiscountcellde.Colspan = 6;
+                                    AllDiscountcellde.PaddingTop = 2.5f;
+                                    AllDiscountcellde.PaddingBottom = 2.5f;
+                                    AllDiscountcellde.HorizontalAlignment = 2;
+                                    table4.AddCell(AllDiscountcellde);
+                                }
+                                PdfPCell vataddcell = new PdfPCell();
+
+                                vataddcell.AddElement(new Paragraph(new Chunk("Gesamtbetrag", font)));
+                                vataddcell.Colspan = 6;
+                                vataddcell.PaddingTop = 2.5f;
+                                vataddcell.PaddingBottom = 2.5f;
+
+                                table4.AddCell(vataddcell);
+                                Paragraph pp1vat = new Paragraph();
+                                Phrase phar1vat = new Phrase("" + ((Convert.ToDecimal(total + Vatamount - Discountamt)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))) + "\n", Fontsmaller);
+                                pp1vat.Add(phar1vat);
+                                PdfPCell vataddcell1 = new PdfPCell(pp1vat);
+                                vataddcell1.HorizontalAlignment = 2;
+                                vataddcell1.Colspan = 6;
+                                vataddcell1.PaddingTop = 2.5f;
+                                vataddcell1.PaddingBottom = 2.5f;
+
+                                table4.AddCell(vataddcell1);
+
+                            }
+                            doc1.Add(table4);
+
+                            PdfPTable table6 = new PdfPTable(1);
+                            PdfPCell cell31 = new PdfPCell();
+                            cell31.Border = 0;
+                            cell31.AddElement(new Paragraph(new Chunk("", font)));
+                            cell31.PaddingTop = 20.5f;
+                            cell31.PaddingBottom = 2.5f;
+                            table6.AddCell(cell31);
+
+                            PdfPCell cell39 = new PdfPCell();
+                            cell39.Border = 0;
+                            cell39.AddElement(new Paragraph(""));
+                            //cell39.PaddingTop = 280.0f;
+                            cell39.PaddingBottom = 2.5f;
+                            table6.AddCell(cell39);
+                            doc1.Add(table6);
+
+                            PdfPTable table7 = new PdfPTable(1);
+                            table7.WidthPercentage = 100f;
+
+                            PdfPCell cell33 = new PdfPCell();
+                            cell33.AddElement(new Paragraph(new Chunk("Payment Terms: " + data1[i].PaymentTerms + "", font)));
+
+                            cell33.PaddingTop = 2.5f;
+                            cell33.PaddingBottom = 2.5f;
+                            cell33.Border = 0;
+                            table7.AddCell(cell33);
+                            PdfPCell signcell = new PdfPCell();
+
+                            signcell.AddElement(new Paragraph(new Chunk("Es gelten unsere Allgemeinen Geschäftsbedingungen.", font)));
+
+                            signcell.PaddingTop = 0f;
+                            signcell.PaddingBottom = 2.5f;
+                            signcell.Border = 0;
+                            table7.AddCell(signcell);
+                            PdfPCell line1 = new PdfPCell();
+
+                            line1.AddElement(new Paragraph(new Chunk("Jede allgemeine Abweichung muss uns vor der Ware, nicht aber 7 Tage nach Erhalt der Ware mitgeteilt werden.", font)));
+
+                            line1.PaddingTop = 6.5f;
+                            line1.PaddingBottom = 2.5f;
+                            line1.Border = 0;
+                            table7.AddCell(line1);
+                            PdfPCell line2 = new PdfPCell();
+
+                            line2.AddElement(new Paragraph(new Chunk("Nach dem Waschen / Verwenden der Ware werden keine Reklamationen akzeptiert.", font)));
+
+                            line2.PaddingTop = 6.5f;
+                            line2.PaddingBottom = 2.5f;
+                            line2.Border = 0;
+                            table7.AddCell(line2);
+
+                            doc1.Add(table7);
+
+                            doc1.Close();
+
+                        }
+                    }
+
+                    return Json(data1, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        public class pdffooterclass : PdfPageEventHelper
+        {
+            PdfTemplate headerTemplate, footerTemplate;
+            BaseFont bf = null;
+            PdfContentByte cb;
+            Color FontColour = new Color(35, 31, 32);
+            Font Fontbiggest = new Font(FontFactory.GetFont("Arial", 50, Font.BOLD, new Color(180)));
+            Font Fontbigger = new Font(FontFactory.GetFont("Arial", 20, Font.BOLD));
+            Font Fontsmaller = new Font(FontFactory.GetFont("Arial", 10, Font.BOLD));
+
+           // Image logo = iTextSharp.text.Image.GetInstance("E:/Projects/Indra/Images/euro_logowithText.png");
+            Image logo = iTextSharp.text.Image.GetInstance("C:/Websites/Indra/Images/euro_logowithText.png");
+            public override void OnStartPage(PdfWriter writer, Document document)
+            {
+                base.OnStartPage(writer, document);
+
+                PdfPCell imageCell = new PdfPCell(logo);
+                imageCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                imageCell.Border = 0;
+                PdfPTable table0 = new PdfPTable(1);
+                table0.WidthPercentage = 200f;
+                table0.TotalWidth = 200f;
+                imageCell.PaddingLeft = 109f;
+                float[] widths = new float[] { 200f };
+                table0.SetWidths(widths);
+                table0.AddCell(imageCell);
+
+                table0.WriteSelectedRows(0, -1, 0, (document.PageSize.Height - 10), writer.DirectContent);
+            }
+            public override void OnEndPage(PdfWriter writer, Document document)
+            {
+                Font fontsmall = new Font(FontFactory.GetFont("Arial", 8, Font.NORMAL));
+
+                base.OnEndPage(writer, document);
+
+                PdfPTable tabFot = new PdfPTable(4);
+                tabFot.WidthPercentage = 100f;
+                tabFot.TotalWidth = 100f;
+                //PdfPCell cell;
+                tabFot.TotalWidth = 300F;
+                //PdfPTable table10 = new PdfPTable(4);
+                PdfPCell cell35 = new PdfPCell();
+
+                PdfPCell cell35line = new PdfPCell();
+                float[] widths2 = new float[] { 120f, 130f, 162f, 160f };
+                tabFot.SetTotalWidth(widths2);
+                tabFot.SetWidthPercentage(widths2, PageSize.A4);
+                tabFot.SetWidths(widths2);
+                cell35line.AddElement(new Paragraph(new Chunk("________________________________________________________________________________________________________________", fontsmall)));
+                cell35line.Colspan = 4;
+                cell35line.Border = 0;
+                cell35line.NoWrap = true;
+                tabFot.AddCell(cell35line);
+                cell35.AddElement(new Paragraph(new Chunk("Eurotextiles GmbH & Co. KG", fontsmall)));
+                //cell35.PaddingTop = 7.5f;
+                //cell35.PaddingBottom = 7.5f;
+                cell35.Border = 0;
+                tabFot.AddCell(cell35);
+
+                PdfPCell cell36 = new PdfPCell();
+
+                cell36.AddElement(new Paragraph(new Chunk("HRA 3451", fontsmall)));
+                cell36.PaddingTop = 1.5f;
+                cell36.Border = 0;
+                tabFot.AddCell(cell36);
+
+                PdfPCell cell37 = new PdfPCell();
+
+                cell37.AddElement(new Paragraph(new Chunk("Kompl.Indra Enterprises GmbH", fontsmall)));
+                cell37.PaddingTop = 1.5f;
+                cell37.Border = 0;
+                tabFot.AddCell(cell37);
+
+                PdfPCell cell38 = new PdfPCell();
+
+                cell38.AddElement(new Paragraph(new Chunk("Bankverbindung", fontsmall)));
+                cell38.PaddingTop = 1.5f;
+                cell38.Border = 0;
+                tabFot.AddCell(cell38);
+
+                PdfPCell cell310 = new PdfPCell();
+
+                cell310.AddElement(new Paragraph(new Chunk("Mammolshainer Weg 14", fontsmall)));
+                cell310.PaddingTop = 1.5f;
+                cell310.Border = 0;
+                tabFot.AddCell(cell310);
+
+                PdfPCell cell40 = new PdfPCell();
+
+                cell40.AddElement(new Paragraph(new Chunk("Amtsgericht Königstein", fontsmall)));
+                cell40.PaddingTop = 1.5f;
+                cell40.Border = 0;
+                tabFot.AddCell(cell40);
+
+                PdfPCell cell59 = new PdfPCell();
+
+                cell59.AddElement(new Paragraph(new Chunk("Geschäftsführer:Krishna Javaji", fontsmall)));
+                cell59.PaddingTop = 1.5f;
+                cell59.Border = 0;
+                tabFot.AddCell(cell59);
+
+                PdfPCell cell60 = new PdfPCell();
+
+                cell60.AddElement(new Paragraph(new Chunk("Nassauische Sparkasse", fontsmall)));
+                cell60.PaddingTop = 1.5f;
+                cell60.Border = 0;
+                tabFot.AddCell(cell60);
+
+                PdfPCell cell61 = new PdfPCell();
+
+                cell61.AddElement(new Paragraph(new Chunk("61462 Königstein im Taunus", fontsmall)));
+                cell61.PaddingTop = 1.5f;
+                cell61.Border = 0;
+                tabFot.AddCell(cell61);
+
+
+                PdfPCell cell62 = new PdfPCell();
+
+                cell62.AddElement(new Paragraph(new Chunk("Steuerrnummer 003 315 60117", fontsmall)));
+                cell62.PaddingTop = 1.5f;
+                cell62.Border = 0;
+                tabFot.AddCell(cell62);
+                PdfPCell cell64 = new PdfPCell();
+
+                cell64.AddElement(new Paragraph(new Chunk("HRB 5137 Amtsgericht Königstein", fontsmall)));
+                cell64.PaddingTop = 1.5f;
+                cell64.Border = 0;
+                tabFot.AddCell(cell64);
+
+                PdfPCell cell65 = new PdfPCell();
+
+                cell65.AddElement(new Paragraph(new Chunk("IBAN :DE15 5105 00150 270 0607 06", fontsmall)));
+                cell65.PaddingTop = 1.5f;
+                cell65.Border = 0;
+                tabFot.AddCell(cell65);
+
+                PdfPCell cell66 = new PdfPCell();
+
+                cell66.AddElement(new Paragraph(new Chunk("Fon +49 6174/25980", fontsmall)));
+                cell66.PaddingTop = 1.5f;
+                cell66.PaddingBottom = 5.5f;
+                cell66.Border = 0;
+                tabFot.AddCell(cell66);
+
+                PdfPCell cell67 = new PdfPCell();
+
+                cell67.AddElement(new Paragraph(new Chunk("USt-IdNr.DE279479010", fontsmall)));
+                cell67.PaddingTop = 1.5f;
+                cell67.PaddingBottom = 5.5f;
+                cell67.Border = 0;
+                tabFot.AddCell(cell67);
+
+                PdfPCell cell68 = new PdfPCell();
+
+                cell68.AddElement(new Paragraph(new Chunk("Steuernummer 003 236 16128", fontsmall)));
+                cell68.PaddingTop = 1.5f;
+                cell68.PaddingBottom = 5.5f;
+                cell68.Border = 0;
+                tabFot.AddCell(cell68);
+
+
+                PdfPCell cell71 = new PdfPCell();
+
+                cell71.AddElement(new Paragraph(new Chunk("SWIFT:-BIC NASSDE55XXX", fontsmall)));
+                cell71.PaddingTop = 1.5f;
+                cell71.PaddingBottom = 5.5f;
+                cell71.Border = 0;
+                tabFot.AddCell(cell71);
+                tabFot.WriteSelectedRows(-300, -1, 20, (document.PageSize.Height - 735), writer.DirectContent);
+            }
+            public override void OnCloseDocument(PdfWriter writer, Document document)
+            {
+                base.OnCloseDocument(writer, document);
+
+                //headerTemplate.BeginText();
+                //headerTemplate.SetFontAndSize(bf, 12);
+                //headerTemplate.SetTextMatrix(0, 0);
+                //headerTemplate.ShowText((writer.PageNumber - 1).ToString());
+                //headerTemplate.EndText();
+
+                //footerTemplate.BeginText();
+                //footerTemplate.SetFontAndSize(bf, 12);
+                //footerTemplate.SetTextMatrix(0, 0);
+                //footerTemplate.ShowText((writer.PageNumber - 1).ToString());
+                //footerTemplate.EndText();
+            }
+            public override void OnOpenDocument(PdfWriter writer, Document document)
+            {
+                try
+                {
+                    DateTime PrintTime = DateTime.Now;
+                    bf = BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+                    cb = writer.DirectContent;
+                    headerTemplate = cb.CreateTemplate(100, 100);
+                    footerTemplate = cb.CreateTemplate(50, 50);
+                }
+                catch (DocumentException de)
+                {
+                }
+                catch (System.IO.IOException ioe)
+                {
+                }
+            }
+        }
+        //Restore the Deleted Invoice
+        public ActionResult ET_Sales_Invoice_RestoreDelete(int id, bool type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    Tbl_OneToOneInvoice deleted = dbcontext.Tbl_OneToOneInvoice.Single(m => m.OTOI_ID == id);
+                    deleted.DELETED = type;
+                    deleted.DELETED_BY = id;
+                    deleted.DELETED_DATE = DateTime.Now;
+                    var result = dbcontext.SaveChanges();
+                    var json = "Failed";
+                    if (result != 0)
+                    {
+                        json = "Success";
+                    }
+                    else
+                    {
+                        objLOG.log_dockey = "3010";
+                        objLOG.log_operation = "Restore";
+                        objLOG.log_userid = Session["UserID"].ToString();
+                        objLOG.log_recordkey = id.ToString();
+                        objLOG.log_Remarks = "Record Restored Successfully";
+                        bal.OperationInsertLogs_BL(objLOG);
+                    }
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Get the invoice details for Edit
+        public ActionResult ET_Sales_Invoice_Update_GetbyID(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    //TempData["CompaycontctID"] = id;
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = dbcontext.Tbl_OneToOneInvoice.Single(m => m.OTOI_ID == id);
+                    var data1 = (from x1 in dbcontext.Tbl_OneToOneInvoice
+                                 join x in dbcontext.Tbl_Shipment_Header on x1.OTOI_ShipmentID equals x.S_ID
+                                 
+                                 where x1.OTOI_ID == id 
+                                 select new OneToOneInvoice_CM
+                                 {
+                                     Bl_no=x.S_BL_NO,
+                                     containerNo=x.S_ContainerNo
+                                 });
+                    var result = new { data, data1 };
+                    var json = new JavaScriptSerializer().Serialize(result);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+    }
+}

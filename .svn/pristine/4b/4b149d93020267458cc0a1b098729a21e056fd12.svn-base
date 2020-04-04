@@ -1,0 +1,3532 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Data.Entity;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
+
+    public partial class EntityClasses : DbContext
+    {
+        public EntityClasses()
+            : base("name=Indraone")
+        {
+        }
+
+        public virtual DbSet<ET_TBL_LC_DETAILS> ET_TBL_LC_DETAILS { get; set; }
+        public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
+        public virtual DbSet<Tbl_AccessPermissions> Tbl_AccessPermissions { get; set; }
+        public virtual DbSet<Tbl_Agency_Commission> Tbl_Agency_Commission { get; set; }
+        public virtual DbSet<Tbl_Agency_Details> Tbl_Agency_Details { get; set; }
+        public virtual DbSet<Tbl_AssignmentTask> Tbl_AssignmentTask { get; set; }
+        public virtual DbSet<Tbl_BankMaster> Tbl_BankMaster { get; set; }
+        public virtual DbSet<Tbl_Category_Details> Tbl_Category_Details { get; set; }
+        public virtual DbSet<Tbl_Contracts_Trading> Tbl_Contracts_Trading { get; set; }
+        public virtual DbSet<Tbl_Currency_Master> Tbl_Currency_Master { get; set; }
+        public virtual DbSet<Tbl_DebitNote> Tbl_DebitNote { get; set; }
+        public virtual DbSet<Tbl_Document_Master> Tbl_Document_Master { get; set; }
+        public virtual DbSet<Tbl_DrCr_Transaction> Tbl_DrCr_Transaction { get; set; }
+        public virtual DbSet<Tbl_Form_Master> Tbl_Form_Master { get; set; }
+        public virtual DbSet<Tbl_Invoice_Details> Tbl_Invoice_Details { get; set; }
+        public virtual DbSet<Tbl_Locations_Master> Tbl_Locations_Master { get; set; }
+        public virtual DbSet<Tbl_Master_BankAccount> Tbl_Master_BankAccount { get; set; }
+        public virtual DbSet<Tbl_Master_Category> Tbl_Master_Category { get; set; }
+        public virtual DbSet<Tbl_Master_Comm> Tbl_Master_Comm { get; set; }
+        public virtual DbSet<Tbl_Master_CompanyContacts> Tbl_Master_CompanyContacts { get; set; }
+        public virtual DbSet<Tbl_Master_CompanyDetails> Tbl_Master_CompanyDetails { get; set; }
+        public virtual DbSet<Tbl_Master_Delivery> Tbl_Master_Delivery { get; set; }
+        public virtual DbSet<Tbl_Master_ProductList> Tbl_Master_ProductList { get; set; }
+        public virtual DbSet<Tbl_Master_Products> Tbl_Master_Products { get; set; }
+        public virtual DbSet<Tbl_Master_Role> Tbl_Master_Role { get; set; }
+        public virtual DbSet<Tbl_Master_UOM> Tbl_Master_UOM { get; set; }
+        public virtual DbSet<Tbl_Master_User> Tbl_Master_User { get; set; }
+        public virtual DbSet<Tbl_Material_Master> Tbl_Material_Master { get; set; }
+        public virtual DbSet<Tbl_Offers_Master> Tbl_Offers_Master { get; set; }
+        public virtual DbSet<Tbl_OfflineCommunication> Tbl_OfflineCommunication { get; set; }
+        public virtual DbSet<Tbl_Order_Details> Tbl_Order_Details { get; set; }
+        public virtual DbSet<Tbl_Order_Details_Stores> Tbl_Order_Details_Stores { get; set; }
+        public virtual DbSet<Tbl_Payment_Config> Tbl_Payment_Config { get; set; }
+        public virtual DbSet<Tbl_Payment_Type_Master> Tbl_Payment_Type_Master { get; set; }
+        public virtual DbSet<Tbl_PaymentReceipt> Tbl_PaymentReceipt { get; set; }
+        public virtual DbSet<Tbl_PayRecDetails> Tbl_PayRecDetails { get; set; }
+        public virtual DbSet<Tbl_Product_BathLinen> Tbl_Product_BathLinen { get; set; }
+        public virtual DbSet<Tbl_Product_BedLinen> Tbl_Product_BedLinen { get; set; }
+        public virtual DbSet<Tbl_Product_Fabric> Tbl_Product_Fabric { get; set; }
+        public virtual DbSet<Tbl_Product_Linen> Tbl_Product_Linen { get; set; }
+        public virtual DbSet<Tbl_Product_Yarn> Tbl_Product_Yarn { get; set; }
+        public virtual DbSet<TBL_PURCHES_RETURN> TBL_PURCHES_RETURN { get; set; }
+        public virtual DbSet<TBL_SALCE_RETURN> TBL_SALCE_RETURN { get; set; }
+        public virtual DbSet<Tbl_Sales_Group_Master> Tbl_Sales_Group_Master { get; set; }
+        public virtual DbSet<Tbl_Shipment_DeliverableInfo> Tbl_Shipment_DeliverableInfo { get; set; }
+        public virtual DbSet<Tbl_Shipment_Details> Tbl_Shipment_Details { get; set; }
+        public virtual DbSet<Tbl_Shipment_Schedule> Tbl_Shipment_Schedule { get; set; }
+        public virtual DbSet<Tbl_Stock_Details> Tbl_Stock_Details { get; set; }
+        public virtual DbSet<Tbl_Trading_CO> Tbl_Trading_CO { get; set; }
+        public virtual DbSet<Tbl_Trading_CustInvoice1> Tbl_Trading_CustInvoice1 { get; set; }
+        public virtual DbSet<Tbl_Trading_PO> Tbl_Trading_PO { get; set; }
+        public virtual DbSet<DBName> DBNames { get; set; }
+        public virtual DbSet<ET_LOGIN_D> ET_LOGIN_D { get; set; }
+        public virtual DbSet<ET_Tbl_PO_CO> ET_Tbl_PO_CO { get; set; }
+        public virtual DbSet<ET_Tbl_Stock_Details> ET_Tbl_Stock_Details { get; set; }
+        public virtual DbSet<Tbl_AuditTrail> Tbl_AuditTrail { get; set; }
+        public virtual DbSet<TBL_Calender_Month> TBL_Calender_Month { get; set; }
+        public virtual DbSet<Tbl_DealNo> Tbl_DealNo { get; set; }
+        public virtual DbSet<Tbl_DealNo_History> Tbl_DealNo_History { get; set; }
+        public virtual DbSet<Tbl_Master_Enquiry> Tbl_Master_Enquiry { get; set; }
+        public virtual DbSet<Tbl_Order_Details_Stores_300614> Tbl_Order_Details_Stores_300614 { get; set; }
+        public virtual DbSet<Tbl_Order_Details_Stores_backup> Tbl_Order_Details_Stores_backup { get; set; }
+        public virtual DbSet<Tbl_Order_Details_Stores_BK2> Tbl_Order_Details_Stores_BK2 { get; set; }
+        public virtual DbSet<Tbl_ShipDelivery_Timer> Tbl_ShipDelivery_Timer { get; set; }
+        public virtual DbSet<Stock> Stocks { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.LC_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.CUST_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.CUST_SUPP)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.CURRENCY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.LC_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.LC_BANK_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.LC_BANK_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_TBL_LC_DETAILS>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AccessPermissions>()
+                .Property(e => e.ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AccessPermissions>()
+                .Property(e => e.ROLE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AccessPermissions>()
+                .Property(e => e.FORMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AccessPermissions>()
+                .Property(e => e.FORM_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AccessPermissions>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AccessPermissions>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AccessPermissions>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AccessPermissions>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AccessPermissions>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.COMM_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.SUPPLIER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.INV_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.PAYMENT_REFNO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.BANK_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Commission>()
+                .Property(e => e.DEBIT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.AGENCY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.CUSTOMER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.SUPPLIER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.DEAL_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.PO_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.SC_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.CURRENCY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.PAYMENT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.PAYMENT_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.ADV_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.ADVANCE_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.ADVANCE_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.DISCOUNT_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.DISCOUNT_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.DEL_TERMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.SALES_GROUP)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.SALES_PERSON)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Agency_Details>()
+                .Property(e => e.Cancelled_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.ASSIGN_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.TASK)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.PRIORITY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.ASSIGN_TO)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.STATUS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.ASSIGNED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AssignmentTask>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.BANK_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.BANK_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.DISPLAY_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.STREET)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.CITY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.ZIP)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.COUNTRY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.SWIFT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.BLZ)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.BIC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.IBAN)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.ACCOUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.CONTACT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.CONTACT_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_BankMaster>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Category_Details>()
+                .Property(e => e.CAT_DETAILS_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Category_Details>()
+                .Property(e => e.CATEGORY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Category_Details>()
+                .Property(e => e.SUB_CATEGORY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Category_Details>()
+                .Property(e => e.DESCRIPTION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Category_Details>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Category_Details>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Category_Details>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Category_Details>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Category_Details>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.TRADING_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUPPLIER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.DEAL_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_PONO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_SCNO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_CURRENCY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_PAYMENT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_PAYMENT_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_DEL_ITEMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_ADV_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_ADVANCE_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CUST_ADV_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.DISCOUNT_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.DISCOUNT_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUPPLIER_PONO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUPPLIER_SCNO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUPP_CURRENCY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUP_PAYMENT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUP_PAYMENT_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUP_DELITEMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUPP_ADV_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUPP_ADVANCE_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUP_ADV_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUPP_DISCOUNT_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SUPP_DISCOUNT_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SALES_GROUP)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.SALES_PERSON)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Contracts_Trading>()
+                .Property(e => e.Cancelled_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.CURRENCY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.CURRENCY_CODE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.CURRENCY_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.CONVERSION_FACTOR)
+                .HasPrecision(18, 3);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Currency_Master>()
+                .Property(e => e.C_ID)
+                .IsFixedLength();
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.DEBIT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.DEBIT_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.SUPPLIER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.DEAL_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.CUST_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.SC_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.INV_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.FILE_PATH)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DebitNote>()
+                .Property(e => e.SHIP_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_code)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_key)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_type)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_prefix)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_suffix)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_startno)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_endno)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_compId)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_branchId)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_deptId)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.autogen_ID)
+                .HasPrecision(10, 0);
+
+            modelBuilder.Entity<Tbl_Document_Master>()
+                .Property(e => e.UrlPath)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.REF_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.DRCR)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.ACCOUNT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.CURRENCY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DrCr_Transaction>()
+                .Property(e => e.PARTICULARS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Form_Master>()
+                .Property(e => e.Form_Name)
+                .IsFixedLength();
+
+            modelBuilder.Entity<Tbl_Form_Master>()
+                .Property(e => e.Form_Group)
+                .IsFixedLength();
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.SUB_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.INVOICE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.TRADING_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.SHEDU_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.UOM_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.PRODUCT_DES)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.SELLING_PRICE)
+                .HasPrecision(18, 4);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Invoice_Details>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.Store_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.Store_Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.Display_Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.Store_KeeperName)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.Street)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.City)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.Zip)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.Country)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.ContactNo)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.Machine_Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.IP_Address)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.Created_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Locations_Master>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.BANK_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.COM_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.BANK_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.DISPLAY_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.STREET)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.CITY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.ZIP)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.COUNTRY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.SWIFT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.BLZ)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.BIC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.IBAN)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.ACCOUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.CONTACT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.CONTACT_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_BankAccount>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Category>()
+                .Property(e => e.CAT_CODE)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Category>()
+                .Property(e => e.CAT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Category>()
+                .Property(e => e.CAT_DESCRIPTION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Category>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Category>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Category>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Category>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Category>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.COMM_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.COM_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.COMMUNICATION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.MADE_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.Whom_by)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Comm>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.CONTACT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.COM_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.TITLE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.FIRST_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.LAST_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.JOB_TITLE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.PHONE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.FAX)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.MOBILE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.EMAIL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyContacts>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_DISPLAYNAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_STREET)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_CITY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_ZIP)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_COUNTRY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_EMAIL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_FAX)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_PHONE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_MOBILE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_WEB)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.COM_REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.Company_ID)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.Tax_No)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .HasMany(e => e.Tbl_Agency_Commission)
+                .WithRequired(e => e.Tbl_Master_CompanyDetails)
+                .HasForeignKey(e => e.SUPPLIER_ID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .HasMany(e => e.Tbl_DebitNote)
+                .WithOptional(e => e.Tbl_Master_CompanyDetails)
+                .HasForeignKey(e => e.CUST_ID);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .HasMany(e => e.Tbl_Master_Comm)
+                .WithRequired(e => e.Tbl_Master_CompanyDetails)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .HasMany(e => e.Tbl_Master_CompanyContacts)
+                .WithRequired(e => e.Tbl_Master_CompanyDetails)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .HasMany(e => e.Tbl_Master_Enquiry)
+                .WithRequired(e => e.Tbl_Master_CompanyDetails)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .HasMany(e => e.Tbl_PaymentReceipt)
+                .WithRequired(e => e.Tbl_Master_CompanyDetails)
+                .HasForeignKey(e => e.CUST_ID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .HasMany(e => e.Tbl_Trading_CO)
+                .WithRequired(e => e.Tbl_Master_CompanyDetails)
+                .HasForeignKey(e => e.CUST_ID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Master_CompanyDetails>()
+                .HasMany(e => e.Tbl_Trading_PO)
+                .WithRequired(e => e.Tbl_Master_CompanyDetails)
+                .HasForeignKey(e => e.SUPPLIER_ID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Master_Delivery>()
+                .Property(e => e.DELIVERY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Delivery>()
+                .Property(e => e.DELIVERY_TERMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Delivery>()
+                .Property(e => e.DELIVERY_DESCRIPTION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Delivery>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Delivery>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Delivery>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Delivery>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Delivery>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.P_CODE)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.CAT_CODE)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.P_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.P_DESCRIPTION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_ProductList>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.SHORT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.UOM)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.EAN_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.CATEGORY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.PRODUCT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.PRODUCT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.PRODUCT_CODE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Products>()
+                .Property(e => e.PA_CODE)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Role>()
+                .Property(e => e.ROLE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Role>()
+                .Property(e => e.ROLE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Role>()
+                .Property(e => e.ROLE_DESCRIPTION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Role>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Role>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Role>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Role>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Role>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_UOM>()
+                .Property(e => e.UOM_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_UOM>()
+                .Property(e => e.UOM_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_UOM>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_UOM>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_UOM>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_UOM>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_UOM>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.DISPLAY_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_PASSWORD)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.CONFIRM_PASSWORD)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.ROLE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_STREET)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_CITY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_ZIP)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_COUNTRY)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_EMAIL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_FAX)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_PHONE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_MOBILE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.USER_REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.MAC_ADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .Property(e => e.SALESPERSON)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .HasMany(e => e.Tbl_AssignmentTask)
+                .WithOptional(e => e.Tbl_Master_User)
+                .HasForeignKey(e => e.ASSIGN_TO);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .HasMany(e => e.Tbl_Trading_CO)
+                .WithOptional(e => e.Tbl_Master_User)
+                .HasForeignKey(e => e.SALES_PERSON);
+
+            modelBuilder.Entity<Tbl_Master_User>()
+                .HasMany(e => e.Tbl_Trading_PO)
+                .WithOptional(e => e.Tbl_Master_User)
+                .HasForeignKey(e => e.SALES_PERSON);
+
+            modelBuilder.Entity<Tbl_Material_Master>()
+                .Property(e => e.MATERIAL_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Material_Master>()
+                .Property(e => e.MATERIAL_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Material_Master>()
+                .Property(e => e.MATERIAL_DESCRIPTION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Material_Master>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Material_Master>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Material_Master>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Material_Master>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Material_Master>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.OFFER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.COM_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.CUST_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.OFFER_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.DESCRIPTION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.PLACE_DEST)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.DESTINATION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.CONTACT_PERSON)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.PAYMENT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.SHIPMENT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.VALIDITY_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.CUST_SUPP)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Offers_Master>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.ATTACH_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.COMM_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.CUST_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.SUBJECT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.COMMUNICATION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.MAIL_TO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.MAIL_FROM)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.MAIL_CC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.MAIL_BCC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.FILE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_OfflineCommunication>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.ORDER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.AGEN_TRAD_PO_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.AGEN_TRAD_PO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.CATEGORY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.UOM)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.CURRENCY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.PRICE)
+                .HasPrecision(18, 4);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.PACKING)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.SUPPLIEROFFER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.CUSTOMEROFFER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details>()
+                .Property(e => e.CLOSED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.CO_ORDER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.CO_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.Store_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.UOM)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.SELLING_PRICE)
+                .HasPrecision(18, 4);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.SELLING_TERMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.TRANSPORT_MODE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.CUSTOMEROFFER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.CLOSED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores>()
+                .Property(e => e.AGEN_TRAD_PO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Payment_Config>()
+                .Property(e => e.Payment_Config_Id)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Payment_Config>()
+                .Property(e => e.Payment_Discount_Type)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Payment_Config>()
+                .Property(e => e.Payment_Discount_Percentage)
+                .HasPrecision(18, 3);
+
+            modelBuilder.Entity<Tbl_Payment_Config>()
+                .Property(e => e.Payment_Discount_Amount)
+                .HasPrecision(18, 3);
+
+            modelBuilder.Entity<Tbl_Payment_Config>()
+                .Property(e => e.Machine_Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Payment_Config>()
+                .Property(e => e.IPAddress)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Payment_Config>()
+                .Property(e => e.Created_By)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Payment_Config>()
+                .Property(e => e.Last_Updated_By)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Payment_Config>()
+                .Property(e => e.Deleted_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Payment_Type_Master>()
+                .Property(e => e.PAYMENT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Payment_Type_Master>()
+                .Property(e => e.PAYMENT_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Payment_Type_Master>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Payment_Type_Master>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Payment_Type_Master>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Payment_Type_Master>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Payment_Type_Master>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.PAYMENT_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.PAY_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.CUST_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.CHEQUE_DD)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.REF_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.BANK_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PaymentReceipt>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.PAY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.SHIP_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.PAYMENT_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.INV_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_PayRecDetails>()
+                .Property(e => e.AGEN_TRAD)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.BATHLINEN_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.CATEGORY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.SHORT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.PRODUCT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.MATERIAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.WARP_COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.WEFT_COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.PILE_COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.GSM)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.LENGTH)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.BREADTH)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.SPECIALITIES)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.SUB_RANGE1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.SUB_RANGE2)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.COTTON_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.PRODUCT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BathLinen>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.BEDLINEN_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.CATEGORY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.SHORT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.PRODUCT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.MATERIAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.WARP_COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.WEFT_COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.ENDS_PERINC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.PICKS_PERINC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.GSM)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.LENGTH)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.BREADTH)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.SUB_RANGE1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.SUB_RANGE2)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.COTTON_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.PRODUCT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_BedLinen>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.FABRIC_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.CATEGORY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.SHORT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.PRODUCT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.MATERIAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.WARP_COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.WEFT_COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.ENDS_PERINC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.PICKS_PERINC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.SUB_RANGE1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.SUB_RANGE1_VAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.SUB_RANGE2)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.WEAVE_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.COTTON_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.PRODUCT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.SUB_RANGE3)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Fabric>()
+                .Property(e => e.SUB_RANGE4)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.TABLELINEN_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.CATEGORY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.SHORT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.PRODUCT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.MATERIAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.WARP_COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.WEFT_COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.ENDS_PERINC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.PICKS_PERINC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.GSM)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.LENGTH)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.BREADTH)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.SUB_RANGE1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.SUB_RANGE2)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.COTTON_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.PRODUCT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Linen>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.PRODUCT_YARN_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.CATEGORY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.SHORT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.PRODUCT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.MATERIAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.MATERIAL_VAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.BLEND1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.BLEND1_VAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.BLEND2)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.BLEND2_VAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.BLEND3)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.BLEND3_VAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.BLEND4)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.BLEND4_VAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.COUNT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.COUNT_VAL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.SUB_RANGE1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.SUB_RANGE2)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.SUB_RANGE3)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.SUB_RANGE4)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.SUB_RANGE5)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.PACKAGE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.COTTON_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.PRODUCT_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Product_Yarn>()
+                .Property(e => e.ALterD_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Purches_Code)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Purches_Order_No)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Supplier_Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Supplier_Contract_No)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Invoice_No)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Invoice_Amount)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Total_Return_Quantity)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Total_Return_Amount)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Total_Invoice_Amount)
+                .HasPrecision(18, 3);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Gross_Total)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Machine_Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.IP_Address)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Created_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Last_Updated_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Deleted_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.Schuduld_No)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_PURCHES_RETURN>()
+                .Property(e => e.SalcePerson)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Salce_Code)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Purches_Order_No)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Supplier_Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Supplier_Contract_No)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Invoice_No)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Invoice_Amount)
+                .HasPrecision(18, 3);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Total_Return_Quantity)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Total_Return_Amount)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Total_Invoice_Amount)
+                .HasPrecision(18, 3);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Gross_Total)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Machine_Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.IP_Address)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Created_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Last_Updated_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Deleted_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.Schuduld_No)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_SALCE_RETURN>()
+                .Property(e => e.SalcePerson)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Sales_Group_Master>()
+                .Property(e => e.GROUP_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Sales_Group_Master>()
+                .Property(e => e.SALES_GROUP_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Sales_Group_Master>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Sales_Group_Master>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Sales_Group_Master>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Sales_Group_Master>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Sales_Group_Master>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Sales_Group_Master>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Sales_Group_Master>()
+                .Property(e => e.ALterD_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.DEL_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.AGEN_TRADE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.SHEDU_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.UOM)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_DeliverableInfo>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.SHIP_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.AGEN_TRAD)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.RELATIONAL_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.DEAL_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.SC_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.SHIPPMENT_SCH_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.DEP_PORT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.ARR_PORT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.BL_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.INV_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.GROSS_WT)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.CONT_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.VESSEL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.FLEEDER_VESSEL)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.STORE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Details>()
+                .Property(e => e.LC_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.SHEDU_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.AGEN_TRADE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.AGENCY_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.DEAL_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.SHIPPMENT_SCH_NO)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.TOTAL_QUAN)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.Cancelled_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .Property(e => e.Remarks)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .HasMany(e => e.Tbl_Shipment_DeliverableInfo)
+                .WithRequired(e => e.Tbl_Shipment_Schedule)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Shipment_Schedule>()
+                .HasMany(e => e.Tbl_Shipment_Details)
+                .WithRequired(e => e.Tbl_Shipment_Schedule)
+                .HasForeignKey(e => e.SHIPPMENT_SCH_ID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Stock_Details>()
+                .Property(e => e.STOCK_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Stock_Details>()
+                .Property(e => e.PO_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Stock_Details>()
+                .Property(e => e.STORE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Stock_Details>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Stock_Details>()
+                .Property(e => e.UOM)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.CO_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.CUST_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.DEAL_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.PO_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.SC_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.CURRENCY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.DEL_ITEMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.PAYMENT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.PAYMENT_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.ADV_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.ADVANCE_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.ADV_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.DISCOUNT_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.DISCOUNT_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.SALES_GROUP)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.SALES_PERSON)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CO>()
+                .Property(e => e.Cancelled_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.INVOICE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.INV_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.CUST_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.DESCRIPTION)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.REPORT_DES)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.INV_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .Property(e => e.LC_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_CustInvoice1>()
+                .HasMany(e => e.Tbl_Invoice_Details)
+                .WithRequired(e => e.Tbl_Trading_CustInvoice1)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.PO_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.SUPPLIER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.DEAL_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.PO_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.SC_NO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.CURRENCY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.DEL_ITEMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.PAYMENT)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.PAYMENT_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.ADV_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.ADVANCE_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.ADV_DAYS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.DISCOUNT_TYPE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.DISCOUNT_PERCEN)
+                .HasPrecision(18, 1);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.REMARKS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.SALES_GROUP)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.SALES_PERSON)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Trading_PO>()
+                .Property(e => e.Cancelled_By)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<DBName>()
+                .Property(e => e.ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<DBName>()
+                .Property(e => e.DataBase_Name)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DBName>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DBName>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<DBName>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_LOGIN_D>()
+                .Property(e => e.USER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_LOGIN_D>()
+                .Property(e => e.SYSTEM_IP)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<ET_Tbl_PO_CO>()
+                .Property(e => e.ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_Tbl_PO_CO>()
+                .Property(e => e.CO_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_Tbl_PO_CO>()
+                .Property(e => e.STOCK_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_Tbl_PO_CO>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_Tbl_Stock_Details>()
+                .Property(e => e.STOCK_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_Tbl_Stock_Details>()
+                .Property(e => e.STORE_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<ET_Tbl_Stock_Details>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.AUDITTRAIL_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.RECORD_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.ROW_DESC)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.CHANGE_TYPE)
+                .IsFixedLength()
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.FIELD_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.TABLE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.USER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.OLD_VALUE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.NEW_VALUE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.FORM_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.SCREEN_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_AuditTrail>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<TBL_Calender_Month>()
+                .Property(e => e.MonthId)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<TBL_Calender_Month>()
+                .Property(e => e.Month)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DealNo>()
+                .Property(e => e.DealID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DealNo>()
+                .Property(e => e.Prefix)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DealNo>()
+                .Property(e => e.Suffix)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DealNo>()
+                .Property(e => e.CreatedBy)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DealNo>()
+                .Property(e => e.LastUpdatedBy)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DealNo>()
+                .Property(e => e.Finance_year)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DealNo_History>()
+                .Property(e => e.DealID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DealNo_History>()
+                .Property(e => e.Old_DealID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_DealNo_History>()
+                .Property(e => e.Prefix)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_DealNo_History>()
+                .Property(e => e.Suffix)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.ENQ_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.COM_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.ENQUIRY_STATUS)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.SALES_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.OTHERS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.ENQUIRY_TITLE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.ENQUIRY_DES)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.CONTACT_PERSON)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.COSTING)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Master_Enquiry>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.CO_ORDER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.CO_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.Store_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.UOM)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.SELLING_PRICE)
+                .HasPrecision(18, 4);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.SELLING_TERMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.TRANSPORT_MODE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.CUSTOMEROFFER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.CLOSED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_300614>()
+                .Property(e => e.AGEN_TRAD_PO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.CO_ORDER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.CO_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.Store_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.UOM)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.SELLING_PRICE)
+                .HasPrecision(18, 4);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.SELLING_TERMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.TRANSPORT_MODE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.CUSTOMEROFFER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.CLOSED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_backup>()
+                .Property(e => e.AGEN_TRAD_PO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.CO_ORDER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.CO_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.Store_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.UOM)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.SELLING_PRICE)
+                .HasPrecision(18, 4);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.SELLING_TERMS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.TRANSPORT_MODE)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.MACHINE_NAME)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.IPADDRESS)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.CREATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.LAST_UPDATED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.DELETED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.CUSTOMEROFFER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.CLOSED_BY)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Tbl_Order_Details_Stores_BK2>()
+                .Property(e => e.AGEN_TRAD_PO)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Tbl_ShipDelivery_Timer>()
+                .Property(e => e.USER_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Stock>()
+                .Property(e => e.PRODUCT_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Stock>()
+                .Property(e => e.Store_ID)
+                .HasPrecision(18, 0);
+
+            modelBuilder.Entity<Stock>()
+                .Property(e => e.Display_Name)
+                .IsUnicode(false);
+        }
+    }
+}

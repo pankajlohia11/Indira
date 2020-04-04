@@ -1,0 +1,66 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+using DataAccess.Admin_DA;
+namespace BusinessLogic.Admin_BL
+{
+    public class ET_Admin_SalesOrganization_BL
+    {
+        ET_Admin_SalesOrganization_DL objDA = new ET_Admin_SalesOrganization_DL();
+        public List<Tbl_Sales_Organization> ET_Admin_SalesOrganizationList_BL()
+        {
+            return objDA.ET_Admin_SalesOrganizationList_DL();
+        }
+
+        public List<Tbl_Master_User> Binddropdown_User_BL()
+        {
+            return objDA.Binddropdown_User_DL();
+        }
+
+        public List<Tbl_Master_User> Binddropdown_Employees_BL(int id)
+        {
+            return objDA.Binddropdown_Employees_DL(id);
+        }
+
+        public List<Tbl_Sales_Organization> Binddropdown_ORGParent_BL(int id)
+        {
+            return objDA.Binddropdown_ORGParent_DL(id);
+        }
+
+        public decimal Tbl_Sales_Organization_Add(Tbl_Sales_Organization tbl_Sales_org, bool automanual, string prefix)
+        {
+            return objDA.Tbl_Sales_Organization_Add(tbl_Sales_org, automanual, prefix);
+        }
+
+        public Tbl_Sales_Organization ET_Admin_SalesOrganization_Update_Get(int id)
+        {
+            Tbl_Sales_Organization obj = objDA.ET_Admin_SalesOrganization_Update_Get(id);
+            return obj;
+        }
+
+        public List<Tbl_Sales_Organization> ET_Admin_SalesOrganization_View(int id)
+        {
+            return objDA.ET_Admin_SalesOrganization_View(id);
+        }
+
+        //public int ET_Admin_User_Deleted_BL(int id)
+        //{
+        //    return objDA.ET_Admin_Users_Deleted_DL(id);
+        //}
+
+        //public List<Tbl_Master_User> ET_Admin_User_Restore_BL()
+        //{
+        //    return objDA.ET_Admin_User_Restore_DL();
+        //}
+
+        //public decimal ET_Admin_User_Restore_Insert_BL(int id)
+        //{
+        //    return objDA.ET_Admin_User_Restore_Insert_DL(id);
+
+        //}
+
+    }
+}

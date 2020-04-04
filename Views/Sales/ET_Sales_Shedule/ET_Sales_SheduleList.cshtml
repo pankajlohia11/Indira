@@ -1,0 +1,108 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Company Details.
+    The user can edit or remove and restore  a record in Company Details.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_ScheduleNotificationList.js"></script>
+    
+
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order" ng-controller="AC_ScheduleListCtrl">
+        <div class="pageheader">
+
+            <h2> Schedule<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#"> Schedule</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong> Schedule</strong> List</h1>
+                      
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th >Order Type</th>
+                                    <th>Order No</th>
+                                    <th>Order Date</th>
+                                    <th>Supplier Name</th>
+                                    <th>Customer Schedule Date</th>
+                                    <th>Code</th>
+                                    <th>Sales Person</th>
+                                    <th>Action</th>
+
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="schedule in schedulelist">
+                                    <td>{{schedule.CustomerName}}</td>
+                                    <td ng-if="schedule.SH_Type==1">Agency</td>
+                                    <td ng-if="schedule.SH_Type==2">Trading</td>
+                                    <td ng-if="schedule.SH_Type==3">Store</td>                                   
+                                    <td>{{schedule.SO_Code}}</td>
+                                    <td>{{schedule.SO_Date.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{schedule.SupplierName}}</td>
+                                    <td>{{schedule.SH_DATE.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{schedule.SH_Code}}</td>
+                                    <td>{{schedule.SalesPerson}}</td>
+                                    <td>
+                                        <a class="btn btn-xs btn-default" ng-click="ViewRecords(schedule.SH_Code,schedule.SH_Type);" value="{{ schedule.SH_Code }}" style="color:darkblue;padding:5px;">View Item</a>
+                                    </td>
+
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+                
+            </div>
+        </div>
+    </div>
+</section>

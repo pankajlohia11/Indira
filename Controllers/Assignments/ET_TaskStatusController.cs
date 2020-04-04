@@ -1,0 +1,271 @@
+﻿using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Script.Serialization;
+
+namespace Euro.Controllers.Assignments
+{
+    public class ET_TaskStatusController: Controller
+
+
+    {
+        public static string prefix = "";
+        public static bool automanual = false;
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+        EntityClasses dbcontext = new EntityClasses();
+
+        // GET: Status
+        public ActionResult ET_TaskStatus()
+
+        {
+            {
+                bool val = Session["UserID"] == null ? false : true;
+                if (val)
+                {
+                    try
+                    {
+                        int user_id = Convert.ToInt32(Session["UserID"]);
+                        int com_key = Convert.ToInt32(Session["CompanyKey"]);
+                        ViewBag.Login_Name = Session["DisplayName"].ToString();
+                        ViewBag.Users = dbcontext.Tbl_Master_User.Where(m => m.DELETED == false && m.COM_KEY == com_key).ToList();
+                        return View();
+                    }
+                    catch (Exception exe)
+                    {
+                        string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                        string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                        objERR.err_title = controllerName + "-" + controllerName;
+                        objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                        objERR.err_details = exe.Message.Replace("'", "");
+                        int errid = bal.ExceptionInsertLogs_BL(objERR);
+                        return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                    }
+                }
+                else
+                {
+                    return RedirectToAction("ET_SessionExpire", "ET_Login");
+                }
+            }
+
+
+            //return View();
+
+        }
+
+            public JsonResult CheckIfAdminUser()
+            {
+
+               bool val = Session["UserID"] == null ? false : true;
+               if (val)
+                {
+                    try
+                    {
+                    var privilagelist = bal.CheckIfAdminUser_BL(Convert.ToInt32(Session["UserID"].ToString()) );
+                    //var privilagelist = string.Empty;
+                    var json = new JavaScriptSerializer().Serialize(privilagelist);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    catch (Exception exe)
+                    {
+                        string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                        string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                        objERR.err_title = controllerName + "-" + controllerName;
+                        objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                        objERR.err_details = exe.Message.Replace("'", "");
+                        int errid = bal.ExceptionInsertLogs_BL(objERR);
+                        return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                    }
+                }
+                else
+                {
+                    return Json("Expired", JsonRequestBehavior.AllowGet);
+                }
+            }
+        public ActionResult GetTaskStatus(string status,string Fromdate,string Todate)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int taskStatusCode = 0;
+                    Int32.TryParse(status,out taskStatusCode);
+                    string taskStatusText = "All";
+                    if (taskStatusCode == 0)
+                        taskStatusText = "All";
+                    else if(taskStatusCode == 1)
+                        taskStatusText = "Pending";
+                    else if(taskStatusCode == 2)
+                        taskStatusText = "Completed";
+
+                    DateTime startDate = DateTime.Now;
+                    DateTime enddate = DateTime.Now;
+
+                    string[] statusList = new string[] { "Pending", "Completed" };
+
+                    startDate = DateTime.ParseExact(Fromdate, "dd-MM-yyyy", null);
+                    enddate = DateTime.ParseExact(Todate, "dd-MM-yyyy", null);
+
+                    List <ET_TaskStatus_CM> objTaskStatusModel = new List<ET_TaskStatus_CM>();
+                    var data = (from a in dbcontext.Tbl_AssignTask
+                                where a.Expec_Date >= startDate && a.Expec_Date <= enddate && ((a.TSK_Status == taskStatusText) || (taskStatusCode == 0 && statusList.Contains(a.TSK_Status)))
+                                select new ET_TaskStatus_CM
+                                {
+                                    //a.TSK_ID,
+                                    TSK_Title = a.TSK_Title,
+                                    TSK_Description = a.TSK_Desc,
+                                    TSK_Priority = a.TSK_Priority.Value,
+                                    TSK_Status = a.TSK_Status,
+                                    TSK_Expected_Date = a.Expec_Date.Value == null ? DateTime.Now : a.Expec_Date.Value,
+                                    TSK_Compl_Date = a.TSK_Compl_Date.Value == null ? DateTime.Now : a.TSK_Compl_Date.Value,
+                                    TSK_Assignto = String.IsNullOrEmpty(a.TSK_AssignTo) ? String.Empty : a.TSK_AssignTo,
+                                }).ToList();
+
+                    //var assignto = data.Select(a => a.TSK_AssignTo);
+
+                    //foreach(string assigned in assignto)
+                    //{
+                    //    string[] assignedMembers = assigned.Split(',');
+                    //    foreach(string member in assignedMembers)
+                    //    {
+                    //        decimal currentemployee = Convert.ToDecimal(member);
+
+                    //var currentMasterUser = dbcontext.Tbl_Master_User.Where(user => user.USER_ID == currentemployee).SingleOrDefault();
+                    //string displayname = currentMasterUser.DISPLAY_NAME;
+                    //    }
+                    //    //currentMasterUser.DISPLAY_NAME;
+                    //}
+                    //ET_TaskStatus_CM item = new ET_TaskStatus_CM();
+
+
+                    //objTaskStatusModel.Add(item);
+                    //ET_TaskStatus_Collection_CM taskModel = new ET_TaskStatus_Collection_CM();
+
+                    //taskModel.Headerobj = objTaskStatusModel;
+                    //var data = string.Empty;
+                    List<ET_TaskStatus_CM> modelItems = (List<ET_TaskStatus_CM>)data.Select((taskItem, index) => new ET_TaskStatus_CM() { SO_Serial = index + 1, TSK_Title = taskItem.TSK_Title,TSK_Description = taskItem.TSK_Description,TSK_Priority = taskItem.TSK_Priority,TSK_Expected_Date = taskItem.TSK_Expected_Date,TSK_Compl_Date=taskItem.TSK_Expected_Date,TSK_Status=taskItem.TSK_Status,TSK_Assignto = taskItem.TSK_Assignto}).OrderBy(m=>m.SO_Serial).ToList();
+                    var json = new JavaScriptSerializer().Serialize(modelItems);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public ActionResult ET_submit(string status, string Fromdate, string Todate)
+        {
+            try
+            {
+                int taskStatusCode = 0;
+                Int32.TryParse(status, out taskStatusCode);
+                string taskStatusText = "";
+                if (taskStatusCode == 0)
+                    taskStatusText = "All";
+                else if (taskStatusCode == 1)
+                    taskStatusText = "Pending";
+                else if (taskStatusCode == 2)
+                    taskStatusText = "Completed";
+
+                DateTime startDate = DateTime.Now;
+                DateTime enddate = DateTime.Now;
+
+                string[] statusList = new string[] { "Pending", "Completed" };
+
+                startDate = DateTime.ParseExact(Fromdate, "dd-MM-yyyy", null);
+                enddate = DateTime.ParseExact(Todate, "dd-MM-yyyy", null);
+
+                //List<ET_TaskStatus_CM> objTaskStatusModel = new List<ET_TaskStatus_CM>();
+                /*var data = (from a in dbcontext.Tbl_AssignTask
+                            where a.Expec_Date >= startDate && a.Expec_Date <= enddate && ((a.TSK_Status == taskStatusText) || (taskStatusCode == 0 && statusList.Contains(a.TSK_Status)))
+                            select new
+                            {
+                                //a.TSK_ID,
+                                a.TSK_Title,
+                                a.TSK_Desc,
+                                a.TSK_Priority,
+                                a.TSK_Status,
+                                a.Expec_Date,
+                                a.TSK_Compl_Date,
+                                a.TSK_AssignTo,
+
+                            }).ToList();*/
+                var data = string.Empty;
+                var json = new JavaScriptSerializer().Serialize(data);
+                return Json(json, JsonRequestBehavior.AllowGet);
+
+
+            }
+            catch (Exception exe)
+            {
+                string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                objERR.err_title = controllerName + "-" + controllerName;
+                objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                objERR.err_details = exe.Message.Replace("'", "");
+                int errid = bal.ExceptionInsertLogs_BL(objERR);
+                return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+            }
+            
+        }
+        public  ActionResult  GetTaskAssingedUserName (int currentemployee)
+        {
+            try
+            {
+                //decimal userid =Convert.ToDecimal
+
+                //int userId = Convert.ToInt32(Session["UserID"].ToString());
+                var currentMasterUser = dbcontext.Tbl_Master_User.Where(user => user.USER_ID == currentemployee).SingleOrDefault();
+                string displayname = string.Empty;
+                if (currentMasterUser != null)
+                {
+                    displayname = currentMasterUser.DISPLAY_NAME;
+                }
+                var json = new JavaScriptSerializer().Serialize(displayname);
+                return Json(json, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception exe)
+            {
+                string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                objERR.err_title = controllerName + "-" + controllerName;
+                objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                objERR.err_details = exe.Message.Replace("'", "");
+                int errid = bal.ExceptionInsertLogs_BL(objERR);
+                return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+            }
+
+
+        }
+
+                }
+
+    }
+                                 
+                            
+
+    
+

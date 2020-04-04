@@ -1,0 +1,201 @@
+﻿@model BusinessEntity.CustomModels.Paclistdetails_View_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <input id="englishformat" style="display:none;" value="@Model.QHeader[0].PL_ID" />
+    <table style="width:100%" align="center">
+        <tr>
+            <td style="width:30%;"></td>
+            <td style="width:40%;text-align:center;">
+                <img src="@Model.QHeader[0].imgurl">
+                @*<h1 style="font-size:large"><label><strong>@Model.QHeader[0].SystemCompany</strong></label></h1>*@
+            </td>
+            <td style="width:30%;"></td>
+        </tr>
+    </table>
+    <br />
+    <h2 style="text-align:center;font-size:large;font-weight:bold;"><u>Packing List</u></h2>
+    <br />
+    <table style="font-size:14px;width:100%;">
+        <tr>
+            <td width="50%"><span><strong>@Model.QHeader[0].CompanyName</strong></span></td>
+            <td width="30%" />
+            <td width="10%" style="text-align:left">Shipment Id:</td>
+            <td width="10%" style="text-align:right"><strong>@Model.QHeader[0].OTOI_ShipmentID</strong></td>
+        </tr>
+        <tr>
+            <td width="50%"><span><label>@Model.QHeader[0].Street,</label></span></td>
+            <td width="30%" />
+            <td width="10%" style="text-align:left">Container No:</td>
+            <td width="10%" style="text-align:right"><strong>@Model.QHeader[0].OTOI_ContainerNo</strong></td>
+        </tr>
+        <tr>
+            <td width="50%"><span><label>@Model.QHeader[0].CityState,</label></span></td>
+            <td width="30%" />
+            <td width="10%" style="text-align:left">Customer Id:<strong></strong></td>
+            <td width="10%" style="text-align:right"><strong>@Model.QHeader[0].PL_CustomerID</strong></td>
+        </tr>
+        <tr>
+            <td width="50%"><span><label>@Model.QHeader[0].CountryZip.</label></span></td>
+            <td width="30%" />
+            <td width="10%" style="text-align:left">Customer Name:<strong></strong></td>
+            <td width="10%" style="text-align:right"><strong>@Model.QHeader[0].CustomerName</strong></td>
+        </tr>
+        <tr>
+            <td width="50%"></td>
+            <td width="30%"></td>
+            <td width="10%" style="text-align:left">Order No:<strong></strong></td>
+            <td width="10%" style="text-align:right"><strong>@Model.QHeader[0].Orders</strong></td>
+        </tr>
+    </table> <br /><br />
+
+    @*<table style="width:100%;" class='generaltable'>
+        <tr>
+            <td width="50%"></td>
+            <td width="30%"></td>
+            <td width="10%" style="text-align:left">Customer Id:<strong></strong></td>
+            <td width="10%" style="text-align:right"><strong>@Model.QHeader[0].PL_CustomerID</strong></td>
+        </tr>
+        <tr>
+            <td width="50%"></td>
+            <td width="30%"></td>
+            <td width="10%" style="text-align:left">Customer Name:<strong></strong></td>
+            <td width="10%" style="text-align:right"><strong>@Model.QHeader[0].CustomerName</strong></td>
+        </tr>
+        <tr>
+            <td width="50%"></td>
+            <td width="30%"></td>
+            <td width="10%" style="text-align:left">Order No:<strong></strong></td>
+            <td width="10%" style="text-align:right"><strong>@Model.QHeader[0].Orders</strong></td>
+        </tr>
+    </table>*@
+    <br /><br />
+    @if (Model.QHeader[0].PL_Type == 1)
+    {
+        <table border="1" style="width:100%">
+            <thead>
+                <tr>
+                    <th style="width:10%;"><strong>S.No</strong></th>
+                    <th style="width:30%;text-align:center"><strong>Product Name:</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Pallet No</strong></th>
+                    <th style="width:10%;text-align:center"><strong>No. of Cones</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Lot No.</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Nwt.in Kgs</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Gwt.in Kgs</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Remarks</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var i = 1;}
+                @foreach (var item1 in Model.QChild)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item1.ProductName</td>
+                        <td style="text-align:center">@item1.PD_PalletNo</td>
+                        <td style="text-align:center">@item1.PD_ConesNr</td>
+                        <td style="text-align:center">@item1.PD_LotNr</td>
+                        <td style="text-align:center">@item1.PD_NwtinKGS</td>
+                        <td style="text-align:center">@item1.PD_GwtinKGS</td>
+                        <td style="text-align:center">@item1.PL_Remarks</td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    }
+    else if (Model.QHeader[0].PL_Type == 2)
+    {
+        <table border="1" style="width:100%">
+            <thead>
+                <tr>
+                    <th style="width: 5%;"><strong>S.No</strong></th>
+                    <th style="width:30%;text-align:center"><strong>Product Name</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Pallet No</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Design No</strong></th>
+                    <th style="width:5%;text-align:center"><strong>No of Pieces</strong></th>
+                    <th style="width:5%;text-align:center"><strong>Total Meters</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Nwt.in Kgs</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Gwt.in Kgs</strong></th>
+                    <th style="text-align:center; width:5%"><strong>Individual piece lengths</strong></th>
+                    <th style="width:10%;"><strong>Remarks</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var i = 1;}
+                @foreach (var item1 in Model.QChild)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item1.ProductName</td>
+                        <td style="text-align:center">@item1.PD_PalletNo</td>
+                        <td style="text-align:center">@item1.PD_DesignNo</td>
+                        <td style="text-align:center">@item1.PD_NoOfPieces</td>
+                        <td style="text-align:center">@item1.PD_TotalMeters</td>
+                        <td style="text-align:center">@item1.PD_NwtinKGS</td>
+                        <td style="text-align:center">@item1.PD_GwtinKGS</td>
+                        <td style="text-align:center">@item1.PD_IndividualPieceLength</td>
+                        <td style="text-align:center">@item1.PL_Remarks</td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <table border="1" style="width:100%">
+            <thead>
+                <tr>
+                    <th style="width:5%;"><strong>S.No</strong></th>
+                    <th style="width:30%;text-align:center"><strong>Product Name:</strong></th>
+                    <th style="width:10%;text-align:center"><strong>No.of Pieces</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Packing Units</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Nwt.in Kgs</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Gwt.in Kgs</strong></th>
+                    <th style="width:10%;text-align:center"><strong>Remarks</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var i = 1;}
+                @foreach (var item1 in Model.QChild)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item1.ProductName</td>
+                        <td style="text-align:center">@item1.PD_NoOfPieces</td>
+                        <td style="text-align:center">@item1.PD_PackingUnits</td>
+                        <td style="text-align:center">@item1.PD_NwtinKGS</td>
+                        <td style="text-align:center">@item1.PD_GwtinKGS</td>
+                        <td style="text-align:center">@item1.PL_Remarks</td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    }
+    <br />
+    <br />
+    <br />
+    <table style="font-size:12px;">
+        <tr>
+            <td><span><label>Our general terms of business apply</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>Any general variation have to be notified to us before the goods but not than 7 days on receipt of the goods.</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>No claims will be accepted after washing/using the goods.</label></span></td>
+        </tr>
+    </table>
+    <br />
+    <p> <hr style="font-weight:bold;border-top:1px solid black;"></p>
+    <table style="font-size:10px;width:100%;">
+        <tr>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Eurotextiles GmbH & Co.KG<br />Mammolshainer Weg 14<br />61462 Konigstein im Taunus<br />Fon +49 6174/25980<br />HRA 3451</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">HRA 3451<br />Amtsgericht Kongstein<br />Steuerrnummer 003 315 60117<br />USt-IdNr. DE279479010</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Kompl. Indra Enterprises GmbH<br />Geshafuher:Krishna Javaji<br />HRB 5137 Amtsgericht Konigstein<br />Steuernummer 003 236 16128</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Bankverbindung<br />Nassauische Sparkasse<br />IBAN :DE15 5105 0015 0270 0607 06<br />SWIFT:-BIC NASSDE55XXX</td>
+
+
+        </tr>
+    </table>
+</div>

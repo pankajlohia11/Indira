@@ -1,0 +1,90 @@
+﻿
+@{
+    ViewBag.Title = "ET_Sales_DespatchList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_DespatchNotificationList.js"></script>
+}
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order">
+        <div class="pageheader">
+
+            <h2>Shipment<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Shipment</a>
+                        <a style="display:none;" id="PAthid" target="_blank">click to download</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" id="mainDiv" ng-controller="AC_DespatchListCtrl">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Shipment</strong> List</h1>
+
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Shipment Date</th>
+                                    <th>Code</th>
+
+                                    <th>Customer Name</th>
+                                    <th>Sales Person</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="despatch in despatchlist">
+                                    <td>{{despatch.D_DespatchDate.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{despatch.D_Code}}</td>
+
+                                    <td>{{despatch.D_CustomerName}}</td>
+                                    <td>{{despatch.D_SalesPersonName }}</td>
+                                    <td>
+                                        <a class="btn btn-xs btn-default" ng-click="ViewRecords(despatch.D_ID);" value="{{ despatch.D_ID }}" style="color:darkblue;padding:5px;">View Item</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+

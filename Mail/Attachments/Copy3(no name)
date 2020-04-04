@@ -1,0 +1,11 @@
+Reporting-MTA: dns;AM0PR08MB4146.eurprd08.prod.outlook.com
+Received-From-MTA: dns;AM0PR08MB3729.eurprd08.prod.outlook.com
+Arrival-Date: Fri, 26 Apr 2019 07:37:26 +0000
+
+Final-Recipient: rfc822;Albert.Maier@baywa-baumarkt.de
+Action: failed
+Status: 5.2.0
+Diagnostic-Code: smtp;550 5.2.0 mailbox unavailable.
+Remote-MTA: dns;mailin08.rmx.de
+X-Display-Name: Albert.Maier@baywa-baumarkt.de
+

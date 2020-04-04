@@ -1,0 +1,119 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BusinessEntity.CustomModels
+{
+    public class Tbl_Order_Details_CM
+    {
+        public decimal SO_ID { get; set; }
+
+        [StringLength(50)]
+        public string SO_Code { get; set; }
+
+        [Column(TypeName = "date")]
+        public DateTime SO_OrderDate { get; set; }
+
+        public decimal SO_SalesPersonID { get; set; }
+
+        public decimal? SO_ORGID { get; set; }
+
+        public int SO_OrderType { get; set; }
+
+        public decimal? SO_CutomerID { get; set; }
+
+        public decimal? SO_SupplierID { get; set; }
+
+        [StringLength(50)]
+        public string SO_CusPONO { get; set; }
+
+        public DateTime? SO_CusPODate { get; set; }
+
+        [StringLength(50)]
+        public string SO_CusSCNO { get; set; }
+
+        public DateTime? SO_CusSCDate { get; set; }
+        
+
+        [StringLength(50)]
+        public string SO_SupSCNO { get; set; }
+
+        public DateTime? SO_SupSCDate { get; set; }
+
+        public decimal? SO_CusCurrency { get; set; }
+        public string SO_CusCurrencyname { get; set; }
+        public decimal? SO_SupCurrency { get; set; }
+        public string SO_SupCurrencyname { get; set; }
+
+        public decimal? SO_CusPaymentTermID { get; set; }
+        
+
+        public string SO_CusDeliveryTerms { get; set; }
+        
+
+        public decimal? SO_Commision { get; set; }
+
+        public int SO_Approval { get; set; }
+
+        public string SO_Remarks { get; set; }        
+
+        public decimal COM_KEY { get; set; }
+
+        public decimal ORDER_ID { get; set; }
+
+        public decimal AGEN_TRAD_PO_ID { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string AGEN_TRAD_PO { get; set; }
+
+        public decimal CATEGORY_ID { get; set; }
+
+        public decimal PRODUCT_ID { get; set; }
+        public string PRODUCT_Name { get; set; }
+
+        public decimal? QUANTITY { get; set; }
+
+        public decimal? PENDING_QUANTITY { get; set; }
+
+        public decimal? SHIP_ISSUED_QUANTITY { get; set; }
+
+        public decimal? RETURN_QUANTITY { get; set; }
+
+        [Column(TypeName = "numeric")]
+        public decimal? Close_Quantity { get; set; }
+
+        public decimal? UOM { get; set; }
+
+        public decimal? CURRENCY_ID { get; set; }
+
+        public decimal? PRICE { get; set; }
+
+        public decimal? Selling_Price { get; set; }
+
+        [StringLength(50)]
+        public string PACKING { get; set; }
+        public decimal? SUPPLIEROFFER_ID { get; set; }
+        public string SUPPLIEROFFER_Code { get; set; }
+        public bool? IS_SUPPLIEROFFER { get; set; }
+        public decimal? CUSTOMEROFFER_ID { get; set; }
+        public bool? IS_CUSTOMEROFFER { get; set; }
+        public string UOM_NAME { get; set; }
+        public string USER_NAME { get; set; }
+        public string CAT_NAME { get; set; }
+        public string SHORT_NAME { get; set; }
+        public string CURRENCY_NAME { get; set; }
+        public string ArticleNo { get; set; }
+        public string CUSTOMER_NAME { get; set; }
+        public string SUPPLIER_NAME { get; set; }
+        public decimal Discount { get; set; }
+        public string OrderDescription { get; set; }
+        public string P_PackingQuantityUOM { get; set; }
+        public string CustomerName { get; set; }
+        public decimal Quotation { get; set; }
+    }
+}

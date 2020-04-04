@@ -1,0 +1,121 @@
+﻿@model BusinessEntity.EntityModels.ET_TBL_LC_DETAILS
+
+@{ 
+    BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+
+    var Currency = dbc.Tbl_Currency_Master.Single(m => m.CURRENCY_ID == Model.CURRENCY_ID).CURRENCY_CODE;
+
+    var day = (Model.LC_EXPIRYDATE - Model.LC_DATE).TotalDays;
+
+}
+
+<div class="col-md-12">
+    <div class="row">
+        <div class="form-group col-md-6 col-md-offset-2">
+            @if (Model.CUST_SUPP == "0")
+            {
+            <div class="form-group col-md-3 col-md-offset-5">
+                <input type="radio" name="chkCustomerLC" checked id="chkCustomerLC" disabled />Customer LC
+            </div>
+            }
+            else
+            {
+            <div class="form-group col-md-3">
+                <input type="radio" name="chkCustomerLC" checked disabled />Euro Texttiles LC
+            </div>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="lblLC">LC Code:</label>
+            <input type="text" name="txtLCCode" class="form-control" id="txtLCCode" disabled />
+            <input type="text" name="txtLCID" class="form-control hidden" id="txtLCID" />
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblLC">LC NO.:</label>
+            <input type="text" name="txtLCNo" class="form-control" value="@Model.LC_NO" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label for="lblLCDate">LC Date</label>
+
+            <div class='input-group datepicker w-360' width="100%">
+                <input type='text' class="form-control" value="@Model.LC_DATE" disabled />
+                <span class="input-group-addon">
+                    <span class="fa fa-calendar" required></span>
+                </span>
+            </div>
+
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblBankName">Customer Name</label>
+            <input type="text" name="txtAmount" class="form-control" value="@Model.CUST_ID" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label for="lblBankName">Bank Name</label>
+            <input type="text" name="txtAmount" class="form-control" value="@Model.LC_BANK_NAME" disabled />
+        </div>
+    </div>
+
+
+    <div class="row">
+
+        <div class="form-group col-md-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <label for="lblLCPeriod">LC Period:</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="text" name="txtLCPeriod" class="form-control" value="@day" id="txtLCPeriod" disabled />
+                </div>
+                <div class="col-md-1">
+                    Days
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group col-md-4 col-md-offset-2">
+            <div class="row">
+                <div class="col-md-8">
+                    <label for="lblExpiryDate">Expiry Date:</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    @*<label for="lblExpiry"></label>*@
+                    <input type="text" name="Expirydate" disabled class="form-control" value="@Model.LC_EXPIRYDATE" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblCurrency">Currency:</label>
+            <input type="text" name="txtAmount" class="form-control" value="@Currency" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label for="lblAmount">Amount</label>
+            <input type="text" name="txtAmount" class="form-control" value="@Model.LC_AMOUNT" disabled />
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblBalAmount">Bal.Amount:</label>
+            @*<label for="lblBalAmt"></label>*@
+            <input type="text" name="txtBalAmount" disabled class="form-control" value="@Model.LC_BAL_AMT" />
+        </div>
+    </div>
+
+</div>

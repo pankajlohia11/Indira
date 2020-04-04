@@ -1,0 +1,328 @@
+﻿<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="assets/js/vendor/jquery/jquery-1.11.2.min.js"><\/script>')</script>
+<script src="assets/js/vendor/bootstrap/bootstrap.min.js"></script>
+<script src="assets/js/vendor/daterangepicker/moment.min.js"></script>
+<script src="assets/js/vendor/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="assets/js/vendor/chosen/chosen.jquery.min.js"></script>
+
+@{
+    /**/
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+
+    This Form is used to create a Commissions Details.
+    The user can edit or remove and restore  a record in Commissions.Here the used can able to see list of Received Commissions and List of Commissions and  capture commissions Details also etc.
+    Author=jesmi
+    Created Date=4th April 2018
+    ET_Agency_Commissions view
+    Operations[Add,Edit,Restore]
+-->
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide display page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying view page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+    }
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Commissions <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Commissions</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <!-- In this section user can able to see Commissions Details-->
+                <section class="tile" id="div_View">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Commissions</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Invoice No.</th>
+                                    <th>Debit No.</th>
+                                    <th>Comm.Amount</th>
+                                    <th>Comm. Received</th>
+                                    <th>Received Date</th>
+                                    <th>Bank Name</th>
+                                    <th>Payment Ref No.</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!-- In this section user can have an option to create or edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong>Commissions</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- this is link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <form name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblSupplierName">Supplier Name</label>
+                                    <select tabindex="3" class="chosen-select" style="width:100%" required>
+                                        <option value="AK">ravi</option>
+                                        <option value="HI">Hawaii</option>
+                                    </select>
+
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblInvoiceNo">Invoice No</label>
+                                    <input type="text" name="txtInvoiceNo1" class="form-control"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits"
+                                           disabled="disabled">
+
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblcommamt">Comm. Amount:</label>
+                                    <input type="text" name="txtCommamt" class="form-control"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits"
+                                           disabled="disabled">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblbalamt">Comm.Bal.Amount:</label>
+
+                                    <input type="text" name="txtBalanceamt" class="form-control"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits"
+                                           disabled="disabled">
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblreceived">Comm.Received</label>
+                                    <input type="text" name="txtcommReceived" class="form-control" placeholder="Comm.Received<"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits"
+                                           required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblReceivedDate">Received Date</label>
+
+                                    <div class='input-group datepicker w-360' style="width:100%">
+                                        <input type='text' class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar" required></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblBankNm">Bank Name</label>
+                                    <select tabindex="3" class="chosen-select" style="width:100%" required>
+                                        <option value="AK">Alaska</option>
+                                        <option value="HI">Hawaii</option>
+                                    </select>
+
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblPaymentRef">Payment Ref.No</label>
+                                    <textarea name="txtPayment" rows="3" cols="80" class="form-control" placeholder="Payment Ref.No" data-parsley-trigger="change"
+                                              data-parsley-type="alphanum"></textarea>
+                                </div>
+                            </div>
+                            <div class="tile-body">
+                                <div class="table-responsive">
+                                    <!-- This table is used for displaying data in the form of grid in the create/edit page-->
+                                    List of Received Commissions
+                                    <div class="tile-body">
+                                        <table class="table table-custom dt-responsive" id="responsive-usage" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>Invoice No</th>
+                                                    <th>Debit No</th>
+                                                    <th>Comm.Amount</th>
+                                                    <th class="none">Comm.Received</th>
+                                                    <th class="none">Received Date</th>
+                                                    <th class="none">Bank Name</th>
+                                                    <th class="none">Payment Ref No.</th>
+
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                    List of Commissions
+                                    <!-- This table is used for displaying List of Commissions in the form of grid-->
+                                    <div class="tile-body">
+                                        <table class="table table-custom dt-responsive" id="responsive-usage" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>Customer</th>
+                                                    <th>SC No</th>
+                                                    <th>Invoice No</th>
+                                                    <th class="none">Invoice Date</th>
+                                                    <th class="none">Debit No.</th>
+                                                    <th class="none">Invoice Amount</th>
+                                                    <th class="none">Comm(%)</th>
+                                                    <th class="none">Comm.Amount</th>
+                                                    <th class="none">Balance.Amount</th>
+
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled id="formSubmit">Submit</button>
+
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!-- In this section user can have an option to delete or restore records-->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Commissions</strong></h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Invoice No.</th>
+                                    <th>Debit No.</th>
+                                    <th>Comm.Amount</th>
+                                    <th>Comm. Received</th>
+                                    <th>Received Date</th>
+                                    <th>Bank Name</th>
+                                    <th>Payment Ref No.</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

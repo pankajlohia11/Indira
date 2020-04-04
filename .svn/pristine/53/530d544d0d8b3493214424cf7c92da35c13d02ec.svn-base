@@ -1,0 +1,50 @@
+﻿app1.controller("AC_OrderdetailsCtrl", function ($scope, $http, $window, $compile) {
+
+    $scope.showRecords = function () {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+
+    // Restore div in General Offer
+    $scope.restoreRecords = function () {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+
+    // Create new record in General Offer
+    $scope.createnew = function () {
+        //if ($scope.Iscreate) {
+            $("#hdncustomer").addClass("hidden");
+            $("#drpCurrency").val("0").trigger("chosen:updated");
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+           
+        //}
+        //else {
+        //    message = "You don't access to do this operation, please contact admin.";
+        //    toastr["error"](message, "Notification");
+        //}
+    }
+
+    $scope.changeOrdertyper = function ()
+    {
+        setTimeout(function () { $("#drpOrdertype").val($scope.Oredertype).trigger("chosen:updated"); }, 100);
+        debugger;
+        if ($scope.Oredertype == "1") {
+            $("#divAgency").removeClass("hidden");
+            $("#divPO").addClass("hidden");
+        }
+        else if ($scope.Oredertype == "2") {
+            $("#divAgency").addClass("hidden");
+            $("#divPO").removeClass("hidden");
+        }
+        else {
+            $("#divAgency").addClass("hidden");
+            $("#divPO").addClass("hidden");
+        }
+    }
+
+});

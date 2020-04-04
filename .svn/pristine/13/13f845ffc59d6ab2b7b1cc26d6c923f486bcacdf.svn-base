@@ -1,0 +1,621 @@
+﻿app1.controller("AC_ProductMaster", function ($scope, $http, $window, $rootScope) {
+    GetPrivilages();
+    GetProductTree();
+    callcontext();
+    GetUOM();
+    function GetPrivilages() {
+        var getprivilagesCat = $http.get("/ET_Admin_Product/GetPrivilages",
+            {
+                params: { id: 3013 }
+            });
+        getprivilagesCat.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.IscreateCat = privilage[0].IS_ADD;
+            $scope.IseditCat = privilage[0].IS_EDIT;
+            $scope.IsdeleteCat = privilage[0].IS_DELETE;
+            $scope.IsrestoreCat = privilage[0].IS_FULLCONTROL;
+            $scope.IsviewCat = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+
+        var getprivilagesPro = $http.get("/ET_Admin_Product/GetPrivilages",
+            {
+                params: { id: 5014 }
+            });
+        getprivilagesPro.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.IscreatePro = privilage[0].IS_ADD;
+            $scope.IseditPro = privilage[0].IS_EDIT;
+            $scope.IsdeletePro = privilage[0].IS_DELETE;
+            $scope.IsrestorePro = privilage[0].IS_FULLCONTROL;
+            $scope.IsviewPro = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        });
+    }
+    function GetUOM() {
+        var getprivilagesCat = $http.get("/ET_Admin_Product/GetUOM");
+        getprivilagesCat.then(function (uom) {
+            var privilage = JSON.parse(uom.data);
+            debugger;
+            $scope.uoms = privilage;
+            $scope.P_UOM = "0";
+        }, function () {
+            alert('UOM Not Found');
+        });
+    }
+    function GetProductTree() {
+        $.jstree.destroy();
+        var getcompanylist = $http.get("/ET_Admin_Product/BindTree");
+        getcompanylist.then(function (company) {
+            debugger;
+            var res = company.data;
+            var data123 = JSON.parse(res);
+            $('#evts').on("changed.jstree", function (e, data) {
+                if (data.selected.length) {
+                    //alert('The selected node is: ' + data.instance.get_node(data.selected[0]).id+"_anchor");
+                    var res = data.instance.get_node(data.selected[0]).id + "_anchor";
+                    if (res.indexOf("P") > -1) {
+                        angular.element(document.getElementById("mainDiv")).scope().EditProduct(res);
+                    }
+                    else
+                    {
+                        angular.element(document.getElementById("mainDiv")).scope().EditSubCategory(res);
+                    }
+                }
+            })
+                .jstree({
+                    'core': {
+                        'data': data123
+                    }
+                });
+
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    function callcontext() {
+
+        $.contextMenu({
+            selector: '.jstree-anchor',
+            build: function ($triggerElement, e) {
+
+                var z = $("#" + $triggerElement[0].id).parent().attr("aria-level");
+                if (z == 1) {
+                    return {
+                        callback: function (key, options, name) {
+                            var x = options.$trigger[0].id;
+                            if (key == "addsubcategory") {
+                                $scope.NewSubCategory(x);
+                            }
+                            else if (key == "editcategory") {
+                                angular.element(document.getElementById("mainDiv")).scope().EditSubCategory(x);
+                            }
+                            else if (key == "deletecategory") {
+                                angular.element(document.getElementById("mainDiv")).scope().DeleteSubCategory(x, "parent");
+                            }
+                        },
+                        items: {
+                            "addsubcategory": { name: "Add Sub Category" },
+                            "editcategory": { name: "Edit Category" },
+                            "deletecategory": { name: "Delete Category" }
+                        }
+                    };
+                }
+                else {
+                    if ($("#" + $triggerElement[0].id).children().hasClass("jstree-file")) {
+                        return {
+                            callback: function (key, options) {
+
+                                var x = options.$trigger[0].id;
+                                if (key == "editprod") {
+                                    angular.element(document.getElementById("mainDiv")).scope().EditProduct(x);
+                                }
+                                else if (key == "deleteprod") {
+                                    angular.element(document.getElementById("mainDiv")).scope().DeleteProduct(x);
+                                }
+                            },
+                            items: {
+                                "editprod": { name: "Edit" },
+                                "deleteprod": { name: "Delete" },
+                            }
+                        };
+                    }
+                    else {
+                        return {
+                            callback: function (key, options) {
+
+                                var x = options.$trigger[0].id;
+                                if (key == "addprod") {
+                                    angular.element(document.getElementById("mainDiv")).scope().NewProduct(x);
+                                }
+                                else if (key == "editsubcat") {
+                                    angular.element(document.getElementById("mainDiv")).scope().EditSubCategory(x);
+                                }
+                                else if (key == "deletesubcat") {
+                                    angular.element(document.getElementById("mainDiv")).scope().DeleteSubCategory(x, "child");
+                                }
+                            },
+                            items: {
+                                "addprod": { name: "Add Product" },
+                                "editsubcat": { name: "Edit Sub Category" },
+                                "deletesubcat": { name: "Delete Sub Category" },
+                            }
+                        };
+                    }
+                }
+            }
+
+        });
+    }
+    $scope.NewCategory = function () {
+
+        if ($scope.IscreateCat) {
+            $("#div_productcategory").css("display", "block");
+            $("#div_product").css("display", "none");
+            $("#parent_cat").css("display", "block");
+            $("#child_cat").css("display", "none");
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#txtIntial").attr("required", true);
+            $scope.catsubmittext = "Submit";
+            $scope.createeditcat = "Create";
+            $scope.createeditcat1 = "Product Category";
+            $scope.PG_Parent = "";
+            $scope.PG_PARENT_ID = "0";
+            $scope.PG_ID = "0";
+            $scope.PG_CODE = "";
+            $scope.PG_Initial = "";
+            if ($("#ProductCategoryCode").attr("disable")) {
+                $scope.PG_CODE = "[Autogenerated]";
+            }
+            $scope.PG_NAME = "";
+            $scope.$apply();
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+    $scope.NewSubCategory = function (id) {
+
+        if ($scope.IscreateCat) {
+            $("#div_productcategory").css("display", "block");
+            $("#div_product").css("display", "none");
+            $("#parent_cat").css("display", "none");
+            $("#child_cat").css("display", "block");
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#txtIntial").removeAttr("required");
+            $scope.catsubmittext = "Submit";
+            $scope.createeditcat = "Create";
+            $scope.createeditcat1 = "Product Sub Category";
+            $scope.PG_Parent = $('#' + id).text();
+            var updatedString = id.replace("_anchor", "");
+            $scope.PG_PARENT_ID = updatedString;
+            $scope.PG_ID = "0";
+            $scope.PG_CODE = "";
+            $scope.PG_Initial = "";
+            if ($("#ProductCategoryCode").attr("disable")) {
+                $scope.PG_CODE = "[Autogenerated]";
+            }
+            $scope.PG_NAME = "";
+            $scope.$apply();
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+    $scope.EditSubCategory = function (id1) {
+        if ($scope.IseditCat) {
+
+            debugger;
+            var updatedString = id1.replace("_anchor", "");
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Product/ET_Admin_ProductGroup_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: updatedString
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else {
+
+                    var UserByID = JSON.parse(data);
+                    $("#div_productcategory").css("display", "block");
+                    $("#div_product").css("display", "none");
+                    $("#formSubmit").removeAttr('disabled');
+                    $scope.catsubmittext = "Update";
+                    $scope.createeditcat = "Edit";
+                    $scope.createeditcat1 = "Product Sub Category";
+                    $scope.PG_Parent = UserByID[0].PG_Parent;
+                    $scope.PG_PARENT_ID = UserByID[0].PG_PARENT_ID;
+                    $scope.PG_ID = UserByID[0].PG_ID;
+                    $scope.PG_CODE = UserByID[0].PG_CODE;
+                    $scope.PG_NAME = UserByID[0].PG_NAME;
+                    $scope.PG_Initial = UserByID[0].PG_Initial;
+                    if ($scope.PG_PARENT_ID == 0) {
+                        $("#parent_cat").css("display", "block");
+                        $("#child_cat").css("display", "none");
+                        $scope.createeditcat1 = "Product Category";
+                    }
+                    else {
+                        $("#parent_cat").css("display", "none");
+                        $("#child_cat").css("display", "block");
+                        $scope.createeditcat1 = "Product Sub Category";
+                    }
+                    $scope.$apply();
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+    $scope.CategorySubmitClick = function () {
+        debugger;
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_Product/ET_Admin_ProductGroup_Add",
+            dataType: 'json',
+            data: {
+                GroupID: $scope.PG_ID,
+                GroupCode: $scope.PG_CODE,
+                GroupName: $scope.PG_NAME,
+                Parent: $scope.PG_PARENT_ID,
+                Initial: $scope.PG_Initial
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+
+        post.success(function (data, status) {
+
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else if (data.indexOf("Validation") > -1) {
+                toastr["error"](data, "Notification");
+            }
+            else {
+                var splitdata = data.split('_');
+                if (splitdata[0] != "0") {
+                    if ($scope.PG_ID == 0) {
+                        $scope.PG_ID = splitdata[0];
+                        $scope.PG_CODE = splitdata[1];
+                        message = 'Record Inserted Successfully.';
+                        toastr["success"](message, "Notification");
+                        //var textdata = $("#" + $scope.PG_PARENT_ID + "_anchor").next('ul').html();
+                        //   $("#" + $scope.PG_PARENT_ID + "_anchor").next('ul').html('<li role="treeitem" aria-selected="false" aria-level="2" aria-labelledby="' + $scope.PG_ID + '_anchor" id="' + $scope.PG_ID + '" class="jstree-node  jstree-leaf"><i class="jstree-icon jstree-ocl" role="presentation"></i><a class="jstree-anchor" href="#" tabindex="-1" id="' + $scope.PG_ID + '_anchor"><i class="jstree-icon jstree-themeicon" role="presentation"></i>' + $scope.PG_NAME + '</a></li>' + textdata);
+                    }
+                    else {
+                        $scope.PG_ID = splitdata[0];
+                        message = 'Record Updated Successfully.';
+                        toastr["success"](message, "Notification");
+                        //  $("#" + $scope.PG_ID + "_anchor").html('<i class="jstree-icon jstree-themeicon" role="presentation"></i>'+$scope.PG_NAME);
+                    }
+                    $scope.catsubmittext = "Update";
+                    $scope.createeditcat = "Edit";
+                    GetProductTree();
+
+                    $scope.$apply();
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            }
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+    $scope.DeleteSubCategory = function (id1, type1) {
+        var updatedString = id1.replace("_anchor", "");
+        if ($scope.IsdeleteCat) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Product/ET_Admin_ProductGroup_Delete",
+                dataType: 'json',
+                data: {
+                    id: updatedString,
+                    type: type1
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (data == "100") {
+                        toastr["error"]("This Category cannot be deleted. It already contain Products", "Notification");
+                    }
+                    else if (data != "0") {
+                        toastr["success"]("Category Deleted Successfully", "Notification");
+                        $("#div_productcategory").css("display", "none");
+                        $("#div_product").css("display", "none");
+                        GetProductTree();
+
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+    $scope.NewProduct = function (id) {
+        if ($scope.IscreatePro) {
+            $("#div_productcategory").css("display", "none");
+            $("#div_product").css("display", "block");
+            $("#formSubmit1").attr('disabled', "disabled");
+            $scope.prosubmittext = "Submit";
+            $scope.createeditpro = "Create";
+            $scope.P_ID = "0";
+            $scope.P_Code = "";
+            $scope.P_ArticleNo = "";
+
+            var x = $('#' + id).parent().parent().parent();
+            var y = x.attr("aria-labelledby");
+            $scope.P_Category = $('#' + y).text();
+            var updatedString1 = y.replace("_anchor", "");
+            $scope.P_CategoryID = updatedString1;
+
+            $scope.P_Subcategory = $('#' + id).text();
+            var updatedString = id.replace("_anchor", "");
+            $scope.P_SubcategoryID = updatedString;
+
+            $scope.P_Name = "";
+            $scope.P_ShortName = "";
+            $scope.P_Description = "";
+            $scope.P_UOM = "0";
+            $("#drpuom").val($scope.P_UOM).trigger("chosen:updated");
+            $scope.P_PackingQuantity = "";
+            $scope.P_Remark1 = "";
+            $scope.P_Remark2 = "";
+            $scope.P_Remark3 = "";
+            $scope.$apply();
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+    $scope.ProductSubmitClick = function () {
+        debugger;
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_Product/ET_Admin_Product_Add",
+            dataType: 'json',
+            data: {
+                ID: $scope.P_ID,
+                Code: $scope.P_Code,
+                ArticleNo: $scope.P_ArticleNo,
+                CategoryID: $scope.P_CategoryID,
+                SubCategoryID: $scope.P_SubcategoryID,
+                Name: $scope.P_Name,
+                ShortName: $scope.P_ShortName,
+                Description: $scope.P_Description,
+                UOM: $scope.P_UOM,
+                PackingQuantity: $scope.P_PackingQuantity,
+                Remark1: $scope.P_Remark1,
+                Remark2: $scope.P_Remark2,
+                Remark3: $scope.P_Remark3
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+
+        post.success(function (data, status) {
+
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else if (data.indexOf("Validation") > -1) {
+                toastr["error"](data, "Notification");
+            }
+            else {
+                var splitdata = data.split('_');
+                if (splitdata[0] != "0") {
+                    if ($scope.P_ID == 0) {
+                        $scope.P_ID = splitdata[0];
+                        $scope.P_Code = splitdata[1];
+                        $scope.P_ArticleNo = splitdata[2];
+                        message = 'Record Inserted Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.prosubmittext = "Update";
+                    $scope.createeditpro = "Edit";
+                    GetProductTree();
+
+                    $scope.$apply();
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            }
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+    $scope.EditProduct = function (id1) {
+        if ($scope.IseditPro) {
+
+            debugger;
+            var updatedString = id1.replace("_anchor", "");
+            updatedString = updatedString.replace("P_", "");
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Product/ET_Admin_Product_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: updatedString
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else {
+
+                    var UserByID = JSON.parse(data);
+                    $("#div_productcategory").css("display", "none");
+                    $("#div_product").css("display", "block");
+                    $("#formSubmit1").removeAttr('disabled');
+                    $scope.prosubmittext = "Update";
+                    $scope.createeditpro = "Edit";
+                    debugger;
+                    $scope.P_ID = UserByID[0].P_ID;
+                    $scope.P_Code = UserByID[0].P_Code;
+                    $scope.P_ArticleNo = UserByID[0].P_ArticleNo;
+                    $scope.P_Category = UserByID[0].category;
+                    $scope.P_CategoryID = UserByID[0].P_CategoryID;
+                    $scope.P_Subcategory = UserByID[0].subcategory;
+                    $scope.P_SubcategoryID = UserByID[0].P_SubcategoryID;
+                    $scope.P_Name = UserByID[0].P_Name;
+                    $scope.P_ShortName = UserByID[0].P_ShortName;
+                    $scope.P_Description = UserByID[0].P_Description;
+                    $scope.P_UOM = UserByID[0].P_UOM;
+                    $("#drpuom").val($scope.P_UOM).trigger("chosen:updated");
+                    $scope.P_PackingQuantity = UserByID[0].P_PackingQuantity;
+                    $scope.P_Remark1 = UserByID[0].P_Remark1;
+                    $scope.P_Remark2 = UserByID[0].P_Remark2;
+                    $scope.P_Remark3 = UserByID[0].P_Remark3;
+                    $scope.$apply();
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+    $scope.DeleteProduct = function (id1) {
+        var updatedString = id1.replace("_anchor", "");
+        updatedString = updatedString.replace("P_", "");
+        if ($scope.IsdeletePro) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Product/ET_Admin_Product_Delete",
+                dataType: 'json',
+                data: {
+                    id: updatedString
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                   
+                    if (data == "100") {
+                        toastr["error"]("This Product cannot be deleted. It is already in use.", "Notification");
+                    }
+                    else if (data != "0") {
+                        toastr["success"]("Product Deleted Successfully", "Notification");
+                        $("#div_productcategory").css("display", "none");
+                        $("#div_product").css("display", "none");
+                        GetProductTree();
+
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+    $scope.$watch("uoms", function (value) {
+        var val = value || null;
+        if (val) {
+           // setTimeout(function () { $("#drpuom").val($scope.P_UOM).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.UOM_Change = function () {
+    }
+});

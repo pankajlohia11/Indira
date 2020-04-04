@@ -1,0 +1,228 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+using DataAccess.Admin_DA;
+using DataAccess;
+
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_LC_Details_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+
+        public List<ET_TBL_LC_DETAILS> ET_Admin_LC_Detailslist_DL()
+        {
+            try
+            {
+                var data = dbcontext.ET_TBL_LC_DETAILS.Where(m => m.DELETED == false).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public decimal ET_Admin_LC_Details_Add_DL(ET_TBL_LC_DETAILS_CM obj, string prefix, bool automanual)
+        {
+            try
+            {
+                if (obj.LC_ID == 0)
+                {
+                    ET_TBL_LC_DETAILS objlc = new ET_TBL_LC_DETAILS()
+                    {
+                        LC_CODE = obj.LC_CODE,
+                        LC_ID = obj.LC_ID,
+                        CUST_ID = obj.CUST_ID,
+                        CUST_SUPP = obj.CUST_SUPP,
+                        CURRENCY_ID = obj.CURRENCY_ID,
+                        LC_NO = obj.LC_NO,
+                        LC_DATE = obj.LC_DATE,
+                        LC_EXPIRYDATE = obj.LC_EXPIRYDATE,
+                        LC_AMOUNT = obj.LC_AMOUNT,
+                        LC_BAL_AMT = obj.LC_BAL_AMT,
+                        LC_CLOSE_AMT = obj.LC_CLOSE_AMT,
+                        LC_BANK_NAME = obj.LC_BANK_NAME,
+                        LC_BANK_ID = obj.LC_BANK_ID,
+                        LAST_UPDATED_BY = obj.LC_BANK_ID,
+                        DELETED = false,
+                        CREATED_DATE = DateTime.Now,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                    };
+                    dbcontext.ET_TBL_LC_DETAILS.Add(objlc);
+                    obj.LC_ID = dbcontext.SaveChanges();
+
+                    if (automanual == true)
+                    {
+                        int len = 10 - (prefix + obj.LC_ID).Length;
+                        string code = prefix + new String('0', len) + obj.LC_ID;
+                        ET_TBL_LC_DETAILS ET_TBL_LC_DETAILS = dbcontext.ET_TBL_LC_DETAILS.Single(m => m.LC_ID == obj.LC_ID);
+                        {
+                            ET_TBL_LC_DETAILS.LC_CODE = code;
+                        };
+                        dbcontext.SaveChanges();
+                    }
+                }
+                else
+                {
+                    ET_TBL_LC_DETAILS objlc = dbcontext.ET_TBL_LC_DETAILS.Single(m => m.LC_ID == obj.LC_ID);
+                    {
+                        objlc.LC_CODE = obj.LC_CODE;
+                        objlc.LC_ID = obj.LC_ID;
+                        objlc.CUST_ID = obj.CUST_ID;
+                        objlc.CUST_SUPP = obj.CUST_SUPP;
+                        objlc.CURRENCY_ID = obj.CURRENCY_ID;
+                        objlc.LC_NO = obj.LC_NO;
+                        objlc.LC_DATE = obj.LC_DATE;
+                        objlc.LC_EXPIRYDATE = obj.LC_EXPIRYDATE;
+                        objlc.LC_AMOUNT = obj.LC_AMOUNT;
+                        objlc.LC_BAL_AMT = obj.LC_BAL_AMT;
+                        objlc.LC_CLOSE_AMT = obj.LC_CLOSE_AMT;
+                        objlc.LC_BANK_NAME = obj.LC_BANK_NAME;
+                        objlc.LC_BANK_ID = obj.LC_BANK_ID;
+                        objlc.LAST_UPDATED_BY = obj.LC_BANK_ID;
+                        objlc.LAST_UPDATED_DATE = DateTime.Now;
+                    };
+                    obj.LC_ID = dbcontext.SaveChanges();
+                }
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+            return obj.LC_ID;
+        }
+
+        public ET_TBL_LC_DETAILS ET_Admin_LC_Details_Update_GetbyID_DL(int id)
+        {
+            try
+            {
+                return dbcontext.ET_TBL_LC_DETAILS.Single(m => m.LC_ID == id);
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public int ET_Admin_LC_Details_Delete_DL(int id, decimal deleteby)
+        {
+            try
+            {
+                ET_TBL_LC_DETAILS obj = dbcontext.ET_TBL_LC_DETAILS.Single(m => m.LC_ID == id && m.DELETED == false);
+                {
+                    obj.DELETED = true;
+                    obj.DELETED_DATE = DateTime.Now;
+                    obj.DELETED_BY = deleteby;
+                }
+                int i = dbcontext.SaveChanges();
+                return i;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public List<ET_TBL_LC_DETAILS> ET_Admin_LC_Details_Restore_DL()
+        {
+            try
+            {
+                var data = dbcontext.ET_TBL_LC_DETAILS.Where(m => m.DELETED == true).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public int ET_Admin_LC_Details_Restore_Insert_DL(int id, decimal Updatedby)
+        {
+            try
+            {
+                ET_TBL_LC_DETAILS obj = dbcontext.ET_TBL_LC_DETAILS.Single(m => m.LC_ID == id && m.DELETED == true);
+                {
+                    obj.DELETED = false;
+                    obj.DELETED_DATE = DateTime.Now;
+                    obj.LAST_UPDATED_BY = Updatedby;
+                }
+                int i = dbcontext.SaveChanges();
+                return i;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public ET_TBL_LC_DETAILS ET_Admin_LC_Details_View_DL(int id)
+        {
+            try
+            {
+                return dbcontext.ET_TBL_LC_DETAILS.Single(m => m.LC_ID == id);
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public List<Tbl_Master_CompanyDetails> Bind_dropdown_Customer_DL()
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                var Customername = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != 1).ToList();
+                return Customername;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public List<Tbl_Master_CompanyDetails> Bind_dropdown_Supplier_DL()
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                var Suppliername = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != 0).ToList();
+                return Suppliername;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public List<Tbl_BankMaster> Bind_dropdown_Bankname_DL()
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                var Bankname = dbcontext.Tbl_BankMaster.ToList();
+                return Bankname;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public List<Tbl_Currency_Master> Bind_Currency_DL()
+        {
+            try
+            {
+                var Currency = dbcontext.Tbl_Currency_Master.ToList();
+                return Currency;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+    }
+}

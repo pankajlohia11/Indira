@@ -1,0 +1,108 @@
+﻿app1.controller("AC_AgencyShipmentDetailsCtrl", function ($scope, $http, $window, $rootScope) {
+    $scope.ifcustomdate = "none";
+    $scope.SelectedDuration = "0";
+    $scope.SelectedSalesperson = "0";
+    $scope.SelectedCustomer = "0";
+    $scope.SelectedSupplier = "0";
+    GetCustomerSupplierSalesperson();
+    // Binding the Customer , Supplier , Sales Person Dropdowns
+    function GetCustomerSupplierSalesperson() {
+        $http({
+            method: 'GET',
+            url: '/AgencyShipmentDetails/GetCustomerSupplierSalesperson',
+        }).success(function (data) {
+                debugger;;
+                $scope.SupplierList = data.supplier;
+                $scope.SalespersonList = data.salesperson;
+            $scope.CustomerList = data.customer;
+            });
+    }
+    //Get report Data
+    $scope.GetAgencyShipmentDetails = function () {
+        if ($scope.SelectedDuration == "7" && ($("#FromDate").val() == "" || $("#ToDate").val() == "")) {
+            message = "Select From and To date";
+            toastr["error"](message, "Notification");
+        }
+        else {
+            var getAgencyShipmentDetails = $http.get("/AgencyShipmentDetails/GetAgencyShipmentDetails",
+                {
+                    params:
+                        {
+                            salesperson: $scope.SelectedSalesperson,
+                            customer: $scope.SelectedCustomer,
+                            supplier: $scope.SelectedSupplier,
+                            duration: $scope.SelectedDuration,
+                            fromdate: $("#FromDate").val(),
+                            todate: $("#ToDate").val(),
+                        }
+                });
+            getAgencyShipmentDetails.then(function (res) {
+                debugger;
+                if (res.data.indexOf("Validation") > -1) {
+                    toastr["error"](res.data, "Notification");
+                }
+                else {
+
+                }
+            });
+        }
+    }
+    $scope.SalespersonChange = function () {
+    }
+    $scope.Customerchange = function () {
+    }
+    $scope.Supplierchange = function () {
+    }
+    $scope.Durationchange = function () {
+        if ($scope.SelectedDuration != "7") {
+            $scope.ifcustomdate = "none";
+        }
+        else {
+            $scope.ifcustomdate = "block";
+        }
+        $("#FromDate").val("");
+        $("#ToDate").val("");
+    }
+    $scope.$watch("SalespersonList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesperson").val($scope.SelectedSalesperson).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("CustomerList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCustomer").val($scope.SelectedCustomer).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("SupplierList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSupplier").val($scope.SelectedSupplier).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("SelectedSalesperson", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesperson").val($scope.SelectedSalesperson).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("SelectedCustomer", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCustomer").val($scope.SelectedCustomer).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("SelectedSupplier", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSupplier").val($scope.SelectedSupplier).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("SelectedDuration", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpDuration").val($scope.SelectedDuration).trigger("chosen:updated"); }, 100);
+        }
+    });
+});

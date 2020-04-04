@@ -1,0 +1,141 @@
+﻿@model BusinessEntity.CustomModels.Paclistdetails_View_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <input id="englishformat" style="display:none;" value="@Model.QHeader[0].PL_ID" />
+
+    <table style="width:100%" align="center">
+        <tr>
+            <td style="width:30%;"></td>
+            <td style="width:40%;text-align:center;">
+                <img src="@Model.QHeader[0].imgurl" width="100">
+                @*<h1 style="font-size:large"><label><strong>@Model.QHeader[0].SystemCompany</strong></label></h1>*@
+            </td>
+            <td style="width:30%;"></td>
+        </tr>
+    </table>
+    <br />
+    <h2 style="text-align:center;font-size:large;font-weight:bold;"><u>Packing List</u></h2>
+    <br />
+    <table style="font-size:14px;width:100%;">
+        <tr>
+            <td><span><strong>@Model.QHeader[0].CompanyName</strong></span></td>
+            <td style="text-align:right">Shipment Id:<span><strong>@Model.QHeader[0].OTOI_ShipmentID</strong></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.QHeader[0].Street,</label></span></td>
+            <td style="text-align:right">Container No:<span><strong>@Model.QHeader[0].OTOI_ContainerNo</strong></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.QHeader[0].CityState,</label></span></td>
+            <td />
+        </tr>
+        <tr>
+            <td><span><label>@Model.QHeader[0].CountryZip.</label></span></td>
+            <td />
+        </tr>
+    </table> <br /><br />
+    @for (int i = 0; i < Model.QChild.Count(); i++)
+    {
+        if (i == 0)
+        {
+            <table style="width:100%">
+                <tr>
+                    <td>Customer :<strong>@Model.QHeader[0].CustomerName </strong></td>
+                    <td style="text-align:right">Product Name:<strong>@Model.QChild[i].ProductName </strong></td>
+                </tr>
+                <tr>
+                    <td>Order No's:@Model.QHeader[0].Orders</td>
+                    <td style="text-align:right">Grade:<strong>Export</strong></td>
+                </tr>
+            </table>
+            <table border="1" style="width:100%">
+                <thead>
+                    <tr>
+                        <th style="width: 11%;"><strong>S.No</strong></th>
+                        <th style="width:11.1%;"><strong>Pallet No</strong></th>
+                        <th style="width:12%;"><strong>Design No</strong></th>
+                        <th style="width:14.4%;"><strong>No of Pieces</strong></th>
+                        <th style="width:13.5%;"><strong>Total Meters</strong></th>
+                        <th style="width:12.1%;"><strong>Nwt.in Kgs</strong></th>
+                        <th style="width:12%;"><strong>Gwt.in Kgs</strong></th>
+                        <th style="text-align:center; width:12%"><strong>Individual piece lengths</strong></th>
+                    </tr>
+
+                </thead>
+            </table>
+        }
+        else if (Model.QChild[i].PD_ProductID != Model.QChild[i - 1].PD_ProductID)
+        {<br />
+            <br /><br />
+            <table style="width:100%">
+
+                <tr>
+                    <td>Customer :<strong>@Model.QHeader[0].CustomerName</strong></td>
+                    <td style="text-align:right">Product Name:<strong>@Model.QChild[i].ProductName</strong></td>
+
+                </tr>
+                <tr>
+                    <td>Order No:<strong>@Model.QHeader[0].OrderCode</strong></td>
+                    <td style="text-align:right">Grade:<strong>Export</strong></td>
+
+                </tr>
+            </table>
+            <table border="1" style="width:100%">
+                <thead>
+                    <tr>
+                        <th style="width: 11%;"><strong>S.No</strong></th>
+                        <th style="width:11.1%;"><strong>Pallet No</strong></th>
+                        <th style="width:12%;"><strong>Design No</strong></th>
+                        <th style="width:14.4%; "><strong>No of Pieces</strong></th>
+                        <th style="width:13.5%;"><strong>Total Meters</strong></th>
+                        <th style="width:12.1%;"><strong>Nwt.in Kgs</strong></th>
+                        <th style="width:12%;"><strong>Gwt.in Kgs</strong></th>
+                        <th style="width:12%;"><strong>Individual piece lengths</strong></th>
+                    </tr>
+
+                </thead>
+            </table>
+        }
+        <table border="1" style="width:100%">
+            <tbody>
+
+                <tr>
+                    <td style="width: 11%;">@(i + 1)</td>
+                    <td style="width:11.1%;">@Model.QChild[i].PD_PalletNo</td>
+                    <td style="width:12%;">@Model.QChild[i].PD_DesignNo</td>
+                    <td style="width:14.4%; text-align:right;">@Model.QChild[i].PD_NoOfPieces</td>
+                    <td style="width:13.5%; text-align:right; ">@Model.QChild[i].PD_TotalMeters</td>
+                    <td style="width:12.1%; text-align:right;">@Model.QChild[i].PD_NwtinKGS</td>
+                    <td style="width:12%; text-align:right;">@Model.QChild[i].PD_GwtinKGS</td>
+                    <td style="text-align:right; width:12%">@Model.QChild[i].PD_IndividualPieceLength</td>
+                </tr>
+
+            </tbody>
+        </table>
+    }
+    <br />
+    <br />
+    <br />
+    <table style="font-size:12px;">
+        <tr>
+            <td><span><label>Our general terms of business apply</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>Any general variation have to be notified to us before the goods but not than 7 days on receipt of the goods.</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>No claims will be accepted after washing/using the goods.</label></span></td>
+        </tr>
+    </table>
+    <br />
+    <p> <hr style="font-weight:bold;border-top:1px solid black;"></p>
+    <table style="font-size:10px;width:100%;">
+        <tr>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Eurotextiles GmbH & Co.KG<br />Mammolshainer Weg 14<br />61462 Konigstein im Taunus<br />Fon +49 6174/25980<br />HRA 3451</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">HRA 3451<br />Amtsgericht Kongstein<br />Steuerrnummer 003 315 60117<br />USt-IdNr.DE279479010</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Kompl.Indra Enterprises GmbH<br />Geshafuher:Krishna Javaji<br />HRB 5137 Amtsgericht Konigstein<br />Steuernummer 003 236 16128</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Bankverbindung<br />Nassauische Sparkasse<br />IBAN :DE15 5105 00150270060706<br />SWIFT:-BIC NASSDE55XXX</td>
+
+
+        </tr>
+    </table>
+</div>

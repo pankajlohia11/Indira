@@ -1,0 +1,1424 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Entity;
+using BusinessEntity.EntityModels;
+using BusinessEntity.CustomModels;
+using BusinessLogic.Admin_BL;
+using BusinessLogic;
+using System.Web.Script.Serialization;
+using System.Data;
+
+namespace Euro.Controllers.Sales
+{
+    
+    public class ET_Sales_OrderDetailsController : Controller
+    {
+        // GET: ET_Sales_OrderDetails
+
+        public static string prefix = "";
+        public static bool automanual = false;
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+        EntityClasses dbcontext = new EntityClasses();
+        ET_Sales_OrderDetails_BL ObjBL = new ET_Sales_OrderDetails_BL();
+
+        //Checking the auto/manual
+        private void AutoManual()
+        {
+            ViewBag.AutoManual = false;
+            automanual = false;
+            List<Tbl_Document_Master> ObjDoc = bal.AutoManual_BL(6014);
+            if (ObjDoc.Count > 0)
+            {
+                foreach (var item in ObjDoc)
+                {
+                    if (item.autogen_type == "Automatic")
+                    {
+                        ViewBag.AutoManual = true;
+                        prefix = item.autogen_prefix;
+                        automanual = true;
+                    }
+                    else
+                    {
+                        ViewBag.Required = "required";
+                    }
+                }
+            }
+        }
+        //Get the order list
+        public JsonResult Tbl_OrderList(bool deleted,int type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int com_key = Convert.ToInt32(Session["Companykey"]);
+                    var data = (from Ol in dbcontext.Tbl_Master_Order
+                                join Mu in dbcontext.Tbl_Master_User on Ol.SO_SalesPersonID equals Mu.USER_ID
+                                join b in dbcontext.Tbl_Master_CompanyDetails on Ol.SO_CutomerID equals b.COM_ID into comp
+                                from x in comp
+                                where Ol.DELETED== deleted && Ol.COM_KEY==com_key && Ol.SO_OrderType == type
+                                select new
+                                {
+                                    SO_ID = Ol.SO_ID,
+                                    SO_CODE = Ol.SO_Code,
+                                    USER_NAME = Mu.USER_NAME,
+                                    Type =
+                                    (
+                                    Ol.SO_OrderType == 1 ? "Agency":
+                                    Ol.SO_OrderType == 2 ? "Trading(One-One)" : "Trading(One-Many)"
+                                    ),
+                                    Ol.SO_Approval,
+                                    x.COM_NAME,
+                                    Ol.SO_OrderDate,
+                                    Ol.SO_SupSCNO
+
+                                }).ToList();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the quation list
+        public JsonResult GetQuotations(int id,int orderid,int type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int com_key = Convert.ToInt32(Session["Companykey"]);
+                    var approver = dbcontext.Tbl_Document_Master.Single(m => m.auto_key == 8015).workflow_status;
+                    if (approver == 1)
+                    {
+                        if (orderid == 0)
+                        {
+                            var data1 = dbcontext.Tbl_Master_Order.Select(m => m.SO_QuotationID);
+                            var data = dbcontext.tbl_QuotationHeader.Where(m => m.DELETED == false && m.COM_KEY == com_key && m.Q_ApprovedStatus == 1 && m.Q_CustomerID == id && !data1.Contains(m.Q_ID) && m.Q_Type == type).ToList();
+                            var json = new JavaScriptSerializer().Serialize(data);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            var data1 = dbcontext.Tbl_Master_Order.Where(m => m.SO_ID == orderid).Select(m => m.SO_QuotationID);
+                            var data = dbcontext.tbl_QuotationHeader.Where(m => m.DELETED == false && m.COM_KEY == com_key && m.Q_ApprovedStatus == 1 && m.Q_CustomerID == id && data1.Contains(m.Q_ID) && m.Q_Type == type).ToList();
+                            var json = new JavaScriptSerializer().Serialize(data);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                    else
+                    {
+                        if (orderid == 0)
+                        {
+                            var data1 = dbcontext.Tbl_Master_Order.Select(m => m.SO_QuotationID );
+                            var data = dbcontext.tbl_QuotationHeader.Where(m => m.DELETED == false && m.COM_KEY == com_key && m.Q_CustomerID == id && !data1.Contains(m.Q_ID) && m.Q_Type == type).ToList();
+                            var json = new JavaScriptSerializer().Serialize(data);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            var data1 = dbcontext.Tbl_Master_Order.Where(m => m.SO_ID == orderid).Select(m => m.SO_QuotationID);
+                            var data = dbcontext.tbl_QuotationHeader.Where(m => m.DELETED == false && m.COM_KEY == com_key && m.Q_CustomerID == id && data1.Contains(m.Q_ID) && m.Q_Type == type).ToList();
+                            var json = new JavaScriptSerializer().Serialize(data);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                    }
+
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //get the order details
+        public ActionResult ET_Sales_OrderDetails(string type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                if (type != null)
+                {
+                    if (type == "Agency" || type == "Trading" || type == "Store")
+                    {
+                        try
+                        {
+                            AutoManual();
+                            ViewBag.Login_Name = Session["DisplayName"].ToString();
+                            return View();
+
+                        }
+                        catch (Exception exe)
+                        {
+                            string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                            string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                            objERR.err_title = controllerName + "-" + controllerName;
+                            objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                            objERR.err_details = exe.Message.Replace("'", "");
+                            int errid = bal.ExceptionInsertLogs_BL(objERR);
+                            return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction("ET_InvalidRequest", "ET_Login");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction("ET_InvalidRequest", "ET_Login");
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        public ActionResult ET_Sales_OffertoOrderDetails(string type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                if (type != null)
+                {
+                    if (type == "Agency" || type == "Trading" || type == "Store")
+                    {
+                        try
+                        {
+                            AutoManual();
+                            ViewBag.Login_Name = Session["DisplayName"].ToString();
+                            return View();
+
+                        }
+                        catch (Exception exe)
+                        {
+                            string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                            string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                            objERR.err_title = controllerName + "-" + controllerName;
+                            objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                            objERR.err_details = exe.Message.Replace("'", "");
+                            int errid = bal.ExceptionInsertLogs_BL(objERR);
+                            return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction("ET_InvalidRequest", "ET_Login");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction("ET_InvalidRequest", "ET_Login");
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Checking privilages
+        public JsonResult GetPrivilages()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        var privilagelist = bal.GetPrivilages_BL(Convert.ToInt32(Session["UserID"].ToString()), 6014);
+                        var json = new JavaScriptSerializer().Serialize(privilagelist);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Binding the dropdown for bank name
+        public JsonResult Bind_dropdown_Banknameandcussup(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    EntityClasses dbcontext = new EntityClasses();
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    decimal companykey = Convert.ToInt64(Session["CompanyKey"]);
+                    try
+                    {
+                        var Bankname = (from tmc in dbcontext.Tbl_Master_CompanyDetails
+                                        join bank in dbcontext.Tbl__Master_CompanyBank on tmc.COM_ID equals bank.B_PID into t
+                                        from rt in t.DefaultIfEmpty()
+                                        where tmc.Cust_Supp != id && tmc.DELETED == false && tmc.COM_KEY == companykey
+                                        select new
+                                        {
+                                            rt.B_ID,
+                                            rt.B_NAME,
+                                            tmc.COM_ID,
+                                            tmc.COM_NAME
+                                        }).ToList(); ;
+                        var json = new JavaScriptSerializer().Serialize(Bankname);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    catch (Exception exe)
+                    {
+                        throw exe;
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the sales person
+        [HttpPost]
+        public JsonResult GetSalesPerson(int id,decimal type)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        int companykey = Convert.ToInt32(Session["CompanyKey"]);
+                        var ObjSales_Org = dbcontext.Tbl_Sales_Organization.Where(m => m.COM_KEY == companykey && m.DELETED == false && m.sales_Organization==type).ToList();
+                        string s = "";
+                        for (int i = 0; i < ObjSales_Org.Count(); i++)
+                        {
+                            if (i == 0)
+                            {
+                                s = ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                            }
+                            else
+                            {
+                                s = s + "," + ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                            }
+                           // s = s + "," + ObjSales_Org[i].ORG_HEAD_ID.ToString();
+                        }
+                        var UID = new HashSet<decimal>(s.Split(',').Select(m => Convert.ToDecimal(m)).ToList());
+
+                        if (id == 0)
+                        {
+                            var SalesPerson = dbcontext.Tbl_Master_User.Where(m => m.USER_ID > 0  && m.COM_KEY == companykey && m.DELETED == false && UID.Contains(m.USER_ID)).Distinct().OrderBy(a => a.DISPLAY_NAME).ToList();
+                            var json = new JavaScriptSerializer().Serialize(SalesPerson);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            var user = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == id).SO_SalesPersonID;
+                            var SalesPerson = dbcontext.Tbl_Master_User.Where(m => m.USER_ID > 0 && m.COM_KEY == companykey && UID.Contains(m.USER_ID)  && (m.DELETED == false  || m.USER_ID == user)).Distinct().OrderBy(a => a.DISPLAY_NAME).ToList();
+                            var json = new JavaScriptSerializer().Serialize(SalesPerson);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the sales organization
+        [HttpPost]
+        public JsonResult SalesOrgBind(decimal id,decimal orgtype)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+
+                    DataTable dt_Org = ObjBL.OrgEmp_BL(Convert.ToInt32(Session["CompanyKey"]), orgtype);
+                    DataRow[] result = dt_Org.Select(string.Format("EmpID ='{0}' ", id));
+                    int j = dt_Org.Rows.IndexOf(result[0]);
+                    string s = dt_Org.Rows[j]["OrgName"] + "," + dt_Org.Rows[j]["OrgID"];
+                    return Json(s, JsonRequestBehavior.AllowGet);
+                }
+
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Bind the payment terms
+        [HttpPost]
+        public JsonResult Payment_terms_dropdown(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int companykey = Convert.ToInt32(Session["CompanyKey"]);
+                    if (id == 0)
+                    {
+                        var paymentdata = dbcontext.Tbl_Payment_Terms.Where(m => m.COM_KEY == companykey && m.DELETED == false).OrderBy(m => m.PT_Name).ToList();
+                        var json = new JavaScriptSerializer().Serialize(paymentdata);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var payment = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == id).SO_CusPaymentTermID;
+                        var paymentdata = dbcontext.Tbl_Payment_Terms.Where(m => m.COM_KEY == companykey && (m.DELETED == false || m.PT_ID == payment)).OrderBy(m => m.PT_Name).ToList();
+                        var json = new JavaScriptSerializer().Serialize(paymentdata);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the product packing details
+        public JsonResult Bind_Packing()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+
+                    var data = bal.Bind_Packing_BL();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Validate the data
+        private string validations(string OrderCode, decimal OrderID, decimal drpSalesperson, decimal ORGIDValue, int drpOrdertype, string txtOrderdate, string Orderdetails, EntityClasses context)
+        {
+            //user = 0;
+            //try
+            //{
+            //    var approver = dbcontext.Tbl_Document_Master.Single(m => m.auto_key == 6014).workflow_status;
+            //    if (approver == 1)
+            //        user = dbcontext.Tbl_Document_Master.Single(m => m.auto_key == 6014).workflowapprover ?? 0;
+            //    else
+            //        user = 1000000;
+            //}
+            //catch { }
+            //if (user == 0)
+            //{
+            //    return "Please contact Admin to set Approver.";
+            //}
+            if (!automanual && OrderCode == "")
+            {
+                return "Enter the Order Code";
+            }
+            if (drpSalesperson == 0)
+            {
+                return "Sales person should not be empty.";
+            }
+            if (ORGIDValue == 0)
+            {
+                return "Sales Group should not be empty.";
+            }
+            if (drpOrdertype == 0)
+            {
+                return "Select order type.";
+            }
+            if (txtOrderdate == "")
+            {
+                return "Order date should not be empty.";
+            }
+            if (!automanual)
+            {
+                string valid = ObjBL.CheckDuplicateCode_BL(OrderID, OrderCode);
+                if (valid != "")
+                {
+                    return "Order Code Already Exist";
+                }
+            }
+            try
+            {
+                string[] ChildRow = Orderdetails.Split('|');
+                string[] tableColumns = new string[ChildRow.Length];
+                for (int i = 0; i < ChildRow.Length - 1; i++)
+                {
+                    string[] ChildRecord = ChildRow[i].Split('}');
+                    if (tableColumns.Contains(Convert.ToDecimal(ChildRecord[0]).ToString()))
+                    {
+                        return "Product is repeated at row :" + (i + 1);
+                    }
+                    tableColumns[i] = Convert.ToDecimal(ChildRecord[0]).ToString();
+                }
+            }
+            catch
+            {
+                return "Unable to process your request. Please verify product data.";
+            }
+            if (OrderID != 0)
+            {
+                string[] ChildRow = Orderdetails.Split('|');
+                var scheduledetail = dbcontext.Tbl_Schedule.Where(m => m.SH_OrderID == OrderID).ToList();
+                if (scheduledetail.Count() > 0)
+                {
+                    var QtyvalAll = scheduledetail.GroupBy(p => p.SH_ProductID).Select(c => new
+                    {
+                        Qty = c.Sum(d => d.SH_SheduledQuantity),
+                        productId = c.First().SH_ProductID
+                    }).ToArray();
+                    var QtyvalShipped = scheduledetail.Where(p => p.SH_Status == true).GroupBy(p => p.SH_ProductID).Select(c => new
+                    {
+                        Qty = c.Sum(d => d.SH_SheduledQuantity),
+                        productId = c.First().SH_ProductID
+                    }).ToArray();
+                    //Shipped
+                    for (int i = 0; i < QtyvalShipped.Length; i++)
+                    {
+                        int k = 0;
+                        for (int j = 0; j < ChildRow.Length - 1; j++)
+                        {
+                            string[] ChildRecord = ChildRow[j].Split('}');
+                            var Productid = Convert.ToDecimal(ChildRecord[0]);
+                            if (QtyvalShipped[i].productId == Productid)
+                            {
+                                k = 1;
+                                if (QtyvalShipped[i].Qty > Convert.ToDecimal(ChildRecord[4]))
+                                {
+                                    return "Ordered Product is already Scheduled. Ordered Quantity Cannot be reduced less than Scheduled Quantity at row : " + (j + 1);
+                                }
+                            }
+                        }
+                        if (k == 0)
+                        {
+                            return "You cannot delete a product which is already Scheduled";
+                        }
+                    }
+                    //All Schedules
+                    for (int i = 0; i < QtyvalAll.Length; i++)
+                    {
+                        int k = 0;
+                        for (int j = 0; j < ChildRow.Length - 1; j++)
+                        {
+                            string[] ChildRecord = ChildRow[j].Split('}');
+                            var Productid = Convert.ToDecimal(ChildRecord[0]);
+                            if (QtyvalAll[i].productId == Productid)
+                            {
+                                k = 1;
+                                if (QtyvalAll[i].Qty > Convert.ToDecimal(ChildRecord[4]))
+                                {
+                                    var data = context.Tbl_Schedule.Where(m => m.SH_OrderID == OrderID && m.SH_ProductID == Productid && m.SH_Status == false).ToList();
+                                    data.ForEach(m => m.SH_SheduledQuantity = 0);
+                                    context.SaveChanges();
+                                }
+                            }
+                        }
+                        if (k == 0)
+                        {
+                            return "You cannot delete a product which is already Scheduled";
+                        }
+                    }
+                }
+            }
+            return "";
+        }
+        //Insert/update the order
+        [HttpPost]
+        public JsonResult ET_Sales_OrderDetails_Add(string OrderCode, decimal OrderID,int SO_PriceType, decimal drpSalesperson, decimal ORGIDValue, int drpOrdertype, string txtOrderdate, decimal drpCustomer, decimal drpSupplier, string txtcusponumber, string cuspodate,string cusscdate, string subpodate, string txtsubscnumber, string subscdate, decimal drpCusCurrency, decimal txtcommisionagy, string txtCusdeliveryterms, decimal drpCusPaymenttype, string remarks,int quotation,decimal SO_Discount, string Orderdetails)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                var context = new EntityClasses();
+                var transaction = context.Database.BeginTransaction();
+                try
+                {
+                    DateTime Orerdate = DateTime.ParseExact(txtOrderdate, "dd-MM-yyyy", null);
+                    DateTime CusPOdate = DateTime.ParseExact(cuspodate, "dd-MM-yyyy", null);
+                    DateTime? Sup_SCdate = null;
+                    if (subscdate != "") { Sup_SCdate = DateTime.ParseExact(subscdate, "dd-MM-yyyy", null); }
+                    //For Editing Scheduled Value
+                    string valid = validations(OrderCode, OrderID, drpSalesperson, ORGIDValue, drpOrdertype, txtOrderdate, Orderdetails, context);
+                    if (valid == "")
+                    {
+                        Tbl_Master_Order obj = new Tbl_Master_Order()
+                        {
+                            SO_ID = OrderID,
+                            SO_Code = OrderCode,
+                            SO_OrderDate = Orerdate,
+                            SO_PriceType = SO_PriceType,
+                            SO_SalesPersonID = drpSalesperson,
+                            SO_ORGID = ORGIDValue,
+                            SO_OrderType = drpOrdertype,
+                            SO_CutomerID = drpCustomer,
+                            SO_SupplierID = drpSupplier,
+                            SO_CusPONO = txtcusponumber,
+                            SO_CusPODate = CusPOdate,
+                            SO_SupSCNO = txtsubscnumber,
+                            SO_SupSCDate = Sup_SCdate,
+                            SO_CusCurrency = drpCusCurrency,
+                            SO_CusPaymentTermID = drpCusPaymenttype,
+                            SO_CusDeliveryTerms = txtCusdeliveryterms,
+                            SO_Commision = txtcommisionagy,
+                            SO_Remarks = remarks,
+                            SO_Approval = 0,
+                            DELETED = false,
+                            CREATED_BY = Convert.ToInt32(Session["UserID"]),
+                            LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"]),
+                            COM_KEY = Convert.ToInt32(Session["CompanyKey"]),
+                            SO_QuotationID = quotation,
+                            SO_Approver = 0,
+                            SO_Discount = SO_Discount
+                        };
+                        string OrdCode;
+
+                        var data = ObjBL.ET_Sales_OrderDetails_Add_BL(obj, prefix, automanual, Orderdetails, out OrdCode);
+                        var json = "Success:" + OrdCode;
+                        if (data == 0)
+                        {
+                            transaction.Rollback();
+                            json = "Failed";
+                        }
+                        else
+                        {
+                            transaction.Commit();
+                            if (quotation != 0)
+                            {
+                                dbcontext.tbl_QuotationHeader.Single(m => m.Q_ID == quotation).Q_Status = true;
+                                dbcontext.SaveChanges();
+                            }
+                            objLOG.log_dockey = "6014";
+                            objLOG.log_userid = Session["UserID"].ToString();
+                            objLOG.log_recordkey = data.ToString();
+                            if (OrderID == 0)
+                            {
+                                objLOG.log_operation = "Insert";
+                                objLOG.log_Remarks = "Record Inserted Successfully";
+                            }
+                            else
+                            {
+                                objLOG.log_operation = "Update";
+                                objLOG.log_Remarks = "Record Updated Successfully";
+                            }
+                            bal.OperationInsertLogs_BL(objLOG);
+                        }
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var json = "Validation:" + valid;
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    transaction.Rollback();
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+                finally
+                {
+                    transaction.Dispose();
+                    context.Dispose();
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Edit the orderdetails
+        public JsonResult ET_Sales_OrderDetails_Update_GetbyID(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data =(from a in dbcontext.Tbl_Master_Order where a.SO_ID==id select new
+                    {
+                        a.SO_Code,
+                        a.SO_Commision,
+                        a.SO_CusCurrency,
+                        a.SO_CusDeliveryTerms,
+                        a.SO_CusPaymentTermID,
+                        a.SO_CusPODate,
+                        a.SO_CusPONO,
+                        a.SO_CutomerID,
+                        a.SO_Discount,
+                        a.SO_ID,
+                        a.SO_OrderDate,
+                        a.SO_OrderType,
+                        a.SO_ORGID,
+                        a.SO_QuotationID,
+                        a.SO_Remarks,
+                        a.SO_SalesPersonID,
+                        a.SO_SupplierID,
+                        a.SO_SupSCDate,
+                        a.SO_SupSCNO,
+                        a.SO_PriceType,
+                        paymenttype =(dbcontext.Tbl_Payment_Terms.FirstOrDefault(m=>m.PT_ID == a.SO_CusPaymentTermID).PT_DiscountType)
+                    }).ToList();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Restore the order details
+        [HttpPost]
+        public JsonResult ET_Sales_OrderDetails_Restore_Delete(int id, bool type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var Updatedby = Convert.ToInt64(Session["UserID"]);
+                    var result = ObjBL.ET_Sales_OrderDetails_Restore_Delete_BL(id, Updatedby, type);
+                    var json = "Failed";
+                    if (result != 0)
+                    {
+                        json = "Success";
+                    }
+                    else
+                    {
+                        objLOG.log_dockey = "6014";
+                        objLOG.log_operation = "Restore";
+                        objLOG.log_userid = Session["UserID"].ToString();
+                        objLOG.log_recordkey = id.ToString();
+                        objLOG.log_Remarks = "Record Restored Successfully";
+                        bal.OperationInsertLogs_BL(objLOG);
+                    }
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+
+        }
+        //Get the product
+        public JsonResult GetProducts(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int companykey = Convert.ToInt32(Session["CompanyKey"]);
+                    if (id == 0)
+                    {
+                        var Products = dbcontext.Tbl_Product_Master.Where(m => m.COM_KEY == companykey && m.DELETED == false).OrderBy(m => m.P_ArticleNo).ToList();
+                        var json = new JavaScriptSerializer().Serialize(Products);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var product = dbcontext.Tbl_Order_Details.Where(m => m.AGEN_TRAD_PO_ID == id).Select(a => a.PRODUCT_ID);
+                        var Products = dbcontext.Tbl_Product_Master.Where(m => m.COM_KEY == companykey && (m.DELETED == false || product.Contains(m.P_ID))).OrderBy(m => m.P_ArticleNo).ToList();
+                        var json = new JavaScriptSerializer().Serialize(Products);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //View:Stock view
+        [HttpPost]
+        public ActionResult ET_Sales_Stock_View(int pid, int oid)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    decimal orderqty = 0;
+                    var OpeningStock = (from d in dbcontext.tbl_StoreDetails
+                                        join f in dbcontext.tbl_StoreMaster on d.SD_SM_ID equals f.SM_Id
+                                        where d.SD_Itemcode == pid
+                                        select new
+                                        {
+                                            OpeningStock = d.SD_OpeningStock,
+                                        }).Select(a => a.OpeningStock).DefaultIfEmpty(0).Sum();
+
+                    var GI = (from d in dbcontext.tbl_GoodsInwardDetail
+                              join f in dbcontext.tbl_GoodsInwardHeader on d.GD_PID equals f.GI_ID
+                              where d.GD_ProductID == pid
+                              select new
+                              {
+                                  GIQuantity = d.GD_GIQuantity ?? 0,
+                              }).Select(a => a.GIQuantity).DefaultIfEmpty(0).Sum();
+                    if (oid == 0)
+                    {
+                        orderqty = (from a in dbcontext.Tbl_Master_Order
+                                    join b in dbcontext.Tbl_Order_Details on a.SO_ID equals b.AGEN_TRAD_PO_ID
+                                    where a.SO_Approval != 2 && b.PRODUCT_ID == pid
+                                    select new
+                                    { b.QUANTITY }).Select(a => a.QUANTITY).DefaultIfEmpty(0).Sum() ?? 0;
+                    }
+                    else
+                    {
+                        orderqty = (from a in dbcontext.Tbl_Master_Order
+                                    join b in dbcontext.Tbl_Order_Details on a.SO_ID equals b.AGEN_TRAD_PO_ID
+                                    where a.SO_ID != oid && a.SO_Approval != 2 && b.PRODUCT_ID == pid
+                                    select new
+                                    { b.QUANTITY }).Select(a => a.QUANTITY).DefaultIfEmpty(0).Sum() ?? 0;
+                    }
+                    var POs = dbcontext.tbl_GoodsInwardHeader.Select(a => a.GI_POCode);
+                    var PODetail = (from a in dbcontext.tbl_PurchaseOrderHeader
+                                    join b in dbcontext.tbl_PurchaseOrderDetails on a.PP_ID equals b.PD_PID
+                                    where b.PD_ProductID == pid && a.PO_Type == 3 && !POs.Contains(a.PP_ID)
+                                    select new AvailbleStock
+                                    {
+                                        POQty = b.PD_Quantity ?? 0,
+                                        PODate = a.Po_DeliveryDate ?? DateTime.Today
+                                    }).ToList();
+                    AvailbleStock head = new AvailbleStock();
+                    head.AvailableQty = OpeningStock + GI - orderqty;
+                    AvailbleStockView obj = new AvailbleStockView();
+                    obj.Head = head;
+                    obj.Detail = PODetail;
+                    return PartialView("/Views/Sales/ET_Sales_OrderDetails/ET_Sales_OrderDetails_StockView.cshtml", obj);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //View: popup view
+        [HttpPost]
+        public ActionResult ET_Sales_OrderDetails_View(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = (from MO in dbcontext.Tbl_Master_Order
+                                join OD in dbcontext.Tbl_Order_Details on MO.SO_ID equals OD.AGEN_TRAD_PO_ID
+                                join PM in dbcontext.Tbl_Product_Master on OD.PRODUCT_ID equals PM.P_ID
+                                join b in dbcontext.tbl_LookUp on PM.P_UOM equals b.LU_Code
+                                into m from n in m.DefaultIfEmpty()
+                                join CY in dbcontext.Tbl_Currency_Master on MO.SO_CusCurrency equals CY.CURRENCY_ID
+                                join MU in dbcontext.Tbl_Master_User on MO.SO_SalesPersonID equals MU.USER_ID
+                                join CD in dbcontext.Tbl_Master_CompanyDetails on MO.SO_CutomerID equals CD.COM_ID
+                                into x from y in x.DefaultIfEmpty()
+                                where MO.SO_ID == id && n.LU_Type == 2
+                                select new Tbl_Order_Details_CM
+                                {
+                                    AGEN_TRAD_PO = OD.AGEN_TRAD_PO,
+                                    PRODUCT_Name = PM.P_Name,
+                                    QUANTITY = OD.QUANTITY,
+                                    UOM_NAME = n.LU_Description,
+                                    SO_OrderDate = MO.SO_OrderDate,
+                                    SO_ORGID = MO.SO_ORGID,
+                                    SO_OrderType = MO.SO_OrderType,
+                                    SO_CutomerID = MO.SO_CutomerID,
+                                    SO_SupplierID = MO.SO_SupplierID,
+                                    SO_CusPONO = MO.SO_CusPONO,
+                                    SO_CusPODate = MO.SO_CusPODate,
+                                    SO_SupSCNO = MO.SO_SupSCNO,
+                                    SO_SupSCDate = MO.SO_SupSCDate,
+                                    SO_CusCurrencyname = CY.CURRENCY_NAME,
+                                    SO_CusPaymentTermID = MO.SO_CusPaymentTermID,
+                                    SO_CusDeliveryTerms = MO.SO_CusDeliveryTerms,
+                                    SO_Commision = MO.SO_Commision,
+                                    SO_Remarks = MO.SO_Remarks,
+                                    PACKING = OD.PACKING,
+                                    SHORT_NAME = PM.P_ShortName,
+                                    SO_PriceType=MO.SO_PriceType,
+                                    PRICE = OD.PRICE,
+                                    USER_NAME = MU.USER_NAME,
+                                    SO_Code = MO.SO_Code,
+                                    CustomerName = y.COM_NAME,
+                                    Quotation = MO.SO_QuotationID??0,
+                                    P_PackingQuantityUOM=PM.P_PackingQuantityUOM,
+                                    OrderDescription = OD.OrderDescription
+                                }).ToList();
+                    return PartialView("/Views/Sales/ET_Sales_OrderDetails/ET_Sales_OrderDetails_View.cshtml", data);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Print the order
+        public ActionResult ET_Sales_OrderDetails_Print(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = (from MO in dbcontext.Tbl_Master_Order
+                                join OD in dbcontext.Tbl_Order_Details on MO.SO_ID equals OD.AGEN_TRAD_PO_ID
+                                join PM in dbcontext.Tbl_Product_Master on OD.PRODUCT_ID equals PM.P_ID
+                                join b in dbcontext.tbl_LookUp on PM.P_UOM equals b.LU_Code
+                                into m
+                                from n in m.DefaultIfEmpty()
+                                join CY in dbcontext.Tbl_Currency_Master on OD.CURRENCY_ID equals CY.CURRENCY_ID
+                                join MU in dbcontext.Tbl_Master_User on MO.SO_SalesPersonID equals MU.USER_ID
+                                join CD in dbcontext.Tbl_Master_CompanyDetails on MO.SO_CutomerID equals CD.COM_ID
+                                join SCD in dbcontext.Tbl_Master_CompanyDetails on MO.SO_SupplierID equals SCD.COM_ID
+                                into x
+                                from y in x.DefaultIfEmpty()
+                                where MO.SO_ID == id && n.LU_Type == 2
+                                select new Tbl_Order_Details_CM
+                                {
+                                    ArticleNo = PM.P_ArticleNo,
+                                    AGEN_TRAD_PO = OD.AGEN_TRAD_PO,
+                                    PRODUCT_Name = PM.P_Name,
+                                    QUANTITY = OD.QUANTITY,
+                                    UOM_NAME = n.LU_Description,
+                                    CURRENCY_NAME = CY.CURRENCY_NAME,
+                                    SO_OrderDate = MO.SO_OrderDate,
+                                    SO_ORGID = MO.SO_ORGID,
+                                    SO_OrderType = MO.SO_OrderType,
+                                    SO_CutomerID = MO.SO_CutomerID,
+                                    SO_SupplierID = MO.SO_SupplierID,
+                                    SO_CusPONO = MO.SO_CusPONO,
+                                    SO_CusPODate = MO.SO_CusPODate,
+                                    SO_SupSCNO = MO.SO_SupSCNO,
+                                    SO_SupSCDate = MO.SO_SupSCDate,
+                                    SO_CusCurrencyname = CY.CURRENCY_NAME,
+                                    SO_SupCurrencyname = CY.CURRENCY_NAME,
+                                    SO_CusPaymentTermID = MO.SO_CusPaymentTermID,
+                                    SO_CusDeliveryTerms = MO.SO_CusDeliveryTerms,
+                                    SO_Commision = MO.SO_Commision,
+                                    SO_Remarks = MO.SO_Remarks,
+                                    PACKING = OD.PACKING,
+                                    SHORT_NAME = PM.P_ShortName,
+                                    PRICE = OD.PRICE,
+                                    USER_NAME = MU.USER_NAME,
+                                    CUSTOMER_NAME = CD.COM_NAME,
+                                    SUPPLIER_NAME = y.COM_NAME,
+                                    SO_Code = MO.SO_Code
+
+                                }).ToList();
+                    return PartialView("/Views/Agency/ET_Sales_OrderDetails/ET_Sales_OrderDetails_Print.cshtml", data);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+        // Binding the contact details in dynamic table 
+        public JsonResult ET_Sales_OrderDetails_Update_Childtable(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = ObjBL.ET_Sales_OrderDetails_Update_Childtable_BL(id);
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Get the quation details
+        public JsonResult ET_Sales_OrderDetails_Update_ChildtableQuotation(int id,int orderid)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data1 = (from a in dbcontext.tbl_QuotationHeader where a.Q_ID == id select new { a.Q_PaymentTerms,a.Q_DeliveryTerms });
+                    if (orderid == 0)
+                    {
+                        EntityClasses dbcontext = new EntityClasses();
+                        //var data = dbcontext.tbl_QuotationDetails.Where(m => m.QD_PID == id).ToString();
+                        var data = (from a in dbcontext.tbl_QuotationDetails
+                                     join b in dbcontext.Tbl_Product_Master on a.QD_ProductID equals b.P_ID
+                                     join e in dbcontext.tbl_LookUp on b.P_UOM equals e.LU_Code into f
+                                     from g in f.DefaultIfEmpty()
+                                    where a.QD_PID == id && g.LU_Type == 2 
+                                    select new Tbl_Order_Details_CM
+                                    {
+                                        PRODUCT_ID = b.P_ID,
+                                        P_PackingQuantityUOM = b.P_PackingQuantityUOM,
+                                        UOM_NAME = g.LU_Description,
+                                        QUANTITY = a.QD_Quantity,
+                                        PRICE = a.QD_Unit_Price,
+                                        OrderDescription = a.QD_Description,
+                                        SUPPLIEROFFER_ID = 0
+                                    }
+                                   );
+                        var res = new { QuotationDetails = data,QuotationInfo = data1 };
+                        var json = new JavaScriptSerializer().Serialize(res);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var data = (from Ol in dbcontext.Tbl_Master_Order
+                                    join Od in dbcontext.Tbl_Order_Details on Ol.SO_ID equals Od.AGEN_TRAD_PO_ID
+                                    join Pct in dbcontext.Tbl_Product_Master on Od.PRODUCT_ID equals Pct.P_ID
+                                    where Ol.SO_ID == orderid
+                                    select new Tbl_Order_Details_CM
+                                    {
+                                        PRODUCT_ID = Pct.P_ID,
+                                        UOM_NAME = (dbcontext.tbl_LookUp.FirstOrDefault(m => m.LU_Type == 2 && m.LU_Code == Od.UOM).LU_Description),
+                                        QUANTITY = Od.QUANTITY,
+                                        PRICE = Od.PRICE,
+                                        SUPPLIEROFFER_ID = Od.SUPPLIEROFFER_ID,
+                                        OrderDescription = Od.OrderDescription,
+                                        P_PackingQuantityUOM = Pct.P_PackingQuantityUOM
+                                    }).ToList();
+                        var res = new { QuotationDetails = data, QuotationInfo = data1 };
+                        var json = new JavaScriptSerializer().Serialize(res);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Get the offer details
+        public ActionResult ET_General_Order_SuplierProduct_Offer(int id,int pid,int custid)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    if (custid == 0)
+                    {
+                        var data = (from Ofid in dbcontext.Tbl_Offer_Details
+                                    join OfM in dbcontext.Tbl_Offers_Master on Ofid.OFFER_ID equals OfM.OFFER_ID
+                                    join pct in dbcontext.Tbl_Product_Master on Ofid.PRODUCT_ID equals pct.P_ID
+                                    where OfM.COM_ID == id && Ofid.PRODUCT_ID == pid && OfM.VALIDITY_DATE >= DateTime.Now && OfM.CUST_ID == 0
+                                    select new Tbl_Offer_Details_CM
+                                    {
+                                        OFFER_ID = OfM.OFFER_ID,
+                                        CUST_ID = OfM.CUST_ID,
+                                        CUST_SUPP = OfM.CUST_SUPP,
+                                        OFFER_NO = OfM.OFFER_NO,
+                                        PRODUCT_NAME = pct.P_ShortName,
+                                        PRICE = Ofid.PRICE,
+                                        VALIDITY_DATE = OfM.VALIDITY_DATE,
+                                        VALIDITY_DAYS = OfM.VALIDITY_DAYS,
+                                        OFFER_DATE = OfM.OFFER_DATE,
+                                        COM_ID = OfM.COM_ID,
+                                        PRODUCT_ID = Ofid.PRODUCT_ID,
+                                        OFFER_CODE = OfM.OFFER_CODE,
+                                        OfferType = "No"
+
+                                    }).ToList();
+                        return PartialView("/Views/Sales/ET_Sales_OrderDetails/ET_Sales_OrderDetails_Offer.cshtml", data);
+                    }
+                    else
+                    {
+                        var data = (from Ofid in dbcontext.Tbl_Offer_Details
+                                    join OfM in dbcontext.Tbl_Offers_Master on Ofid.OFFER_ID equals OfM.OFFER_ID
+                                    join pct in dbcontext.Tbl_Product_Master on Ofid.PRODUCT_ID equals pct.P_ID
+                                    where OfM.COM_ID == id && Ofid.PRODUCT_ID == pid && OfM.VALIDITY_DATE >= DateTime.Now && (OfM.CUST_ID == custid || OfM.CUST_ID==0)
+                                    select new Tbl_Offer_Details_CM
+                                    {
+                                        OFFER_ID = OfM.OFFER_ID,
+                                        CUST_ID = OfM.CUST_ID,
+                                        CUST_SUPP = OfM.CUST_SUPP,
+                                        OFFER_NO = OfM.OFFER_NO,
+                                        PRODUCT_NAME = pct.P_ShortName,
+                                        PRICE = Ofid.PRICE,
+                                        VALIDITY_DATE = OfM.VALIDITY_DATE,
+                                        VALIDITY_DAYS = OfM.VALIDITY_DAYS,
+                                        OFFER_DATE = OfM.OFFER_DATE,
+                                        COM_ID = OfM.COM_ID,
+                                        PRODUCT_ID = Ofid.PRODUCT_ID,
+                                        OFFER_CODE = OfM.OFFER_CODE,
+                                        OfferType = OfM.CUST_ID == 0 ? "No" : "Yes"
+                                    }).ToList();
+                        return PartialView("/Views/Sales/ET_Sales_OrderDetails/ET_Sales_OrderDetails_Offer.cshtml", data);
+                    }
+                    //var json = new JavaScriptSerializer().Serialize(data);
+                    //return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Get the product details
+        public JsonResult ProductDetails(int id,int priceType)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = (from a in dbcontext.Tbl_Product_Master
+                                where a.P_ID == id
+                                select new
+                                {
+                                    a.P_PackingQuantityUOM,
+                                    Description = (dbcontext.tbl_LookUp.FirstOrDefault(m => m.LU_Type == 2 && m.LU_Code == a.P_UOM).LU_Description),
+                                    price = (priceType == 1 ? (dbcontext.Tbl_ProductCatalog.FirstOrDefault(m => m.ACTIVE_STATUS == true && m.PRODUCT_ID == a.P_ID).UNIT_PRICE1) : priceType == 2 ? (dbcontext.Tbl_ProductCatalog.FirstOrDefault(m => m.ACTIVE_STATUS == true && m.PRODUCT_ID == a.P_ID).UNIT_PRICE2) : priceType == 3 ? (dbcontext.Tbl_ProductCatalog.FirstOrDefault(m => m.ACTIVE_STATUS == true && m.PRODUCT_ID == a.P_ID).UNIT_PRICE3) : (dbcontext.Tbl_ProductCatalog.FirstOrDefault(m => m.ACTIVE_STATUS == true && m.PRODUCT_ID == a.P_ID).UNIT_PRICE4)) != null ? (priceType == 1 ? (dbcontext.Tbl_ProductCatalog.FirstOrDefault(m => m.ACTIVE_STATUS == true && m.PRODUCT_ID == a.P_ID).UNIT_PRICE1) : priceType == 2 ? (dbcontext.Tbl_ProductCatalog.FirstOrDefault(m => m.ACTIVE_STATUS == true && m.PRODUCT_ID == a.P_ID).UNIT_PRICE2) : priceType == 3 ? (dbcontext.Tbl_ProductCatalog.FirstOrDefault(m => m.ACTIVE_STATUS == true && m.PRODUCT_ID == a.P_ID).UNIT_PRICE3) : (dbcontext.Tbl_ProductCatalog.FirstOrDefault(m => m.ACTIVE_STATUS == true && m.PRODUCT_ID == a.P_ID).UNIT_PRICE4)) : 0,
+                                });
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+       //GEt the discount
+        public JsonResult GetDiscount(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = (from a in dbcontext.Tbl_Payment_Terms
+                                where a.PT_ID == id
+                                select new
+                                {
+                                    a.PT_DiscountType,
+                                    a.PT_DiscountPer,
+                                    a.PT_DiscountAmount,
+                                }).ToList();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //public JsonResult ET_General_Order_saveOffer(int COMID,int PID, int Ofid)
+        //{
+        //    bool val = Session["UserID"] == null ? false : true;
+        //    if (val)
+        //    {
+        //        try
+        //        {
+        //            var User = Convert.ToInt32(Session["UserID"]);
+        //            var data = ObjBL.ET_General_Order_saveOffer_BL(COMID, PID, Ofid, User);
+        //            var json = "Failed";
+        //            if (data != 0)
+        //            {
+        //                json = "Success";
+        //            }
+        //            else
+        //            {
+        //                objLOG.log_dockey = "6014";
+        //                objLOG.log_operation = "Supplier Offer";
+        //                objLOG.log_userid = Session["UserID"].ToString();
+        //                objLOG.log_recordkey = Ofid.ToString();
+        //                objLOG.log_Remarks = "Supplier Offer Successfully";
+        //                bal.OperationInsertLogs_BL(objLOG);
+        //            }
+        //            return Json(json, JsonRequestBehavior.AllowGet);
+        //        }
+        //        catch (Exception exe)
+        //        {
+        //            string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+        //            string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+        //            objERR.err_title = controllerName + "-" + controllerName;
+        //            objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+        //            objERR.err_details = exe.Message.Replace("'", "");
+        //            int errid = bal.ExceptionInsertLogs_BL(objERR);
+        //            return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return Json("ET_SessionExpire", "ET_Login");
+        //    }
+        //}
+        //Get the customer and supplier
+        public JsonResult GetCustomerSupplier(int id,int custsup)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        int companykey = Convert.ToInt32(Session["CompanyKey"]);
+                        if (id == 0)
+                        {
+                            var Customer = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != custsup && m.COM_KEY == companykey && m.DELETED == false).OrderBy(m => m.COM_NAME).ToList();
+                            var json = new JavaScriptSerializer().Serialize(Customer);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            if (custsup == 1)
+                            {
+                                var cust = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == id).SO_CutomerID;
+                                var Customer = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != custsup && m.COM_KEY == companykey && (m.DELETED == false || m.COM_ID == cust)).ToList();
+                                var json = new JavaScriptSerializer().Serialize(Customer);
+                                return Json(json, JsonRequestBehavior.AllowGet);
+                            }
+                            else
+                            {
+                                var cust = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == id).SO_SupplierID;
+                                var Customer = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != custsup && m.COM_KEY == companykey && (m.DELETED == false || m.COM_ID == cust)).ToList();
+                                var json = new JavaScriptSerializer().Serialize(Customer);
+                                return Json(json, JsonRequestBehavior.AllowGet);
+                            }
+                        }
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+    }
+}

@@ -1,0 +1,58 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_Payment_Terms
+    {
+        [Key]
+        [Column(Order = 0)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal PT_ID { get; set; }
+
+        [Key]
+        [Column(Order = 1)]
+        [StringLength(50)]
+        public string PT_Code { get; set; }
+
+        [Key]
+        [Column(Order = 2)]
+        [StringLength(50)]
+        public string PT_Name { get; set; }
+
+        public int? PT_CreditDays { get; set; }
+
+        [StringLength(15)]
+        public string PT_DiscountType { get; set; }
+
+        public decimal? PT_DiscountPer { get; set; }
+
+        public decimal? PT_DiscountAmount { get; set; }
+
+        public int? PT_DiscountDays { get; set; }
+
+        public bool? PT_IsAdvance { get; set; }
+
+        [StringLength(15)]
+        public string PT_AdvanceType { get; set; }
+
+        public decimal? PT_AdvancePer { get; set; }
+
+        public decimal? PT_AdvanceAmount { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+    }
+}

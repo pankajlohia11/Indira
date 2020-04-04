@@ -1,0 +1,500 @@
+﻿app1.controller("AC_Organization", function ($scope, $http, $window, $rootScope) {
+    GetOrgList();
+    GetOrgRestoreList();
+    GetPrivilages();
+    //Checking privilage
+    function GetPrivilages() {
+        $scope.selectedtype = "0";
+        //$scope.selectedOrgtype = 0;
+        $scope.selectedemp = "";
+        var getprivilages = $http.get("/ET_Admin_SalesOrganization/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    //View  List
+    function GetOrgList() {
+        
+        var getOrglist = $http.get("/ET_Admin_SalesOrganization/GetOrgList",
+            {
+                params: { deleted: false }
+            });
+        getOrglist.then(function (org) {
+            
+            var res = JSON.parse(org.data);
+            $scope.Orglist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    // Restore List
+    function GetOrgRestoreList() {
+        var getrestoreuserllist = $http.get("/ET_Admin_SalesOrganization/GetOrgList",
+            {
+                params: { deleted: true }
+            });
+        getrestoreuserllist.then(function (user) {
+            var res = JSON.parse(user.data);
+            $scope.Orgrestorelist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    // Bind Dropdown Users
+    function ORGOrgHeadBind() {
+        var getorglist = $http.get("/ET_Admin_SalesOrganization/Binddropdown_User",
+            {
+                params: { type: $scope.submittext, id: $scope.ORG_ID, orgtype: $scope.selectedOrgtype }
+            }
+        );
+        getorglist.then(function (org) {
+            
+            if (org.data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (org.data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                
+                var res = JSON.parse(org.data);
+                $scope.orgHead = res;
+            }
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    // Bind Dropdown Employees Based on User Dropdown
+    $scope.GetEmployee = function () {
+        
+        if ($scope.selectedorghead != "0") {
+            var getparentlist = $http.get("/ET_Admin_SalesOrganization/Binddropdown_Employees",
+                {
+                    params: { pid: $scope.selectedorghead, type: $scope.submittext, id: $scope.ORG_ID}
+                });
+            getparentlist.then(function (emp) {
+                if (emp.data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (emp.data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    
+                    var res = JSON.parse(emp.data);
+                    $scope.emplist = res;
+                }
+            }, function () {
+                alert("No Data Found");
+            });
+        }
+        else {
+            $scope.emplist = {};
+            setTimeout(function () { $("#drpEmployees").val("").trigger("chosen:updated"); }, 100);
+        }
+    }
+    // Bind Dropdown Parent Organization Based on Organization Type
+    $scope.ORGParentBind = function () {
+        
+        if ($scope.selectedtype == "2") {
+            $("#ParentDisplay").css("display", "block");
+            var getemplist = $http.get("/ET_Admin_SalesOrganization/Binddropdown_ORGParent",
+                {
+                    params: { id: $scope.selectedtype, type: $scope.submittext }
+                });
+            getemplist.then(function (emp) {
+                
+                if (emp.data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (emp.data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    
+                    var res = JSON.parse(emp.data);
+                    $scope.parentOrg = res;
+                }
+            }, function () {
+                alert("No Data Found");
+            });
+        }
+        else {
+            $("#ParentDisplay").css("display", "none");
+            $scope.parentOrg = {};
+        }
+    }
+    $scope.EMPChange = function () {
+    }
+    $scope.ParentChange = function () {
+    }
+    $scope.TypeChange = function () {
+        ORGOrgHeadBind();
+    }
+    //Show the target list
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        GetOrgList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    //Show the deleted records
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        GetOrgRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+    //Insert the new Organization
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+            $scope.ORG_ID = "0";
+            $scope.ORG_CODE = "";
+            $scope.ORG_NAME = "";
+            $scope.selectedorghead = "0";
+            $scope.selectedemp = "";
+            $scope.selectedtype = "0";
+           
+            $scope.selectedparent = "0";
+            //ORGOrgHeadBind();
+            $("#drpOrgHead").val("0").trigger("chosen:updated");
+            $("#drpOrganizationType").val("0").trigger("chosen:updated");
+            $("#drpEmployees").val("").trigger("chosen:updated");
+            $("#drpOrgType").val("0").trigger("chosen:updated");
+            $scope.ORGParentBind();
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    // Insert / Update Sales Organization
+    $scope.SubmitClick = function () {
+        debugger;
+        
+        $("#div_loadImage").css("display", "block");
+        var Employees = $("#drpEmployees").val();
+        if (Employees == null)
+            Employees = "";
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_SalesOrganization/ET_Admin_SalesOrganization_Add",
+            dataType: 'json',
+            data: {
+                OrganizationID: $scope.ORG_ID,
+                txtOrganizationCode: $scope.ORG_CODE,
+                txtOrganizationName: $scope.ORG_NAME,
+                drpOrganizationHead: $scope.selectedorghead,
+                drpOrganizationType: $scope.selectedtype,
+                drpOrganizationParent: $scope.selectedparent,
+                drpEmployees: Employees.toString(),
+                drpOrgType: $scope.selectedOrgtype
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+
+        post.success(function (data, status) {
+            $("#div_loadImage").css("display", "none");
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else if (data.indexOf("Validation") > -1) {
+                toastr["error"](data, "Notification");
+            }
+            else if (data.indexOf("Success") > -1) {
+                var res = data.split(':');
+                if ($scope.ORG_ID == 0) {
+                    message = 'Record Inserted Successfully With Code : ' + res[1].toString();
+                    toastr["success"](message, "Notification");
+                }
+                else {
+                    message = 'Record Updated Successfully With Code : ' + res[1].toString();
+                    toastr["success"](message, "Notification");
+                }
+                $scope.submittext = "Submit";
+                $scope.createedit = "Create";
+                $("#formSubmit").attr('disabled', "disabled");
+                $scope.ORG_ID = "0";
+                $scope.ORG_CODE = "";
+                $scope.ORG_NAME = "";
+                $scope.selectedorghead = "0";
+                $scope.selectedemp = "";
+                $scope.selectedtype = "0";
+                $scope.selectedOrgtype = "0";
+                $scope.selectedparent = "0";
+                ORGOrgHeadBind();
+                $("#drpOrgHead").val("0").trigger("chosen:updated");
+                $("#drpOrganizationType").val("0").trigger("chosen:updated");
+                $("#drpOrgType").val("0").trigger("chosen:updated");
+                $scope.ORGParentBind();
+                
+            }
+            else {
+                message = "Failed to do this operation.";
+                toastr["error"](message, "Notification");
+            }
+        });
+
+        post.error(function (data, status) {
+            $("#div_loadImage").css("display", "none");
+            console.log(data);
+            $window.alert(data.Message);
+        });
+
+    }
+    //Get: Record for Edit Row 
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_SalesOrganization/ET_Admin_SalesOrganization_Update_Get",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    debugger;
+                    var UserByID = JSON.parse(data);
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+
+                    $scope.ORG_ID = UserByID.ORG_ID;
+                    $scope.ORG_CODE = UserByID.ORG_CODE;
+                    $scope.ORG_NAME = UserByID.ORG_NAME;
+                    
+                    $scope.selectedOrgtype = UserByID.sales_Organization;
+                    $scope.selectedorghead = UserByID.ORG_HEAD_ID;
+                    $scope.selectedemp = UserByID.ORG_EMPLOYEE_IDS;
+                    $scope.selectedtype = UserByID.ORG_TYPE;
+                    $scope.selectedparent = UserByID.ORG_PARENT_ID;
+                    ORGOrgHeadBind();
+                    $("#drpOrgHead").val(UserByID.ORG_HEAD_ID).trigger("chosen:updated");
+                    $("#drpOrganizationType").val(UserByID.ORG_TYPE).trigger("chosen:updated");
+                    $("#drpOrgType").val(UserByID.sales_Organization).trigger("chosen:updated");
+                    $scope.ORGParentBind();
+
+                }
+            });
+
+            post.error(function (data, status) {
+                
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Restore the delete records
+
+    //Restore the deleted records
+    $scope.PerformRestore = function (a, $event, b) {
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_SalesOrganization/ET_Admin_SalesOrganization_RestoreDelete",
+            dataType: 'json',
+            data: {
+                id: a,
+                type: b
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                if (data == "Success") {
+                    $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                    if (b) {
+                        message = "Record Deleted Successfully.";
+                    }
+                    else {
+                        message = "Record Restored Successfully.";
+                    }
+
+                    toastr["success"](message, "Notification");
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            }
+        });
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+   $scope.Restoredeleterecords = function (a, $event, b) 
+   {
+       if (b)
+       {
+           alertmessageModified($event, a.toString(), b, 'ET_Admin_SalesOrganization', 'ET_Admin_SalesOrganization_RestoreDelete');
+       }
+       else
+       {
+           $scope.PerformRestore(a, $event, b);
+            //message = "You don't access to do this operation, please contact admin.";
+            //toastr["error"](message, "Notification");
+        }
+    } 
+    // View : Popup View record
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_SalesOrganization/ET_Admin_SalesOrganization_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Watch for binding  data
+    $scope.$watch("orgHead", function (value) {
+        var val = value || null;
+        if (val) {
+            
+            setTimeout(function () { $("#drpOrgHead").val($scope.selectedorghead).trigger("chosen:updated"); $scope.GetEmployee(); }, 100);
+            
+        }
+    });
+    $scope.$watch("emplist", function (value) {
+        var val = value || null;
+        if (val) {
+            
+            var emps = $scope.selectedemp.toString().split(',');
+            setTimeout(function () { $("#drpEmployees").val(emps).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("parentOrg", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpOrganizationParent").val($scope.selectedparent).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("Orglist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("Orgrestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 50);
+        }
+    });
+});
+
+    //scope.$watch("assignments", function (value) {//I change here
+    //    var val = value || null;
+    //    if (val)
+    //        element.dataTable({ "bDestroy": true });
+    //});
+
+
+//$scope.$watch(
+    //    "selectedcountry",
+    //    function (newValue, oldValue) {
+    //        // Ignore initial setup.
+    //        if (newValue === oldValue) {
+    //            return;
+    //        }
+    //        alert(newValue);
+    //    }
+    //);

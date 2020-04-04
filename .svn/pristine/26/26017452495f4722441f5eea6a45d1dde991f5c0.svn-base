@@ -1,0 +1,37 @@
+﻿@model BusinessEntity.EntityModels.Tbl_Payment_Config
+
+<div class="col-md-12">
+
+    <div name="form1" role="form" id="form1" data-parsley-validate>
+        @*<div class="row">
+
+                <div class="form-group col-md-6">
+                    <label for="PaymentFrom">Payment Code</label>
+                    <input type="text" name="txtPaymentCode" id="txtPaymentCode" class="form-control" disabled="@ViewBag.AutoManual" />
+                </div>
+            </div>*@
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="PaymentFrom">Payment From</label>
+                <input type="text" name="txtPaymentFrom" id="txtPaymentFrom" class="form-control" value="@Model.Payment_From" disabled />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="PaymentTo">Payment To</label>
+                <input type="text" name="txtPaymentTo" id="txtPaymentTo" class="form-control" value="@Model.Payment_To" disabled />
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="DiscountType">Discount Type</label>
+                <input type="text" name="txtDiscountType" id="txtDiscountType" class="form-control" value="@Model.Payment_Discount_Type" disabled />
+            </div>
+
+            <div class="form-group col-md-6" id="lblDiscount">
+                <label for="Discount">Discount amount / Discount %</label>
+
+                <input type="text" name="txtDiscount" id="txtDiscount" class="form-control" value="@Model.Payment_Discount_Amount / @Model.Payment_Discount_Percentage" disabled />
+            </div>
+        </div>
+    </div>

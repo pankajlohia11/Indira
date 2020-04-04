@@ -1,0 +1,335 @@
+﻿
+@{
+    ViewBag.Title = "ET_Admin_Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_Dashboard.js"></script>
+    
+}
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+<section id="content" ng-controller="AC_DashboardCtrl">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Dash Board<span></span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="index.html"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Dash Board</a>
+                    </li>
+                </ul>
+
+            </div>
+            
+        </div>
+
+        <div class="pagecontent">   
+            <div class="row">
+                <div class="col-md-12" style="color:white;">
+                    <div class="col-md-3" style="position: relative;background:#16a085 !important; min-height: 125px;margin-left: 6%;perspective: 600px;">
+                        <div style="height: 100%;position: relative; width: 100%; padding: 5px;top: 0;left: 0; z-index: 11;">
+                            <div class="row">
+                                <div class="col-xs-12" style="font-size: 23px;font-weight: bold; text-align: center;">
+                                    <span>Agency</span>
+                                </div>
+                                <div class="col-xs-6" style="    font-size: 25px;    text-align: center;">
+                                    <span>Yr. to Date</span>
+                                    <span>This Month</span>
+                                </div>
+                                <div class="col-xs-6" style="    font-size: 25px;    text-align: center;">
+                                    <span id="LblagencyYearSale">
+                                        0
+                                    </span><br/>
+                                    <span id="LblagencyMonthSale">
+                                        0
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-3" style="position: relative;background:#e05d6f !important; min-height: 125px;margin-left: 6%;perspective: 600px;">
+                        <div style="height: 100%;position: relative; width: 100%; padding: 5px;top: 0;left: 0; z-index: 11;">
+                            <div class="row">
+                                <div class="col-xs-12" style="font-size: 23px;font-weight: bold; text-align: center;">
+                                    <span>Trading</span>
+                                </div>
+                                <div class="col-xs-6" style="    font-size: 25px;    text-align: center;">
+                                    <span>Yr. to Date</span>
+                                    <span>This Month</span>
+                                </div>
+                                <div class="col-xs-6" style="    font-size: 25px;    text-align: center;">
+                                    <span id="LblTradingYearSale">
+                                        0
+                                    </span><br />
+                                    <span id="LblTradingMonthSale">
+                                        0
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-3" style="position: relative;background: #418bca !important; min-height: 125px;margin-left: 6%;margin-bottom:1%;">
+                        <div style="height: 100%;position: relative; width: 100%; padding: 5px;top: 0;left: 0; z-index: 11;">
+                            <div class="row">
+                                <div class="col-xs-12" style="font-size: 23px;font-weight: bold; text-align: center;">
+                                    <span>Stores</span>
+                                </div>
+                                <div class="col-xs-6" style="    font-size: 25px;    text-align: center;">
+                                    <span>Yr. to Date</span>
+                                    <span>This Month</span>
+                                </div>
+                                <div class="col-xs-6" style="    font-size: 25px;    text-align: center;">
+                                    <span id="LblStoresYearSale">
+                                        0
+                                    </span><br />
+                                    <span id="LblStoresMonthSale">
+                                        0
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>  
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <ul class="nav nav-tabs tabs-dark">
+                        <li role="presentation" class="active"><a style="padding:10px 15px;" role="tab" data-toggle="tab" href="#litab_Agency">Agency</a></li>
+                        <li role="presentation"><a style="padding:10px 15px;" role="tab" data-toggle="tab" href="#litab_Trading">Trading</a></li>
+                        <li role="presentation"><a style="padding:10px 15px;" role="tab" data-toggle="tab" href="#litab_Store">Store</a></li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="litab_Agency">
+                            <!-- row -->
+
+                            <div class="row" style="background:white;margin-top:2%;">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Sales Person *</label>
+                                    <select data-ng-model="S_SalesPerson" id="drpSalesPerson" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SalesPersonChange()" required>
+                                        <option value="">-Select-</option>
+                                        <option value="0">All</option>
+                                        <option ng-repeat="salesperson in salespersons" value="{{salesperson.USER_ID}}">
+                                            {{salesperson.DISPLAY_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <div id="container" class="col-md-12" style="width: 75%;">
+                                        <canvas id="canvas"></canvas>
+                                    </div>
+                                </div>
+                                <!-- col -->
+
+                                <div class="form-group col-md-6">
+                                    @*<div ng-model="bar-example" id="bar-example" style="height: 250px;display:none;"></div>*@
+                                    <div style="margin-top:5%;padding:2%;">
+                                        <span>Agency Sales (salesperson wise)</span><br />
+                                        @*<span id="AgencyPie"></span>*@
+                                        <canvas id="AgencyPie"></canvas>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                        <!-- /row -->
+
+                        <div role="tabpanel" class="tab-pane" id="litab_Trading">
+                            <!-- row -->
+                            <div class="row" style="background:white;margin-top:2%;">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Sales Person *</label>
+                                    <select data-ng-model="S_SalesPersonForTrading" id="drpSalesPersonForTrading" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SalesPersonChangeForTrading()" required>
+                                        <option value="">-Select-</option>
+                                        <option value="0">All</option>
+                                        <option ng-repeat="salesperson in salespersonsForTrading" value="{{salesperson.USER_ID}}">
+                                            {{salesperson.DISPLAY_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <div id="containerForTrading" style="width: 75%;">
+                                        <canvas id="canvasForTrading"></canvas>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <div style="margin-top:5%;padding:2%;">
+                                        <span>Trading Sales (salesperson wise)</span><br />
+                                        @*<span id="TradingPie"></span>*@
+                                        <canvas id="TradingPie"></canvas>
+                                    </div>
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="litab_Store">
+                            <!-- row -->
+                            <div class="row" style="background:white;margin-top:2%;">
+
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Sales Person *</label>
+                                    <select data-ng-model="S_SalesPersonForStore" id="drpSalesPersonForStore" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SalesPersonChangeForStore()" required>
+                                        <option value="">-Select-</option>
+                                        <option value="0">All</option>
+                                        <option ng-repeat="salesperson in salespersonsForStore" value="{{salesperson.USER_ID}}">
+                                            {{salesperson.DISPLAY_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <div id="containerForStore" style="width: 75%;">
+                                        <canvas id="canvasForStore"></canvas>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-6">
+
+                                    <div style="margin-top:5%;padding:2%;">
+                                        <span>Store Sales (salesperson wise)</span><br />
+                                        @*<span id="StorePie"></span>*@
+                                        <canvas id="StorePie"></canvas>
+                                    </div>
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+                        </div>
+                    </div>
+
+                    <div class="add-nav">
+                        <div class="col-md-12">
+
+
+
+                        </div>
+                        <div>
+                            <div id="pie-chart" style="height: 250px"></div>
+
+                        </div>
+
+
+
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <!-- tile -->
+                    <section class="tile bg-greensea widget-appointments">
+                        <!-- tile header -->
+                        <div class="tile-header dvd dvd-btm">
+                            <h1 class="custom-font">ToDo List</h1>
+                            <ul class="controls">
+                                <li class="dropdown">
+                                    <a role="button" tabindex="0" class="dropdown-toggle settings" data-toggle="dropdown">
+                                        <i class="fa fa-cog"></i>
+                                        <i class="fa fa-spinner fa-spin"></i>
+                                    </a>
+                                    <ul class="dropdown-menu pull-right with-arrow animated littleFadeInUp">
+                                        <li>
+                                            <a role="button" tabindex="0" class="tile-toggle">
+                                                <span class="minimize"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;&nbsp;Minimize</span>
+                                                <span class="expand"><i class="fa fa-angle-up"></i>&nbsp;&nbsp;&nbsp;Expand</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a role="button" tabindex="0" class="tile-refresh">
+                                                <i class="fa fa-refresh"></i> Refresh
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a role="button" tabindex="0" class="tile-fullscreen">
+                                                <i class="fa fa-expand"></i> Fullscreen
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="remove"><a role="button" tabindex="0" class="tile-close"><i class="fa fa-times"></i></a></li>
+                            </ul>
+                        </div>
+                        <!-- /tile header -->
+                        <!-- tile body -->
+                        <div class="tile-body">
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                @*<div class="col-md-6 text-center">
+                            <h4 class="text-light">Bratislava</h4>
+                            <div style="width: 100%;">
+                                <canvas id="c1" class="CoolClock:minovateClock:50"></canvas>
+                            </div>
+                            <span class="text-light">30&deg;C</span>
+                        </div>*@
+                                <!-- /col -->
+                                <!-- col -->
+                                <div class="col-md-12 b-l text-center">
+                                    <span class="day" id="Day">15</span><br />
+                                    <span class="month" id="Month">May</span>
+                                </div>
+                                <div class="col-md-12 text-right">
+                                    <span>Today you have <span id="TotalTask">0</span> task</span>
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+                        </div>
+                        <!-- /tile body -->
+                        <!-- tile footer -->
+                        <div class="tile-footer dvd dvd-top mt-20">
+                            <div class="owl-carousel" id="appointments-carousel">
+                                @*<div>
+                            <p class="text-center text-strong"><i class="fa fa-clock-o"></i> 16:00, <small class="text-thin">Estimated time: 2 hours</small></p>
+                            <p>
+                                <h5 class="mt-10 mb-0 text-strong">Release Update</h5>
+                                <small class="text-thin text-transparent-white">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</small>
+                            </p>
+                        </div>*@
+                                @*<div>
+                            <p class="text-center text-strong"><i class="fa fa-clock-o"></i> 19:00, <small class="text-thin">Estimated time: 5 hours</small></p>
+                            <p>
+                                <h5 class="mt-10 mb-0 text-strong">Make a Backup</h5>
+                                <small class="text-thin text-transparent-white">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</small>
+                            </p>
+                        </div>*@
+                                @*<div>
+                            <p class="text-center text-strong"><i class="fa fa-clock-o"></i> 22:45, <small class="text-thin">Estimated time: 8 hours 45 minutes</small></p>
+                            <p>
+                                <h5 class="mt-10 mb-0 text-strong">Buy Tickets</h5>
+                                <small class="text-thin text-transparent-white">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</small>
+                            </p>
+                        </div>*@
+                            </div>
+                        </div>
+                        <!-- /tile footer -->
+                    </section>
+                    <!-- /tile -->
+                </div>
+            </div>
+        </div>
+    </div>>
+
+</section>
+
+

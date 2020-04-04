@@ -1,0 +1,72 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_Product_Master
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal P_ID { get; set; }
+
+        [StringLength(150)]
+        public string P_Code { get; set; }
+
+        [StringLength(50)]
+        public string P_ArticleNo { get; set; }
+
+        public decimal P_CategoryID { get; set; }
+
+        public decimal P_SubcategoryID { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        public string P_Name { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string P_ShortName { get; set; }
+
+        [Required]
+        public string P_Description { get; set; }
+
+        [Required]
+        [StringLength(10)]
+        public string P_UOM { get; set; }
+
+        public decimal P_PackingQuantity { get; set; }
+
+        public string P_Remark1 { get; set; }
+
+        public string P_Remark2 { get; set; }
+
+        public string P_Remark3 { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+
+        public string P_PackingQuantityUOM { get; set; }
+
+        public bool? P_IsStock { get; set; }
+
+        public decimal P_ROL { get; set; }
+
+        public decimal P_MSL { get; set; }
+    }
+}

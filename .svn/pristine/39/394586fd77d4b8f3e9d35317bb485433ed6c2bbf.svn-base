@@ -1,0 +1,105 @@
+﻿@using System.Globalization;
+@model BusinessEntity.EntityModels.Tbl_Payment_Terms
+
+<div class="col-md-12">
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="BankInfo"><strong>Payment Terms</strong></label>
+        </div>
+    </div>
+    <div class="row">
+        <div>
+            <div class="form-group col-md-6">
+                <label for="PaymentCode">Payment Code</label>
+                <input type="text" class="form-control" value="@Model.PT_Code" disabled />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="PaymentName">Payment Name</label>
+            <input type="text" class="form-control" value="@Model.PT_Name" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label for="DisplayName">Credit Days</label>
+            <input type="text" style="text-align:right;" class="form-control" value="@Model.PT_CreditDays" disabled />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="Discounttype">Discount Type</label>
+            <select class="form-control chosen-select" disabled>
+                @if (Model.PT_DiscountType != "1")
+                {
+                    <option value="1"> Percentage </option>
+                }
+                else
+                {
+                    <option value="2"> Amount </option>
+                }
+            </select>
+        </div>
+        @if (Model.PT_DiscountPer != 0)
+        {
+            <div class="form-group col-md-6">
+                <label for="percentageamount">Percentage</label>
+                <input type="text" style="text-align:right;" class="form-control" value="@Model.PT_DiscountPer" disabled/>
+            </div>
+        }
+        else
+        {
+            <div class="form-group col-md-6" id="htndiscountamount">
+                <label for="Amount">Amount</label>
+                <input type="text" style="text-align:right;" class="form-control" value="@(Convert.ToDecimal(Model.PT_DiscountAmount).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))" disabled/>
+            </div>
+        }
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="DiscountDays">Discount Days</label>
+            <input type="text" style="text-align:right;" value="@Model.PT_DiscountDays" class="form-control" disabled />
+        </div>
+        @if (Model.PT_IsAdvance == true)
+        {
+            <div class="form-group col-md-6">
+                <label class="control-label" for="lblSpecificCustomer">Is Advance</label><br />
+                <input type="checkbox" checked disabled />
+            </div>
+        }
+    </div>
+    @if (Model.PT_IsAdvance == true)
+    {
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="Advancetype">Advance Type</label>
+                <select class="form-control chosen-select" disabled>
+                    @if (Model.PT_AdvanceType != "2")
+                    {
+                        <option value="1"> Percentage</option>
+                    }
+                    else
+                    {
+                        <option value="2"> Amount </option>
+                    }
+                </select>
+            </div>
+            @if (Model.PT_AdvanceType != "2")
+            {
+                <div class="form-group col-md-6">
+                    <label for="percentageamount">Advance Percentage</label>
+                    <input type="text" style="text-align:right;" class="form-control" value="@Model.PT_AdvancePer" disabled />
+                </div>
+            }
+            else
+            {
+                <div class="form-group col-md-6">
+                    <label for="Amount">Advance Amount</label>
+                    <input type="text" style="text-align:right;" class="form-control" value="@(Convert.ToDecimal(Model.PT_AdvanceAmount).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))" disabled/>
+                </div>
+            }
+        </div>
+    }
+</div>

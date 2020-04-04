@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+
+namespace Euro.Controllers
+{
+    public class ET_LoginController : Controller
+    {
+        BAL bal = new BAL();
+
+        // GET: ET_Login
+        public ActionResult ET_Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult ET_Login_post(Tbl_Master_User objBE)
+        {
+            int result = bal.Authenticate_BL(objBE);
+            if (result != 0)
+            {
+                Session["UserID"] = objBE.USER_ID;
+                Session["UserName"] = objBE.USER_NAME;
+                Session["UserKey"] = 1;
+                return RedirectToAction("ET_Admin_Roles", "ET_Admin_Roles");
+            }
+            else
+            {
+                Session["UserID"] = objBE.USER_ID;
+                Session["UserName"] = objBE.USER_NAME;
+                Session["UserKey"] = 1;
+                return RedirectToAction("ET_Admin_Roles", "ET_Admin_Roles");
+            }
+        }
+        public ActionResult ET_SessionExpire()
+        {
+            return View();
+        }
+    }
+}

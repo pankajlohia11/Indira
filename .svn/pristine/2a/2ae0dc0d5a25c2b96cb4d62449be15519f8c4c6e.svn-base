@@ -1,0 +1,105 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.Store_View_CM
+@{
+    BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+
+}
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.storeHeader)
+            {
+                <h5><label><strong>Store Details</strong></label></h5>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Email">Store Code</label>
+                        <input type="text" value="@item.SM_Code" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Url">Store Name</label>
+                        <input type="text" value="@item.SM_Name" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Store Users</label>
+                        <input type="text" value="@item.SM_Store_User" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Address Line1</label>
+                        <input type="text" value="@item.SM_Addressline1" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Address Line2</label>
+                        <input type="text" value="@item.SM_Addressline2" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Country</label>
+                        @{ int locid = Convert.ToInt32(item.SM_Country.ToString());
+                            string CountryName = dbcontext.locations.Single(m => m.location_id == locid).name;}
+                        <input type="text" value="@CountryName" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">State</label>
+
+                        <input type="text" value="@item.SM_State" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">City</label>
+                        <input type="text" value="@item.SM_City" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Zipcode</label>
+                        <input type="text" value="@item.SM_Zipcode" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Status</label>
+                        @{string status = "In Active";
+                            if (item.SM_Activeflag == true)
+                            {
+                                status = "Active";
+                            }
+                            }
+                        <input type="text" value="@status" class="form-control" disabled>
+                    </div>
+                </div>
+            }
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>UOM</th>
+                        <th>Opening Qty</th>
+                        <th>Opening Rate</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.storeChild)
+                    {
+                    <tr>
+                        <td>@item.SD_ItemDescription</td>
+                        <td>@item.Product_name</td>
+                        <td>@item.SD_UOM</td>
+                        <td style="text-align:right;">@(Convert.ToDecimal(item.SD_OpeningStock).ToString("N3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td style="text-align:right;">@(Convert.ToDecimal(item.SD_OpeningRate).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

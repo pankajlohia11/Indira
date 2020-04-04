@@ -1,0 +1,304 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using BusinessEntity.EntityModels;
+using BusinessLogic.Admin_BL;
+using BusinessLogic;
+using System.Web.Script.Serialization;
+using System.Data.Entity;
+using System.IO;
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_SystemSetUpController : Controller
+    {
+        // GET: ET_Admin_SystemSetUp
+
+       // ET_Admin_SystemSetUp_BL objBL = new ET_Admin_SystemSetUp_BL();
+        EntityClasses dbcontext = new EntityClasses();
+        public static string prefix = "";
+        public static bool automanual = false;
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+        public ActionResult ET_Admin_SystemSetUp()
+        {
+            ViewBag.Login_Name = Session["DisplayName"].ToString();
+            return View();
+        }
+        //Used to fetch privilages of current user
+        public JsonResult GetPrivilages()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        var privilagelist = bal.GetPrivilages_BL(Convert.ToInt32(Session["UserID"].ToString()), 8023);
+                        var json = new JavaScriptSerializer().Serialize(privilagelist);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //This method is used to get edited record data
+        public JsonResult ET_Admin_SystemSetUp_Update_Get(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = dbcontext.Tbl_SystemSetUp.Single(m => m.COMPANY_ID == id);
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    // Insert Error Log
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                     objERR.err_title = controllerName + "-" + controllerName;
+                     objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                     objERR.err_details = exe.Message.Replace("'", "");
+                     int errid = bal.ExceptionInsertLogs_BL(objERR);
+                     return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                    
+                }
+            }
+            else
+            {
+                //Session Expiry
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //This method is used to get country data
+        public JsonResult GetCountryList()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        var Country = bal.Binddropdown_County_BL();
+                        return Json(Country, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        // Not in use
+        public JsonResult BindStates(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        var State = bal.Binddropdown_State_BL(id);
+                        return Json(State, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // Not in Use
+        public JsonResult BindCities(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        var City = bal.Binddropdown_City_BL(id);
+                        return Json(City, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //This method is used to update record into database
+        [HttpPost]
+        public decimal ET_Admin_SystemSetUp_Update(decimal CompanyId, string companyName,string CompanyAddressLine1,string CompanyAddressLine2,string Country,string State, string City, string ZipCode,string VatNo, string CompanyLogo,string DateFormat,int PasswordExpireDays,string AdminPassword,string SMTPHostName,string Emailid,string EmailPassword,decimal Tax,int DocumentDays)
+        {
+            Tbl_SystemSetUp gltpt = new Tbl_SystemSetUp();
+            Tbl_SystemSetUp objtpt = dbcontext.Tbl_SystemSetUp.Single(m => m.COMPANY_ID == CompanyId);
+            {
+                objtpt.COMPANY_ID = CompanyId;
+                objtpt.COMPANY_NAME = companyName;
+                objtpt.COMPANY_ADDRESS_LINE_1 = CompanyAddressLine1;
+                objtpt.COMPANY_ADDRESS_LINE_2 = CompanyAddressLine2;
+                objtpt.COMPANY_COUNTRY = Country;
+                objtpt.COMPANY_STATE = State;
+                objtpt.COMPANT_CITY = City;
+                objtpt.COMPANY_ZIP_CODE = ZipCode;
+                objtpt.COMPANY_VAT_NO = VatNo;
+                objtpt.COMPANY_LOGO = CompanyLogo;
+                objtpt.DATEFORMAT = DateFormat;
+                objtpt.PASSWORDEXPIRYDAYS = PasswordExpireDays;
+                objtpt.ADMINISTRATORPASSWORD = AdminPassword;
+                objtpt.SMTPHOSTNAME = SMTPHostName;
+                objtpt.EMAILID = Emailid;
+                objtpt.EMAILPASSWORD = EmailPassword;
+                objtpt.TAX = Tax;
+                objtpt.DOCUMENTDAYS = DocumentDays;
+                objtpt.DELETED = false;
+                objtpt.CREATED_DATE = DateTime.Now;
+                objtpt.CREATED_BY = Convert.ToInt32(Session["UserID"]);
+                objtpt.LAST_UPDATED_DATE = DateTime.Now;
+                objtpt.LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"]);
+                objtpt.COM_KEY = Convert.ToInt32(Session["Companykey"]);
+            };
+            gltpt.COMPANY_ID=dbcontext.SaveChanges();
+            return gltpt.COMPANY_ID;
+        }
+        //This method is used to save company logo into server file system
+        public ActionResult ET_Admin_SystemSetUp_ImagePath()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    string[] urlList = new string[Request.Files.Count];
+                   // bool sentAttachments = false;
+
+                    if (Request.Files.Count > 0)
+                    {
+                        for (int i = 0; i < Request.Files.Count; i++)
+                        {
+                            HttpPostedFileBase file = Request.Files[i]; //Uploaded file
+                                                                        //Use the following properties to get file's name, size and MIMEType
+
+                            int fileSize = file.ContentLength;
+                            string fileName = file.FileName;
+                            string mimeType = file.ContentType;
+                            System.IO.Stream fileContent = file.InputStream;
+
+                            //To save file, use SaveAs method
+                            string subPath = "~/Images/";
+                            bool exists = System.IO.Directory.Exists(Server.MapPath(subPath));
+                            if (!exists)
+                                System.IO.Directory.CreateDirectory(Server.MapPath(subPath));
+
+                            string path1 = System.Web.Hosting.HostingEnvironment.MapPath(subPath) + "\\";
+                            string path = System.Web.Hosting.HostingEnvironment.MapPath(subPath) + "\\" + fileName;
+                            string url = subPath.Replace("~", "") + fileName;
+
+                            FileInfo file1 = new FileInfo(path);
+                            int k = 1;
+                            while (file1.Exists)
+                            {
+                                path = path1 + "Copy" + k + fileName;
+                                url = subPath.Replace("~", "") + "Copy" + k + fileName;
+                                k++;
+                                file1 = new FileInfo(path);
+                            }
+
+
+                            urlList[i] = url;
+
+                            //File will be saved in application root
+                            file.SaveAs(path);
+                            Tbl_SystemSetUp gltpt = new Tbl_SystemSetUp();
+                            Tbl_SystemSetUp objtpt = dbcontext.Tbl_SystemSetUp.Single(m => m.COMPANY_ID == 1);
+                            {
+                                
+                                objtpt.COMPANY_LOGO = url;
+                               
+                            };
+                            gltpt.COMPANY_ID = dbcontext.SaveChanges();
+                        }
+                    }
+
+
+                    string success = "false";
+                
+
+                    return Json(success, JsonRequestBehavior.AllowGet);
+
+
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+    }
+    
+        
+}

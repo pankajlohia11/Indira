@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Routing;
+using BusinessEntity.CustomModels;
+using BusinessLogic.Admin_BL;
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_CustomerModuleController : Controller
+    {
+        // GET: ET_Admin_CompanyModule
+        ET_Admin_CustomerModule_BL objBL = new ET_Admin_CustomerModule_BL();
+        [RequireRequestValue("id")]
+        public ActionResult ET_Admin_CustomerModule(int id)
+        {
+            try
+            {
+                Convert.ToInt32(id);
+            }
+            catch
+            {
+                id = 1;
+            }
+            CompanyModule__CM objMaster = new CompanyModule__CM();
+            objMaster.CustomerMasterList = objBL.GetCustomers_BL();
+            objMaster.CustomerMaster = objBL.GetCustomerDetails_BL(id);
+            objMaster.CompanyContacts= objBL.GetContactDetails_BL(id);
+            ViewBag.CustomerName = objMaster.CustomerMaster.ToList()[0].COM_NAME;
+            return View(objMaster);
+        }
+        public ActionResult ET_Admin_CustomerModule()
+        {
+            int id1 = Convert.ToInt32(objBL.GetCustomers_BL().ToList()[0].COM_ID);
+            
+            return Redirect("~/ET_Admin_CustomerModule/ET_Admin_CustomerModule?id=" + id1 + "");
+                
+            
+        }
+    }
+}

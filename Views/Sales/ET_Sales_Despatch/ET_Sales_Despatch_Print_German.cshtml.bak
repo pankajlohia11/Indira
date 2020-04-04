@@ -1,0 +1,93 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.DespatchVIew_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <input id="germanformat" style="display:none;" value="@Model.Header[0].D_ID" />
+    <table style="width:100%" align="center">
+        <tr>
+            <td style="width:30%;"><img src="@Model.Header[0].imgurl" width="100"></td>
+            <td style="width:40%;text-align:center;"><h1 style="font-size:large"><label><strong>@Model.Header[0].SystemCompany</strong></label></h1></td>
+            <td style="width:30%;"></td>
+        </tr>
+    </table>
+    <br />
+    <h2 style="text-align:center;font-size:large;font-weight:bold;"><u>Lieferschein</u></h2>
+    <br />
+    <table style="font-size:14px;">
+        <tr>
+            <td><span><strong>@Model.Header[0].CompanyName</strong></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.Header[0].Street,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.Header[0].CityState,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.Header[0].CountryZip.</label></span></td>
+        </tr>
+
+    </table>
+    <table align="right">
+        <tr>
+            <td colspan="2">Kunden Nr:<strong>@Model.Header[0].CompanyCode</strong></td>
+        </tr>
+        @*<tr>
+            <td>Bestellnummern:<strong>@Model.Header[0].OrderCodes</strong></td>
+        </tr*@>
+        <tr>
+            <td>KD. USt-IdNr.:<strong>@Model.Header[0].USTID</strong></td>
+        </tr>
+        <tr>
+            <td>Datum:<strong>@Model.Header[0].D_DespatchDate.ToString("dd-MM-yyyy")</strong><br /><br /></td>
+        </tr>
+
+    </table><br /><br />
+    <div class="form-group col-md-6">
+        <label><strong>Lieferschein Nr:</strong></label>
+        <strong>@Model.Header[0].D_Code</strong>
+    </div><br /><br />
+    <table border="1" width="100%">
+        <thead>
+            <tr>
+                <th style="text-align:center"><strong>Pos</strong></th>
+                <th style="text-align:center" colspan="2"><strong>Menge</strong></th>
+                <th style="text-align:center"><strong>Text</strong></th>
+            </tr>
+        </thead>
+        <tbody>
+            @{int i = 1; }
+            @foreach (var item1 in Model.Details)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td style="text-align:right">@(Convert.ToDecimal(item1.DD_DespatchQuantity).ToString("N3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    <td align="center">@item1.DD_UOM</td>
+                    <td>@item1.DD_ProductName</td>
+                </tr>
+                i++;
+            }
+        </tbody>
+    </table><br />
+    <table style="font-size:12px;">
+        <tr>
+            <td>
+                <p>
+                    Es gelten die Allgemeinen Geschäftsbedingungen (AGB) der Eurotextiles GmbH & Co. KG.
+                    Abweichungen von Qualität/Stückzahl der Ware müssen uns vor Benutzung, aber in jedem Fall innerhalb von 7 Tagen nach Erhalt der Ware, schriftlich mitgeteilt werden. Ware die bereits gewaschen oder benutzt wurde ist von der Reklamation ausgeschlossen.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td><p>Hinweis nach Bundesdatenschutzgesetz: Wir arbeiten mit EDV und haben Ihren Namen und die sonst im Rahmen der Angelegenheit benötigten Daten gespeichert. Eine Übermittlung an Dritte findet nicht statt.</p></td>
+        </tr>
+    </table><br />
+    <p> <hr style="font-weight:bold;border-top:1px solid black;"></p>
+    <table style="font-size:10px;width:100%;">
+        <tr>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Eurotextiles GmbH & Co.KG<br />Mammolshainer Weg 14<br />61462 Königstein im Taunus<br />Fon +49 6174/25980<br />HRA 3451</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">HRA 3451<br />Amtsgericht Kongstein<br />Steuerrnummer 003 315 60117<br />USt-IdNr.DE279479010</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Kompl.Indra Enterprises GmbH<br />Geshafuher:Krishna Javaji<br />HRB 5137 Amtsgericht Konigstein<br />Steuernummer 003 236 16128</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Bankverbindung<br />Nassauische Sparkasse<br />IBAN :DE15 5105 00150270060706<br />SWIFT:-BIC NASSDE55XXX</td>
+        </tr>
+    </table>
+</div>

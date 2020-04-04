@@ -1,0 +1,100 @@
+﻿<!--
+     Author=Manoj
+    Created Date=11th April 2018
+    User Master View Partial View
+    Operations[View Popup]
+    -->
+@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_User>
+@{
+    BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+
+}
+@foreach (var item in Model)
+{
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="Code">User Code</label>
+            @Html.TextBoxFor(m => item.USER_CODE, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="col-md-6">
+            <label for="UserName">User Name</label>
+            @Html.TextBoxFor(m => item.USER_NAME, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="DisplayName">Display Name</label>
+            @Html.TextBoxFor(m => item.DISPLAY_NAME, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="col-md-6">
+            <label for="Role">Role</label>
+            @{ string roleName = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == item.ROLE_ID).ROLE_NAME;}
+            <input type="text" class="form-control" readonly value="@roleName" />
+        </div>
+    </div>
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="Street">Street</label>
+            @Html.TextBoxFor(m => item.USER_STREET, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="col-md-6">
+            <label for="Country">Country</label>
+            @{ int locid = Convert.ToInt32(item.USER_COUNTRY.ToString());
+                string CountryName = dbcontext.locations.Single(m => m.location_id == locid).name;}
+            <input type="text" class="form-control" readonly value="@CountryName" />
+        </div>
+    </div>
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="State">State</label>
+            @*@{ int stateid = Convert.ToInt32(item.USER_STATE.ToString());
+                string StateName = dbcontext.locations.Single(m => m.location_id == stateid).name;}*@
+            <input type="text" class="form-control" readonly value="@item.USER_STATE" />
+        </div>
+        <div class="col-md-6">
+            <label for="City">City</label>
+            @*@{ int cityid = Convert.ToInt32(item.USER_CITY.ToString());
+                string CityName = dbcontext.locations.Single(m => m.location_id == cityid).name;}*@
+            <input type="text" class="form-control" readonly value="@item.USER_CITY" />
+        </div>
+    </div>
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="ZipCode">Zip Code</label>
+            @Html.TextBoxFor(m => item.USER_ZIP, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="col-md-6">
+            <label for="Email">Email</label>
+            @Html.TextBoxFor(m => item.USER_EMAIL, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="Fax">Fax</label>
+            @Html.TextBoxFor(m => item.USER_FAX, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="col-md-6">
+            <label for="Phone">Phone</label>
+            @Html.TextBoxFor(m => item.USER_PHONE, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="Mobile">Mobile</label>
+            @Html.TextBoxFor(m => item.USER_MOBILE, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="col-md-6">
+            <label for="Remarks">Remarks</label>
+            @Html.TextBoxFor(m => item.USER_REMARKS, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+}
+
+

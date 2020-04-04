@@ -1,0 +1,57 @@
+﻿@using System.Globalization;
+@model IEnumerable<BusinessEntity.CustomModels.Despatch_CM>
+@foreach (var item in Model)
+{
+
+<tr>
+    <td>
+        <input type='text' id='txtSerial' class='form-control' value="@item.SO_Serial" />
+    </td>
+    <td style="display:none;">
+        <input type='text' id='txtOrderID' class='form-control' style="display:none;" value="@item.D_OrderID" />
+    </td>
+    <td>
+        <input type='text' id='txtOrderCode' class='form-control' value="@item.D_OrderCode" disabled />
+    </td>
+    <td style="display:none;">
+        <input type='text' id='txtProductID' class='form-control' style="display:none;" value="@item.DD_ProductID" />
+    </td>
+    <td>
+        <input type='text' id='txtArticleNo' class='form-control' readonly='readonly' value="@item.DD_ArticleNo" />
+    </td>
+    <td>
+        <input type='text' id='txtProductName' class='form-control' readonly='readonly' value="@item.DD_ProductName" />
+    </td>
+    <td>
+        <input type='text' id='txtUOM' class='form-control' readonly='readonly' value="@item.DD_UOM" />
+    </td>
+    <td>
+        <input style="text-align:right;" type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@(Convert.ToDecimal(item.DD_OrderQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td>
+        @{
+            decimal pendingqty = Convert.ToDecimal(@item.DD_OrderQuantity);
+            if (@item.DD_OrderQuantity != null)
+            {
+                pendingqty = pendingqty - Convert.ToDecimal(@item.DD_PendingQuantity);
+            }
+        }
+        <input style="text-align:right;" type='text' id='txtPendingQuantity' class='form-control' readonly='readonly' value="@(Convert.ToDecimal(pendingqty).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td>
+        @{
+            decimal tot = 0;
+            if (item.DD_AvailableStock1 != null)
+            { tot = Convert.ToDecimal(item.DD_AvailableStock1); }
+            tot = tot + Convert.ToDecimal(item.DD_AvailableStock2) - Convert.ToDecimal(item.DD_AvailableStock3);
+        }
+        <input style="text-align:right;" type='text' id='txtAvailableStock' class='form-control' readonly='readonly' value="@(Convert.ToDecimal(tot).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td>
+        <input style="text-align:right;" type='text' id='txtDespatchQuantity' onchange="DespatchQtyChange(this);" class='form-control' value="@(Convert.ToDecimal(item.DD_DespatchQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td style="display:none;">
+        <input type='text' id='txtOrderDetailID' class='form-control' style="display:none;" value="@item.DD_OrderDetailID" />
+    </td>
+</tr>
+}

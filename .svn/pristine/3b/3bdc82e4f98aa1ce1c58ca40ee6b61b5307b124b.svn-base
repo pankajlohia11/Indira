@@ -1,0 +1,682 @@
+﻿app1.controller("AC_OneToManyInvoiceCtrl", function ($scope, $http, $window, $compile) {
+    GetPrivilages();
+    GetInvoiceList();
+    GetCustomerList();
+    GetSalesPersonList();
+    //Get the Privillage access for this document
+    function GetPrivilages() {
+        debugger;
+        var getprivilages = $http.get("/ET_Sales_OneToManyInvoice/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            if (privilage.length != 0) {
+                $scope.Iscreate = privilage[0].IS_ADD;
+                $scope.Isedit = privilage[0].IS_EDIT;
+                $scope.Isdelete = privilage[0].IS_DELETE;
+                $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+                $scope.Isview = privilage[0].IS_VIEW;
+            }
+            else {
+                $scope.Iscreate = true;
+                $scope.Isedit = true;
+                $scope.Isdelete = true;
+                $scope.Isrestore = true;
+                $scope.Isview = true;
+            }
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    //Get the invoice list
+    function GetInvoiceList() {
+        var getinvoicelist = $http.get("/ET_Sales_OneToManyInvoice/GetInvoiceList",
+            {
+                params: { delete: false }
+            });
+        getinvoicelist.then(function (invoicelist) {
+            var res = JSON.parse(invoicelist.data);
+            $scope.invoicelist = res;
+        }, function () {
+            alert("Invoice List Found");
+        });
+    }
+    //Get the invoice list which are deleted
+    function GetInvoiceRestoreList() {
+        var getinvoicerestorelist = $http.get("/ET_Sales_OneToManyInvoice/GetInvoiceList",
+            {
+                params: { delete: true }
+            });
+        getinvoicerestorelist.then(function (invoicerestorelist) {
+            var res = JSON.parse(invoicerestorelist.data);
+            $scope.invoicerestorelist = res;
+        }, function () {
+            alert("Invoice Restore List Found");
+        });
+    }
+    //Get the Customers
+    function GetCustomerList() {
+        var getcustomerlist = $http.get("/ET_Sales_OneToManyInvoice/GetCustomers");
+        getcustomerlist.then(function (customerlist) {
+            var res = JSON.parse(customerlist.data);
+            $scope.customers = res;
+            $scope.OTMI_CustomerID = "";
+        }, function () {
+            alert("Customer Not Found");
+        });
+    }
+    //Get the Sales Person
+    function GetSalesPersonList() {
+        var getsalespersonlist = $http.get("/ET_Sales_OneToManyInvoice/GetSalesPerson");
+        getsalespersonlist.then(function (salespersonlist) {
+            var res = JSON.parse(salespersonlist.data);
+            $scope.salespersons = res;
+            $scope.OTMI_SalesPerson = 0;
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    // Get the sales person  For Customer
+    function GetSalesPersonForCustomer() {
+        if ($scope.OTMI_CustomerID != "") {
+            var SalesPerson = $http.get("/ET_Sales_OneToManyInvoice/GetSalesPersonForCustomer",
+                {
+                    params: { custid: $scope.OTMI_CustomerID }
+                });
+            SalesPerson.then(function (sPerson) {
+                var data = sPerson.data;
+                $scope.OTMI_SalesPerson = data[0];
+                if ($scope.OTMI_SalesPerson == 0) {
+                    message = "Sales Person not assigned in company master";
+                    toastr["error"](message, "Notification");
+                }
+                else {
+                    $("#drpSalesPerson").val($scope.OTMI_SalesPerson).trigger("chosen:updated");
+                }
+                
+            }, function () {
+                alert("Enquires Not Found");
+            });
+        }
+        else {
+            message = "Select Type";
+            toastr["error"](message, "Notification");
+            $scope.Q_CustomerID == "";
+            $("#drpCustomer").val("").trigger("chosen:updated");
+        }
+    }
+      //Customer Change
+    $scope.CustomerChange = function () {
+        $scope.OTMI_DespatchIDs = "";
+        GetDespatches();
+        GetSalesPersonForCustomer();
+        getTax();
+    }
+    //Get the Despatches
+    function GetDespatches() {
+        debugger;
+        if ($scope.OTMI_CustomerID != "") {
+            var getdespatchlist = $http.get("/ET_Sales_OneToManyInvoice/GetDespatches",
+                {
+                    params: {
+                        custid: $scope.OTMI_CustomerID,
+                        type: $scope.submittext,
+                        invid: $scope.OTMI_ID
+                    }
+                });
+            getdespatchlist.then(function (despatchlist) {
+
+                var res = JSON.parse(despatchlist.data);
+                $scope.despatchlist = res;
+            }, function () {
+                alert("Despatches Not Found");
+            });
+        }
+        else {
+            $scope.despatchlist = {};
+            $scope.OTMI_DespatchIDs = "";
+        }
+    }
+    //Despatch change
+    $scope.DespatchChange = function () {
+  
+        GetInvoiceDetails();
+    }
+    //Get tax
+    function getTax() {
+        if ($scope.OTMI_CustomerID != "") {
+            var getTaxPer = $http.get("/ET_Sales_OneToManyInvoice/GetTax", {
+                params: { id: $scope.OTMI_CustomerID }
+            });
+            getTaxPer.then(function (getTaxPercent) {
+                $scope.OTMI_TaxPer = parseFloat(getTaxPercent.data).toFixed(0);
+            }, function () {
+                alert('Data not found');
+            });
+        }
+    }
+    //Get invoice details
+    function GetInvoiceDetails() {
+        debugger;
+        var id = "";
+        try {
+            id = $scope.OTMI_DespatchIDs.join();
+        }
+        catch
+        {
+            id = $scope.OTMI_DespatchIDs;
+        }
+        $http({
+            method: 'POST',
+            url: '/ET_Sales_OneToManyInvoice/GetInvoiceDetails',
+            dataType: 'html',
+            data: {
+                ids: id,
+            },
+        }).success(function (data) {
+            debugger;
+            angular.element(document.getElementById('invoicedetailsbody')).html("");
+                angular.element(document.getElementById('invoicedetailsbody')).html(data);
+            }).error(function (result)
+            {
+                debugger;
+                alert("Invoice Details Not Found");
+            });
+        $http({
+            method: 'POST',
+            url: '/ET_Sales_OneToManyInvoice/GetInvoiceTotal',
+            dataType: 'json',
+            data: {
+                ids: id,
+            },
+        }).success(function (data) {
+            debugger;
+            
+            $scope.OTMI_OrderAmount = parseFloat(data.data2).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+            var taxper = parseFloat($scope.OTMI_TaxPer);
+            var taxamount = (parseFloat(data.data2) * taxper / 100);
+            var invamt = parseFloat(data.data2) + taxamount;
+            var DiscountAmt = invamt * parseFloat(data.data1[0].Discount) / 100;
+            $scope.OTMI_TaxAmount = taxamount.toLocaleString("es-ES", { minimumFractionDigits: 2 });
+            $scope.OTMI_DiscountAmt = DiscountAmt.toLocaleString("es-ES", { minimumFractionDigits: 2 });
+            $scope.OTMI_InvoiceAmount = (invamt - DiscountAmt).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+            $scope.OTMI_PaymentTerms = data.data1[0].PaymentTerms;
+        });
+    }
+    $scope.SalesPersonChange = function () {
+    }
+    //Tax changes
+    $scope.taxchange = function () {
+        debugger;
+        if ($scope.OTMI_OrderAmount == "") {
+            $scope.OTMI_TaxPer = "";
+            message = "Please Select Despatch No, Order Amount cannot be empty.";
+            toastr["error"](message, "Notification");
+        }
+        else {
+            $scope.OTMI_TaxAmount = (parseFloat($scope.OTMI_OrderAmount) * (parseFloat($scope.OTMI_TaxPer)) / 100).toFixed(3);
+            $scope.OTMI_InvoiceAmount = (parseFloat($scope.OTMI_OrderAmount) + (parseFloat($scope.OTMI_TaxAmount))).toFixed(3)
+        }
+    }
+       //Show the invoice
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        GetInvoiceList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+        $("#div_Print").css("display", "none");
+    }
+    //Show the deleted invoice  
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        GetInvoiceRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+        $("#div_Print").css("display", "none");
+    }
+     //create the new invoice
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $("#div_Print").css("display", "none");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+
+            $scope.OTMI_ID = "0";
+            $scope.OTMI_FreightCost = "";
+            $scope.OTMI_TransCost = "";
+            $scope.OTMI_Code = "";
+            $scope.OTMI_CustomerID = "";
+            $scope.OTMI_SalesPerson = 0;
+            $scope.OTMI_CustomerID = "";
+            $scope.OTMI_DespatchIDs = "";
+            $scope.OTMI_InvoiceDate = "";
+            $scope.OTMI_OrderAmount = "";
+            $scope.OTMI_TaxPer = "";
+            $scope.OTMI_TaxAmount = "";
+            $scope.OTMI_InvoiceAmount = "";
+
+            $scope.orderlist = {};
+            $scope.despatchlist = {};
+            $("#txtINVDate").val("");
+            $("#drpCustomer").val("").trigger("chosen:updated");
+            $("#drpDespatchIDs").val("").trigger("chosen:updated");
+            $("#drpSalesPerson").val("").trigger("chosen:updated");
+            angular.element(document.getElementById('invoicedetailsbody')).html("");
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Validate the data before saving   
+    function validate() {
+        var txt = "";
+        if ($("#txtINVDate").val() == "") {
+            message = "Select Invoice Date";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.OTMI_CustomerID == "") {
+            message = "Select Customer";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.OTMI_DespatchIDs == "") {
+            message = "Select Atleast One Despatch";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.OTMI_SalesPerson ==0) {
+            message = "Select Sales Person";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($("#txtOrderAmount").val() == "") {
+            message = "Total Order Amount Cannot be empty. Select Despatch No";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        return "something";
+    }
+    //Save the invoice
+    $scope.SubmitClick = function () {
+        debugger;
+        $("#div_loadImage").css("display", "block");
+        var date = $("#txtINVDate").val();
+        var txt = validate();
+        var desids = "";
+        try {
+            desids = $scope.OTMI_DespatchIDs.join();
+        }
+        catch (ex) {
+            desids = $scope.OTMI_DespatchIDs;
+        }
+        if ($scope.OTMI_FreightCost == "") {
+            $scope.OTMI_FreightCost = 0;
+        }
+        if ($scope.OTMI_TransCost == "") {
+            $scope.OTMI_TransCost = 0;
+        }
+
+        debugger;
+        if (txt != "") {
+            var transcost = parseFloat($scope.OTMI_TransCost.split('.').join("").replace(",", "."));
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OneToManyInvoice/ET_Sales_Invoice_Add",
+                dataType: 'json',
+                data: {
+                    OTMI_ID: $scope.OTMI_ID,
+                    OTMI_Code: $scope.OTMI_Code,
+                    OTMI_CustomerID: $scope.OTMI_CustomerID,
+                    OTMI_SalesPerson: $scope.OTMI_SalesPerson,
+                    OTMI_DespatchIDs: desids,
+                    OTMI_InvoiceDate: date,
+                    OTMI_OrderAmount: parseFloat($scope.OTMI_OrderAmount.split('.').join("").replace(",", ".")),
+                    OTMI_DiscountAmt: parseFloat($scope.OTMI_DiscountAmt.split('.').join("").replace(",", ".")),
+                    OTMI_TaxPer: $scope.OTMI_TaxPer,
+                    OTMI_PaymentTerms: $scope.OTMI_PaymentTerms,
+                    OTMI_FreightCost: parseFloat($scope.OTMI_FreightCost.split('.').join("").replace(",", ".")),
+                    OTMI_TransCost: transcost,
+                    OTMI_TaxAmount: parseFloat($scope.OTMI_TaxAmount.split('.').join("").replace(",", ".")),
+                    OTMI_InvoiceAmount: parseFloat($scope.OTMI_InvoiceAmount.split('.').join("").replace(",", "."))
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+
+            post.success(function (data, status) {
+                $("#div_loadImage").css("display", "none");
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else if (data.indexOf("Success") > -1) {
+                    var res = data.split(":");
+                    if ($scope.OTMI_ID == 0) {
+                        message = 'Record Inserted Successfully With Code : ' + res[1];
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully With Code : ' + res[1];
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.createnew();
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $("#div_loadImage").css("display", "none");
+                console.log(data);
+                $window.alert(data.message);
+            });
+        }
+        else {
+            $("#div_loadImage").css("display", "none");
+        }
+    }
+    //Edit the invoice details
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OneToManyInvoice/ET_Sales_Invoice_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var InvoiceByID = JSON.parse(data);
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+                    debugger;
+                    $scope.OTMI_ID = InvoiceByID.data.OTMI_ID;
+                    $scope.OTMI_Code = InvoiceByID.data.OTMI_Code;
+                    $scope.OTMI_CustomerID = InvoiceByID.data.OTMI_CustomerID;
+                    $scope.OTMI_SalesPerson = InvoiceByID.data.OTMI_SalesPerson;
+                    
+                    $scope.OTMI_DespatchIDs = InvoiceByID.data.OTMI_DespatchIDs;
+                    $scope.OTMI_InvoiceDate = parseFloat(InvoiceByID.data.OTMI_InvoiceDate).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                    $scope.OTMI_OrderAmount = parseFloat(InvoiceByID.data.OTMI_OrderAmount).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                    $scope.OTMI_TaxPer = InvoiceByID.data.OTMI_TaxPer;
+                    $scope.OTMI_PaymentTerms = InvoiceByID.data.PaymentTerms;
+                    
+                    $scope.OTMI_FreightCost = parseFloat(InvoiceByID.data.OTMI_FreightCost).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                   
+                    $scope.OTMI_TaxAmount = parseFloat(InvoiceByID.data.OTMI_TaxAmount).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                    $scope.OTMI_InvoiceAmount = parseFloat(InvoiceByID.data.OTMI_InvoiceAmount).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+if(InvoiceByID.data.OTMI_TransportCost=="" || InvoiceByID.data.OTMI_TransportCost==null)
+{
+$scope.OTMI_TransCost = parseFloat(0).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+}
+else
+{
+$scope.OTMI_TransCost = parseFloat(InvoiceByID.data.OTMI_TransportCost).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+}
+
+                    var Invoicedate = new Date(parseInt(InvoiceByID.data.OTMI_InvoiceDate.substr(6)));
+                    var INVDT = ("0" + Invoicedate.getDate()).slice(-2) + "-" + ("0" + (Invoicedate.getMonth() + 1)).slice(-2) + "-" +Invoicedate.getFullYear();
+                    $("#txtINVDate").val(INVDT);
+
+                    $("#drpCustomer").val($scope.OTMI_CustomerID).trigger("chosen:updated");
+                    $("#drpSalesPerson").val($scope.OTMI_SalesPerson).trigger("chosen:updated");
+                    GetDespatches();
+                    GetInvoiceDetails();
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+   //Restore the deleted records
+    $scope.Restoredeleterecords = function (a, $event, b) {
+
+        var res = false;
+        if (b)
+            res = $scope.Isdelete;
+        else
+            res = $scope.Isrestore
+        if (res) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OneToManyInvoice/ET_Sales_Invoice_RestoreDelete",
+                dataType: 'json',
+                data: {
+                    id: a,
+                    type: b
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (data == "Success") {
+                        $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                        if (b) {
+                            message = "Record Deleted Successfully.";
+                        }
+                        else {
+                            message = "Record Restored Successfully.";
+                        }
+
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+    //View the records
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OneToManyInvoice/ET_Sales_Invoice_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+    //Change language in print
+    $scope.ChangeLanguage = function (lang) {
+        debugger;
+        var id = 0;
+        if (lang == "E") {
+            id = parseInt($("#germanformat").val());
+        }
+        else {
+            id = parseInt($("#englishformat").val());
+        }
+        $scope.PrintRecords(id, lang);
+    }
+    //Print the invoice
+    $scope.PrintRecords = function (a, b) {
+                debugger;
+                a = parseInt(a);
+                if ($scope.Isview) {
+                    var post = $http({
+                        method: "POST",
+                        url: "/ET_Sales_OneToManyInvoice/ET_Sales_Invoice_Print",
+                        dataType: 'html',
+                        data: {
+                            id: a,
+                            lang: b
+                        },
+                        headers: { "Content-Type": "application/json" }
+                    });
+                    post.success(function (data, status) {
+                        if (data == "Session Expired") {
+                            $window.location.href = '/ET_Login/ET_SessionExpire';
+                        }
+                        else if (data.indexOf("ERR") > -1) {
+                            $("#spanErrMessage1").html(data);
+                            $("#spanErrMessage2").html(data);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                            $('#div_PrintContent').html(data);
+                            $("#div_View").css("display", "none");
+                            $("#div_Restore").css("display", "none");
+                            $("#div_Edit").css("display", "none");
+                            $("#div_Print").css("display", "block");
+                        }
+                    });
+                    var post1 = $http({
+                        method: "POST",
+                        url: "/ET_Sales_OneToManyInvoice/ET_Sales_InvoicePrint",
+                        dataType: 'html',
+                        data: {
+                            id: a,
+                            lang: b
+                        },
+                        headers: { "Content-Type": "application/json" }
+                    });
+                    post1.success(function (data, status) {
+                        debugger;
+                        if (data == "Session Expired") {
+                            $window.location.href = '/ET_Login/ET_SessionExpire';
+                        }
+                        else if (data.indexOf("ERR") > -1) {
+                            $("#spanErrMessage1").html(data);
+                            $("#spanErrMessage2").html(data);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                            $("#PAthid").attr("href", "/Sales/PDFList/OnetoManyInvoice/" + data[0].OTMI_Code + "/" + data[0].OTMI_Code + ".pdf ");
+                            $("#PAthid").text(data);
+                            $("#div_View").css("display", "none");
+                            $("#div_Restore").css("display", "none");
+                            $("#div_Edit").css("display", "none");
+                            $("#div_Print").css("display", "block");
+                        }
+                    });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Watch for All Binding
+    $scope.$watch("customers", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCustomer").val($scope.OTMI_CustomerID).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("despatchlist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpDespatchIDs").val($scope.OTMI_DespatchIDs).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("salespersons", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesPerson").val($scope.OTMI_SalesPerson).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("invoicelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("invoicerestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 5);
+        }
+    });
+});

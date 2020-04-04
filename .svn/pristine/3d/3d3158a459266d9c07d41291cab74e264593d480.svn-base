@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+
+namespace BusinessEntity.CustomModels
+{
+    public class ET_Admin_Product_CM
+    {
+        public List<Tbl_Product_Yarn> Yarn { get; set; }
+        public List<Tbl_Product_BedLinen> BedLinen { get; set; }
+        public List<Tbl_Product_BathLinen> BathLinen { get; set; }
+        public List<Tbl_Product_Fabric> Fabric { get; set; }
+        public List<Tbl_Product_Linen> Linen { get; set; }
+        public List<Tbl_Master_Products> Products { get; set; }
+
+    }
+}

@@ -1,0 +1,34 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+   public class PendingShipmentReport_CM
+    {
+        public decimal SchduleID { get; set; }
+        public string SchduleCode { get; set; }
+        public string UOM { get; set; }
+        public decimal salespersonID { get; set; }
+        public string salespersonName { get; set; }
+        public decimal? customerID { get; set; }
+        public decimal? SO_Commision { get; set; }
+        public string customerName { get; set; }
+        public decimal? supplierID { get; set; }
+        public string supplierName { get; set; }
+        public decimal ProductId { get; set; }
+        public string ProductName { get; set; }
+        public decimal? QUANTITY { get; set; }
+        public decimal OrderedQty { get; set; }
+        public decimal SchduleQty { get; set; }
+        public string Sc_No { get; set; }
+        public DateTime Sc_Date { get; set; }
+        public DateTime ETD { get; set; }
+        public Decimal Comm { get; set; }
+        public Decimal? UnitPrice { get; set; }
+
+
+    }
+}

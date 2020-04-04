@@ -1,0 +1,84 @@
+﻿<!--
+     Author=Manoj
+    Created Date=17th April 2018
+    Sales Organization View Partial View
+    Operations[View Popup]
+    -->
+@model IEnumerable<BusinessEntity.EntityModels.Tbl_Sales_Organization>
+@{
+    BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+
+}
+@foreach (var item in Model)
+{
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="Code">Organization Code</label>
+            @Html.TextBoxFor(m => item.ORG_CODE, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="col-md-6">
+            <label for="OrganizationName">Organization Name</label>
+            @Html.TextBoxFor(m => item.ORG_NAME, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="OrganizationHead">Organization Head</label>
+            @{ string HeadName = dbcontext.Tbl_Master_User.Single(m => m.USER_ID == item.ORG_HEAD_ID).DISPLAY_NAME;}
+            <input type="text" class="form-control" readonly value="@HeadName" />
+        </div>
+        <div class="col-md-6">
+            <label for="Organization Type">Organization Type</label>
+            @{
+                string orgtype = "";
+                string ParentORGName = "";
+                if (item.ORG_TYPE == 1)
+                {
+                    orgtype = "Parent";
+                }
+                else
+                {
+                    orgtype = "Child";
+                    ParentORGName = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == item.ORG_PARENT_ID).ORG_NAME;
+                }
+            }
+            <input type="text" class="form-control" readonly value="@orgtype" />
+        </div>
+    </div>
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="Parent Organization">Parent Organization</label>
+            <input type="text" class="form-control" readonly value="@ParentORGName" />
+        </div>
+        <div class="col-md-6">
+            <label for="Employees">Employees</label>
+            @{var employeeList = dbcontext.Tbl_Master_User;
+                string[] emplist1 = item.ORG_EMPLOYEE_IDS.Split(',');
+                int[] emplist2 = emplist1.Select(int.Parse).ToArray();
+
+                string emplist3 = "";
+
+                for (int i = 0; i < emplist2.Length; i++)
+                {
+                    var userid = Convert.ToInt32(emplist2[i]);
+                    emplist3 = emplist3 + dbcontext.Tbl_Master_User.Single(m => m.USER_ID == userid).DISPLAY_NAME;
+                    //emplist3 =emplist3 + (from a in dbcontext.Tbl_Master_User where a.USER_ID == userid select a.DISPLAY_NAME).ToString();
+
+                    if (i != (emplist2.Length - 1))
+                    {
+                        emplist3 = emplist3 + " , ";
+                    }
+                }
+            }
+
+
+            <input type="text" class="form-control" readonly value="@emplist3" />
+        </div>
+    </div>
+
+}
+
+

@@ -1,0 +1,108 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_Master_User
+    {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Tbl_Master_User()
+        {
+            Tbl_AssignmentTask = new HashSet<Tbl_AssignmentTask>();
+            Tbl_Trading_CO = new HashSet<Tbl_Trading_CO>();
+            Tbl_Trading_PO = new HashSet<Tbl_Trading_PO>();
+        }
+
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal USER_ID { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string USER_NAME { get; set; }
+
+        [StringLength(50)]
+        public string DISPLAY_NAME { get; set; }
+
+        [Required]
+        public string USER_PASSWORD { get; set; }
+
+        public string CONFIRM_PASSWORD { get; set; }
+
+        public decimal ROLE_ID { get; set; }
+
+        [Column(TypeName = "text")]
+        public string USER_STREET { get; set; }
+
+        [StringLength(50)]
+        public string USER_CITY { get; set; }
+
+        [StringLength(20)]
+        public string USER_ZIP { get; set; }
+
+        [StringLength(50)]
+        public string USER_COUNTRY { get; set; }
+
+        [StringLength(50)]
+        public string USER_EMAIL { get; set; }
+
+        [StringLength(20)]
+        public string USER_FAX { get; set; }
+
+        [StringLength(20)]
+        public string USER_PHONE { get; set; }
+
+        [StringLength(20)]
+        public string USER_MOBILE { get; set; }
+
+        [StringLength(500)]
+        public string USER_REMARKS { get; set; }
+
+        [StringLength(300)]
+        public string MAC_ADDRESS { get; set; }
+
+        public bool? MAC_AUTHENTICATION { get; set; }
+
+        [StringLength(300)]
+        public string MACHINE_NAME { get; set; }
+
+        [StringLength(50)]
+        public string IPADDRESS { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public string SALESPERSON { get; set; }
+
+        [StringLength(10)]
+        public string USER_CODE { get; set; }
+
+        [StringLength(50)]
+        public string USER_STATE { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Tbl_AssignmentTask> Tbl_AssignmentTask { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Tbl_Trading_CO> Tbl_Trading_CO { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Tbl_Trading_PO> Tbl_Trading_PO { get; set; }
+    }
+}

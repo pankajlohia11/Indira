@@ -1,0 +1,323 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_Role>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+
+This Form is used to create a Roles and Privilages Details for the customer and the supplier.
+    The user can edit or remove and restore  a record in Roles and Privilages.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide View List page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        };
+    /* This function is used for displaying View List page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+        };
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+    };
+
+    function editRecords(e) {
+        debugger;
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ET_Admin_Roles_Update_Get", "ET_Admin")',
+            data: { userId: Id },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                debugger;
+                alert(result)
+            },
+            error: function (response) {
+                debugger;
+                alert('eror');
+            }
+        });
+
+    }
+
+        @*function editRecords(e) {
+            var id = $(e).val();
+            alert(id);
+            $.ajax({
+                url: '@Url.Action("ET_Admin_Roles_Update_Get", "ET_Admin")',
+                type: 'GET',
+                datatype:'json',
+                contentType: 'application/json; charset=utf-8',
+                data: { id: id },
+                success: function (data) {
+                  //  alert("hi");
+                    //$("#div_View").css("display", "none");
+                    //$("#div_Edit").css("display", "block");
+
+                    //var data = "";
+                    //alert(response.length);
+                    //for (i = 0; i < response.length; i++)
+                    //{
+                    //    $("#Rolename").val(Response[i].ROLE_NAME);
+                    //    $("#Description").val(Response[i].ROLE_DESCRIPTION);
+                    //}
+                    alert(data);
+                },
+                error: function () {
+                    alert("error");
+                }
+            });
+           // return false;
+        }*@
+
+
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Roles and Privilege <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Roles and Privilege</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Roles and Privilege</strong> List</h1>
+                        <ul class="controls">
+                            <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                            <li style="padding:5px">
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    @if (ViewBag.details == null)
+                    {
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-6"><div id="tableTools"></div></div>
+                                <div class="col-md-6"><div id="colVis"></div></div>
+                            </div>
+                            <table class="table table-custom" id="advancedusage">
+                                <thead>
+
+                                    <tr>
+                                        <th>Role ID</th>
+                                        <th>Role Name</th>
+                                        <th>Role Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @item.ROLE_ID
+                                            </td>
+                                            <td>
+                                                @item.ROLE_NAME
+                                            </td>
+                                            <td>
+                                                @item.ROLE_DESCRIPTION
+                                            </td>
+                                            <td>
+                                                @*<a href="../ET_Admin/ET_Admin_Roles"><i class="fa fa-caret-right"></i>Edit</a>*@
+                                                @*@Html.ActionLink("Edit", "ET_Admin_Roles_Update_Get", "ET_Admin", new { id = item.ROLE_ID, onclick= "editRecords();" }, null)*@
+                                                <button class="edit" id="editbtn" onclick="editRecords(this);" value="@item.ROLE_ID">Edit</button>
+                                            </td>
+                                            <td>
+                                                @*<a href="../ET_Admin/ET_Admin_Roles"><i class="fa fa-caret-right"></i>Delete</a>*@
+                                                @Html.ActionLink("Delete", "ET_Admin_Roles_Delete", "ET_Admin", new { id = item.ROLE_ID, @class = "icon-trash" }, null)
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </section>
+
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore Roles and Privilege</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    @using (Html.BeginForm("ET_Admin_Roles_Add", "ET_Admin", FormMethod.Post))
+                    {
+
+                        <div class="tile-body">
+
+                            <div name="form1" role="form" id="form1" data-parsley-validate>
+                                @*@foreach (var item in Model)
+                                    {*@
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Role Name</label>
+                                        @*@Html.TextBoxFor(m => item.ROLE_NAME, new { @class = "form-control" })*@
+                                        <input type="text" name="Rolename" id="Rolename" class="form-control" data-parsley-trigger="change" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Description</label>
+                                        @*@Html.TextBoxFor(m => item.ROLE_DESCRIPTION, new { @class = "form-control" })*@
+                                        <input type="text" name="Description" id="Description" class="form-control" data-parsley-trigger="change" required>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Role Group
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input type="radio" name="radio" value="1"><i>Admin</i>
+                                        @*@Html.RadioButtonFor(m => m.ROLE_ACCESS, "1") Admin*@
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input type="radio" name="radio" value="2"><i>Sales Group</i>
+                                        @*@Html.RadioButtonFor(m => m.ROLE_ACCESS, "2") Sales Group*@
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input type="radio" name="radio" value="3"><i>Others</i>
+                                        @*@Html.RadioButtonFor(m => m.ROLE_ACCESS, "3") Others*@
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input type="radio" name="radio" value="4"><i>Sales Support</i>
+                                        @*@Html.RadioButtonFor(m => m.ROLE_ACCESS, "4") Sales Support*@
+                                    </div>
+                                </div>
+
+                                <div class="tile-footer text-right bg-tr-black lter dvd dvd-top">
+                                    <!-- SUBMIT BUTTON -->
+                                    <button type="submit" class="btn btn-lightred" id="formSubmit">Submit</button>
+                                </div>
+                                @*}*@
+                            </div>
+
+
+
+                        </div>
+
+
+                    }
+                </section>
+                <!--The user can have a option to restore-->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore Roles and Privilege</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Role Name</th>
+                                    <th>Role Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @*@foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td></td>
+                                        </tr>
+                                    }*@
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+            </div>
+        </div>
+    </div>
+</section>

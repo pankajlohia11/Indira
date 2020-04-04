@@ -1,0 +1,52 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+using DataAccess;
+
+namespace BusinessLogic
+{
+    public class ET_Admin_Roles_BL
+    {
+        ET_Admin_Roles_DL ObjDA = new ET_Admin_Roles_DL();
+        public List<Tbl_Master_Role> ET_Admin_RoleList_BL()
+        {
+            return ObjDA.ET_Admin_RoleList_DL();
+        }
+        public decimal Tbl_Master_Role_Add(Tbl_Master_Role _tbl_Master_Role)
+        {
+            return ObjDA.Tbl_Master_Role_Add(_tbl_Master_Role);
+        }
+
+
+        public List<Tbl_Master_Role> ET_Admin_Roles_View(int id)
+        {
+            return ObjDA.ET_Admin_Roles_View(id);
+        }
+        public Tbl_Master_Role ET_Admin_Roles_Update_Get(int id)
+        {
+            return ObjDA.ET_Admin_Roles_Update_Get(id);
+        }
+        public decimal ET_Admin_Roles_Update(Tbl_Master_Role objtbl_Master_Role)
+        {
+            return ObjDA.ET_Admin_Roles_Update(objtbl_Master_Role);
+        }
+        public int ET_Admin_Roles_Deleted_BL(int id)
+        {
+                return ObjDA.ET_Admin_Roles_Deleted_DL(id);
+        }
+
+        public List<Tbl_Master_Role> ET_Admin_Roles_Restore_BL()
+        {
+            return ObjDA.ET_Admin_Roles_Restore_DL();
+        }
+
+        public decimal ET_Admin_Roles_Restore_Insert_BL(int id)
+        {
+            return ObjDA.ET_Admin_Roles_Restore_Insert_DL(id);
+
+        }
+    }
+}

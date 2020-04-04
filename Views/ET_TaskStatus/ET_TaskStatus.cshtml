@@ -1,0 +1,135 @@
+﻿
+@{
+   
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section angularcontroller
+{
+    @*<script src="~/Assets/js/vendor/jquery/jquery-1.11.2.min.js"></script>
+    <script src="~/Assets/js/vendor/jquery-ui/jquery-ui.min.js"></script>*@
+    <script src="~/Content/AngularScripts/AC_Status.js"></script>
+    <script type="text/javascript">
+        //function Statuschange() {
+
+        //}
+
+    </script>
+}
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order" id="mainDiv" ng-controller="AC_StatusCtrl">
+        <div class="pageheader">
+
+            <h2> Task Status<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#"> Status</a>
+
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" id="mycontroller">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label>Start  Date*</label>
+                            <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                <input type='text' id="txtFromDate" name="txtFromDate" class="form-control" />
+                                <span class="input-group-addon">
+                                    <span class="fa fa-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>End Date*</label>
+                            <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                <input type='text' id="txtToDate" name="txtToDate" class="form-control"  />
+                                <span class="input-group-addon">
+                                    <span class="fa fa-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Type of Status*</label>
+                            <select ng-model="T_StatusID" id="drpStatus" data-parsley-trigger="change" ng-change="Statuschange()" class="form-control chosen-select" required>
+                                @*<option value="">--Select--</option>*@
+                                <option value="0" selected>All</option>
+                                <option value="1">Pending</option>
+                                <option value="2">Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label></label>
+                            @*<div class="input-group col-md-3 text-right" style="vertical-align:middle">*@
+                                <input type="button" ng-model="status_filter" style="vertical-align:middle" class="btn btn-greensea b-0 br-2 mr-0 block" value="Task Filter" ng-click="ET_submit()" />
+                            @*</div>*@
+                        </div>
+                    </div>
+                    @*<ul class="controls">
+            <li style="padding:5px">
+                <a tabindex="0" ng-click="createnew()">
+
+                    <span class="btn btn-slategray btn-xs mb-15">
+                        submit
+                    </span>
+                    </a>
+            </li>
+        </ul>*@
+
+
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th style="width:100px">S.No</th>
+                                    <th style="width:100px">Task Title</th>
+                                    <th style="width:100px">Description</th>
+                                    <th style="width:100px">Priority</th>
+                                    <th style="width:100px">Current Status</th>
+                                    <th style="width:100px">Expected Completion Date</th>
+                                    <th style="width:100px">Actual Completed Date</th>
+                                    <th style="width:100px">Assigned Members</th>
+                                </tr>
+
+                            </thead>
+                            <tbody id="taskbody"></tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+
+
+
+            </div>
+        </div>
+    </div>
+</section>
+

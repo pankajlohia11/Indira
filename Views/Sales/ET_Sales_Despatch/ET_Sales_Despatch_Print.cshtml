@@ -1,0 +1,117 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.DespatchVIew_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <input id="englishformat" style="display:none;" value="@Model.Header[0].D_ID" />
+    <table style="width:100%" align="center">
+        <tr>
+            <td style="width:30%;text-align:left;"></td>
+            <td style="width:40%;text-align:center;"><img src="@Model.Header[0].imgurl" /></td>
+            <td style="width:30%;text-align:left;"></td>
+        </tr>
+    </table>
+    <br />
+    <h2 style="text-align:center;font-size:large;font-weight:bold;"><u>Despatch</u></h2>
+    <br />
+    <table style="font-size:14px;">
+        <tr>
+            <td><u>Eurotextiles GmbH & Co. KG, Mammolshainer Weg 14, 61462 Königstein</u></td>
+        </tr>
+        <tr>
+            <td><span><strong>@Model.Header[0].CompanyName</strong></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.Header[0].Street,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.Header[0].CityState,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.Header[0].CountryZip.</label></span></td>
+        </tr>
+    </table>
+    <table align="right">
+        <tr>
+            <td colspan="2">Customer Code:<strong>@Model.Header[0].CompanyCode</strong></td>
+        </tr>
+        @*<tr>
+                <td>Order No's:<strong>@Model.Header[0].OrderCodes</strong></td>
+            </tr>*@
+        <tr>
+            <td>Customer Vat-ID.:<strong>@Model.Header[0].USTID</strong></td>
+        </tr>
+        <tr>
+            <td>Date:<strong>@Model.Header[0].D_DespatchDate.ToString("dd-MM-yyyy")</strong></td>
+        </tr>
+        <tr>
+            <td>Order No:<strong>@Model.Header[0].D_OrderCode</strong></td>
+        </tr>
+        <tr>
+            <td>Confirmation No:<strong>@Model.Header[0].cusPONo</strong><br /><br /></td>
+        </tr>
+
+    </table>
+    <table style="width:100%;text-align:left;" class='generaltable'>
+        <tr>
+            <td><strong>Shipment No: @Model.Header[0].D_Code</strong></td>
+            <td></td>
+        </tr>
+    </table>
+    <table border="1" style="width:100%;"  align="center" class='generaltable'>
+        <thead>
+            <tr>
+                <th style="text-align:center;width:5%"><strong>S.No</strong></th>
+                <th style="text-align:center;width:10%" colspan="2"><strong>Quantity</strong></th>
+                <th style="text-align:center;width:50%"><strong>Product Description</strong></th>
+                @*<th style="text-align:center"><strong>DesignDetail</strong></th>
+                <th style="text-align:center"><strong>Remarks</strong></th>*@
+                <th style="text-align:center;width:10%"><strong>Price(€)</strong></th>
+                <th style="text-align:center;width:10%"><strong>Total(€)</strong></th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @{int i = 1;
+                decimal total = 0;
+                var modelItems = Model.Details.AsEnumerable().Select((orderItem, index) => new { SO_Serial = index + 1, orderItem.DD_DespatchQuantity, orderItem.DD_UOM, orderItem.DD_ProductName, orderItem.DesignDetail, orderItem.CustomerDes, orderItem.Price });
+                foreach (var item1 in Model.Details)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td style="text-align:right">@(Convert.ToDecimal(item1.DD_DespatchQuantity).ToString("N3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td align="center">@item1.DD_UOM</td>
+                        <td>@item1.DD_ProductName<br />@item1.DD_Description<br />@item1.DesignDetail <br /> @item1.CustomerDes</td>
+                        @*<td align="center">@item1.DesignDetail</td>
+                        <td>@item1.CustomerDes</td>*@
+                        <td style="text-align:right;">@(Convert.ToDecimal(item1.Price).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td style="text-align:right;">@((Convert.ToDecimal(item1.Price) * Convert.ToDecimal(item1.DD_DespatchQuantity)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    </tr>
+                    //total = total + Convert.ToDecimal(item1.Price) * Convert.ToDecimal(item1.DD_DespatchQuantity);
+                    i++;
+                }
+            }
+        </tbody>
+    </table><br />
+    <table style="font-size:12px;">
+        <tr>
+            <td><p>It is the General Terms and Conditions (GTC) of Eurotextiles GmbH & Co. KG. Downgrades of quality / quantity of goods must be given in writing before use, but in any case 7 days after receipt of the goods. Goods that are washed or washed are excluded from the complaint.</p></td>
+        </tr>
+        <tr>
+            <td>
+                <p>
+                    Note according to the Federal Data Protection Act: We work with EDP and have stored your name and the data otherwise required in the context of the matter. A transmission to third does not take place.
+                </p>
+            </td>
+        </tr>
+    </table><br />
+    <p> <hr style="font-weight:bold;border-top:1px solid black;"></p>
+    <table style="font-size:10px;width:100%;">
+        <tr>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Eurotextiles GmbH & Co.KG<br />Mammolshainer Weg 14<br />61462 Konigstein im Taunus<br />Fon +49 6174/25980<br />HRA 3451</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">HRA 3451<br />Amtsgericht Kongstein<br />Steuerrnummer 003 315 60117<br />USt-IdNr. DE279479010</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Kompl. Indra Enterprises GmbH<br />Geshafuher:Krishna Javaji<br />HRB 5137 Amtsgericht Konigstein<br />Steuernummer 003 236 16128</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Bankverbindung<br />Nassauische Sparkasse<br />IBAN :DE15 5105 0015 0270 0607 06<br />SWIFT:-BIC NASSDE55XXX</td>
+
+
+        </tr>
+    </table>
+</div>

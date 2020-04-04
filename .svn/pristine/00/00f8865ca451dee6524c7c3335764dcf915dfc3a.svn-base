@@ -1,0 +1,53 @@
+﻿@using System.Globalization;
+@model IEnumerable<BusinessEntity.CustomModels.Shipment_CM>
+@foreach (var item in Model)
+{
+
+<tr>
+    <td style="display:none;">
+        <input type='text' id='txtOrderDetailID' class='form-control' readonly='readonly' value="@item.SD_OrderDetailID" />
+    </td>
+    <td style="display:none;">
+        <input type='text' id='txtProductID' class='form-control' readonly='readonly' value="@item.SD_ProductID" />
+    </td>
+    <td style="display:none;">
+        <input type='text' id='txtArticleNo' class='form-control' readonly='readonly' value="@item.SD_ArticleNo" />
+    </td>
+    <td>
+        <input type='text' id='txtScheduleNo' class='form-control' readonly='readonly' value="@item.SD_ScheduleID" />
+    </td>
+    <td>
+        <input type='text' id='txtArticleNo' class='form-control' readonly='readonly' value="@item.SD_ArticleNo" />
+    </td>
+    <td>
+        <input type='text' id='txtProductName' class='form-control' readonly='readonly' value="@item.SD_ProductName" />
+    </td>
+    <td>
+        <input type='text' id='txtDesign' class='form-control' readonly='readonly' value="@item.DesignDetail"/>
+    </td>
+    <td>
+        <input type='text' id='txtcus' class="form-control" readonly='readonly' value="@item.CustomerDes"/>
+    </td>
+    @if (item.S_Type == 2)
+    {
+        <td>
+            <input type='text' id='txtDesignNo' class='form-control' readonly='readonly' value="@item.DesignNo" />
+        </td>
+    }
+    <td>
+        <input type='text' style="text-align:right" id='txtPrice' class='form-control' readonly='readonly' value="@(Convert.ToDecimal(item.Price).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td>
+        <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.SD_Quantity" />
+    </td>
+    @*<td>
+            <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.SD_ProductName" />
+        </td>*@
+    @*<td>
+            <input type='text' style="text-align:right" id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@(Convert.ToDecimal(item.SD_ScheduledQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+        </td>*@
+    <td>
+        <input type='text' style="text-align:right" id='txtShipmentQuantity' class='form-control' value="@(Convert.ToDecimal(item.SD_ScheduledQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" maxlength="21" onchange="calinvamount(this)" />
+    </td>
+</tr>
+}

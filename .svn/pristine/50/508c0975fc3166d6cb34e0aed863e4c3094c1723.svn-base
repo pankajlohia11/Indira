@@ -1,0 +1,19 @@
+﻿@model IEnumerable<BusinessEntity.CustomModels.OneToOneInvoice_CM>
+@foreach (var item in Model)
+{
+
+    <tr>
+        <td>
+            <input type='text' id='txtProductName' class='form-control' readonly='readonly' value="@item.ArticleNo" />
+        </td>
+        <td>
+            <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.ProductName" />
+        </td>
+        <td>
+            <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.UOM" />
+        </td>
+        <td>
+            <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.SD_Quantity" />
+        </td>
+    </tr>
+}

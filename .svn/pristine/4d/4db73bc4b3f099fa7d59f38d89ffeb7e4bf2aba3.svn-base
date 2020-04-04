@@ -1,0 +1,36 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace Euro.Controllers
+{
+    public class ET_AgencyController : Controller
+    {
+        // GET: ET_Commissions
+        public ActionResult Index()
+        {
+            return View();
+        }
+        /* Author       = jesmi
+     Created Date =3rd Apr 2018
+     [Action Method=ET_Agency_Commission ]
+     */
+        public ActionResult ET_Agency_Commission()
+        {
+
+            return View();
+        }
+        /* Author       = jesmi
+      Created Date =3rd Apr 2018
+      [Action Method=ET_Agency_Shipment_Details ]
+      */
+        public ActionResult ET_Agency_Shipment_Details()
+        {
+
+            return View();
+        }
+
+    }
+}

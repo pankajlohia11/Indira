@@ -1,0 +1,601 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Locations_Master>
+
+@{
+    /**/
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+
+Save all Store master data.This page contains Store Add, Modify, Delete and Restore.
+    Author=RajKumar
+    Date = 2nd Apr 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide View List page */
+    //function restoreRecords() {
+    //    $("#div_View").css("display", "none");
+    //    $("#div_Restore").css("display", "block");
+    //};
+    /* This function is used for displaying View List page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+        $("#formSubmit").html("Submit");
+        $("#span_tabtext").html("Add");
+         $("#txtStoreCode").val();
+         $("#txtStoreID").val("");
+         $("#txtStoreName").val("");
+         $("#txtDisplayName").val("");
+        $("#txtStreet").val("");
+        $("#drpCountry").val("").trigger("chosen:updated");
+        $("#drpState").val("").trigger("chosen:updated");
+        $("#drpCity").val("").trigger("chosen:updated");
+         $("#txtZipCode").val("");
+         $("#txtStoreKeeper").val("");
+         $("#txtContactNo").val("");
+    };
+
+    function InsertRecords() {
+
+        var StoreID = $("#txtStoreID").val();
+        if (StoreID != 0) {
+            StoreID = StoreID;
+        }
+        else {
+            StoreID = "0";
+        }
+
+        var StoreCode = $("#txtStoreCode").val();
+        if (StoreCode != 0) {
+            StoreCode = StoreCode;
+        }
+        else {
+            StoreCode = "0";
+        }
+
+        var txtStoreName = $("#txtStoreName").val();
+        var txtDisplayName = $("#txtDisplayName").val();
+        var txtStreet = $("#txtStreet").val();
+        var drpCountry = $("#drpCountry").val();
+        var drpState = $("#drpState").val();
+        var drpCity = $("#drpCity").val();
+        var txtZipCode = $("#txtZipCode").val();
+        var txtStoreKeeper = $("#txtStoreKeeper").val();
+        var txtContactNo = $("#txtContactNo").val();
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ET_Admin_Store_Add", "ET_Admin_Store")',
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            data: {
+                StoreCode: StoreCode,
+                StoreID: StoreID,
+                StoreName: txtStoreName,
+                DisplayName: txtDisplayName,
+                Street: txtStreet,
+                State: drpState,
+                Country: drpCountry,
+                City: drpCity,
+                ZipCode: txtZipCode,
+                ContactNo: txtContactNo,
+                StoreKeeper: txtStoreKeeper
+            },
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (result == "Success") {
+                        createRecords();
+                        if (StoreID == 0) {
+                            message = 'Record Inserted Successfully.';
+                            toastr["success"](message, "Notification");
+                        }
+                        else {
+                            message = 'Record Updated Successfully.';
+                            toastr["success"](message, "Notification");
+                        }
+                    }
+                    else if (result == "Failed") {
+                        message = 'Failed to do this operation.';
+                        toastr["error"](message, "Notification");
+                    }
+                    else if (result.indexOf("Validation") > -1) {
+                        toastr["error"](result, "Notification");
+                    }
+                }
+            },
+            error: function (response) {
+               // alert(response);
+                message = "You don't access to do this operation, please contact admin.";
+                toastr["error"](message, "Notification");
+            }
+        });
+    };
+
+    function editRecords(e, f) {
+        if ($(f).attr("id").toString().indexOf("EditYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Store_Update_GetbyID", "ET_Admin_Store")',
+                data: { id: id },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                        if (result.indexOf("ERR") > -1) {
+                          //  alert("hlw");
+                            $("#spanErrMessage1").html(result);
+                            $("#spanErrMessage2").html(result);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                        var res = JSON.parse(result);
+                            $("#div_View").css("display", "none");
+                            $("#div_Edit").css("display", "block");
+                            $("#formSubmit").html("Update");
+                           // $("#formSubmit").attr("disabled","");
+                            $("#span_tabtext").html("Edit");
+                            $("#txtStoreID").val(res.Store_ID);
+                            $("#txtStoreCode").val(res.Store_Code);
+                            $("#txtStoreName").val(res.Store_Name);
+                            $("#txtDisplayName").val(res.Display_Name);
+                           // $("#drpState").val("");
+                           // $("#drpCity").val("");
+                            $("#txtStreet").val(res.Street);
+                            $("#txtZipCode").val(res.Zip);
+                            $("#txtStoreKeeper").val(res.Store_KeeperName);
+                            $("#txtContactNo").val(res.ContactNo);
+                            $("#drpCountry").val(res.Country).trigger("chosen:updated");
+                            State(res.State, res.City);
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+     function deleteRecord(e, f) {
+        if ($(f).attr("id").toString().indexOf("DeleteYes") > -1) {
+            alertmessage(e, $(f).attr("id").toString());
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function deleteRecordConfirm(e,f) {
+        var id = e;
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ET_Admin_Store_Delete", "ET_Admin_Store")',
+            data: { id: id },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (result == "Success") {
+                        message = 'Record Deleted Successfully. You can retrive it from Restore page';
+                        toastr["success"](message, "Notification");
+                        var ctrl = "#" + f;
+                        $(ctrl).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                    }
+                    else {
+                        message = 'Failed To Delete';
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            },
+            error: function (response) {
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+        });
+    };
+
+    function restoreRecords(f) {
+        if ($(f).attr("id").toString().indexOf("RestoreYes") > -1) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Store_Restore", "ET_Admin_Store")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $("#div_View").css("display", "none");
+                        $("#div_Restore").css("display", "block");
+                        $('#restorediv').html(result);
+                        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+                    }
+                },
+                error: function (response) {
+                    //alert('error');
+                    message = "'Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function Restoredeleterecords(id, f) {
+        var id = id;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Store_Restore_Insert", "ET_Admin_Store")',
+                data: {
+                    id: id
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        if (result == "Success") {
+                            $("#div_View").css("display", "none");
+                            $("#div_Restore").css("display", "block");
+
+                            message = 'Record Restored Successfully';
+                            toastr["success"](message, "Notification");
+                            $(f).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                        }
+                        else if (result == "Success") {
+                            message = 'Failed to do this operation.';
+                            toastr["error"](message, "Notification");
+                        }
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+    };
+
+    function ViewRecords(e,f) {
+        if ($(f).attr("id").toString().indexOf("ViewYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Store_View", "ET_Admin_Store")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: { id: id },
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $('#viewpopup').html(result);
+                        $("#btnviewpopup").trigger("click");
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function State(e,f) {
+        var id = ($("#drpCountry").val());
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_State", "ET_Admin_Store")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+             success: function (result) {
+
+                 debugger;
+                 var html = '<option value="">--Select--</option>';
+                 for (i = 0; i < result.length; i++) {
+                     html += '<option value="' + result[i].location_id + '">' + result[i].name + '</option>';
+                 }
+                 html += '</option>';
+
+                 $('#drpState').html(html).trigger("chosen:updated");
+                 $("#drpState").val(e).trigger("chosen:updated");
+                 if(f)
+                    City(f);
+                },
+                error: function (response) {
+                    toastr["error"]("State Not Loading", "Notification");
+                }
+            });
+    };
+
+    function City(f) {
+        var id = ($("#drpState").val());
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_City", "ET_Admin_Store")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+            success: function (result) {
+                var html = '<option value="">--Select--</option>';
+                for (i = 0; i < result.length; i++) {
+                    html += '<option value="' + result[i].location_id + '">' + result[i].name
+                        + '</option>';
+                }
+                html += '</option>';
+
+                $('#drpCity').html(html).trigger("chosen:updated");
+                $("#drpCity").val(f).trigger("chosen:updated");
+                },
+                error: function (response) {
+                    toastr["error"]("City Not Loading", "Notification");
+                }
+            });
+    };
+
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Store <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Store</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <!--[div_view] All view list contents datas will be written here-->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Store</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords(this);" id="@ViewBag.Restore"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Store Name</th>
+                                    <th>City</th>
+                                    <th>Country</th>
+                                    <th>Store keeper Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            @if (Model != null)
+                            {
+                                int i = 0;
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Store_ID</td>
+                                        <td>@item.Store_Name</td>
+                                        <td>@item.Country</td>
+                                        <td>@item.City</td>
+                                        <td>@item.Store_KeeperName</td>
+                                        <td>
+                                            <a onclick="editRecords(@item.Store_ID,this);" value="@item.Store_ID" id="@ViewBag.Edit@i" style="color:forestgreen;padding:5px;" title="Edit"><i class="fa fa-edit"></i></a>
+                                            <a onclick="ViewRecords(@item.Store_ID,this);" value="@item.Store_ID" id="@ViewBag.View@i" style="color:darkblue;padding:5px;" title="View"><i class="fa fa-eye"></i></a>
+                                            <a onclick="deleteRecord(@item.Store_ID,this);" id="@ViewBag.Delete@i" style="color:red;padding:5px;" title="Delete"><i class="fa fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong><span id="span_tabtext"></span></strong> Store</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <h4> <label><strong>Location Info</strong></label></h4>
+                            <h5> <label><strong>Name details</strong></label></h5>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblStoreName">Store Code</label>
+                                    <input type="text" name="txtStoreCode" id="txtStoreCode" class="form-control" disabled="@ViewBag.AutoManual">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblStoreName">Store Name</label>
+                                    <input type="text" name="txtStoreName" id="txtStoreName" class="form-control" data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/" required>
+                                    <input type="text" name="txtStoreID" id="txtStoreID" class="form-control hidden">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Display Name</label>
+
+                                    <input type="text" name="txtDisplayName" id="txtDisplayName" class="form-control" data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/" required>
+                                </div>
+                            </div>
+                            <h5> <label><strong>Address Details</strong></label></h5>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblStreet">Address</label>
+                                    <input type="text" name="txtStreet" id="txtStreet" class="form-control" data-parsley-type="alphanum" data-parsley-trigger="change">
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">Country</label>
+                                    @*<select class="form-control"></select>*@
+                                    @Html.DropDownList("drpCountry", new SelectList(ViewBag.Country, "location_id", "name"), "--Select--", new { @class = "form-control chosen-select", onchange = "State()", @id = "drpCountry" })
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblState">State</label>
+                                    <select class="form-control chosen-select" name="drpState" id="drpState" onchange="City();"></select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblCity">City</label>
+                                    <select class="form-control chosen-select" name="drpCity" id="drpCity"></select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Zip">Zip</label>
+                                    <input type="text" name="txtZipCode" id="txtZipCode" class="form-control" data-parsley-trigger="change" data-parsley-type="digits">
+                                </div>
+                            </div>
+
+                            <h5> <label><strong>Contact Details</strong></label></h5>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblStoreKeeper">Store Keeper Name</label>
+                                    <input type="text" name="txtStoreKeeper" id="txtStoreKeeper" class="form-control" pattern="/^[a-zA-Z]+$/" data-parsley-trigger="change">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblContactNo">Contact No</label>
+
+                                    <input type="text" name="txtContactNo" id="txtContactNo" class="form-control" data-parsley-trigger="change" data-parsley-type="digits">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled onclick="InsertRecords();" id="formSubmit">Submit</button>
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--The user can have a option to restore-->
+                <section class="tile" id="div_Restore" style="display:none">
+                    <div id="restorediv">
+                    </div>
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+

@@ -1,0 +1,472 @@
+﻿app1.controller("AC_PaymentTermsCtrl", function ($scope, $http, $window) {
+
+    AC_GetPayment_List();
+    GetPrivilages();
+
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        AC_GetPayment_List();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        AC_GetPaymentRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+
+    // Create function
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $("#formSubmit").attr('disabled', "disabled");
+            //$("#htndiscountpersentage").addClass("hidden");
+            //$("#htndiscountamount").addClass("hidden");
+            //$("#htnadvancetype").addClass("hidden");
+
+            //$("#drpAdvancetype").removeAttr('required');
+            //$("#txtAdvancepersentageamount").removeAttr('required');
+            //$("#txtAdvanceAmount").removeAttr('required');
+            //$("#txtpersentageamount").removeAttr('required');
+            //$("#txtAmount").removeAttr('required');
+
+            $scope.pamentID = "0";
+            $scope.txtpamentCode = "";
+            $scope.txtPaymentName = "";
+            //$scope.txtCreditdays = "";
+            //$scope.chk_Advance = false;
+            //$scope.SelectedDiscounttype = "";
+            //$scope.txtpersentageamount = "";
+            //$scope.txtAmount = "";
+            //$scope.txtDiscountdays = "";
+            //$scope.SelectedAdvancetype = "";
+            //$scope.txtAdvancepersentageamount = "";
+            //$scope.txtAdvanceAmount = "";
+            //$("#drpAdvancetype").val($scope.SelectedDiscounttype).trigger("chosen:updated");
+            //$("#drpDiscounttype").val($scope.SelectedAdvancetype).trigger("chosen:updated");
+            $scope.txtDetails = "";
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+
+    // Ger privilages
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_Admin_PaymentTerms/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+
+    // List of payment details
+    function AC_GetPayment_List() {
+        var getac_paymentlist = $http.get("/ET_Admin_PaymentTerms/GetPayment_Terms_List",
+            {
+                params: { deleted: false }
+            });
+        getac_paymentlist.then(function (result) {
+            var res = JSON.parse(result.data);
+            $scope.paymentslist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+
+    // payment restore list
+    function AC_GetPaymentRestoreList() {
+        var getpaymentrestorelist = $http.get("/ET_Admin_PaymentTerms/GetPayment_Terms_List",
+            {
+                params: { deleted: true }
+            });
+        getpaymentrestorelist.then(function (result) {
+            var res = JSON.parse(result.data);
+            $scope.paymentrestorelist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+
+    // Discount type show and hide function
+    $scope.ChangeDiscounttype = function () {
+        var discountvalue = $scope.SelectedDiscounttype;
+        if (discountvalue != "1") {
+            $("#htndiscountamount").removeClass("hidden");
+            $("#htndiscountpersentage").addClass("hidden");
+            $scope.txtpersentageamount = 0;
+            $("#txtAmount").attr('required', true);
+            $("#txtpersentageamount").removeAttr("required");
+        }          
+        else {
+            $("#htndiscountpersentage").removeClass("hidden");
+            $("#htndiscountamount").addClass("hidden");
+            $scope.txtAmount = 0;
+            $("#txtpersentageamount").attr('required', true);
+            $("#txtAmount").removeAttr("required");
+        }
+    }
+
+    // Advanc type show and hide function
+    $scope.ChangeAdvancetype = function () {
+        var Advancetvalue = $scope.SelectedAdvancetype;
+        if (Advancetvalue != "1") {
+            $("#htnadvanceamount").removeClass("hidden");
+            $("#htnadvancepersentage").addClass("hidden");
+            $scope.txtAdvancepersentageamount = 0;
+            $("#txtAdvanceAmount").attr('required', true);
+            $("#txtAdvancepersentageamount").removeAttr("required");
+        }
+        else {
+            $("#htnadvancepersentage").removeClass("hidden");
+            $("#htnadvanceamount").addClass("hidden");
+            $scope.txtAdvanceAmount = 0;        
+            $("#txtAdvancepersentageamount").attr('required', true);
+            $("#txtAdvanceAmount").removeAttr("required");
+        }
+    }
+
+    $scope.ChangePersentage = function () {
+        if (parseInt($scope.txtpersentageamount) >= 100) {
+            message = "Under the 100%";
+            toastr["error"](message, "Notification");
+            $scope.txtpersentageamount = 0;
+        }
+        else if ($scope.txtAdvancepersentageamount >= "100") {
+            message = "Under the 100%";
+            toastr["error"](message, "Notification");
+            $scope.txtAdvancepersentageamount = 0;
+        }
+    }
+
+    // Is specific show and hide function
+    $scope.SpecificAdvance = function (e) {
+        var check = $scope.chk_Advance;
+        debugger;
+        if (check || e) {
+            $("#htnadvancetype").removeClass("hidden");
+            $("#htnadvancepersentage").addClass("hidden");
+            $("#htnadvanceamount").addClass("hidden");
+            $scope.SelectedAdvancetype= "";
+            $("#drpAdvancetype").val($scope.SelectedAdvancetype).trigger("chosen:updated");
+            $("#drpAdvancetype").attr('required', true);
+        }
+        else {
+            $("#htnadvancetype").addClass("hidden");
+            $("#drpAdvancetype").removeAttr("required");
+        }
+    }
+    function validation()
+    {
+        if ($scope.txtPaymentName == "") {
+            return "Enter Payment Name";
+        }
+        //if ($scope.txtCreditdays == "") {
+        //    return "Enter Credit Days";
+        //}
+        //if ($scope.SelectedDiscounttype == "") {
+        //    return "Select Discount Type";
+        //}
+        //if ($scope.SelectedDiscounttype=="1" && $scope.txtpersentageamount == "") {
+        //    return "Enter Discount Percentage";
+        //}
+        //if ($scope.SelectedDiscounttype == "2" && $scope.txtAmount == "") {
+        //    return "Enter Discount Amount";
+        //}
+        //if ($scope.txtAmount != "") {
+        //    $scope.txtAmount = parseFloat($scope.txtAmount.toString().split('.').join("").replace(",", "."));
+        //}
+        //if ($scope.txtDiscountdays == "") {
+        //    return "Enter Discount Days";
+        //}
+        //if ($scope.chk_Advance) {
+        //    if ($scope.SelectedAdvancetype == "") {
+        //        return "Select Advance Type";
+        //    }
+        //    if ($scope.SelectedAdvancetype == "1" && $scope.txtAdvancepersentageamount == "") {
+        //        return "Enter Advance Percentage";
+        //    }
+        //    if ($scope.SelectedAdvancetype == "2" && $scope.txtAdvanceAmount == "") {
+        //        return "Enter Advance Amount";
+        //    }
+        //}
+        //if ($scope.txtAdvanceAmount != "") {
+        //    $scope.txtAdvanceAmount = parseFloat($scope.txtAdvanceAmount.toString().split('.').join("").replace(",", "."));
+        //}
+        if ($scope.txtDetails == "") {
+            return "Enter Payment Term Details";
+        }
+        return "";
+    }
+    // Insert and Update function
+    $scope.SubmitClick = function () {
+        debugger;
+        var valid = validation();
+        if (valid == "") {
+            //if ($scope.txtDiscountdays == "" || $scope.txtDiscountdays == undefined)
+            //    $scope.txtDiscountdays = 0;
+            //if ($scope.txtCreditdays == "" || $scope.txtCreditdays == undefined)
+            //    $scope.txtCreditdays = 0;
+
+            //if ($scope.txtAmount == "" || $scope.txtAmount == undefined)
+            //    $scope.txtAmount = 0;
+            //if ($scope.txtpersentageamount == "" || $scope.txtpersentageamount == undefined)
+            //    $scope.txtpersentageamount = 0;
+
+            //if ($scope.txtAdvancepersentageamount == "" || $scope.txtAdvancepersentageamount == undefined)
+            //    $scope.txtAdvancepersentageamount = 0;
+            //if ($scope.txtAdvanceAmount == "" || $scope.txtAdvanceAmount == undefined)
+            //    $scope.txtAdvanceAmount = 0;
+
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_PaymentTerms/ET_Admin_PaymentTerms_Add",
+                dataType: 'json',
+                data: {
+                    pamentID: $scope.pamentID,
+                    txtpamentCode: $scope.txtpamentCode,
+                    txtPaymentName: $scope.txtPaymentName,
+                    //txtCreditdays: $scope.txtCreditdays,
+                    //drpDiscounttype: $scope.SelectedDiscounttype,
+                    //txtpersentageamount: $scope.txtpersentageamount,
+                    //txtAmount: $scope.txtAmount,
+                    //txtDiscountdays: $scope.txtDiscountdays,
+                    //chk_Advance: $scope.chk_Advance,
+                    //drpAdvancetype: $scope.SelectedAdvancetype,
+                    //txtAdvancepersentageamount: $scope.txtAdvancepersentageamount,
+                    //txtAdvanceAmount: $scope.txtAdvanceAmount,
+                    txtDetails: $scope.txtDetails
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+
+            post.success(function (data, status) {
+
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else if (data.indexOf("Success") > -1) {
+                    var res = data.split(":");
+                    if ($scope.pamentID == 0) {
+                        message = 'Record Inserted Successfully With Code : ' + res[1];
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully With Code : ' + res[1];
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.createnew();
+                    $scope.submittext = "Submit";
+                    $scope.createedit = "Create";
+                    $("#formSubmit").attr('disabled', "disabled");
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else
+        {
+            toastr["error"](valid, "Notification");
+        }
+    }   
+
+    // Edit function
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var get = $http({
+                method: "POST",
+                url: "/ET_Admin_PaymentTerms/ET_Admin_PaymentTerms_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            get.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var res = JSON.parse(data);
+                    debugger;
+                    $scope.pamentID = res.PT_ID;
+                    $scope.txtpamentCode = res.PT_Code;
+                    $scope.txtPaymentName = res.PT_Name;
+                    //$scope.txtCreditdays = res.PT_CreditDays;
+                    //$scope.SelectedDiscounttype = res.PT_DiscountType;
+                    //$("#drpDiscounttype").val(res.PT_DiscountType).trigger("chosen:updated");
+                    //$scope.ChangeDiscounttype();
+                    //$scope.txtpersentageamount = res.PT_DiscountPer;
+                    //$scope.txtAmount = parseFloat(res.PT_DiscountAmount).toLocaleString("es-ES", { minimumFractionDigits: 3 });
+                    //$scope.txtDiscountdays = res.PT_DiscountDays;
+                    //$scope.SpecificAdvance(res.PT_IsAdvance);
+                    //$scope.SelectedAdvancetype = res.PT_AdvanceType;
+                    //$scope.ChangeAdvancetype();
+                    //$("#drpAdvancetype").val(res.PT_AdvanceType).trigger("chosen:updated");
+                    //$scope.txtAdvancepersentageamount = res.PT_AdvancePer;
+                    //$scope.txtAdvanceAmount = parseFloat(res.PT_AdvanceAmount).toLocaleString("es-ES", { minimumFractionDigits: 3 });
+                    //$scope.chk_Advance = res.PT_IsAdvance;  
+                    $scope.txtDetails = res.PT_Details;
+
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+                }
+            });
+
+            get.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+
+    // Delete and restore function
+    $scope.Restoredeleterecords = function (a, $event, b) {
+        var res = false;
+        if (b)
+            res = $scope.Isdelete;
+        else
+            res = $scope.Isrestore
+        if (res) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_PaymentTerms/ET_Admin_PaymentTermsr_Restore_Delete",
+                dataType: 'json',
+                data: {
+                    id: a,
+                    type: b
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (data == "Success") {
+                        $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                        if (b) {
+                            message = "Record Deleted Successfully.";
+                        }
+                        else {
+                            message = "Record Restored Successfully.";
+                        }
+
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+
+    // View function in payment terms
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_PaymentTerms/ET_Admin_PaymentTerms_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.$watch("paymentslist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("paymentrestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 5);
+        }
+    });
+});

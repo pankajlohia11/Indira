@@ -1,0 +1,51 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_Payment_Config
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal Payment_Config_Id { get; set; }
+
+        public int? Payment_From { get; set; }
+
+        public int? Payment_To { get; set; }
+
+        [StringLength(250)]
+        public string Payment_Discount_Type { get; set; }
+
+        public decimal? Payment_Discount_Percentage { get; set; }
+
+        public decimal? Payment_Discount_Amount { get; set; }
+
+        [StringLength(300)]
+        public string Machine_Name { get; set; }
+
+        [StringLength(50)]
+        public string IPAddress { get; set; }
+
+        [StringLength(50)]
+        public string Created_By { get; set; }
+
+        public DateTime? Created_Date { get; set; }
+
+        [StringLength(250)]
+        public string Last_Updated_By { get; set; }
+
+        public DateTime? Last_Updated_Date { get; set; }
+
+        public decimal? Deleted_By { get; set; }
+
+        public DateTime? Deleted_date { get; set; }
+
+        public bool? Deleted { get; set; }
+
+        [StringLength(50)]
+        public string Payment_Config_Code { get; set; }
+    }
+}

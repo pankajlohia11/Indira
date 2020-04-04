@@ -1,0 +1,199 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+    }
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Company Master <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Company Master</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="pagecontent">
+            <section class="tile" id="div_View">
+
+                <!-- tile header -->
+                <div class="tile-header dvd-btm">
+                    <h1 class="custom-font"><strong>Company Master</strong> List</h1>
+                    <ul class="controls">
+                        <li style="padding:5px">
+                            <a tabindex="0" onclick="createRecords();">
+                                <span class="btn btn-slategray btn-xs mb-10">
+                                    <i class="fa fa-plus"></i>
+                                    Add
+                                </span>
+                            </a>
+                        </li>
+                        <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                    </ul>
+                </div>
+                <!-- /tile header -->
+                <!-- tile body -->
+                <div class="tile-body">
+                    <div class="row">
+                        <div class="col-md-6"><div id="tableTools"></div></div>
+                        <div class="col-md-6"><div id="colVis"></div></div>
+                    </div>
+                    <table class="table table-custom" id="advancedusage">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Company </th>
+                                <th>Display name</th>
+                                <th>Country</th>
+                                <th>City </th>
+                                <th>Zipcode</th>
+                                <th>Mobile</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- /tile body -->
+
+            </section>
+            <section class="tile" id="div_Edit" style="display:none">
+
+                <!-- tile header -->
+                <div class="tile-header dvd-btm">
+                    <h1 class="custom-font"><strong>Create</strong> Company Master</h1>
+                    <ul class="controls">
+                        <li style="padding:5px">
+                            <a tabindex="0" onclick="showRecords();">
+                                <span class="btn btn-hotpink btn-xs mb-10">
+                                    <i class="fa fa-arrow-left"></i> Back
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /tile header -->
+                <!-- tile body -->
+                <div class="tile-body">
+
+
+                    <form class="form-horizontal" name="form3" role="form" id="form3" data-parsley-validate>
+
+
+
+
+                        <hr class="line-dashed line-full" />
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Role Name</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="fc4" class="form-control" placeholder="minlength = 5"
+                                       data-parsley-trigger="change"
+                                       minlength="5"
+                                       required>
+                            </div>
+                        </div>
+
+                        <hr class="line-dashed line-full" />
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Description</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="fc5" class="form-control" placeholder="maxlength = 5"
+                                       data-parsley-trigger="change"
+                                       maxlength="5"
+                                       required>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+                <!-- /tile body -->
+                <!-- tile footer -->
+                <div class="tile-footer text-right bg-tr-black lter dvd dvd-top">
+                    <!-- SUBMIT BUTTON -->
+                    <button type="submit" class="btn btn-default" id="form3Submit">Submit</button>
+                </div>
+                <!-- /tile footer -->
+
+            </section>
+            <section class="tile" id="div_Restore" style="display:none">
+
+                <!-- tile header -->
+                <div class="tile-header dvd-btm">
+                    <h1 class="custom-font"><strong>Restore Company Master</strong> List</h1>
+                    <ul class="controls">
+                        <li style="padding:5px">
+                            <a tabindex="0" onclick="showRecords();">
+                                <span class="btn btn-hotpink btn-xs mb-10">
+                                    <i class="fa fa-arrow-left"></i>Back
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /tile header -->
+                <!-- tile body -->
+                <div class="tile-body">
+                    <div class="row">
+                        <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                        <div class="col-md-6"><div id="colVisRestore"></div></div>
+                    </div>
+                    <table class="table table-custom" id="advancedusageRestore">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Role Name</th>
+                                <th>Role Description</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- /tile body -->
+
+            </section>
+
+        </div>
+
+    </div>
+
+</section>

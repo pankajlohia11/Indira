@@ -1,0 +1,243 @@
+﻿
+@{
+    ViewBag.Title = "ET_Sales_OrdertoSchdule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/Ac_OrdertoSchdule.js"></script>
+    <script type="text/javascript">
+        function MoneyValidation(s) {
+            debugger;
+            var re = /^[\d.]+(\,\d*)?$/;
+            var txt = s.value;
+            if (txt != "") {
+                if (!re.test(txt)) {
+                    toastr["error"]("Invalid Data", "Notification");
+                    s.value = '';
+                    return false;
+                }
+                else {
+                    s.value = parseFloat(txt.split('.').join("").replace(",", ".")).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                }
+            }
+            return true;
+        }
+        function scheduleqtychange(e)
+        {
+            if (MoneyValidation(e)) {
+                var td = $(e).parent().parent().find("td");
+                if ($(td[6]).find("input").val() == "")
+                    $(td[6]).find("input").val("0");
+                if ($(td[7]).find("input").val() == "")
+                    $(td[7]).find("input").val("0");
+                //if (parseFloat($(td[7]).find("input").val().split('.').join("").replace(",", ".")) > parseFloat($(td[6]).find("input").val().split('.').join("").replace(",", "."))) {
+                //    $(e).val("0,000");
+                //    toastr["error"]("Schedule Quantity cannot be more than Available Quantity", "Notification");
+                //}
+            }
+        }
+    </script>
+
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order" ng-controller="AC_OrdertoScheduleCtrl">
+        <div class="pageheader">
+
+            <h2>{{Type}} Schedule<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">{{Type}} Schedule</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:block">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> {{Type}} Schedule</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- This Below code is used for Tab purpose -->
+                    @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                        </ul>*@
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Schedule Code</label>
+                                    <input type="text" name="txtScheduleCode" id="txtScheduleCode" ng-model="SH_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                    <input type="text" name="txtScheduleID" id="txtScheduleID" ng-model="SH_ID" class="hidden">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="drpType">Order Type</label>
+                                    <select data-ng-model="SH_Type" id="drpType" data-parsley-trigger="change" class="form-control chosen-select" ng-change="OrderTypeChange()" disabled>
+                                        <option value="">-Select-</option>
+                                        <option value="1">Agency</option>
+                                        <option value="2">Trading</option>
+                                        <option value="3">Store</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="CustomerName">Customer Name *</label>
+                                    <select class="form-control chosen-select" name="drpCustomer" id="drpCustomer" ng-model="SelectedCustomer" ng-change="Customerchange();" data-parsley-trigger="change" required>
+                                        <option value="">-Select-</option>
+                                        <option data-ng-repeat="st in CustomerList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="drpOrder">Customer Order No</label>
+                                    <select data-ng-model="SH_OrderID" id="drpOrder" data-parsley-trigger="change" class="form-control chosen-select" ng-change="OrderChange()" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-if="SH_Type==1" ng-repeat="order in orders" value="{{order.SO_ID}}">
+                                            {{ order.SO_SupSCNO + '-'+ order.SO_Code  }}
+                                        </option>
+                                        <option ng-if="SH_Type!=1" ng-repeat="order in orders" value="{{order.SO_ID}}">
+                                            {{ order.SO_CusPONO + '-'+ order.SO_Code  }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="PONo">Customer Order Date</label>
+                                    <input type="text" class="form-control" name="txtOrderdate" id="txtOrderdate" ng-model="txtOrderdate" disabled>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6" ng-if="SH_Type!=3">
+                                    <label for="SupplierName">Supplier Name *</label>
+                                    <select tabindex="3" class="form-control chosen-select" name="drpSupplier" id="drpSupplier" ng-model="SelectedSupplier" ng-change="Supplierchange();" disabled>
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in SupplierList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6" ng-if="SH_Type!=3">
+                                    <label for="SupplierPO">Supplier PO No</label>
+                                    <input type="text" class="form-control" name="txtSupplierPO" id="txtSupplierPO" ng-model="SH_SUP_PO" disabled />
+                                </div>
+                                <div class="form-group col-md-6">
+
+                                    <label for="Url">Sales Person</label>
+                                    <select data-ng-model="SH_SalesPerson" id="drpSalesPerson" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SalesPersonChange()" disabled required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="salesperson in salespersons" value="{{salesperson.USER_ID}}">
+                                            {{salesperson.DISPLAY_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtSupSchDate">Supplier Schedule Date*</label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtSupSchDate" name="txtSupSchDate" class="form-control" ng-model="SH_SUPDate" disabled />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="CustomerDeliveryItems">Customer Schedule Date*</label>
+                                        <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                            <input type='text' id="txtSchDate" name="txtSchDate" class="form-control" ng-model="SH_Date" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <div class="row">
+
+                            </div>
+                            <section class="tile">
+                                <!-- tile header -->
+                                <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                    <h1 class="custom-font"><strong>Schedule</strong> Details</h1>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+
+                                    <div class="collapse" id="collapseExample">
+                                        <div class="row">
+                                            <div class="table-responsive">
+                                                <style type="text/css">
+                                                    #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                        padding: 0px;
+                                                    }
+                                                </style>
+                                                <table class="table table-custom" id="editable-usage">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Article No</th>
+                                                            <th>Product Name</th>
+                                                            <th ng-if="SH_Type==2">Design No</th>
+                                                            <th>Ordered Quantity</th>
+                                                            <th>Available Quantity</th>
+                                                            <th>Schedule Quantity</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="scheduledetailsbody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- /tile body -->
+
+                            </section>
+
+
+                        </div>
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" value="Submit" ng-bind="submittext">Submit</button>
+                    </div>
+                </section>
+
+                
+            </div>
+        </div>
+    </div>
+</section>

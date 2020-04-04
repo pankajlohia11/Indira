@@ -1,0 +1,182 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.POCombo_CM
+<div>
+    <input id="englishformat" style="display:none;" value="@Model.POHeader[0].PO_Code" />
+
+    <table style="width:100%;">
+        <tr>
+            <td style="text-align:left;width:30%;"><img src="@Model.POHeader[0].imgurl" width="100"></td>
+            <td style="text-align:center;width:40%;"><h1 style="font-size:20px;font-family:'Times New Roman';"><label><strong>@Model.POHeader[0].SysCompany</strong></label></h1></td>
+            <td style="text-align:left;width:30%;"></td>
+        </tr>
+    </table>
+    <div id="tblprintpdf" style="width:100%;">
+        <table style="width:100%;">
+            <tr>
+                <td style="text-align:center;"><h1 style="font-size:18px"><label><strong><u>Purchase Order confirmation</u></strong></label></h1></td>
+            </tr>
+        </table>
+        <table style="font-weight: 600;" class='generaltable'>
+            
+            <tr>
+                <td><u>Eurotextiles GmbH & Co. KG.Mammolshainer Weg 14,61462 Königstein</u></td>
+            </tr>
+            <tr>
+                <td><strong>@Model.POHeader[0].SUPPLIER_NAME</strong></td>
+            </tr>
+            <tr>
+                <td>@Model.POHeader[0].Street</td>
+            </tr>
+            <tr>
+                <td>@Model.POHeader[0].CityState</td>
+            </tr>
+            <tr>
+                <td>@Model.POHeader[0].CountryZip</td>
+            </tr>
+
+        </table>
+        <table align="right" style="text-align:right" class='generaltable'>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Customer Code:</td>
+                <td><strong>@Model.POHeader[0].PO_CutomerID</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Processed by:</td>
+                <td><strong>@Model.POHeader[0].salesPersonName</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Date:</td>
+                <td><strong>@((Model.POHeader[0].PO_Date).ToString("dd-MM-yyyy"))</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Customer Order No:</td>
+                <td><strong>@Model.POHeader[0].PO_CusPONO</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Purchase Order No:</td>
+                <td><strong>@Model.POHeader[0].PO_Code</strong></td>
+            </tr>
+        </table>
+        @*<table style="width:100%;text-align:left;" class='generaltable'>
+                <tr>
+                    <td><strong>Customer Order No: @Model.OHeader[0].SO_Code</strong></td>
+                    <td></td>
+                </tr>
+            </table>*@
+        <table border="1" style="width:100%;" align="center" class='generaltable'>
+            <thead>
+                <tr>
+                    <th style="text-align:center"><strong>S.No</strong></th>
+                    <th style="text-align:center" colspan="2"><strong>Quantity</strong></th>
+                    <th style="text-align:center"><strong>Product Description</strong></th>
+                    <th style="text-align:center"><strong>Design</strong></th>
+                    <th style="text-align:center"><strong>Remarks</strong></th>
+                    <th style="text-align:center"><strong>Price</strong></th>
+                    <th style="text-align:center"><strong>Total</strong></th>
+                </tr>
+
+            </thead>
+            <tbody>
+                @{
+                    //int i = 1;
+                    decimal total = 0;
+                    var modelItems = Model.PODetails.AsEnumerable().Select((orderItem, index) => new { SO_Serial = index + 1, orderItem.PD_Quantity, orderItem.PD_UnitPrice, orderItem.PD_UOM, orderItem.PD_ShortName, orderItem.DesignDetail, orderItem.CustomerDesc });
+                    //var vatPercObj = Model.POHeader[0].VatPer;
+                    foreach (var item in modelItems)
+                    {
+                        <tr>
+                            <td>@item.SO_Serial</td>
+                            <td style="text-align:right">@(Convert.ToDecimal(item.PD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                            <td>@item.PD_UOM</td>
+                            <td>@item.PD_ShortName</td>
+                            <td>@item.DesignDetail</td>
+                            <td>@item.CustomerDesc</td>
+                            <td style="text-align:right;">@(Convert.ToDecimal(item.PD_UnitPrice).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                            <td style="text-align:right;">@((Convert.ToDecimal(item.PD_UnitPrice) * Convert.ToDecimal(item.PD_Quantity)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        </tr>
+                        total = total + Convert.ToDecimal(item.PD_UnitPrice) * Convert.ToDecimal(item.PD_Quantity);
+                        //i++;
+                    }
+
+                }
+                @*<tr>
+                    <td colspan="5">Net Value</td>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">@total.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))</td>
+                </tr>*@
+                @*<tr>
+                    <td colspan="5">Incl <strong>@(Convert.ToDecimal(vatPerc).ToString("0"))</strong> % Vat</td>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">@(Convert.ToDecimal(total * vatPerc / 100).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                </tr>*@
+                <tr>
+                    <td colspan="5">Total</td>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">@((Convert.ToDecimal(total)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    @*<td colspan="3" style="text-align:right;font-weight:bold;">@((Convert.ToDecimal(total + vatPerRatio).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))))</td>*@
+                </tr>
+            </tbody>
+        </table>
+        <table class='mediumtable'>
+            <tr>
+                <td>
+                    <p>Payment Terms : @Model.POHeader[0].PaymentTermsDescription</p>
+                    <p>Delivery: @Model.POHeader[0].PO_CusDeliveryTerms</p>
+                </td>
+            </tr>
+        </table>
+        <br />
+
+        <table class='mediumtable'>
+            <tr>
+                <td><span><label>Our general terms of business apply</label></span></td>
+            </tr>
+            <tr>
+                <td><span><label>Any general variation have to be notified to us before the goods but not than 7 days on receipt of the goods.</label></span></td>
+            </tr>
+            <tr>
+                <td><span><label>No claims will be accepted after washing/using the goods.</label></span></td>
+            </tr>
+        </table>
+        <hr style="font-weight:bold;border-top:1px solid black;">
+        <table class='footertable' style="font-size: 10px;width: 100%;">
+            <tr>
+                <td>Eurotextiles GmbH & Co.KG</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Mammolshainer Weg 14</td>
+                <td>HRA 3451</td>
+                <td>Kompl.Indra Enterprises GmbH</td>
+                <td>Bankverbindung</td>
+            </tr>
+            <tr>
+                <td>61462 Konigstein im Taunus</td>
+                <td>Amtsgericht Kongstein</td>
+                <td>Geshafuher:Krishna Javaji</td>
+                <td>Nassauische Sparkasse</td>
+            </tr>
+            <tr>
+                <td>Fon +49 6174/25980</td>
+                <td>Steuerrnummer 003 315 60117</td>
+                <td>HRB 5137 Amtsgericht Konigstein</td>
+                <td>IBAN :DE15 5105 00150270060706</td>
+            </tr>
+            <tr>
+                <td>HRA 3451</td>
+                <td>USt-IdNr.DE279479010</td>
+                <td>Steuernummer 003 236 16128</td>
+                <td>SWIFT:-BIC NASSDE55XXX</td>
+            </tr>
+        </table>
+    </div>
+</div>

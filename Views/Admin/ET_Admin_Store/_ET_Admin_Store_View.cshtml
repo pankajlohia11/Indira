@@ -1,0 +1,80 @@
+﻿@model BusinessEntity.EntityModels.Tbl_Locations_Master
+
+@{
+
+    BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+
+    var CountryID = Convert.ToInt32(Model.Country);
+    var StateID = Convert.ToInt32(Model.State);
+    var CityID = Convert.ToInt32(Model.City);
+
+    var countryname = (from country in dbc.locations
+                       where country.location_id == CountryID
+                       select country.name).FirstOrDefault();
+
+    var statename = (from state in dbc.locations
+                     where state.location_id == StateID
+                     select state.name).FirstOrDefault();
+
+    var cityname = (from city in dbc.locations
+                    where city.location_id == CityID
+                    select city.name).FirstOrDefault();
+}
+<div class="col-md-12">
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="lblStoreName">Store Name</label>
+            <input type="text" name="txtStoreName" id="txtStoreName" class="form-control" value="@Model.Store_Name" disabled />
+        </div>
+        <div class="form-group col-md-6">
+            <label for="Url">Display Name</label>
+
+            <input type="text" name="txtDisplayName" id="txtDisplayName" class="form-control" value="@Model.Display_Name" disabled />
+        </div>
+    </div>
+    <h5> <label><strong>Address Details</strong></label></h5>
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblStreet">Address</label>
+            <input type="text" name="txtStreet" id="txtStreet" class="form-control" value="@Model.Street" disabled />
+        </div>
+
+        <div class="form-group col-md-6">
+            <label for="Alpha">Country</label>
+            <input type="text" name="Country" value="@countryname" class="form-control" disabled>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="lblState">State</label>
+            <input type="text" name="Country" value="@statename" class="form-control" disabled>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="lblCity">City</label>
+            <input type="text" name="Country" value="@cityname" class="form-control" disabled>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-md-6">
+            <label for="Zip">Zip</label>
+            <input type="text" name="txtZipCode" id="txtZipCode" class="form-control" value="@Model.Zip" disabled />
+        </div>
+    </div>
+
+    <h5> <label><strong>Contact Details</strong></label></h5>
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="lblStoreKeeper">Store Keeper Name</label>
+            <input type="text" name="txtStoreKeeper" id="txtStoreKeeper" class="form-control" value="@Model.Store_KeeperName" disabled/>
+        </div>
+        <div class="form-group col-md-6">
+            <label for="lblContactNo">Contact No</label>
+
+            <input type="text" name="txtContactNo" id="txtContactNo" class="form-control" value="@Model.ContactNo" disabled />
+        </div>
+    </div>
+</div>

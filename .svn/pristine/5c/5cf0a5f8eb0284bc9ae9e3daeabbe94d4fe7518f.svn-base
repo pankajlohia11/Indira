@@ -1,0 +1,229 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+
+    This Form is used to create a Category Details.
+    The user can edit or remove and restore  a record in Category.The user can capture Category and Category Details etc.
+    Author=jesmi
+    Created Date=31st Mar 2018
+    Category Deatils Form view
+    Operations[Add,Edit,Restore]
+-->
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide display page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying view page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+    }
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Category Details <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Category Details</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <!--Here user can have to see Category Details -->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Category</strong> Details</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Category Details</th>
+                                    <th>Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--Here user can have to edit Category Details -->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong>Category Details</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- this is link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <form name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lbl_Category">Category</label>
+                                    <select class="form-control" id="ddlCategory" required name="StudentGender">
+                                        <option></option>
+                                        <option>Category2</option>
+                                        <option>Category3</option>
+                                    </select>
+
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lbl_CategoryDetails">Category Details</label>
+                                    <select class="form-control" id="ddlCategoryDetails" required name="StudentGender">
+                                        <option></option>
+                                        <option>CatDetails1</option>
+                                        <option>CatDetails2</option>
+                                    </select>
+
+
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lbl_Description">Description</label>
+                                    <textarea name="ddlDescription" rows="3" cols="80" class="form-control" placeholder="Description" data-parsley-trigger="change"
+                                              data-parsley-type="alphanum" required></textarea>
+                                </div>
+
+                            </div>
+                        </form>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" disabled>Submit</button>
+
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--Here user can have to restore Category Details -->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Category</strong> Details</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Category Details</th>
+                                    <th>Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

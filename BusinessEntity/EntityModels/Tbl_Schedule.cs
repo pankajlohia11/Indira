@@ -1,0 +1,56 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_Schedule
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal SH_ID { get; set; }
+
+        [StringLength(50)]
+        public string SH_Code { get; set; }
+
+        public int SH_Type { get; set; }
+
+        public decimal SH_OrderID { get; set; }
+
+        public decimal SH_OrderDetailID { get; set; }
+
+        public decimal SH_ProductID { get; set; }
+
+        public DateTime SH_DATE { get; set; }
+
+        public DateTime SUP_SH_DATE { get; set; }
+
+        public decimal SH_OrderQuantity { get; set; }
+
+        public decimal SH_SheduledQuantity { get; set; }
+
+        public bool? SH_Status { get; set; }
+
+        public decimal SH_SalesPerson { get; set; }
+
+        public string SH_Remarks { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public int? COM_KEY { get; set; }
+    }
+}

@@ -1,0 +1,57 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_Order_Details
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal ORDER_ID { get; set; }
+
+        public decimal AGEN_TRAD_PO_ID { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string AGEN_TRAD_PO { get; set; }
+
+        public decimal CATEGORY_ID { get; set; }
+
+        public decimal PRODUCT_ID { get; set; }
+
+        public decimal? QUANTITY { get; set; }
+
+        public decimal? PENDING_QUANTITY { get; set; }
+
+        public decimal? SHIP_ISSUED_QUANTITY { get; set; }
+
+        public decimal? RETURN_QUANTITY { get; set; }
+
+        [Column(TypeName = "numeric")]
+        public decimal? Close_Quantity { get; set; }
+
+        public string UOM { get; set; }
+
+        public decimal? CURRENCY_ID { get; set; }
+
+        public decimal? PRICE { get; set; }
+
+        public decimal? Selling_Price { get; set; }
+
+        [StringLength(50)]
+        public string PACKING { get; set; }
+
+        public decimal? SUPPLIEROFFER_ID { get; set; }
+
+        public bool? IS_SUPPLIEROFFER { get; set; }
+
+        public decimal? CUSTOMEROFFER_ID { get; set; }
+
+        public bool? IS_CUSTOMEROFFER { get; set; }
+
+        public string OrderDescription { get; set; }
+    }
+}

@@ -1,0 +1,37 @@
+﻿@using System.Globalization;
+@model IEnumerable<BusinessEntity.CustomModels.Schedule_CM>
+@foreach (var item in Model)
+{
+
+<tr>
+    <td style="display:none;">
+        <input type='text' id='txtOrderDetailID' class='form-control' readonly='readonly' value="@item.SH_OrderDetailID" />
+    </td>
+    <td style="display:none;">
+        <input type='text' id='txtProductID' class='form-control' readonly='readonly' value="@item.SH_ProductID" />
+    </td>
+    <td>
+        <input type='text' id='txtArticleNo' class='form-control' readonly='readonly' value="@item.P_ArticleNo" />
+    </td>
+    <td>
+        <input type='text' id='txtProductName' class='form-control' readonly='readonly' value="@item.P_ShortName" />
+    </td>
+    @if (item.SH_Type == 2)
+    {
+    <td >
+        <input type='text' id='txtDesignNo' class='form-control' readonly='readonly' value="@item.DesignNo" />
+    </td>
+    }
+  
+    
+    <td>
+        <input type='text' id='txtOrderedQuantity' style="text-align:right;" class='form-control' readonly='readonly' value="@(Convert.ToDecimal(item.SH_OrderQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td>
+        <input type='text' id='txtAvailableQuantity' style="text-align:right;" class='form-control' readonly='readonly' value="@(Convert.ToDecimal(item.SH_AvailableQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td>
+        <input type='text' id='txtScheduleQuantity' style="text-align:right;" class='form-control' value="@(Convert.ToDecimal(item.SH_SheduledQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" onchange="scheduleqtychange(this);" />
+    </td>
+</tr>
+}

@@ -1,0 +1,452 @@
+﻿app1.controller("AC_Mail", function ($scope, $http, $window, $compile) {
+
+    mailList();
+
+
+
+    $scope.compose = function (reply, body, cc, subject) {
+        $scope.MST_To = "";
+        $scope.MST_Cc = "";
+        $scope.MST_Subject = "";
+        $scope.MST_Body = "";
+
+        $('#Compose').css('display', 'block');
+        $('#SingleSentMail').css('display', 'none');
+        $('#Inbox').css('display', 'none');
+        $('#SingleMail').css('display', 'none');
+        $('#Settings').css('display', 'none');
+        $('#Sent').css('display', 'none');
+        debugger;
+        //Class Active 
+        $('#in').removeClass("active");
+        $('#in').removeClass("active");
+        $('#sent').removeClass("active");
+        if (reply != "") subject = "RE: " + subject;
+
+        var reply = reply.split(',');
+        for (var i = 0; reply.length > i; i++) {
+            var sdf = $($('#mailIds').parent()[0].children[1]).find('input');
+            //$($('#mailIds').parent()[0].children[1]).append("<span class='tag label label-primary'>" + reply[i] + "<span data-role='remove'></span></span>");
+        }
+        $($('#mailIds').parent()[0].children[1]).append("<input type='text' placeholder='' style='width: 20em!important;'>");
+        if (cc != null) {
+            var cc = cc.split(',');
+            $($('#mailCcIds').parent()[0].children[1]).html("");
+            for (var i = 0; cc.length > i; i++) {
+                $($('#mailCcIds').parent()[0].children[1]).append("<span class='tag label label-primary'>" + cc[i] + "<span data-role='remove'></span></span>");
+            }
+            $($('#mailCcIds').parent()[0].children[1]).append("<input type='text' placeholder='' style='width: 20em!important;'>");
+        }
+            
+        $scope.MST_To = reply;
+        $scope.MST_Cc = cc;
+        $scope.MST_Subject = subject;
+        $scope.MST_Body = body;
+        $("#summernote").code(""+body);
+        
+       
+
+    }
+
+    $scope.SendClick = function () {
+        
+        var body = $($('.note-editable')[0]).html();
+        
+        var formdata = new FormData(); //FormData object
+        var myFileInput = document.getElementsByName('file1[]');
+        
+        
+        
+
+            var fileInput = document.getElementById('fileInput');
+            //Iterating through each files selected in fileInput
+        for (i = 0; i < myFileInput.length; i++) {
+                //Appending each file to FormData object
+            formdata.append(myFileInput[i].files[0].name, myFileInput[i].files[0]);
+        }
+
+        formdata.append("Cc", $('#mailCcIds').val());
+        formdata.append("TO_IDS", $('#mailIds').val());
+        formdata.append("Subject", $scope.MST_Subject);
+        formdata.append("Body", body);
+        
+
+        //Creating an XMLHttpRequest and sending
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/ET_Mail_Email/ET_Master_Mail_Compose_Reply_Forward');
+        xhr.send(formdata);
+        xhr.onreadystatechange = function () {
+            debugger;   
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                if (xhr.responseText == "true") {
+                    message = 'Record Updated Successfully.';
+                    toastr["success"](message, "Notification");
+                }
+            }
+        }
+
+    }
+
+    $scope.settings = function () {
+        $('#set').addClass("active");
+        $('#in').removeClass("active");
+        $('#sent').removeClass("active");
+
+        $('#SingleSentMail').css('display', 'none');
+        $('#Compose').css('display', 'none');
+        $('#Inbox').css('display', 'none');
+        $('#SingleMail').css('display', 'none');
+        $('#Settings').css('display', 'block');
+        $('#Sent').css('display', 'none');
+
+        var getsettings = $http.get("/ET_Mail_Email/ET_Master_Mail_Fetch_Settings");
+        getsettings.then(function (settings) {
+            var setting = JSON.parse(settings.data);
+            if (setting.length != 0) {
+                $scope.MS_ID = setting[0].MS_ID;
+                $scope.MS_IncomingHostName = setting[0].MS_IncomingHostName;
+                $scope.MS_EmailID = setting[0].MS_EmailID;
+                $scope.MS_IncomingPort = setting[0].MS_IncomingPort;
+                $scope.MS_Password = setting[0].MS_Password;
+                $scope.MS_OutGoingHostName = setting[0].MS_OutGoingHostName;
+                $scope.MS_OutGoingPort = setting[0].MS_OutGoingPort;
+                $scope.MS_Authentication = setting[0].MS_Authentication;
+                $scope.MS_UseSSL = setting[0].MS_UseSSL;
+                $("#chkssl").prop('checked', setting[0].MS_UseSSL);
+            }
+            else
+            {
+                $scope.MS_ID = "0";
+                $scope.MS_IncomingHostName = "";
+                $scope.MS_EmailID = "";
+                $scope.MS_IncomingPort = "";
+                $scope.MS_Password = "";
+                $scope.MS_OutGoingHostName = "";
+                $scope.MS_OutGoingPort = "";
+                $scope.MS_Authentication = "";
+                $scope.prop('checked', false);
+                $scope.MS_UseSSL = false;
+            }
+           
+        });
+        
+    }
+
+    $scope.SubmitClick = function () {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Mail_Email/ET_Master_Mail_Add_Update",
+                dataType: 'json',
+                data: {
+                    MS_ID: $scope.MS_ID,
+                    MS_IncomingHostName: $scope.MS_IncomingHostName,
+                    MS_OutGoingHostName: $scope.MS_OutGoingHostName,
+                    MS_EmailID: $scope.MS_EmailID,
+                    MS_Password: $scope.MS_Password,
+                    MS_UseSSL: $scope.MS_UseSSL,
+                    MS_IncomingPort: $scope.MS_IncomingPort,
+                    MS_OutGoingPort: $scope.MS_OutGoingPort,
+                    MS_Authentication: $scope.MS_Authentication
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+        
+        post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+            try
+            {
+                if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+            }
+            catch (ex)
+            {
+                if (data != "0") {
+                    message = 'Record Updated Successfully.';
+                    toastr["success"](message, "Notification");
+                    $scope.MS_ID = data;
+                }
+                else if (data == 0) {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+    }
+
+    function mailList() {
+        $.getJSON('/ET_Mail_Email/ET_Master_Mail_Fetch_Settings_insert_mailList', function (inboxList) {
+            var inbox = JSON.parse(inboxList.Result);
+            var unread = JSON.parse(inboxList.ID);
+            $scope.inboxList = inbox;
+            $scope.unread = unread;
+            $scope.$apply();
+        }, function () {
+        alert("Inbox List Not Found");
+        });
+    }
+
+    $scope.sentList = function () {
+        $('#sent').addClass("active");
+        $('#in').removeClass("active");
+        $('#set').removeClass("active");
+
+        $('#SingleSentMail').css('display', 'none');
+        $('#Sent').css('display', 'block');
+        $('#Compose').css('display', 'none');
+        $('#Inbox').css('display', 'none');
+        $('#SingleMail').css('display', 'none');
+        $('#Settings').css('display', 'none');
+        $.getJSON('/ET_Mail_Email/ET_Master_Mail_Fetch_sentList', function (sentList) {
+            var sent = JSON.parse(sentList);
+            $scope.sentMailList = sent;
+            $scope.$apply();
+        }, function () {
+            alert("Inbox List Not Found");
+            });
+    }
+
+    $scope.mailList = function () {
+        $('#in').addClass("active");
+        $('#set').removeClass("active");
+        $('#sent').removeClass("active");
+
+        $('#SingleSentMail').css('display', 'none');
+        $('#Compose').css('display', 'none');
+        $('#Inbox').css('display', 'block');
+        $('#SingleMail').css('display', 'none');
+        $('#Settings').css('display', 'none');
+        $('#Sent').css('display', 'none');
+        mailList();
+    }
+
+    $scope.singleMail = function (MIID, MI_Subject, MI_Address, MI_Message, MI_Date, MI_Attachment, MI_cc) {
+        $('#SingleSentMail').css('display', 'none');
+        $('#Compose').css('display', 'none');
+        $('#Inbox').css('display', 'none');
+        $('#SingleMail').css('display', 'block');
+        $('#Settings').css('display', 'none');
+        $('#Sent').css('display', 'none');
+            $scope.MID = MIID;
+            $scope.MISubject = MI_Subject;
+            $scope.MIAddress = MI_Address;
+            $scope.MIMessage = MI_Message;
+            $scope.MIDate = MI_Date;
+            $scope.MICc = MI_cc;
+        if (MI_Attachment == 1) {
+            var getattachmentlist = $http.get("/ET_Mail_Email/ET_Master_Mail_Attachment",
+                {
+                    params: { MI_ID: MIID }
+                });
+            getattachmentlist.then(function (attachmentList) {
+                var res = JSON.parse(attachmentList.data);
+                $scope.attachmentList = res;
+            }, function () {
+                alert("No Data Found");
+            });
+        }
+        //update read mail
+        var read = true;
+        var post = $http({
+            method: "POST",
+            url: "/ET_Mail_Email/ET_Master_Mail_Read",
+            dataType: 'json',
+            data: {
+                MIID: MIID,
+                type: read
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            });
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+
+        
+    }
+
+    $scope.singleSentMail = function (MSTID, MST_Subject, MST_To, MST_Message, MST_Date, MST_Attachment) {
+        
+        $('#Compose').css('display', 'none');
+        $('#Inbox').css('display', 'none');
+        $('#SingleMail').css('display', 'none');
+        $('#SingleSentMail').css('display', 'block');
+        $('#Settings').css('display', 'none');
+        $('#Sent').css('display', 'none');
+        $scope.MSTID = MSTID;
+        $scope.MSTSubject = MST_Subject;
+        $scope.MSTTo = MST_To;
+        $scope.MSTMessage = MST_Message;
+        $scope.MSTDate = MST_Date;
+        $scope.MSTAttachment = MST_Attachment;
+        if (MST_Attachment == 1) {
+            var getattachmentlist = $http.get("/ET_Mail_Email/ET_Master_MailSent_Attachment",
+                {
+                    params: { MST_ID: MSTID }
+                });
+            getattachmentlist.then(function (attachmentList) {
+                var res = JSON.parse(attachmentList.data);
+                $scope.attachmentSentList = res;
+            }, function () {
+                //alert("No Data Found");
+            });
+        }
+        //update read mail
+        
+        //post.success(function (data, status) {
+        //    if (data == "Session Expired") {
+        //        $window.location.href = '/ET_Login/ET_SessionExpire';
+        //    }
+        //    else if (data.indexOf("ERR") > -1) {
+        //        $("#spanErrMessage1").html(data);
+        //        $("#spanErrMessage2").html(data);
+        //        if ($("#exceptionmessage").length)
+        //            $("#exceptionmessage").trigger("click");
+        //    }
+        //});
+        //post.error(function (data, status) {
+        //    $window.alert(data.Message);
+        //});
+
+
+    }
+
+    $scope.deleteSentMail = function () {
+        var checkboxes = document.getElementsByName('deletesent_mail[]');
+        var vals = "";
+        for (var i = 0, n = checkboxes.length; i < n; i++) {
+            if (checkboxes[i].checked) {
+                vals += "," + checkboxes[i].value;
+            }
+        }
+        if (vals) { vals = vals.substring(1); uids = uids.substring(1); }
+
+        if (vals != "") {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Mail_Email/ET_Master_Sent_Delete",
+                dataType: 'json',
+                data: {
+                    ids: vals   
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                try {
+                    if (data.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(data);
+                        $("#spanErrMessage2").html(data);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else if (data.indexOf("Validation") > -1) {
+                        toastr["error"](data, "Notification");
+                    }
+                }
+                catch (ex) {
+                    if (data != "0") {
+                        message = 'Record Deleted Successfully.';
+                        toastr["success"](message, "Notification");
+                        $scope.MS_ID = data;
+                    }
+                    else if (data == 0) {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        $scope.$apply();
+        mailList();
+        
+    }
+
+    $scope.deleteMail = function () {
+        var checkboxes = document.getElementsByName('delete_mail[]');
+        var UID = document.getElementsByName('UID[]');
+        var uids = "";
+        var vals = "";
+        for (var i = 0, n = checkboxes.length; i < n; i++) {
+            if (checkboxes[i].checked) {
+                vals += "," + checkboxes[i].value;
+                uids += "," + UID[i].value;
+            }
+        }
+        if (vals) { vals = vals.substring(1); uids = uids.substring(1); }
+
+        if (vals != "") {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Mail_Email/ET_Master_Mail_Delete",
+                dataType: 'json',
+                data: {
+                    ids: vals,
+                    uids: uids
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                try {
+                    if (data.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(data);
+                        $("#spanErrMessage2").html(data);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else if (data.indexOf("Validation") > -1) {
+                        toastr["error"](data, "Notification");
+                    }
+                }
+                catch (ex) {
+                    if (data != "0") {
+                        message = 'Record Deleted Successfully.';
+                        toastr["success"](message, "Notification");
+                        $scope.MS_ID = data;
+                    }
+                    else if (data == 0) {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        $scope.$apply();
+        mailList();
+
+    }
+
+});

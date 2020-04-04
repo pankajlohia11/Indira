@@ -1,0 +1,81 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class tbl_QuotationHeader
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal Q_ID { get; set; }
+
+        [StringLength(10)]
+        public string Q_Code { get; set; }
+
+        public int Q_Type { get; set; }
+
+        [Column(TypeName = "date")]
+        public DateTime Q_Date { get; set; }
+
+        public decimal Q_CustomerID { get; set; }
+
+        public decimal Q_EnquiryID { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string Q_CurrencyCode { get; set; }
+
+        public decimal Q_PaymentTerms { get; set; }
+
+        [Required]
+        public string Q_DeliveryTerms { get; set; }
+
+        public int Q_ValidityDays { get; set; }
+
+        public decimal Q_Freight_Cost { get; set; }
+
+        public string Q_Enclosures { get; set; }
+
+        public decimal? Q_TotalValue { get; set; }
+
+        public decimal Q_Sales_Person { get; set; }
+
+        [StringLength(255)]
+        public string Q_Quotedescription { get; set; }
+
+        [StringLength(255)]
+        public string Q_specialdescription { get; set; }
+
+        [StringLength(255)]
+        public string Q_LeadTime { get; set; }
+
+        public int Q_ApprovedStatus { get; set; }
+
+        public decimal Q_Approver { get; set; }
+
+        public int Q_PriceType { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+
+        public bool? Q_Status { get; set; }
+
+        public string Q_CatalogId { get; set; }
+    }
+}

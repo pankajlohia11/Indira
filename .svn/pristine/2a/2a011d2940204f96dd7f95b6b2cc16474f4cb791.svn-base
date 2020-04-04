@@ -1,0 +1,235 @@
+﻿app1.controller("AC_SystemSetUpCtrl", function ($scope, $http, $window) {
+    GetPrivilages();
+    // Ger privilages
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_Admin_SystemSetUp/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+
+
+            
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+            $scope.editRecords();
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    // Edit function
+    $scope.editRecords = function () {
+        a = 1;
+        
+        if ($scope.Isedit) {
+            var get = $http({
+                method: "POST",
+                url: "/ET_Admin_SystemSetUp/ET_Admin_SystemSetUp_Update_Get",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            get.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var res = JSON.parse(data);
+         
+                    $scope.CompanyID = res.COMPANY_ID;
+                    $scope.txtCompanyName = res.COMPANY_NAME;
+                    $scope.txtCompanyAddressLine1 = res.COMPANY_ADDRESS_LINE_1;
+                    $scope.txtCompanyAddressLine2 = res.COMPANY_ADDRESS_LINE_2;
+                    $scope.SelectedCountry = res.COMPANY_COUNTRY;
+                    $scope.txtState = res.COMPANY_STATE;
+                    $scope.txtCity = res.COMPANT_CITY;
+                    $("#drpCountry").val(res.COMPANY_COUNTRY).trigger("chosen:updated");
+                    $scope.USER_ZIP = res.COMPANY_ZIP_CODE;
+                    $scope.txtVatNo = res.COMPANY_VAT_NO;
+                    $scope.ImgCompanyLogo = res.COMPANY_LOGO;
+                    $scope.TxtCompanyLogo = res.COMPANY_LOGO;
+                    $("#drpDateFormat").val(res.DATEFORMAT).trigger("chosen:updated");
+                    $scope.selectedDateFormat = res.DATEFORMAT;
+                    $scope.txtPasswordExpireDays = res.PASSWORDEXPIRYDAYS;
+                    $scope.ADMINISTRATOR_PASSWORD = res.ADMINISTRATORPASSWORD;
+                    $scope.txtSMTPHostName= res.SMTPHOSTNAME;
+                    $scope.txtEmailId = res.EMAILID;
+                    $scope.EMAIL_PASSWORD = res.EMAILPASSWORD;
+                    $scope.txtTax = res.TAX;
+                    $scope.txtDocumentDays= res.DOCUMENTDAYS;
+                    $("#formSubmit").removeAttr('disabled');
+                    GetCountry();
+                    //$scope.GetState();
+                    //$scope.GetCity();
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.Edit = "Edit";
+                    $("#span_tabtext").html("Edit");
+                }
+            });
+
+            get.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+
+    function GetCountry() {
+        var getcountryllist = $http.get("/ET_Admin_User_Master/GetCountryList");
+        getcountryllist.then(function (country) {
+            $scope.countrys = country.data;
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    //$scope.GetState = function () {
+        
+    //    if ($scope.SelectedCountry != "0") {
+    //        var getstatelist = $http.get("/ET_Admin_SystemSetUp/BindStates",
+    //            {
+    //                params: { id: $scope.SelectedCountry }
+
+    //            });
+    //        getstatelist.then(function (state) {
+                
+    //            $scope.getstates = state.data;
+    //        }, function () {
+    //            alert("No Data Found");
+    //        });
+    //    }
+    //    else {
+    //        $scope.getstates = {};
+    //        $scope.getcities = {};
+    //    }
+    //}
+    //$scope.GetCity = function () {
+    //    if ($scope.SelectedState != "0") {
+    //        var getcitylist = $http.get("/ET_Admin_User_Master/BindCities",
+    //            {
+    //                params: { id: $scope.SelectedState }
+    //            });
+    //        getcitylist.then(function (city) {
+    //            $scope.getcities = city.data;
+    //        }, function () {
+    //            alert("No Data Found");
+    //        });
+    //    }
+    //    else { $scope.getcities = {}; }
+    //}
+    $scope.$watch("countrys", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCountry").val($scope.SelectedCountry).trigger("chosen:updated"); }, 100);
+        }
+    });
+    //$scope.$watch("getstates", function (value) {
+    //    var val = value || null;
+    //    if (val) {
+    //        setTimeout(function () { $("#drpState").val($scope.SelectedState).trigger("chosen:updated"); }, 100);
+    //    }
+    //});
+    //$scope.$watch("getcities", function (value) {
+    //    var val = value || null;
+    //    if (val) {
+    //        setTimeout(function () { $("#drpcity").val($scope.selectedcity).trigger("chosen:updated"); }, 100);
+    //    }
+    //});
+    $scope.SubmitClick = function () {
+        alert();
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_SystemSetUp/ET_Admin_SystemSetUp_Update",
+            dataType: 'json',
+            data: {
+                CompanyId: $scope.CompanyID,
+                companyName: $scope.txtCompanyName,
+                CompanyAddressLine1: $scope.txtCompanyAddressLine1,
+                CompanyAddressLine2: $scope.txtCompanyAddressLine2,
+                Country: $scope.SelectedCountry,
+                State: $scope.txtState,
+                City: $scope.txtCity,
+                ZipCode: $scope.USER_ZIP,
+                VatNo: $scope.txtVatNo,
+                CompanyLogo: $scope.TxtCompanyLogo,
+                DateFormat: $scope.selectedDateFormat,
+                PasswordExpireDays: $scope.txtPasswordExpireDays,
+                AdminPassword: $scope.ADMINISTRATOR_PASSWORD,
+                SMTPHostName: $scope.txtSMTPHostName,
+                Emailid: $scope.txtEmailId,
+                EmailPassword: $scope.EMAIL_PASSWORD,
+                Tax: $scope.txtTax,
+                DocumentDays: $scope.txtDocumentDays
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+        
+        post.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else if (data.indexOf("Validation") > -1) {
+                toastr["error"](data, "Notification");
+            }
+            else if (data == 1) {
+                if ($scope.CompanyID == 0) {
+                    message = 'Record Inserted Successfully.';
+                    toastr["success"](message, "Notification");
+                }
+                else {
+                    debugger;
+                    message = 'Record Updated Successfully.';
+                    toastr["success"](message, "Notification");
+                    
+                    var fileInput = document.getElementById('TxtCompanyLogo').value;
+                    if (fileInput != "") {
+                        var formdata = new FormData(); //FormData object
+                        var myFileInput = document.getElementsByName('file1[]');
+                        //Iterating through each files selected in fileInput
+                        for (i = 0; i < myFileInput.length; i++) {
+                            //Appending each file to FormData object
+                            formdata.append(myFileInput[i].files[0].name, myFileInput[i].files[0]);
+                        }
+                        //Creating an XMLHttpRequest and sending
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', '/ET_Admin_SystemSetUp/ET_Admin_SystemSetUp_ImagePath');
+                        xhr.send(formdata);
+                        
+                    }  
+                   
+                
+                }
+            
+               
+}
+            else {
+                message = "Failed to do this operation.";
+                toastr["error"](message, "Notification");
+            }
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+   
+});

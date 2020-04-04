@@ -1,0 +1,585 @@
+﻿app1.controller("AC_SPLCtrl", function ($scope, $http, $window, $compile) {
+    GetPrivilages();  
+    GetSupplierPriceList();
+    GetProductList();
+    Bind_Currency();
+    //check privillages
+    function GetPrivilages() {
+        $scope.SPL_SupplierKey = "";
+        var getprivilages = $http.get("/ET_Purchase_SupplierPriceList/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    } 
+    var length = 1;
+    var Productlength = 1;
+    //get the supplier price list
+    function GetSupplierPriceList() {
+        var getstorelist = $http.get("/ET_Purchase_SupplierPriceList/GetSupplierPriceList",
+            {
+                params: { delete: false }
+            });
+        getstorelist.then(function (spllist) {
+            var res = JSON.parse(spllist.data);
+            $scope.spllist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    //Get the supplieers
+    function GetSuppliers(type1,id1) {
+        var getsupplierlist = $http.get("/ET_Purchase_SupplierPriceList/GetSuppliers",
+            {
+                params: { type: type1, id: id1 }
+            });
+        getsupplierlist.then(function (supplierslist) {
+            var res = JSON.parse(supplierslist.data);
+            $scope.supplierslist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    //Get the deleted list
+    function GetSPLRestoreList() {
+        var getsplrestorelist = $http.get("/ET_Purchase_SupplierPriceList/GetSupplierPriceList",
+            {
+                params: { delete: true }
+            });
+        getsplrestorelist.then(function (splrestorelist) {
+            var res = JSON.parse(splrestorelist.data);
+            $scope.splrestorelist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    } 
+    //Get the product list
+    function GetProductList() {
+        var getproductlist = $http.get("/ET_Purchase_SupplierPriceList/GetProducts");
+        getproductlist.then(function (productlist) {
+            debugger;
+            var res = JSON.parse(productlist.data);
+            $scope.products = res;
+        }, function () {
+            alert('Data not found');
+        });
+    } 
+    function GetProductListCallback(lengthval, enquirydata) {
+        var getproductlist = $http.get("/ET_Purchase_SupplierPriceList/GetProducts");
+        getproductlist.then(function (productlist) {
+            debugger;
+            var res = JSON.parse(productlist.data);
+            $scope.products1 = res;
+            if (length <= Productlength) {
+                lengthval--;
+                GetProductListCallback(lengthval, enquirydata);
+            }
+            else {
+                $scope.enquirydata1 = enquirydata;
+            }
+            
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    //Add the new product
+    $scope.addnewrow = function (a) {
+         
+        var e = a.target;
+        var tr = $("#supplierdetailsbody").find("tr");
+        var txt = "";
+        for (var i = 0; i < tr.length; i++) {
+            var td = tr[i].cells;
+            //var Product = $(td[0]).find("select").val();
+            var Product = $(td[1]).find("p").text();
+            var price = $(td[4]).find("input").val(); 
+            if (Product == "") {
+                message = "Select Product at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            } 
+            else if (price == "") {
+                message = "Enter the price at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            }
+        }
+        if (txt == "") {
+            var rowlength = tr.length + 1;
+            //var Rowhtml = "<tr><td><input readonly='readonly' type='number' id='txtSerial' value='" + rowlength + "' class='form-control' /></td><td><p style='display:none;'></p><select class='form-control chosen-select' id='drpProduct" + length + "' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo+'-'+product.P_Name  }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control'/></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var Rowhtml = "<tr><td><input readonly='readonly' type='number' id='txtSerial' value='" + rowlength + "' class='form-control' /></td><td><p style='display:none;'></p><select class='form-control chosen-select' id='drpProduct" + length + "' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo+'-'+product.P_Name  }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control'/></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var temp = $compile(Rowhtml)($scope);
+            angular.element(document.getElementById('supplierdetailsbody')).append(temp);
+            $('.chosen-select').chosen();
+            GetProductList();
+        }
+    }
+    //Delete the product
+    $scope.deleterow = function (a) {
+        var e = a.target;
+        var len = $("#supplierdetailsbody").find("tr").length;
+        if (len != 1) {
+            $(e).parent().parent().parent().fadeOut(300, function () { $(this).remove(); });
+        }
+        else {
+            message = "Atleast one Product required";
+            toastr["error"](message, "Notification");
+        }
+    } 
+    //Show the list
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        GetSupplierPriceList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    //Get the deleted price list
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        GetSPLRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+     
+    $scope.UserChange = function () {
+    } 
+    //Create the new price list
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+             
+            GetSuppliers("Submit",0);
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+            $scope.SPL_ID = "0";
+            $scope.SPL_Code = "";
+            $scope.SPL_SupplierKey = ""; 
+            $("#drpsuppliername").val("").trigger("chosen:updated");
+            //var Rowhtml = "<tr><td><input readonly='readonly' type='number' value = '1' id='txtSerial' class='form-control' /></td><td><p style='display:none;'></p><select class='form-control chosen-select' id='drpProduct" + length + "' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo+'-'+product.P_Name }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control'/></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var Rowhtml = "<tr><td><input readonly='readonly' type='number' value = '1' id='txtSerial' class='form-control' /></td><td><p style='display:none;'></p><select class='form-control chosen-select' id='drpProduct" + length + "' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo+'-'+product.P_Name }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control'/></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var temp = $compile(Rowhtml)($scope);
+            angular.element(document.getElementById('supplierdetailsbody')).html("");
+            angular.element(document.getElementById('supplierdetailsbody')).append(temp);
+            $('.chosen-select').chosen();
+            GetProductList();
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Validate the data
+    function validate() {
+        var tr = $("#supplierdetailsbody").find("tr");
+        var txt = "";
+        for (i = 0; i < tr.length; i++) {
+            var td = $(tr[i]).find("td");
+            //var productCode = $(td[1]).find("select").val();
+            var product = $(td[1]).find("p").text();
+            var price = $(td[4]).find("input").val(); 
+            if (product == "") {
+                message = "Enter Product Name at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }  
+            else if (price == "") {
+                message = "Enter Price at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else {
+                txt = txt + $(td[1]).find("p").text() + "}";
+                txt = txt + $(td[1]).find("select option:selected").text() + "}";
+                txt = txt + $(td[2]).find("input").val() + "}";
+                txt = txt + $(td[3]).find("input").val() + "}"; 
+                txt = txt + $(td[4]).find("input").val().split('.').join("").replace(",", ".") + "|";
+            }
+        }
+        return txt;
+    }
+    //Save the data
+    $scope.SubmitClick = function () {
+        $("#div_loadImage").css("display", "block");
+        var txt = validate();
+         
+        if (txt != "") {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Purchase_SupplierPriceList/ET_Master_SPL_Add",
+                dataType: 'json',
+                data: {
+                    SPL_ID: $scope.SPL_ID,
+                    SPL_Code: $scope.SPL_Code,
+                    SPL_SupplierKey: $scope.SPL_SupplierKey,
+                    SupplierDetails: txt
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+
+            post.success(function (data, status) {
+                $("#div_loadImage").css("display", "none");
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else if (data.indexOf("Success") > -1) {
+                    var res = data.split(':');
+                    if ($scope.SPL_ID == 0) {
+                        message = 'Record Inserted Successfully With Code : '+res[1];
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully With Code : ' + res[1];
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.createnew();
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $("#div_loadImage").css("display", "none");
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            $("#div_loadImage").css("display", "none");
+        }
+
+    }
+    //Edit the new records
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Purchase_SupplierPriceList/ET_Master_SPL_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var SPLByID = JSON.parse(data);
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+                     
+                    $scope.SPL_ID = SPLByID.SPL_ID;
+                    $scope.SPL_Code = SPLByID.SPL_Code;
+                    $scope.SPL_SupplierKey = SPLByID.SPL_SupplierKey; 
+                    $("#drpsuppliername").val(SPLByID.SPL_SupplierKey).trigger("chosen:updated");  
+                    SupplierDetails(SPLByID.SPL_ID);
+                    GetSuppliers("Update", $scope.SPL_SupplierKey);
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Get the supplier details
+    function SupplierDetails(e) {
+        var id = e;
+        $http({
+            method: 'POST',
+            url: '/ET_Purchase_SupplierPriceList/ET_Master_SPL_Details_Load',
+            data: {
+                id: id,
+            },
+        }).success(function (data) {
+            debugger;
+            var enquirydata = JSON.parse(data);
+            var i = enquirydata.length;
+            Productlength = enquirydata.length;
+            var j = 0;
+            length = 1;
+            angular.element(document.getElementById('supplierdetailsbody')).html("");
+            while (i != 0)
+            {
+                //var Rowhtml = "<tr><td><input readonly='readonly' type='number' id='txtSerial' value='" + length + "' class='form-control' /></td><td><p style='display:none;'></p><select class='form-control chosen-select' id='drpProduct" + length + "' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products1' value='{{ product.P_ID }}'>{{ product.P_ArticleNo+'-'+product.P_Name }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control'/></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+                var Rowhtml = "<tr><td><input readonly='readonly' type='number' id='txtSerial' value='" + length + "' class='form-control' /></td><td><p style='display:none;'></p><select class='form-control chosen-select' id='drpProduct" + length + "' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products1' value='{{ product.P_ID }}'>{{ product.P_ArticleNo+'-'+product.P_Name }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control'/></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+                var temp = $compile(Rowhtml)($scope);
+                angular.element(document.getElementById('supplierdetailsbody')).append(temp);
+                $('.chosen-select').chosen();
+                i--;
+                length++;
+                //GetProductList()
+                j++;
+            }
+            length = 1;
+            GetProductListCallback(enquirydata.length, enquirydata);
+            
+        });
+    }
+    //Restore the deleted records
+    $scope.PerformRestore = function (a, $event, b) {
+        var post = $http({
+            method: "POST",
+            url: "/ET_Purchase_SupplierPriceList/ET_Master_SPL_RestoreDelete",
+            dataType: 'json',
+            data: {
+                id: a,
+                type: b
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                if (data == "Success") {
+                    $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                    if (b) {
+                        message = "Record Deleted Successfully.";
+                    }
+                    else {
+                        message = "Record Restored Successfully.";
+                    }
+
+                    toastr["success"](message, "Notification");
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            }
+        });
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+    //$scope.deleteRecordConfirm = function (e, f) {
+
+    //    var res = false;
+    //    //if (b)
+    //    //    res = $scope.Isdelete;
+    //    //else
+    //    //    res = $scope.Isrestore
+    //    res = $scope.Isdelete;
+    //    if (res) {
+    //        var post = $http({
+    //            method: "POST",
+    //            url: "/ET_Purchase_SupplierPriceList/ET_Master_SPL_RestoreDelete",
+    //            dataType: 'json',
+    //            data: {
+    //                id: a,
+    //                type: b
+    //            },
+    //            headers: { "Content-Type": "application/json" }
+    //        });
+    //        post.success(function (data, status) {
+    //            if (data == "Session Expired") {
+    //                $window.location.href = '/ET_Login/ET_SessionExpire';
+    //            }
+    //            else if (data.indexOf("ERR") > -1) {
+    //                $("#spanErrMessage1").html(data);
+    //                $("#spanErrMessage2").html(data);
+    //                if ($("#exceptionmessage").length)
+    //                    $("#exceptionmessage").trigger("click");
+    //            }
+    //            else {
+    //                if (data == "Success") {
+    //                    $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+    //                    if (b) {
+    //                        message = "Record Deleted Successfully.";
+    //                    }
+    //                    else {
+    //                        message = "Record Restored Successfully.";
+    //                    }
+
+    //                    toastr["success"](message, "Notification");
+    //                }
+    //                else {
+    //                    message = "Failed to do this operation.";
+    //                    toastr["error"](message, "Notification");
+    //                }
+    //            }
+    //        });
+    //        post.error(function (data, status) {
+    //            $window.alert(data.Message);
+    //        });
+    //    }
+    //}
+    $scope.Restoredeleterecords = function (a, $event, b) {
+       if (b) {
+            alertmessageModified($event, a.toString(),b,'ET_Purchase_SupplierPriceList', 'ET_Master_SPL_RestoreDelete');
+        }
+       else
+       {
+           $scope.PerformRestore(a, $event, b);
+            //message = "You don't access to do this operation, please contact admin.";
+            //toastr["error"](message, "Notification");
+        }
+    } 
+    //View the records
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Purchase_SupplierPriceList/ET_Master_SupplierPriceList_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    function Bind_Currency() {
+        $http({
+            method: 'GET',
+            url: '/ET_Admin_GeneralOffer/Bind_Currency',
+
+        }).success(function (result) {
+            var res = JSON.parse(result)
+            $scope.Currencylist = res;
+            $scope.SelectedCusCurrency = "";
+        });
+    }
+    //Watch for all data binding
+    $scope.$watch("Currencylist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCusCurrency").val($scope.SelectedCusCurrency).trigger("chosen:updated"); }, 5);
+        }
+    });
+    $scope.$watch("products", function (value) {
+        var val = value || null;
+        if (val) {
+            debugger;
+            setTimeout(function () { $("#drpProduct" + length).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("products1", function (value) {
+        var val = value || null;
+        if (val) {
+            debugger;
+            setTimeout(function () { $("#drpProduct" + length).trigger("chosen:updated"); length++; });
+        }
+    });
+    $scope.$watch("supplierslist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpsuppliername").val($scope.SPL_SupplierKey).trigger("chosen:updated"); }, 100);
+        }
+    });
+    
+    $scope.$watch("spllist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("splrestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 5);
+        }
+    });
+    $scope.$watch("enquirydata1", function (value) {
+        var val = value || null;
+        if (val) {
+            var enquirydata = $scope.enquirydata1;
+            setTimeout(function () {
+                 
+                var tr = $("#supplierdetailsbody").find("tr");
+                for (var i = 0; i < tr.length; i++) {
+                    var td = tr[i].cells;
+                    $(td[1]).find("p").text(enquirydata[i].productid);
+                    $(td[1]).find("select").val(enquirydata[i].productid).trigger("chosen:updated");
+                    $(td[2]).find("input").val(enquirydata[i].name);
+                    $(td[3]).find("input").val(enquirydata[i].ED_UOM);
+                    $(td[4]).find("input").val(parseFloat(enquirydata[i].unitprice).toLocaleString("es-ES", { minimumFractionDigits: 2 })); 
+                }
+            }, 1);
+        }
+    });
+
+});

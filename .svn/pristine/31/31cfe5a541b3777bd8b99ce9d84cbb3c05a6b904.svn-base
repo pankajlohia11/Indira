@@ -1,0 +1,370 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Document_Master>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+
+This Form is used to create a form wise Code setting with prefix and suffix.
+    Set Workflow required for that form.
+    Here can set Controls for Auto generated code Start and end level.
+    Author=Manoj
+    Date = 7th Apr 2018
+    Document Setup View
+-->
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide View List page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying View List page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+    }
+
+</script>
+
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Document Master<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Document Master</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd dvd-btm">
+                        <h1 class="custom-font"><strong>Document</strong> Setup</h1>
+                        <ul class="controls">
+
+                            <li class="dropdown">
+
+                                <a role="button" tabindex="0" class="dropdown-toggle settings" data-toggle="dropdown">
+                                    <i class="fa fa-cog"></i>
+                                    <i class="fa fa-spinner fa-spin"></i>
+                                </a>
+
+                                <ul class="dropdown-menu pull-right with-arrow animated littleFadeInUp">
+                                    <li>
+                                        <a role="button" tabindex="0" class="tile-toggle">
+                                            <span class="minimize"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;&nbsp;Minimize</span>
+                                            <span class="expand"><i class="fa fa-angle-up"></i>&nbsp;&nbsp;&nbsp;Expand</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a role="button" tabindex="0" class="tile-refresh">
+                                            <i class="fa fa-refresh"></i> Refresh
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a role="button" tabindex="0" class="tile-fullscreen">
+                                            <i class="fa fa-expand"></i> Fullscreen
+                                        </a>
+                                    </li>
+                                </ul>
+
+                            </li>
+
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    @if (ViewBag.details == null)
+                    {
+                        <div class="tile-body">
+                            <div class="table-responsive">
+                                <table class="table table-custom" id="editable-usage">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none"></th>
+                                            <th>Form Group</th>
+                                            <th>Form Name</th>
+                                            <th>Code Type</th>
+                                            <th>Prefix</th>
+                                            <th>Suffix</th>
+                                            <th>Start No</th>
+                                            <th>End No</th>
+                                            <th>Work Flow</th>
+                                            <th style="width: 160px;" class="no-sort">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr class="odd gradeX">
+                                                <td style="display:none">@item.auto_key</td>
+                                                <td>@item.autogen_formgroup</td>
+                                                <td>@item.autogen_formname</td>
+                                                <td>@item.autogen_type</td>
+                                                <td>@item.autogen_prefix</td>
+                                                <td>@item.autogen_suffix</td>
+                                                <td>@item.autogen_startno</td>
+                                                <td>@item.autogen_endno</td>
+                                                <td>
+                                                    @if (@item.workflow_status == 1)
+                                                    {@item.workflowrequired}
+                                                </td>
+                                                <td class="actions">
+                                                    <a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                    <!-- /tile body -->
+
+                </section>
+               
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+@section dynamictablecreation
+{
+    <script type="text/javascript">
+        function alphaOnly(event) {
+            var key = event.keyCode;
+            return ((key >= 65 && key <= 90) || key == 8);
+        };
+
+        //initialize editable datatable
+
+            function restoreRow(oTable, nRow) {
+                debugger;
+            var aData = oTable.row(nRow).data();
+            var jqTds = $('>td', nRow);
+
+                for (var i = 0, iLen = jqTds.length; i < iLen; i++) {
+                   // alert(nRow[i]);
+                   // alert(aData[i]);
+                oTable.row(nRow).data(aData[i]);
+            }
+
+            oTable.draw();
+        }
+
+        //Edit row and bind the existing value
+        function editRow(oTable, nRow) {
+            var aData = oTable.row(nRow).data();
+            var jqTds = $('>td', nRow);
+            jqTds[0].innerHTML = '<input type="hidden" class="form-control input-sm" value="' + aData[0] + '">';
+            jqTds[1].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[1] + '" disabled>';
+            jqTds[2].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[2] + '" disabled>';
+            jqTds[3].innerHTML = '<select id="drpcodetype" class="form-control" name="drpcodetype"><option value = "Automatic" >Automatic</option ><option value = "Manual" >Manual</option ></select>';
+            $("#drpcodetype").val(aData[3]);
+            jqTds[4].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[4] + '" maxlength="3" onkeydown="return alphaOnly(event);">';
+            jqTds[5].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[5] + '" maxlength="3" onkeydown="return alphaOnly(event);">';
+            jqTds[6].innerHTML = '<input type="number" class="form-control input-sm" value="' + aData[6] + '" >';
+            jqTds[7].innerHTML = '<input type="number" class="form-control input-sm" value="' + aData[7] + '">';
+            if (aData[8] != "")
+                jqTds[8].innerHTML = '<select id="drpworkflow" class="form-control" name="drpworkflow"><option value = "Yes" >Yes</option ><option value = "No" >No</option ></select>';
+            else
+                jqTds[8].innerHTML = '<select id="drpworkflow" class="form - control" name="drpworkflow" style="display:none"></select>';
+
+            $("#drpworkflow").val(aData[8]);
+            jqTds[9].innerHTML = "<a role='button' tabindex='0' class='edit text-success text-uppercase text-strong text-sm mr-10'>Save</a><a role='button' tabindex='0' class='cancel text-warning text-uppercase text-strong text-sm mr-10'>Cancel</a>";
+        }
+
+        //Insert/Update Document Setup
+        function saveRow(oTable, nRow) {
+            var jqInputs = $('input', nRow);
+            var jqSelects = $('select', nRow);
+
+            if (jqInputs[3].value == "") {
+                toastr["error"]("Prefix Shouldn't be Empty");
+                return false;
+            }
+            if (jqInputs[4].value == "") {
+                toastr["error"]("Suffix Shouldn't be Empty");
+                return false;
+            }
+            if (jqInputs[5].value == "") {
+                toastr["error"]("Start No Shouldn't be Empty");
+                return false;
+            }
+            if (jqInputs[6].value == "") {
+                toastr["error"]("End No Shouldn't be Empty");
+                return false;
+            }
+
+
+            oTable.cell(nRow, 0).data(jqInputs[0].value);
+            oTable.cell(nRow, 1).data(jqInputs[1].value);
+            oTable.cell(nRow, 2).data(jqInputs[2].value);
+            oTable.cell(nRow, 3).data(jqSelects[0].value);
+            oTable.cell(nRow, 4).data(jqInputs[3].value);
+            oTable.cell(nRow, 5).data(jqInputs[4].value);
+            oTable.cell(nRow, 6).data(jqInputs[5].value);
+            oTable.cell(nRow, 7).data(jqInputs[6].value);
+            oTable.cell(nRow, 8).data(jqSelects[1].value);
+            oTable.cell(nRow, 9).data("<a role='button' tabindex='0' class='edit text-primary text-uppercase text-strong text-sm mr-10'>Edit</a>");
+            oTable.draw();
+
+             $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_DocumentSetup_Add", "ET_Admin_DocumentSetup")',
+                 data: {
+                     DocumentId: jqInputs[0].value,
+                     FormGroup: jqInputs[1].value,
+                     FormName: jqInputs[2].value,
+                     CodeType: jqSelects[0].value,
+                     Prefix: jqInputs[3].value,
+                     Suffix: jqInputs[4].value,
+                     StartNo: jqInputs[5].value,
+                     EndNo: jqInputs[6].value,
+                     WorkFlow: jqSelects[1].value
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result == "Success") {
+                        message = 'Record Updated Successfully.';
+                        toastr["success"](message, "Notification");
+                        
+                    }
+                    else if (result == "Failed") {
+
+                        message = 'Failed to do this operation.';
+                        toastr["error"](message, "Notification");
+                    }
+                    else if (result.indexOf("Validation") > -1) {
+                        toastr["error"](result, "Notification");
+                    }
+                },
+                error: function (response) {
+
+                    toastr["success"]("Error in updating Record.");
+                }
+            });
+        }
+
+        var table2 = $('#editable-usage');
+
+        var oTable = $('#editable-usage').DataTable({
+            "aoColumnDefs": [
+                { 'bSortable': false, 'aTargets': ["no-sort"] }
+            ]
+        });
+
+        var nEditing = null;
+        var nNew = false;
+
+        $('#add-entry').click(function (e) {
+            e.preventDefault();
+
+            if (nNew && nEditing) {
+                if (confirm("Previous row is not saved yet. Save it ?")) {
+                    saveRow(oTable, nEditing); // save
+                    $(nEditing).find("td:first").html("Untitled");
+                    nEditing = null;
+                    nNew = false;
+
+                } else {
+                    oTable.row(nEditing).remove().draw(); // cancel
+                    nEditing = null;
+                    nNew = false;
+
+                    return;
+                }
+            }
+
+            var aiNew = oTable.row.add(['', '', '', '', '', '', '', '', '', '']).draw();
+            var nRow = oTable.row(aiNew[0]).node();
+            editRow(oTable, nRow);
+            nEditing = nRow;
+            nNew = true;
+        });
+
+
+
+        table2.on('click', '.cancel', function (e) {
+            e.preventDefault();
+            if (nNew) {
+                oTable.row(nEditing).remove().draw();
+                nEditing = null;
+                nNew = false;
+            } else {
+                window.location = "";
+                //restoreRow(oTable, nEditing);
+                nEditing = null;
+            }
+        });
+
+        table2.on('click', '.edit', function (e) {
+            e.preventDefault();
+
+            /* Get the row as a parent of the link that was clicked on */
+            var nRow = $(this).parents('tr')[0];
+
+            if (nEditing !== null && nEditing != nRow) {
+                /* Currently editing - but not this row - restore the old before continuing to edit mode */
+                restoreRow(oTable, nEditing);
+                editRow(oTable, nRow);
+                nEditing = nRow;
+            } else if (nEditing == nRow && this.innerHTML == "Save") {
+                /* Editing this row and want to save it */
+                saveRow(oTable, nEditing);
+                nEditing = null;
+
+            } else {
+                /* No edit in progress - let's start one */
+                editRow(oTable, nRow);
+                nEditing = nRow;
+            }
+        });
+        //*initialize editable datatable
+
+        
+    </script>
+}
+
+
+

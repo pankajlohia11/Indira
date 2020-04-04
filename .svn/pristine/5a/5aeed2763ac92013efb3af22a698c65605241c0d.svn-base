@@ -1,0 +1,360 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Transfer of Items.
+    The user can edit or remove and restore  a record in  Transfer of Item.
+    Author=RajKumar
+    Date = 19th June 2018
+    Purchase  Transfer of Item View
+    Operation={View,Restore,Create}
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_TransferIn.js"></script>
+    <script type="text/javascript">
+        function MoneyValidation(s) {
+
+            var re = /^[\d.]+(\,\d*)?$/;
+            var txt = s.value;
+            if (txt != "") {
+
+                if (!re.test(txt)) {
+                    toastr["error"]("Invalid Data", "Notification");
+                    s.value = '';
+                    return false;
+                }
+                else {
+                    s.value = parseFloat(txt.split('.').join("").replace(",", ".")).toLocaleString("es-ES", { minimumFractionDigits: 3 });
+                }
+            }
+            return true;
+        }
+        function ProductChange(e)
+        {
+            debugger;
+            var id1 = parseInt($(e).val());
+            var StoreID = $("#drpStoreName").val();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetProductDetailsByID", "ET_Purchase_Transfers")',
+            data: {
+                id: id1,
+                StoreId: StoreID
+            },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                debugger;
+                var res = JSON.parse(result);
+               
+                var td = $(e).parent().parent().find("td");
+                $(td[1]).find("input").val(res[0].name);
+                $(td[2]).find("input").val(res[0].uom);
+               
+                $(td[4]).find("input").val(res[0].res.toLocaleString("es-ES", { minimumFractionDigits: 3 })); 
+
+            },
+            error: function (response) {
+                toastr["error"]("Product Data Not Found", "Notification");
+            }
+        });
+        }
+
+    </script>
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order">
+        <div class="pageheader">
+
+            <h2>Item Transfer In<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Item Transfer In</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_ITCtrl">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Item</strong> Transfer</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                    Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>From store</th>
+                                    <th>To Store</th>
+                                    <th>Received By</th> 
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="it in itlist">
+                                    <td>{{it.Code}}</td>
+                                    <td>{{it.Fromstore}}</td>
+                                    <td>{{it.ToStore}}</td>
+                                    <td>{{it.ReceicedBy}}</td> 
+                                    <td>
+                                        <a ng-click="editRecords(it.ID);" value="{{ it.ID }}" style="color:forestgreen;padding:5px;display:none;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(it.ID);" value="{{ it.ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                        <a ng-click="Restoredeleterecords(it.ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> Item Transfer In</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- This Below code is used for Tab purpose -->
+                    @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                        </ul>*@
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtStoreCode">Transfer Code</label>
+                                    <input type="text" name="txtStoreCode" id="txtStoreCode" ng-model="IT_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                    <input type="text" name="txtStoreID" id="txtStoreID" ng-model="IT_ID" class="hidden">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtStorename">Transfer Date*</label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtTransferdate" name="txtTransferdate" class="form-control" required />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label">From Store</label>
+                                    <select data-ng-model="IT_TransferStore" id="drpStoreName" class="form-control chosen-select" data-parsley-trigger="change" required ng-change="UserChange()">
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="storelist in storelist" value="{{storelist.SM_Id}}">
+                                            {{storelist.SM_Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Url">To Store</label>
+                                    <select data-ng-model="IT_TransferToStore" id="drptostore" class="form-control chosen-select" data-parsley-trigger="change" ng-change="tostorechange()">
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="tostorelist in tostorelist" value="{{tostorelist.SM_Id}}">
+                                            {{tostorelist.SM_Name}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            @*<div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">GI Number*</label>
+                                    <select data-ng-model="IT_GINo" id="drpGINo" class="form-control chosen-select" data-parsley-trigger="change" required ng-change="GIchange()">
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="gilist in gilist" value="{{gilist.GI_ID}}">
+                                            {{gilist.GI_Code}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label">Transfer Type*</label>
+                                    <select data-ng-model="IT_TransferType" id="drptype" class="form-control chosen-select" data-parsley-trigger="change" required ng-change="typeChange()">
+                                        <option value="">-Select-</option>
+                                        <option value="1">Receipt from Transfer</option>
+                                        <option value="2">Issue against Transfer</option>
+                                    </select>
+                                </div>
+                                
+
+                            </div>*@
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Received By</label>
+                                    <input type="text" name="ReceivedBy" id="txtReceivedBy" ng-model="IT_TransferReceivedBy" class="form-control">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Transfer Note</label>
+                                    <input type="text" name="TransferNote" id="IT_TransferNote" ng-model="IT_TransferNote" class="form-control" >
+                                </div>
+                            </div> 
+                            <section class="tile">
+                                <!-- tile header -->
+                                <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                    <h1 class="custom-font"><strong>Transfer Item</strong> Details</h1>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+
+                                    <div class="collapse" id="collapseExample">
+                                        <div class="row">
+                                            <div class="table-responsive">
+                                                <style type="text/css">
+                                                    #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                        padding: 0px;
+                                                    }
+                                                </style>
+                                                <table class="table table-custom" id="editable-usage">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Article No</th>
+                                                            <th>Product Name</th>
+                                                            <th>UOM</th>
+                                                            <th>Transfer Qty</th>
+                                                            <th>Available Qty</th>
+                                                            <th style="width: 160px;" class="no-sort">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="storedetailsbody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- /tile body -->
+
+                            </section>
+
+
+                        </div>
+
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                    </div>
+                </section>
+
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> Item Transfer In</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>From store</th>
+                                    <th>To Store</th>
+                                    <th>Received By</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="store in storerestorelist">
+                                    <td>{{store.Code}}</td>
+                                    <td>{{store.Fromstore}}</td>
+                                    <td>{{store.ToStore}}</td>
+                                    <td>{{store.ReceicedBy}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(store.ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+

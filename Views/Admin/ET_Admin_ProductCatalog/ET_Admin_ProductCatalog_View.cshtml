@@ -1,0 +1,83 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.ProductCatalogView_CM
+@{ BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();}
+
+
+        <div class="col-md-12" id="div_company_view">
+            <div class="tile-body">
+                <div name="form1" role="form" id="form1" data-parsley-validate>
+                    @foreach (var item in Model.headerObj)
+                    {
+                        <h5><label><strong>Product Catalog Info</strong></label></h5>
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <label for="Email">Catalog Code</label>
+                                <input type="text" name="catalogCode" value="@item.PC_CODE" class="form-control" disabled>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="Email">Catalog Name</label>
+                                <input type="text" name="catalogCode" value="@item.PC_Name" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <label for="Email">Catalog Description</label>
+                                <input type="text" name="catalogCode" value="@item.PC_Description" class="form-control" disabled>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="Email">Catalog Validity</label>
+                                <input type="text" name="catalogCode" value="@((item.CATALOG_VALIDITY).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+                            </div>
+                        </div>
+                    }
+                    </div>
+            </div>
+        </div>
+<div class="tile-body">
+    <div class="table-responsive">
+        <table class="table table-custom">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Article</th>
+                    <th>Short Name</th>
+                    <th>UOM</th>
+                    <th>Description</th>
+                    <th>Summer Price(€)</th>
+                    <th>Winter Price(€)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var modelItems = Model.detailsObj.AsEnumerable().Select((catalogItem, index) => new { index = index + 1, catalogItem.PRODUCT_CODE, catalogItem.P_Name, catalogItem.UOM_NAME, catalogItem.PRODUCT_SPECIFICATION, catalogItem.P_SummerPrice, catalogItem.P_WinterPrice }); }
+                @foreach (var item in modelItems)
+                {
+                    <tr>
+                        <td>
+                            @item.index
+                        </td>
+                        <td>
+                            @item.PRODUCT_CODE
+                        </td>
+                        <td>
+                            @item.P_Name
+                        </td>
+                        <td>
+                            @item.UOM_NAME
+                        </td>
+                        <td>
+                            @item.PRODUCT_SPECIFICATION
+                        </td>
+                        <td>
+                            @(Convert.ToDecimal(item.P_SummerPrice).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))
+                        </td>
+                        <td>
+                            @(Convert.ToDecimal(item.P_WinterPrice).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+

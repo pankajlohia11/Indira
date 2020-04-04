@@ -1,0 +1,79 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BusinessEntity.CustomModels
+{
+    class Tbl_Offers_Master_CM
+    {
+        public decimal OFFER_ID { get; set; }
+
+        public decimal COM_ID { get; set; }
+
+        public bool IS_SPECIFIC { get; set; }
+
+        public decimal? CUST_ID { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string OFFER_NO { get; set; }
+
+        public DateTime OFFER_DATE { get; set; }
+
+        [StringLength(500)]
+        public string DESCRIPTION { get; set; }
+
+        [StringLength(100)]
+        public string PLACE_DEST { get; set; }
+
+        [StringLength(100)]
+        public string DESTINATION { get; set; }
+
+        public decimal CONTACT_PERSON { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        public string PAYMENT { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        public string SHIPMENT { get; set; }
+
+        public decimal VALIDITY_DAYS { get; set; }
+
+        public DateTime VALIDITY_DATE { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string CUST_SUPP { get; set; }
+
+        public bool? IS_ORDER { get; set; }
+
+        public int? AGENCY_TRADING { get; set; }
+
+        [StringLength(300)]
+        public string MACHINE_NAME { get; set; }
+
+        [StringLength(50)]
+        public string IPADDRESS { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+        public string COM_NAME { get; set; }
+    }
+}

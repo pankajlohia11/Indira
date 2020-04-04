@@ -1,0 +1,780 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Company Details.
+    The user can edit or remove and restore  a record in Company Details.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+<link href="~/Assets/js/vendor/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
+@section angularcontroller
+{
+    <script src="~/Assets/js/vendor/jquery/jquery-1.11.2.min.js"></script>
+    <script src="~/Assets/js/vendor/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/Content/AngularScripts/AC_Enquiry.js">
+
+        function ProductCategChange(e) {
+
+            GetProductList();
+        }
+    </script>
+    <script type="text/javascript">
+        window.onload = function () {
+
+            //load wysiwyg editor
+            $('#summernote').summernote({
+                height: 200   //set editable area's height
+            });
+            //*load wysiwyg editor
+
+            $('#select-all').change(function () {
+                if ($(this).is(":checked")) {
+                    $('#mails-list .mail-select input').prop('checked', true);
+                } else {
+                    $('#mails-list .mail-select input').prop('checked', false);
+                }
+            });
+
+            $('#sent-select-all').change(function () {
+                if ($(this).is(":checked")) {
+                    $('#sent-mails-list .mail-select input').prop('checked', true);
+                } else {
+                    $('#sent-mails-list .mail-select input').prop('checked', false);
+                }
+            });
+        };
+        Supplier();
+
+        function MoneyValidation(s) {
+            debugger;
+            var re = /^[\d.]+(\,\d*)?$/;
+            var txt = s.value;
+            if (txt != "") {
+                if (!re.test(txt)) {
+                    toastr["error"]("Invalid Data", "Notification");
+                    s.value = '';
+                    return false;
+                }
+                else {
+                    s.value = parseFloat(txt.split('.').join("").replace(",", ".")).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                }
+            }
+            return true;
+        }
+        @*function deleteRecordConfirm(e, f) {
+            //debugger;
+            var res = false;
+            //var res = false;
+            //if (b)
+            //    res = $scope.Isdelete;
+            //else
+            //    res = $scope.Isrestore
+            //res = $scope.Isdelete;
+            var rowId = f;
+            res = true;
+            if (res) {
+                alert("Record Id " + f);
+
+                $.ajax({
+                    type: "GET",
+                     url: '@Url.Action("ET_Master_Enquiry_RestoreDelete", "ET_Sales_Enquiry")',
+
+                    data: {
+                        id: rowId,
+                        type: true
+                    },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.indexOf("ERR") > -1) {
+                            $("#spanErrMessage1").html(result);
+                            $("#spanErrMessage2").html(result);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                            if (result == "Success") {
+                                message = 'Record Deleted Successfully. You can retrive it from Restore page';
+                                toastr["success"](message, "Notification");
+                                var ctrl = "#" + f;
+                                $(ctrl).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                            }
+                            else {
+                                message = 'Failed To Delete';
+                                toastr["error"](message, "Notification");
+                            }
+                        }
+                    },
+                    error: function (response) {
+                        alert(response);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                });
+            }
+        }*@
+
+        function ProductChange(e) {
+            debugger;
+            var id1 = parseInt($(e).val());
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetProductDetailsByID", "ET_Sales_Enquiry")',
+                data: { id: id1 },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    debugger;
+                    var res = JSON.parse(result)
+                    var td = $(e).parent().parent().find("td");
+                    $(td[2]).find("input").val(res[0].uom);
+                    $(td[3]).find("input").val(res[0].packing);
+                    $(td[4]).find("input").val(res[0].description);
+                    $(td[1]).find("p").text(id1);
+
+                },
+                error: function (response) {
+                    toastr["error"]("Product Data Not Found", "Notification");
+                    var td = $(e).parent().parent().find("td");
+                    $(td[1]).find("p").text("");
+                }
+            });
+        }
+          function Supplier() {
+            debugger;
+            var id1 =0;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetCustomerSupplier", "ET_Sales_Enquiry")',
+                data: {
+                    id: id1,
+                    custsup: 0
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    debugger;
+                    var Supplier = JSON.parse(result);
+
+                    for (i = 0; i < Supplier.length; i++) {
+                        $("#drpSupplier").append("<option value='" + Supplier[i].COM_ID + "'>" + Supplier[i].COM_NAME+"</option>")
+                    }
+                },
+                error: function (response) {
+                    toastr["error"]("Product Data Not Found", "Notification");
+                }
+            });
+        }
+        function schChange(e) {
+        }
+        function GenerateRFQ() {
+            debugger;
+            $("#div_loadImage").css("display", "block");
+            var countries = [];
+            var suppID = "";
+            var MailText = "";
+            $.each($("#drpSupplier option:selected"), function () {
+                countries.push($(this).val());
+            });
+            for ( i = 0; i < countries.length ; i++)
+            {
+
+                if (i == 0) {
+                    suppID = countries[i];
+                }
+                else {
+                    suppID = suppID +"," + countries[i];
+                }
+
+            }
+            debugger;
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("ET_Sales_SupplierDetails", "ET_Sales_Enquiry")',
+                    data: {
+                        ids: suppID,
+                        enqId: $("#popID").val(),
+                        EnqType: $("#ENQType").val(),
+
+                    },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#popupRFQTable").empty();
+                        if (data.indexOf("ERR") > -1) {
+                            $("#div_loadImage").css("display", "none");
+                            $("#spanErrMessage1").html(data);
+                            $("#spanErrMessage2").html(data);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                            debugger;
+                            $("#div_loadImage").css("display", "none");
+                            $("#btnviewdebitnotepopup").trigger("click");
+                            $("#RfqTableId").css("display", "block");
+                            for (i = 0; i < data.length; i++) {
+                                if (data[i].DELETED == 1) {
+                                    MailText = "Mail Sent";
+                                }
+                                else {
+                                    MailText = "";
+                                }
+                                $("#popupRFQTable").append("<tr><td>" + data[i].scheduleCode + "</td><td>" + data[i].SH_Code + "</td><td><a href='../Sales/PDFList/" + data[i].SD_ScheduleID + data[i].SH_Code+".pdf' target='_blank' class='btn btn-xs btn-default'><i class='fa fa-search'></i> View</a><a style='margin-left:10px;' onclick='SendEnquiryPrint(" + data[i].SD_ScheduleID + ',' + $("#popID").val() + ',' + data[i].S_OrderID + "); ' class='btn btn-xs btn-default'><i class='fa fa-envelope'></i> Send Mail </a><span style='color:red;margin-left:16px;' id='MailMessageId" + data[i].SD_ScheduleID + "'></span></td></tr>")
+                                if (data[i].LAST_UPDATED_DATE != null) {
+                                    var Orderdate = new Date(parseInt(data[i].LAST_UPDATED_DATE.substr(6)));
+                                    $("#MailMessageId" + data[i].SD_ScheduleID).text(MailText + "-" + ("0" + Orderdate.getDate()).slice(-2) + "-" + ("0" + (Orderdate.getMonth() + 1)).slice(-2) + "-" + Orderdate.getFullYear());
+                                }
+
+                                //$("#popupRFQTable").append("<tr><td></td><td>" + $("#TxtCustomerName").val() + "</td><td>" + data[i].SH_Code + "</td><td><a ng-click='ViewEnquiryPrint(" + data[i].SD_ScheduleID + ',' + $("#popID").val() + ");' href='../Sales/PDFList/" + ($("#popID").val() + data[i].SH_Code) + ".pdf' target='_blank' class='btn btn-xs btn-default'><i class='fa fa-search'></i> View</a><a onclick='SendEnquiryPrint(" + data[i].SD_ScheduleID + ',' + $("#popID").val() + "); ' class='btn btn-xs btn-default'><i class='fa fa-search'></i> Send Mail </a></td></tr>")
+                            }
+
+                            message = 'RFQ Generated Successfully ';
+                            toastr["success"](message, "Notification");
+
+                            angular.element('#mycontroller').scope().$apply();
+
+                        }
+                    },
+                    error: function (response) {
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                });
+        }
+        function ViewEnquiryPrint(SupId, enqId) {
+            alert(SupId)
+        }
+        function SendClick() {
+            $("#div_loadImage").css("display", "block");
+            debugger;
+            var id1 = 0;
+            var body = $($('.note-editable')[0]).html();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Sales_Mail_Compose_Reply_Forward", "ET_Sales_Enquiry")',
+                data: {
+                    id: $("#RfqID").val(),
+                    enqId: $("#popIDForMail").val(),
+                    SuppId: $("#ENQTypeForMail").val(),
+                    BodyContent: body,
+                    CCid: $('#mailCcIds').val(),
+                    Subject: $('#sub').val(),
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    debugger;
+                    if (result == true) {
+                        $("#div_loadImage").css("display", "none");
+
+                        toastr["success"]("Maill Sent Successfully", "Notification");
+                        $('#mailIds').val("");
+                        $('#mailCcIds').val("");
+                        $('#mailCcIds').val("");
+                        $('#sub').val("");
+                        $("#summernote").code("");
+                         $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetRfqDetails1", "ET_Sales_Enquiry")',
+                data: {
+                    id: $("#popIDForMail").val(),
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    debugger;
+                    $("#popupRFQTable").empty();
+                    $("#RfqTableId").css("display", "block");
+                    var res = JSON.parse(result);
+                    for (var i = 0; i < res.length; i++) {
+                        if (res[i].DELETED == 1) {
+                            MailText = "Mail Sent";
+                        }
+                        else {
+                            MailText = "";
+                        }
+                        $("#popupRFQTable").append("<tr><td>" + res[i].scheduleCode + "</td><td>" + res[i].SH_Code + "</td><td><a href='../Sales/PDFList/RFQ_Sample.pdf' target='_blank' class='btn btn-xs btn-default'><i class='fa fa-search'></i> View</a><a style='margin-left:10px;' onclick='SendEnquiryPrint(" + res[i].SD_ScheduleID + ',' + $("#popID").val() + ',' + res[i].S_OrderID + "); ' class='btn btn-xs btn-default'><i class='fa fa-envelope'></i> Send Mail </a><span style='color:red;margin-left:16px;' id='MailMessageId" + res[i].SD_ScheduleID + "'></span></td></tr>")
+                        if (res[i].LAST_UPDATED_DATE != null) {
+                            var Orderdate = new Date(parseInt(res[i].LAST_UPDATED_DATE.substr(6)));
+                            $("#MailMessageId" + res[i].SD_ScheduleID).text(MailText + " - " + ("0" + Orderdate.getDate()).slice(-2) + "-" + ("0" + (Orderdate.getMonth() + 1)).slice(-2) + "-" + Orderdate.getFullYear());
+                        }
+
+                    }
+                    if (res.length == 0) {
+                        $("#RfqTableId").css("display", "none");
+                    }
+                },
+                error: function (response) {
+                    toastr["error"]("Data Not Found", "Notification");
+                }
+            });
+                    }
+                    else if (res.indexOf("ERR") > -1) {
+
+                        toastr["error"]("Mail not sent.Some Error Occured:" + res, "Notification");
+                    }
+                },
+                error: function (response) {
+                    toastr["error"]("Product Data Not Found", "Notification");
+                }
+            });
+        }
+        function SendEnquiryPrint(SupId, enqId,SuppId) {
+            debugger;
+            $("#popIDForMail").val(enqId);
+            $("#formSubmit").removeAttr("disabled");
+            $("#ENQTypeForMail").val(SuppId) ;
+            $("#RfqID").val(SupId) ;
+            $("#btnviewdebitnotepopup1").trigger("click");
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetSupplierMailId", "ET_Sales_Enquiry")',
+                data: {
+
+                    SuppId: SuppId,
+
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    $("#mailIds").val(result.COM_EMAIL);
+
+                },
+                error: function (response) {
+                    toastr["error"]("Product Data Not Found", "Notification");
+                }
+            });
+        }
+    </script>
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order" ng-controller="AC_EnquiryCtrl">
+        <div class="pageheader">
+
+            <h2>{{Type}} Enquiry<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">{{Type}} Enquiry</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>{{Type}} Enquiry</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Enquiry Date</th>
+                                    <th>Enquiry Code</th>
+                                    <th>Customer Name</th>
+                                    <th ng-if="E_Type==2 || E_Type == 1">Contact Name</th>
+                                    <th ng-if="E_Type==2 || E_Type == 1">Sales Person</th>
+                                    <th>Total Quantity</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="enquiry in enquirylist">
+                                    <td>{{enquiry.E_Date.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{enquiry.E_Code}}</td>
+                                    <td>{{enquiry.E_CustomerName}}</td>
+                                    <td ng-if="E_Type==2 || E_Type == 1">{{enquiry.E_ContactName}}</td>
+                                    <td ng-if="E_Type==2 || E_Type == 1">{{enquiry.E_SalesPersonName}}</td>
+                                    <td>{{enquiry.ED_Quantity | customNumberCulture}}</td>
+                                    <td>
+                                        <a ng-click="editRecords(enquiry.E_ID);" value="{{ enquiry.E_ID }}" style="color:forestgreen;padding:5px;" title="Edit"><i class="fa fa-edit"></i></a>
+                                        <a ng-click="ViewRecords(enquiry.E_ID);" value="{{ enquiry.E_ID }}" style="color:darkblue;padding:5px;" title="View"><i class="fa fa-eye"></i></a>
+                                        <a ng-click="Restoredeleterecords(enquiry.E_ID,$event,true);" style="color:red;padding:5px;" title="Delete"><i class="fa fa-trash"></i></a>
+                                        <a ng-click="ViewRfqDetails(enquiry.E_ID);" style="color:darkblue;padding:5px;" title="ViewRF"><i class="fa fa-plug" ></i></a>
+                                        <a ng-click="RedirectEnqtoCusOffer(enquiry.E_ID);" style="color:darkblue;padding:5px;" title="Offer"><i class="fa fa-newspaper-o"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> {{Type}} Enquiry</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- This Below code is used for Tab purpose -->
+                    @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                        </ul>*@
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Enquiry Code</label>
+                                    <input type="text" name="CompanyCode" id="txtCompanyCode" ng-model="E_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                    <input type="text" name="txtComID" id="txtComID" ng-model="E_ID" class="hidden">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="drpType">Type</label>
+                                    <select data-ng-model="E_Type" id="drpType" data-parsley-trigger="change" class="form-control chosen-select" ng-change="TypeChange()" disabled>
+                                        <option value="">-Select-</option>
+                                        <option value="1">Agency</option>
+                                        <option value="2">Trading</option>
+                                        <option value="3">Store</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Customer Name*</label>
+                                    <select data-ng-model="E_CustomerID" id="drpCustomer" data-parsley-trigger="change" class="form-control chosen-select" ng-change="CustomerChange()" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="customer in customers" value="{{customer.COM_ID}}">
+                                            {{customer.COM_DISPLAYNAME}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label">Contact Person*</label>
+                                    <select data-ng-model="E_ContactID" id="drpContact" data-parsley-trigger="change" class="form-control chosen-select" ng-change="ContactChange()" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="contact in contacts" value="{{contact.CONTACT_ID}}">
+                                            {{contact.FIRST_NAME+' '+contact.LAST_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Sales Person*</label>
+                                    <select data-ng-model="E_SalesPerson" id="drpSalesPerson" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SalesPersonChange()" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="salesperson in salespersons" value="{{salesperson.USER_ID}}">
+                                            {{salesperson.DISPLAY_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="CustomerDeliveryItems">Enquiry Date*</label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtEnqDate" name="txtEnqDate" class="form-control" ng-model="E_Date" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <section class="tile">
+                                <!-- tile header -->
+                                <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                    <h1 class="custom-font"><strong>Enquiry</strong> Details</h1>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+
+                                    <div class="collapse" id="collapseExample">
+                                        <div class="row">
+                                            <div class="table-responsive">
+                                                <style type="text/css">
+                                                    #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                        padding: 0px;
+                                                    }
+                                                </style>
+                                                <table class="table table-custom" id="editable-usage">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>S.NO</th>
+                                                            @*<th>Product Category</th>*@
+                                                            <th style="width:25%;">Article No*</th>
+                                                            <th>UOM</th>
+                                                            <th>Package</th>
+                                                            <th>Description</th>
+                                                            <th>Quantity*</th>
+                                                            <th style="width: 160px;" class="no-sort">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="enquirydetailsbody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- /tile body -->
+
+                            </section>
+
+
+                        </div>
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                    </div>
+                </section>
+
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> Customer Enquiry</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Customer Name</th>
+                                    <th>Contact Name</th>
+                                    <th>Sales Person</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="enquiry in enquiryrestorelist">
+                                    <td>{{enquiry.E_Code}}</td>
+                                    <td>{{enquiry.E_CustomerName}}</td>
+                                    <td>{{enquiry.E_ContactName}}</td>
+                                    <td>{{enquiry.E_SalesPersonName}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(enquiry.E_ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+@section anypopup
+{
+    <a id="btnviewdebitnotepopup" data-toggle="modal" data-target="#viewdebitnotepopup" data-options="splash-2 splash-ef-4"></a>
+    <a id="btnviewdebitnotepopup1" data-toggle="modal" data-target="#viewdebitnotepopup1" data-options="splash-2 splash-ef-4"></a>
+    <div class="modal splash fade" id="viewdebitnotepopup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="width:100%;">
+                <div class="modal-header">
+                    <h3 class="modal-title custom-font red"><strong style="color:red">Generate RFQ</strong></h3>
+                </div>
+                <div class="tile-body">
+                    <div class="col-md-12">
+                        <div class="row" style="margin-top:3%">
+                            <div class="form-group col-md-3">
+                                <label>Customer Name</label>
+                            </div>
+                            <div class="form-group col-md-9">
+                                <input type="text" id="TxtCustomerName" class="form-control" readonly="readonly" />
+                            </div>
+                        </div>
+
+                        <div class="row" id="div_foblist">
+                            <div class="form-group col-md-12">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>UOM</th>
+                                            <th>Quantity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="popupFOBTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-3">
+                                <label> Supplier List</label>
+                            </div>
+                            <div class="form-group col-md-9">
+                                <select tabindex="3" class="form-control chosen-select" name="drpSupplier" id="drpSupplier" data-parsley-trigger="change" onchange="schChange(this);" multiple="">
+                                    <option value="0">-Select-</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-12" id="RfqTableId">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>RFQ No</th>
+                                            <th>Supplier Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="popupRFQTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" id="popID" class="invisible" />
+                    <input type="text" id="ENQType" class="invisible" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal" onclick="GenerateRFQ();">Generate RFQ</button>
+                    <button class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal splash fade" id="viewdebitnotepopup1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="width:100%;">
+                <div class="modal-header">
+                    <h3 class="modal-title custom-font red"><strong style="color:red">Send Mail</strong></h3>
+                </div>
+                <div class="tile-body">
+                    <div id="Compose" style="display:block;">
+                        <div class="tcol">
+                            <!-- right side body -->
+                            <div class="p-15">
+
+                                <!--<form name="newMail" class="form-horizontal mt-20">-->
+                                <div name="form1" class="form-horizontal mt-20" role="form" id="fileupload" method="POST" enctype="multipart/form-data" data-parsley-validate>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label">To:</label>
+                                        <div class="col-lg-8">
+                                            <input class="select-tags form-control mail" readonly name="mail" id="mailIds" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label">Cc:</label>
+                                        <div class="col-lg-8">
+                                            <input class="select-tags form-control mail" id="mailCcIds">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label">Subject:</label>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" id="sub" ng-model="MST_Subject" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label">Content:</label>
+                                        <div class="col-lg-8">
+                                            <div id="summernote" required>{{MST_Body}}</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label"></label>
+                                        <div class="col-lg-8">
+                                            <table class="table" id="addrows"></table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- /right side body -->
+
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" id="popIDForMail" class="invisible" />
+                    <input type="text" id="ENQTypeForMail" class="invisible" />
+                    <input type="text" id="RfqID" class="invisible" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-greensea btn-ef btn-ef-7 btn-ef-7b b-0 br-2" id="formSubmit" onclick="SendClick()"><i class="fa fa-envelope"></i> Send Message</button>
+                    <button class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+}

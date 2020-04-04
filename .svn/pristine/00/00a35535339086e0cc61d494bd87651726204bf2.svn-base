@@ -1,0 +1,376 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Company Details.
+    The user can edit or remove and restore  a record in Company Details.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_Schedule.js"></script>
+    <script type="text/javascript">
+        function MoneyValidation(s) {
+            debugger;
+            var re = /^[\d.]+(\,\d*)?$/;
+            var txt = s.value;
+            if (txt != "") {
+                if (!re.test(txt)) {
+                    toastr["error"]("Invalid Data", "Notification");
+                    s.value = '';
+                    return false;
+                }
+                else {
+                    s.value = parseFloat(txt.split('.').join("").replace(",", ".")).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                }
+            }
+            return true;
+        }
+        function scheduleqtychange(e)
+        {
+            if (MoneyValidation(e)) {
+                var td = $(e).parent().parent().find("td");
+                if ($(td[6]).find("input").val() == "")
+                    $(td[6]).find("input").val("0");
+                if ($(td[7]).find("input").val() == "")
+                    $(td[7]).find("input").val("0");
+                //if (parseFloat($(td[7]).find("input").val().split('.').join("").replace(",", ".")) > parseFloat($(td[6]).find("input").val().split('.').join("").replace(",", "."))) {
+                //    $(e).val("0,000");
+                //    toastr["error"]("Schedule Quantity cannot be more than Available Quantity", "Notification");
+                //}
+            }
+        }
+    </script>
+   
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order" ng-controller="AC_ScheduleCtrl">
+        <div class="pageheader">
+
+            <h2>{{Type}} Schedule<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">{{Type}} Schedule</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>{{Type}} Schedule</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                      Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Schedule Date</th>
+                                    <th>Schedule Code</th>
+                                    <th>Order No</th>
+                                    <th ng-if="SH_Type==1">Sc No</th>
+                                    <th style="width:5%;">Customer PO No</th>
+                                    <th>Customer Name</th>
+                                    <th>Supplier PO No</th>
+                                    <th>Supplier Name</th>
+                                    <th ng-if="SH_Type==1 || SH_Type==2">Sales Person</th>
+                                    <th style="width:5%;">Order Qty</th>
+                                    <th style="width:5%;">Scheduled Qty</th>
+                                    <th>Total Value</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="schedule in schedulelist">
+                                    <td>{{schedule.SH_DATE.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{schedule.SH_Code}}</td>
+                                    <td>{{schedule.SO_Code}}</td>
+                                    <td ng-if="SH_Type==1">{{schedule.ScNo}}</td>
+                                    <td>{{schedule.poNo}}</td>
+                                    <td style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{schedule.CustomerName}}</td>
+                                    <td>{{schedule.SupplierPONo}}</td>
+                                    <td style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{schedule.SupplierName}}</td>
+                                    <td ng-if="SH_Type==1 || SH_Type==2">{{schedule.SalesPerson}}</td>
+                                    <td>{{schedule.SH_OrderQuantity}}</td>
+                                    <td>{{schedule.SH_SheduledQuantity}}</td>
+                                    <td>{{(schedule.TotalSchAmount).toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                    <td>
+                                        <a ng-click="editRecords(schedule.SH_ID);" ng-if="schedule.SH_Status == false" value="{{ schedule.SH_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(schedule.SH_Code);" value="{{ schedule.SH_Code }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                        <a ng-click="Restoredeleterecords(schedule.SH_ID,$event,true);" ng-if="schedule.SH_Status == false" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                        <a ng-click="RedirectschduletoShipment(schedule.SH_Code,$event,true);" ng-if="schedule.SH_Status == false &&  SH_Type!=3" style="color:darkblue;padding:5px;"><i class="fa fa-ship"></i></a>
+                                        <a ng-click="RedirectschduletoDespatch(schedule.SH_OrderID,$event,true);" ng-if="SH_Type==3" style="color:darkblue;padding:5px;"><i class="fa fa-ship"></i></a>
+                                        <a ng-click="RedirectToUpsLink(schedule.SH_OrderID,$event,true);" ng-if="SH_Type==3" style="color:darkblue;padding:5px;"><i class="fa fa-arrow-circle-o-right"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> {{Type}} Schedule</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- This Below code is used for Tab purpose -->
+                    @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                        </ul>*@
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Schedule Code</label>
+                                    <input type="text" name="txtScheduleCode" id="txtScheduleCode" ng-model="SH_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                    <input type="text" name="txtScheduleID" id="txtScheduleID" ng-model="SH_ID" class="hidden">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="drpType">Order Type</label>
+                                    <select data-ng-model="SH_Type" id="drpType" data-parsley-trigger="change" class="form-control chosen-select" ng-change="OrderTypeChange()" disabled>
+                                        <option value="">-Select-</option>
+                                        <option value="1">Agency</option>
+                                        <option value="2">Trading</option>
+                                        <option value="3">Store</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="CustomerName">Customer Name *</label>
+                                    <select class="form-control chosen-select" name="drpCustomer" id="drpCustomer" ng-model="SelectedCustomer" ng-change="Customerchange();" data-parsley-trigger="change" required>
+                                        <option value="">-Select-</option>
+                                        <option data-ng-repeat="st in CustomerList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="drpOrder">Customer Order No</label>
+                                    <select data-ng-model="SH_OrderID" id="drpOrder" data-parsley-trigger="change" class="form-control chosen-select" ng-change="OrderChange()" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-if="SH_Type==1" ng-repeat="order in orders" value="{{order.SO_ID}}">
+                                            {{ order.SO_Code + '-'+ order.SO_SupSCNO }}
+                                        </option>
+                                        <option ng-if="SH_Type!=1" ng-repeat="order in orders" value="{{order.SO_ID}}">
+                                            {{ order.SO_Code + '-'+ order.SO_CusPONO }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="PONo">Order Date</label>
+                                    <input type="text" class="form-control" name="txtOrderdate" id="txtOrderdate" ng-model="txtOrderdate" disabled />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6" ng-if="SH_Type!=3">
+                                    <label for="SupplierName">Supplier Name *</label>
+                                    <select tabindex="3" class="form-control chosen-select" name="drpSupplier" id="drpSupplier" ng-model="SelectedSupplier" ng-change="Supplierchange();" disabled>
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in SupplierList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6" ng-if="SH_Type!=3">
+                                    <label for="SupplierPO">Supplier PO No</label>
+                                    <input type="text" class="form-control" name="txtSupplierPO" id="txtSupplierPO" ng-model="SH_SUP_PO" disabled />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Sales Person</label>
+                                    <select data-ng-model="SH_SalesPerson" id="drpSalesPerson" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SalesPersonChange()" disabled>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="salesperson in salespersons" value="{{salesperson.USER_ID}}">
+                                            {{salesperson.DISPLAY_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtSupSchDate">Supplier Schedule Date*</label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtSupSchDate" name="txtSupSchDate" class="form-control" ng-model="SH_SUPDate" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                 </div>
+                                 <div class="form-group col-md-6">
+                                        <label for="CustomerDeliveryItems">Customer Schedule Date*</label>
+                                        <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                            <input type='text' id="txtSchDate" name="txtSchDate" class="form-control" ng-model="SH_Date" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                 </div>
+                            </div>
+                            <div class="row">
+                            </div>
+                            <section class="tile">
+                                <!-- tile header -->
+                                <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                    <h1 class="custom-font"><strong>Schedule</strong> Details</h1>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+
+                                    <div class="collapse" id="collapseExample">
+                                        <div class="row">
+                                            <div class="table-responsive">
+                                                <style type="text/css">
+                                                    #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                        padding: 0px;
+                                                    }
+                                                </style>
+                                                <table class="table table-custom" id="editable-usage">
+                                                    <thead>
+                                                        <tr>
+                                                            @*<th>S.NO</th>*@
+                                                            <th>Article No</th>
+                                                            <th>Product Name</th>
+                                                            <th ng-if="SH_Type==2">Design No</th>
+                                                            <th>Ordered Quantity</th>
+
+                                                            <th>Available Quantity</th>
+                                                            <th>Schedule Quantity</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="scheduledetailsbody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- /tile body -->
+
+                            </section>
+
+
+                        </div>
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                    </div>
+                </section>
+
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> {{Type}} Schedule</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Schedule Date</th>
+                                    <th>Order No</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="schedule in schedulerestorelist">
+                                    <td>{{schedule.SH_Code}}</td>
+                                    <td>{{schedule.SH_DATE.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{schedule.SO_Code}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(schedule.SH_ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+            </div>
+        </div>
+    </div>
+</section>

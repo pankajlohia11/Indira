@@ -1,0 +1,293 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.ShipmentView_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <input id="englishformat" style="display:none;" value="@Model.headerObj[0].S_ID" />
+    <table style="width:100%">
+        <tr>
+            <td style="text-align:left;width:30%;"></td>
+            <td style="text-align:center;width:40%;"><img src="@Model.headerObj[0].imgurl" >
+            @*<h1 style="font-size:large"><label><strong>@Model.headerObj[0].SystemCompany</strong></label></h1>*@
+            </td>
+            <td style="text-align:left;width:30%;"></td>
+        </tr>
+    </table>
+    <br />
+    <h2 style="text-align:center;font-size:large;font-weight:bold;"><u>Debit Note</u></h2>
+    <br />
+    <table style="font-size:14px;">
+        <tr>
+            @{
+                if (Model.selectedCompany == 1)
+                {
+                    <td><u>Eurotextiles GmbH & Co. KG, Mammolshainer Weg 14, 61462 Königstein</u></td>
+                }
+                else if (Model.selectedCompany == 2)
+                {
+                    <td><u>Indra Fabrics LLP,404, Varalakshmi complex,Srinagar colony,Gannavaram-521101,Krishna District</u></td>
+                }
+            }
+        </tr>
+        <tr>
+            <td><span><strong>@Model.headerObj[0].CompanyName</strong></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.headerObj[0].Street,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.headerObj[0].CityState,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.headerObj[0].CountryZip.</label></span></td>
+        </tr>
+    </table>
+    <table align="right">
+        <tr>
+            <td colspan="2">DebitNote No:<strong>@Model.headerObj[0].DebitNoteCode</strong></td>
+        </tr>
+        <tr>
+            <td>Date:<strong>@Model.headerObj[0].DebitNoteDate.ToString("dd-MM-yyyy")</strong></td>
+        </tr>
+        <tr>
+            <td colspan="2">Invoice No:<strong>@Model.headerObj[0].S_INV_NO</strong></td>
+        </tr>
+        <tr>
+            <td>
+                Invoice Date:<strong>@((Model.headerObj[0].S_INV_DATE ?? DateTime.Now).ToString("dd-MM-yyyy"))</strong><br />
+               
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Customer Name:<strong>@Model.headerObj[0].COM_DISPLAYNAME1</strong><br />
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Sc No:<strong>@Model.headerObj[0].SO_SupSCNO</strong><br />
+               
+            </td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td>
+                <br /><br /><br /><br /><br/>
+                <p>
+                    Dear Sir,<br /><br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; We hereby advice you that we have debited your account for the under mentioned amount being commission due.
+
+                </p>
+            </td>
+        </tr>
+    </table>
+    <br />
+    <table style="width:100%" border="1">
+        <thead>
+            <tr>
+                <th>Order No</th>
+                @if (Model.headerObj[0].isfob == 0)
+                {
+            <th>Order Amount</th>
+                }
+                else
+                {
+            <th>FOB Amount</th>
+                }
+                <th>Commission(%)</th>
+                <th>Commission Amount</th>
+            </tr>
+
+        </thead>
+        <tbody>
+            @{ decimal total = 0;}
+            @foreach (var item in Model.detailsObj)
+            {
+                if (Model.headerObj[0].SO_Currency == "US Dollar")
+                {
+            <tr>
+                <td>@item.popupOrderNo</td>
+                <td style="text-align:right">@(Convert.ToDecimal(item.OrderAmt).ToString("C2", CultureInfo.CreateSpecificCulture("en-US")))</td>
+                <td style="text-align:right">@(Convert.ToDecimal(item.popupCommissionPer).ToString("0"))</td>
+                <td style="text-align:right">@(Convert.ToDecimal(item.popupCommissionPer * item.OrderAmt / 100).ToString("C2", CultureInfo.CreateSpecificCulture("en-US")))
+            </tr>
+}
+else if (Model.headerObj[0].SO_Currency == "Euro" || Model.headerObj[0].SO_Currency == "UK Pound")
+{
+        <tr>
+            <td>@item.popupOrderNo</td>
+            <td style="text-align:right">@(Convert.ToDecimal(item.OrderAmt).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+            <td style="text-align:right">@(Convert.ToDecimal(item.popupCommissionPer).ToString("0"))</td>
+            <td style="text-align:right">@(Convert.ToDecimal(item.popupCommissionPer * item.OrderAmt / 100).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))
+        </tr>
+}
+else if (Model.headerObj[0].SO_Currency == "Indian Rupees")
+{
+        <tr>
+            <td>@item.popupOrderNo</td>
+            <td style="text-align:right">@(Convert.ToDecimal(item.OrderAmt).ToString("C2", CultureInfo.CreateSpecificCulture("en-IN")))</td>
+            <td style="text-align:right">@(Convert.ToDecimal(item.popupCommissionPer).ToString("0"))</td>
+            <td style="text-align:right">@(Convert.ToDecimal(item.popupCommissionPer * item.OrderAmt / 100).ToString("C2", CultureInfo.CreateSpecificCulture("en-IN")))
+        </tr>
+}
+total = total + ((item.popupCommissionPer ?? 0) * (item.OrderAmt ?? 0) / 100);
+}
+            @if (Model.headerObj[0].SO_Currency == "US Dollar")
+    {
+        <tr>
+            <td colspan="3" style="text-align:center;"><strong>Total</strong></td>
+            <td style="text-align:right"><br /><strong> @total.ToString("C2", CultureInfo.CreateSpecificCulture("en-US"))</strong><br /></td>
+        </tr>
+}
+else if (Model.headerObj[0].SO_Currency == "Euro" || Model.headerObj[0].SO_Currency == "UK Pound")
+{
+        <tr>
+            <td colspan="3" style="text-align:center;"><strong>Total</strong></td>
+            <td style="text-align:right"><br /><strong> @total.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))</strong><br /></td>
+        </tr>
+}
+else if (Model.headerObj[0].SO_Currency == "Indian Rupees")
+{
+        <tr>
+            <td colspan="3" style="text-align:center;"><strong>Total</strong></td>
+            <td style="text-align:right"><br /><strong> @total.ToString("C2", CultureInfo.CreateSpecificCulture("en-IN"))</strong><br /></td>
+        </tr>
+}
+        </tbody>
+    </table>
+    <table>
+        <tr>
+            <td style="line-height:21px;">
+                <br />
+                <p>
+                    @if (Model.headerObj[0].SO_Currency == "US Dollar")
+    {
+                <strong>
+                    Total Amount in Words :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;USD &nbsp;@Model.headerObj[0].AmtInWords &nbsp; CENTS ONLY
+                </strong>
+}
+else if (Model.headerObj[0].SO_Currency == "Euro")
+{
+                <strong>
+                    Total Amount in Words :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EURO &nbsp;@Model.headerObj[0].AmtInWords &nbsp; CENTS ONLY
+                </strong>
+}
+else if (Model.headerObj[0].SO_Currency == "Indian Rupees")
+{
+                <strong>
+                    Total Amount in Words :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Indian Rupees &nbsp;@Model.headerObj[0].AmtInWords &nbsp;  ONLY
+                </strong>
+}
+else
+{
+                <strong>
+                    Total Amount in Words :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;@Model.headerObj[0].AmtInWords &nbsp; Pounds ONLY
+                </strong>
+}
+
+
+                </p>
+            </td>
+        </tr>
+    </table>
+    <table>
+        <tr>
+            <td style="font-size:13px;line-height:14px;">
+                <br />
+                <p>
+                    Please arrange the said amount by Demand Draft bearing the name of "@Model.headerObj[0].SystemCompany" and send to our Germany office by COURIER at the earliest.
+                </p>
+
+            </td>
+            
+        </tr>
+        <tr>
+            <td style="font-size:13px;line-height:14px;">
+                <br />
+                <p>
+                    This is computer generated print out doesn't require the signature.
+                </p>
+
+            </td>
+        </tr>
+    </table>
+    <table style="width:100%;border-spacing:5px;">
+        <tr>
+            <td style="line-height: 14px;font-size:13px;" width="27%">
+                <strong><u>Our Bank Details:</u></strong>
+                <br />
+            </td>
+            <td width="27%" />
+            <td width="23%" />
+            <td width="23%" />
+        </tr>
+        <tr>
+            <td style="font-size:11px;line-height:13px" width="27%">
+                Naspa - Nassauische Sparkasse<br />
+                Frankfurter Str. 7 <br />
+                61462 Konigstein Ts. <br />
+                Germany <br />
+                Bank Code: 510 500 15 <br />
+                USDAccount No. - 263710659<br />
+                IBAN No. - DE98510500150263710659 <br />
+                Swift-Code: NASSDE55 <br />
+                Recipient: Eurotextiles GmbH& Co. KG <br />
+                Address:  Mammolshainer Weg 14,61462 Königstein, Germany<br />
+            </td>
+            <td style="font-size:11px;line-height:13px" width="27%">
+                Naspa - Nassauische Sparkasse <br />
+                Frankfurter Str. 7 <br />
+                61462 Konigstein Ts. <br />
+                Germany <br />
+                Bank Code: 510 500 15 <br />
+                EURO Account No. - 270060706 <br />
+                IBAN No. - DE15 5105 0015 0270 060706 <br />
+                Swift-Code: NASSDE55 <br />
+                Recipient: Eurotextiles GmbH& Co. KG<br />
+                Address:   Mammolshainer Weg 14, 61462 Königstein, Germany
+            </td>
+            <td style="font-size:11px;line-height:13px" width="23%">
+                Indra Fabrics LLP
+                404, Varalakshmi complex,<br />
+                Srinagar colony,
+                Gannavaram-521101<br />
+                Krishna District
+                Andhrapradesh<br />
+                A/C Name-INDRA FABRICS LLP<br />
+                A/C Number-4123-0500-0175<br />
+                IFSC-ICIC0004123<br />
+                IFSC-Bank Address:<br />
+                D.No-2-226/G1/B,
+                Boppanas TBR Central,<br />
+                Gannavaram-521101,Krishna District<br />
+                Andhrapradesh,India
+            </td>
+            <td style="font-size:11px;line-height:13px" width="23%">
+                Indra Fabrics LLP
+                404, Varalakshmi complex,<br />
+                Srinagar colony,
+                Gannavaram-521101<br />
+                Krishna District
+                Andhrapradesh<br />
+                A/C Name-INDRA FABRICS LLP<br />
+                A/C Number- 4833-1350-0000-2195<br />
+                IFSC-Bank Address:<br />
+                D.No-8-74 Survey No-457,<br />
+                Panchayti office road,<br />
+                Gannavaram,,Krishna District<br />
+                Andhrapradesh,India
+            </td>
+        </tr>
+
+    </table>
+    <table>
+        <tr>
+            <td>
+                <br />  
+                <p style="line-height: 14px;">
+                    Sincerely Yours, <br /><br /><strong>@Model.headerObj[0].SystemCompany</strong>
+                </p>
+            </td>
+        </tr>
+    </table>
+</div>

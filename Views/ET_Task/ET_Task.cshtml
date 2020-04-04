@@ -1,0 +1,543 @@
+﻿
+@{
+    ViewBag.Title = "ET_Task";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_Task.js"></script>
+
+    <script type="text/javascript">
+
+        function add()
+        {
+            if ($('#TSK_ID').val() != 0)
+            {
+                $('.form-control').removeAttr("disabled");
+                $('#drpEmpList').css('display', 'none');
+                $('#drpStatusDiv').css('display', 'none');
+                $("#drpUser").val('').trigger("chosen:updated");
+                $("#drpStatusDiv").val('').trigger("chosen:updated");
+                $("#taskForm")[0].reset();
+            }
+            $('#createdBy').val("0");
+            $("#btnSubmit").html('Submit');
+            $("#addUpdatebtn").html("Add Task");
+            $("#cal-new-task").modal("show");
+
+        }
+
+       
+        function blockSpecialChar(evt)
+        {
+          var charCode = evt.keyCode || evt.which;
+            var charStr = String.fromCharCode(charCode);
+            
+         //var titleData = document.getElementById("title");
+         //var titleText = titleData.value;
+         var pattern = /^[-_ a-zA-Z0-9]+$/;
+         var patternTitle = charStr.trim();
+         var patternResult = pattern.test(patternTitle);
+            if (!patternResult) {
+                $('#title').setCustomValidity("Please avoid using Special characters(#$!%^&*'\/~`|)");
+                $('#title').focus();
+                //window.event.returnValue = false;
+                evt.preventDefault();
+                return (false);
+            }
+            return (true);
+
+        }
+
+    function masterUser(type)
+    {
+        if (type == 0)
+            $('#drpEmpList').css('display', 'none');
+        else
+            $('#drpEmpList').css('display','block');
+        }
+      
+
+
+        function SubmitClick()
+        {
+            var formdata = new FormData(); //FormData object
+            var title = $('#title').val();
+            //var pattern = /^[a-zA-Z0-9]+$/;
+            var pattern = /^[-_ a-zA-Z0-9]+$/;
+            var patternTitle = title.trim();
+            var patternResult = pattern.test(patternTitle);
+            if (!patternResult) {
+                $('#title').setCustomValidity("Please avoid using Special characters(#$!%^&*'\/~`|)");
+                return false;
+            }
+            var submittext = $("#btnSubmit").html();
+            var cr = $('#createdBy').val();
+            var drpStatus = "";
+            if (submittext == "Update" && $('#drpStatus').val() == "") {
+                message = "Please Select The Status.";
+                toastr["error"](message, "Notification");
+                return false;
+            } else if ($('#drpStatus').val() != "" && submittext == "Update") {
+                drpStatus = $('#drpStatus').val();
+            }
+
+            var type = $('#drpType').val();
+            var assign = "";
+            var s = "";
+            formdata.append("Title", title);
+            formdata.append("Desc", $('#title-desc').val());
+            var expectedDateToValidate = $('#expecDate').val();
+            //alert(expectedDateToValidate);
+            //var validityDate = expectedDateToValidate.substr(0, (expectedDateToValidate.length - 2));
+            //alert(validityDate);
+            //var Expecdate = new Date(validityDate);
+            var expectedDateTime = '';
+            // regular expression to match required date format
+            var dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4}) (\d{1,2}):(\d{1,2}) ([AaPp][Mm])$/;
+            var arrayDate = expectedDateToValidate.match(dateRegex);
+            var Expecdate = new Date(arrayDate[3], arrayDate[1], arrayDate[2], arrayDate[4], arrayDate[5], 0, 0);
+            var regexResult = dateRegex.test(expectedDateToValidate);
+            if (expectedDateToValidate != '') {
+                if (regexResult) {
+                    //var ampm = Expecdate.getHours() >= 12 ? 'PM' : 'AM';
+
+                    if (Expecdate.getMinutes() <= 9) {
+
+
+                        if (Expecdate.getHours() <= 9) {
+                            expectedDateTime = ("0" + Expecdate.getDate()) + "\/" + ("0" + (Expecdate.getMonth())) + "\/" + Expecdate.getFullYear() + " " + "0" + Expecdate.getHours().toLocaleString().replace(/:\d{2}\s/, ' ') + ":0" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ');
+                        }
+                        else {
+                            expectedDateTime = ("0" + Expecdate.getDate()) + "\/" + ("0" + (Expecdate.getMonth())) + "\/" + Expecdate.getFullYear() + " " + Expecdate.getHours() + ":0" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ');
+                        }
+                    }
+                    else {
+                        if (Expecdate.getHours() <= 9) {
+                            expectedDateTime = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + Expecdate.getMonth()).slice(-2) + "\/" + Expecdate.getFullYear() + " " + "0" + Expecdate.getHours().toLocaleString().replace(/:\d{2}\s/, ' ') + ":" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ');
+                        }
+                        else {
+                            expectedDateTime = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + Expecdate.getMonth()).slice(-2) + "\/" + Expecdate.getFullYear() + " " + Expecdate.getHours() + ":" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ');
+                        }
+                    }
+                }
+                else {
+                    $('#ExpecDate').setCustomValidity("Please enter valid date time(mm/dd/yyyy HH:mm AM/PM");
+                    return false;
+                }
+            }
+            else {
+                $('#ExpecDate').setCustomValidity("Please enter valid date time(mm/dd/yyyy HH:mm AM/PM");
+                return false;
+            }
+            formdata.append("ExpecDate", expectedDateTime);
+            formdata.append("Priority", $('#drpPriority').val());
+            formdata.append("createdBy", $('#createdBy').val());
+            if (type == 1) {
+                assign = $('#drpUser').val();
+                if (assign == null || assign == "") {
+                    message = "Please Select The AssignTO.";
+                    toastr["error"](message, "Notification");
+                    return false;
+                }
+            } else { $("#drpUser").val('').trigger("chosen:updated"); }
+
+            for (i = 0; i < assign.length; i++) {
+                if (i == 0) { s = s + "'" + assign[i] + "'" }
+                else { s = s + ",'" + assign[i] + "'" }
+            }
+            formdata.append("Assign", s);
+            formdata.append("Type", type);
+            formdata.append("Status", drpStatus);
+            formdata.append("SubmitText", submittext);
+            formdata.append("TSK_ID", $("#TSK_ID").val());
+
+            if (title != "") {
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("ET_Task_Add_Update", "ET_Task")',
+                    data: formdata,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        debugger;
+                        if (data.indexOf("ERR") > -1) {
+                            $("#spanErrMessage1").html(data);
+                            $("#spanErrMessage2").html(data);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                            if (data != -1) {
+                                message = 'Inserted successfully';
+                            }
+                            else {
+                                message = 'Updated successfully';
+                            }
+                            if (message != '') {
+                                toastr["success"](message, "Notification");
+                                $("#taskForm")[0].reset();
+                                $("#drpUser").val('').trigger("chosen:updated");
+                                $("#Close").trigger("click");
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);  //1s
+                            }
+
+                        }
+                    }
+                });
+            }
+            else {
+                message = "Please enter Title.";
+                toastr["error"](message, "Notification");
+            }
+        }
+
+        
+
+    function shipping(a)
+    {
+        a = parseInt(a);
+        $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Task_View", "ET_Task")',
+                data: { id: a },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+            success: function (result) {
+                
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        var assign;
+                        var res = JSON.parse(result);
+                        $("#title").val(res[0]["TSK_Title"]);
+                        $("#title-desc").val(res[0]["TSK_Desc"]);
+                        $("#drpPriority").val(res[0]["TSK_Priority"]);
+                        $("#TSK_ID").val(res[0]["TSK_ID"]);
+                        var type = 0;
+                        if (res[0]["TSK_Type"] == true) {
+                            type = 1;
+                            $('#drpEmpList').css('display', 'block');
+                            assign = JSON.parse("[" + res[0]['TSK_AssignTo'].replace(/['']+/g, '') + "]");
+                        } else { $('#drpEmpList').css('display', 'none'); }
+                        var Expecdate = new Date(parseInt(res[0]["Expec_Date"].substr(6)));
+                        var ampm = Expecdate.getHours() >= 12 ? 'PM' : 'AM';
+                        if (Expecdate.getMinutes() <= 9)
+                        {
+                            var DT = '';
+                            if (Expecdate.getHours() <= 9)
+                            {
+                                DT = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + (Expecdate.getMonth() + 1)).slice(-2) + "\/" + Expecdate.getFullYear() + " " + "0" + Expecdate.getHours().toLocaleString().replace(/:\d{2}\s/, ' ') + ":0" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                            }
+                            else
+                            {
+                                DT = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + (Expecdate.getMonth() + 1)).slice(-2) + "\/" + Expecdate.getFullYear() + " " + Expecdate.getHours() + ":0" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                            }
+                            
+                            $("#expecDate").val(DT);
+                        }
+                        else
+                        {
+                            var DT
+                            if (Expecdate.getHours() <= 9) {
+
+                                DT = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + (Expecdate.getMonth() + 1)).slice(-2) + "\/" + Expecdate.getFullYear() + " " + "0" + Expecdate.getHours().toLocaleString().replace(/:\d{2}\s/, ' ') + ":" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                            }
+                            else {
+                                DT = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + (Expecdate.getMonth() + 1)).slice(-2) + "\/" + Expecdate.getFullYear() + " " + Expecdate.getHours() + ":" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                            }
+
+                            $("#expecDate").val(DT);
+                        }
+                        
+                        $("#drpType").val(type);
+                        
+                        
+                        
+                        $("#drpStatus").val(res[0]["Status"]);
+                        $("#drpUser").val(assign).trigger("chosen:updated");
+
+                        if (res[0]["CreatedBy"] != true) {
+                            $('.form-control').prop("disabled", true).trigger("chosen:updated");;
+                            $('#drpStatus').prop("disabled", false);
+                            $('#drpStatusDiv').css("display", "block");
+                            $('#createdBy').val(0);
+                        } else
+                        {
+                            $('.form-control').removeAttr("disabled").trigger("chosen:updated");
+                            $('#drpStatusDiv').css("display", "block");
+                            $('#drpStatus').prop("disabled", false);
+                            $('#createdBy').val(1);
+                        }
+                        $("#btnSubmit").html('Update');   
+                        $("#addUpdatebtn").html("Update Task");
+                        $("#cal-new-task").modal("show");
+                    }
+                },
+                error: function (response) {
+
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+           
+    }
+    window.onload = function () {
+            $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetTaskList", "ET_Task")',
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+                success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(result);
+                $("#spanErrMessage2").html(result);
+                if ($("#exceptionmessage").length)
+                $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    debugger;
+                    var res = $.parseJSON(JSON.parse(result));
+                $('#calendar').fullCalendar({
+                header: {
+                left: 'prev',
+                center: 'title',
+                right: 'next'
+                    },
+            
+            editable: true,
+            droppable: true, // this allows things to be dropped onto the calendar
+            drop: function () {
+            // is the "remove after drop" checkbox checked?
+            if ($('#drop-remove').is(':checked')) {
+            // if so, remove the element from the "Draggable Events" list
+            $(this).remove();
+            }
+            },
+            eventLimit: true, // allow "more" link when too many events
+            events: res
+            });
+            }
+            },
+            error: function (response) {
+
+            if ($("#exceptionmessage").length)
+            $("#exceptionmessage").trigger("click");
+            }
+            });
+            // Previous month action
+            $('#cal-prev').click(function () {
+            $('#calendar').fullCalendar('prev');
+            });
+        
+            // Next month action
+            $('#cal-next').click(function () {
+            $('#calendar').fullCalendar('next');
+            });
+
+            // Change to month view
+            $('#change-view-month').click(function () {
+            $('#calendar').fullCalendar('changeView', 'month');
+
+            // safari fix
+            $('#content .main').fadeOut(0, function () {
+            setTimeout(function () {
+            $('#content .main').css({ 'display': 'table' });
+            }, 0);
+            });
+
+        });
+
+        $('#title').on('keypress', function (event)
+        {
+            //var regex = new RegExp("/^[-_ a-zA-Z0-9]+$/");
+            var pattern = /^[-_ a-zA-Z0-9]+$/;
+            //var patternTitle = title.trim();
+            //var patternResult = pattern.test(patternTitle);
+            var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+            if (!pattern.test(key))
+            {
+                event.preventDefault();
+                $('#title').setCustomValidity("Please avoid using Special characters(#$!%^&*'\/~`|)");
+                //$('#title').focus();
+                return false;
+            }
+            return true;
+        });
+
+    // Change to week view
+    $('#change-view-week').click(function () {
+    $('#calendar').fullCalendar('changeView', 'agendaWeek');
+
+    // safari fix
+    $('#content .main').fadeOut(0, function () {
+    setTimeout(function () {
+    $('#content .main').css({ 'display': 'table' });
+    }, 0);
+    });
+
+    });
+
+    // Change to day view
+    $('#change-view-day').click(function () {
+
+    $('#calendar').fullCalendar('changeView', 'agendaDay');
+
+    // safari fix
+    $('#content .main').fadeOut(0, function () {
+    setTimeout(function () {
+    $('#content .main').css({ 'display': 'table' });
+    }, 0);
+    });
+
+    });
+
+    // Change to today view
+    $('#change-view-today').click(function () {
+    $('#calendar').fullCalendar('today');
+    });
+    };
+    </script>
+
+}
+
+<!-- ====================================================
+            ================= CONTENT ===============================
+            ===================================================== -->
+<section id="content">
+
+    <div class="page page-full page-calendar" ng-controller="AC_ShipmentCalendar">
+
+        <div class="tbox tbox-sm">
+
+
+
+<!-- right side -->
+            <div class="tcol">
+
+<!-- right side header -->
+                <div class="p-15 bg-white">
+
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-greensea btn-sm"  onclick="add()"  href="">
+                            <i class="fa fa-plus"></i>Add Task
+                        </button>
+                        <button type="button" class="btn btn-sm btn-default" id="change-view-today">today</button>
+                        <div class="btn-group">
+                            <button class="btn btn-default btn-sm" id="change-view-day">Day</button>
+                            <button class="btn btn-default btn-sm" id="change-view-week">Week</button>
+                            <button class="btn btn-default btn-sm" id="change-view-month">Month</button>
+                        </div>
+                    </div>
+
+                    <h2 class="custom-font text-default m-0">Task</h2>
+                </div>
+<!-- /right side header -->
+<!-- right side body -->
+                <div class="p-15">
+
+                    <div id='calendar'></div>
+
+                </div>
+<!-- /right side body -->
+            </div>
+<!-- /right side -->
+        </div>
+
+    </div>
+
+</section>
+<!--/ CONTENT -->
+@section anypopup
+        {
+    <!-- Modal -->
+    <div class="modal fade" id="cal-new-task" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+    <h2 class="modal-title custom-font" id="addUpdatebtn">Add New Task</h2>
+    </div>
+    <form role="form" id="taskForm" method="post" name="add-task">
+        <div class="modal-body">
+
+            <input type="hidden" id="TSK_ID" value="0" name="tskid">
+
+            <input type="hidden" id="createdBy" value="" name="created">
+
+            <div class="form-group">
+                <label class="control-label">Task title *</label>
+                <input type="text" class="form-control" id="title" name="title" pattern="^[-_ a-zA-Z0-9]+$" title="Please avoid using Special characters(#$!%^&*'\/~`|)"  required="required" >
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Task Desc</label>
+                <textarea class="form-control" id="title-desc" name="Desctitle"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Expected Date</label>
+                <div class='input-group datepicker w-360' style="width:100%" id="datetimepicker1">
+                    <input type='text' id="expecDate" name="date_comm" class="form-control" required="required" /> <!--pattern="/^(\d{1,2})\/(\d{1,2})\/(\d{4}) (\d{1,2}):(\d{1,2}) ([AaPp][Mm])$/" title="Please enter valid date time(mm/dd/yyyy HH:mm AM/PM)" -->
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar"></span>
+                    </span>
+                </div>
+            </div>
+            <script type="text/javascript">
+                $(function () {
+                    //$('#datetimepicker1').datetimepicker({ dateFormat: 'mm/dd/yyyy'});
+                });
+            </script>
+
+            <div class="form-group">
+                <label class="control-label">Priority</label>
+                <select data-ng-model="Priority" id="drpPriority" name="drpPriority" data-parsley-trigger="change" class="form-control" required>
+                    <option value="">-Select-</option>
+                    <option value="0">Low</option>
+                    <option value="1">Normal</option>
+                    <option value="2">High</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Type</label>
+                <select id="drpType" name="drpType" data-parsley-trigger="change" onchange="masterUser(this.value);" class="form-control" required>
+                    <option value="">-Select-</option>
+                    <option value="0">Self</option>
+                    <option value="1">Assign</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="drpEmpList" style="display:none">
+                <label class="control-label">Assign To *</label>
+                @Html.DropDownList("drpUser", new SelectList(ViewBag.Users, "USER_ID", "DISPLAY_NAME"), new { @class = "form-control chosen-select", @id = "drpUser", multiple = "multiple" })
+            </div>
+
+            <input type="hidden" name="update">
+
+            <div class="form-group" id="drpStatusDiv" style="display:none;">
+                <label class="control-label">Status *</label>
+                <select id="drpStatus" name="drpStatus" data-parsley-trigger="change" class="form-control">
+                    <option value="">-Select-</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                </select>
+            </div>
+
+        </div>
+    <div class="modal-footer">
+    <button type="submit" class="btn btn-success btn-ef btn-ef-3 btn-ef-3c" id="btnSubmit" onclick="return SubmitClick()">Submit</button>
+    <button class="btn btn-lightred btn-ef btn-ef-4 btn-ef-4c" id="Close" data-dismiss="modal"><i class="fa fa-arrow-left"></i> Cancel</button>
+    </div>
+    </form>
+    </div>
+    </div>
+    </div>
+}

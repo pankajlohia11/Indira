@@ -1,0 +1,91 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_User>
+
+<div class="col-md-12">
+    <div class="tile-body">
+        <div class="row">
+            <div class="col-md-6"><div id="tableTools"></div></div>
+            <div class="col-md-6"><div id="colVis"></div></div>
+        </div>
+        <table class="table table-custom" id="tblSalesTarget">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Jan</th>
+                    <th>Feb</th>
+                    <th>Mar</th>
+                    <th>Apr</th>
+                    <th>May</th>
+                    <th>Jun</th>
+                    <th>Jul</th>
+                    <th>Aug</th>
+                    <th>Sep</th>
+                    <th>Oct</th>
+                    <th>Nov</th>
+                    <th>Dec</th>
+                    <th>Total</th>
+                </tr>
+                @foreach (var item in Model)
+                {
+            <tr>
+                <td>
+                    <input type="hidden" class="form-control" name="txtUserID" id="txtUserID" value="@item.USER_ID">
+                    <input type="text" class="form-control" name="txtUserID" id="txtUserID" value="@item.DISPLAY_NAME" disabled>
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM1" id="txtM1" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM2" id="txtM2" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM3" id="txtM3"  required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM4" id="txtM4" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM5" id="txtM5" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM6" id="txtM6" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM7" id="txtM7" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM8" id="txtM8" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM9" id="txtM9" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM10" id="txtM10" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM11" id="txtM11" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM12" id="txtM12" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtTotal" id="txtTotal" required
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+            </tr>
+                }
+            </thead>
+        </table>
+    </div>
+</div>

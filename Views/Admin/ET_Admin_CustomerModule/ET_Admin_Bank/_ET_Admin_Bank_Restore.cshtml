@@ -1,0 +1,86 @@
+﻿
+@model IEnumerable<BusinessEntity.EntityModels.Tbl_BankMaster>
+
+<div class="tile-header dvd-btm">
+    <h1 class="custom-font"><strong>Restore Bank</strong> Master</h1>
+    <ul class="controls">
+        <li style="padding:5px">
+            <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+            <a tabindex="0" onclick="showRecords();">
+                <!-- This is used as a link for back -->
+                <span class="btn btn-hotpink btn-xs mb-10">
+                    <i class="fa fa-arrow-left"></i>Back
+                </span>
+            </a>
+        </li>
+    </ul>
+</div>
+<!-- /tile header -->
+<!-- tile body -->
+<div class="tile-body">
+    <div class="row">
+        <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+        <div class="col-md-6"><div id="colVisRestore"></div></div>
+    </div>
+    <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+    <table class="table table-custom" id="advancedusageRestore">
+        <thead>
+            <tr>
+                <th>Bank Name</th>
+                <th>Display Name</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Country</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        @foreach (var item in Model)
+        {
+            BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+            var countryname = "";
+            var statename = "";
+            var cityname = "";
+            if (item.COUNTRY != "")
+            {
+                try
+                {
+                    var CountryID = Convert.ToInt32(item.COUNTRY);
+                    countryname = (from country in dbc.locations
+                                   where country.location_id == CountryID
+                                   select country.name).FirstOrDefault();
+                }
+                catch { }
+            }
+            if (item.STATE != "")
+            {
+                try
+                {
+                    var StateID = Convert.ToInt32(item.STATE);
+                    statename = (from state in dbc.locations
+                                 where state.location_id == StateID
+                                 select state.name).FirstOrDefault();
+                }
+                catch { }
+            }
+            if (item.CITY != "")
+            {
+                try
+                {
+                    var CityID = Convert.ToInt32(item.CITY);
+                    cityname = (from city in dbc.locations
+                                where city.location_id == CityID
+                                select city.name).FirstOrDefault();
+                }
+                catch { }
+            }
+            <tr>
+                <td>@item.BANK_NAME</td>
+                <td>@item.DISPLAY_NAME</td>
+                <td>@cityname</td>
+                <td>@statename</td>
+                <td>@countryname</td>
+                <td><a onclick="Restoredeleterecords(@item.BANK_ID,this);" style="color:red"><i class="fa fa-undo"></i></a></td>
+            </tr>
+    }
+    </table>
+</div>

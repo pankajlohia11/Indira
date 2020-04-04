@@ -1,0 +1,66 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+   public class PackingList_ViewCM
+    {
+        public string CustomerName { get; set; }
+        public string OrderCode { get; set; }
+        public decimal PL_ID { get; set; }
+         
+        public string PL_Code { get; set; }
+
+        public DateTime? PL_Date { get; set; }
+
+        public decimal? PL_OrderNo { get; set; }
+
+        public string PL_Remarks { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public decimal? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+        public decimal PD_ID { get; set; }
+
+        public decimal? PD_PID { get; set; }
+
+        public decimal? PD_ProductID { get; set; }
+         
+        public string PD_ArticleNo { get; set; }
+         
+        public string PD_PalletNo { get; set; }
+         
+        public string PD_DesignNo { get; set; }
+
+        public int? PD_NoOfPieces { get; set; }
+
+        public decimal? PD_TotalMeters { get; set; }
+
+        public decimal? PD_NwtinKGS { get; set; }
+
+        public decimal? PD_GwtinKGS { get; set; }
+
+        public string PD_IndividualPieceLength { get; set; }
+        public string ProductName { get; set; }
+    }
+    public class Paclistdetails_View_CM
+    {
+        public List<PackingList_ViewCM> QHeader { get; set; }
+        public List<PackingList_ViewCM> QChild { get; set; }
+    }
+}

@@ -1,0 +1,609 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DataAccess.Admin_DA;
+using DataAccess;
+using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_Product_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+
+        //  Tbl_Master_Products
+
+        public List<Tbl_Product_Yarn> Product_Yarn_list()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Product_Yarn.Where(m => m.DELETED == false).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public decimal ET_Admin_Master_Products_Add_DL(Tbl_Product_Yarn_CM obj)
+        {
+            if (obj.PRODUCT_ID == 0)
+            {
+                Tbl_Master_Products objtmp = new Tbl_Master_Products()
+                {
+                    SHORT_NAME = obj.SHORT_NAME,
+                    UOM = obj.UOM,
+                    EAN_NO = obj.EAN_NO,
+                    CATEGORY = 1,
+                    PRODUCT = obj.PRODUCT,
+                    PRODUCT_NAME = obj.PRODUCT_NAME,
+                    PRODUCT_CODE = obj.PRODUCT_CODE,
+                    DELETED = false,
+                    CREATED_DATE = DateTime.Now,
+                    CREATED_BY = obj.CREATED_BY,
+                    LAST_UPDATED_BY = obj.LAST_UPDATED_BY,
+                    LAST_UPDATED_DATE = DateTime.Now,
+                };
+                dbcontext.Tbl_Master_Products.Add(objtmp);
+                objtmp.PRODUCT_ID = dbcontext.SaveChanges();
+            }
+            else
+            {
+                Tbl_Master_Products objtmp = dbcontext.Tbl_Master_Products.Single(m => m.PRODUCT_ID == obj.PRODUCT_ID);
+                {
+                    objtmp.SHORT_NAME = obj.SHORT_NAME;
+                    objtmp.UOM = obj.UOM;
+                    objtmp.EAN_NO = obj.EAN_NO;
+                    objtmp.CATEGORY = 1;
+                    objtmp.PRODUCT = obj.PRODUCT;
+                    objtmp.PRODUCT_NAME = obj.PRODUCT_NAME;
+                    objtmp.PRODUCT_CODE = obj.PRODUCT_CODE;
+                    objtmp.DELETED = false;
+                    objtmp.LAST_UPDATED_BY = obj.LAST_UPDATED_BY;
+                    objtmp.LAST_UPDATED_DATE = DateTime.Now;
+                }
+                obj.PRODUCT_ID = dbcontext.SaveChanges();
+            }
+            return obj.PRODUCT_ID;
+        }
+
+        public Tbl_Product_Master ET_Admin_Product_Add_DL(Tbl_Product_Master obj, bool automanual, string prefix)
+        {
+            try
+            {
+                if (obj.P_ID == 0)
+                {
+                    Tbl_Product_Master objtpy = new Tbl_Product_Master()
+                    {
+                        P_Code = obj.P_Code,
+                        P_ArticleNo = obj.P_ArticleNo,
+                        P_CategoryID = obj.P_CategoryID,
+                        P_SubcategoryID = obj.P_SubcategoryID,
+                        P_Name = obj.P_Name,
+                        P_ShortName = obj.P_ShortName,
+                        P_Description = obj.P_Description,
+                        P_UOM = obj.P_UOM,
+                        P_PackingQuantity = obj.P_PackingQuantity,
+                        P_Remark1 = obj.P_Remark1,
+                        P_Remark2 = obj.P_Remark2,
+                        P_Remark3 = obj.P_Remark3,
+                        DELETED = false,
+                        CREATED_DATE = DateTime.Now,
+                        CREATED_BY = obj.CREATED_BY,
+                        LAST_UPDATED_BY = obj.LAST_UPDATED_BY,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                        COM_KEY=obj.COM_KEY
+                    };
+                    dbcontext.Tbl_Product_Master.Add(objtpy);
+                    dbcontext.SaveChanges();
+                    string article = dbcontext.Tbl_ProductGroup.Where(m => m.PG_ID == objtpy.P_CategoryID).ToList()[0].PG_Initial+ "0" + objtpy.P_ID;
+                    Tbl_Product_Master objcode1 = dbcontext.Tbl_Product_Master.Single(m => m.P_ID == objtpy.P_ID);
+                    {
+                        objcode1.P_ArticleNo = article;
+                    };
+                    dbcontext.SaveChanges();
+                    objtpy.P_ArticleNo = article;
+                    if (automanual == true)
+                    {
+                        string code = prefix + "0" + objtpy.P_ID;
+                        Tbl_Product_Master objcode = dbcontext.Tbl_Product_Master.Single(m => m.P_ID == objtpy.P_ID);
+                        {
+                            objcode.P_Code = code;
+                        };
+                        dbcontext.SaveChanges();
+                        objtpy.P_Code = code;
+                    }
+                    obj.P_ID = objtpy.P_ID;
+                    obj.P_Code = objtpy.P_Code;
+                    obj.P_ArticleNo = objtpy.P_ArticleNo;
+                }
+                else
+                {
+                    Tbl_Product_Master objtpy = dbcontext.Tbl_Product_Master.Single(m => m.P_ID == obj.P_ID);
+                    {
+                        objtpy.P_ID = obj.P_ID;
+                        objtpy.P_Code = obj.P_Code;
+                        objtpy.P_ArticleNo = obj.P_ArticleNo;
+                        objtpy.P_CategoryID = obj.P_CategoryID;
+                        objtpy.P_SubcategoryID = obj.P_SubcategoryID;
+                        objtpy.P_Name = obj.P_Name;
+                        objtpy.P_ShortName = obj.P_ShortName;
+                        objtpy.P_Description = obj.P_Description;
+                        objtpy.P_UOM = obj.P_UOM;
+                        objtpy.P_PackingQuantity = obj.P_PackingQuantity;
+                        objtpy.P_Remark1 = obj.P_Remark1;
+                        objtpy.P_Remark2 = obj.P_Remark2;
+                        objtpy.P_Remark3 = obj.P_Remark3;
+                        objtpy.DELETED = false;
+                        objtpy.CREATED_DATE = DateTime.Now;
+                        objtpy.CREATED_BY = obj.CREATED_BY;
+                        objtpy.LAST_UPDATED_BY = obj.LAST_UPDATED_BY;
+                        objtpy.LAST_UPDATED_DATE = DateTime.Now;
+                    };
+                    dbcontext.SaveChanges();
+                    obj.P_ID = objtpy.P_ID;
+                    obj.P_Code = objtpy.P_Code;
+                    obj.P_ArticleNo = objtpy.P_ArticleNo;
+                }
+            }
+            catch (System.Data.Entity.Validation.DbEntityValidationException dbEx)
+            {
+                Exception raise = dbEx;
+                foreach (var validationErrors in dbEx.EntityValidationErrors)
+                {
+                    foreach (var validationError in validationErrors.ValidationErrors)
+                    {
+                        string message = string.Format("{0}:{1}",
+                            validationErrors.Entry.Entity.ToString(),
+                            validationError.ErrorMessage);
+                        // raise a new exception nesting  
+                        // the current instance as InnerException  
+                        raise = new InvalidOperationException(message, raise);
+                    }
+                }
+                throw raise;
+            }
+            return obj;
+        }
+
+        public int ET_Admin_Product_Deleted_DL(int id, decimal deleteby)
+        {
+            int i = 0;
+            try
+            {
+                int count = dbcontext.Tbl_Order_Details.Where(m => m.PRODUCT_ID == id).ToList().Count;
+                if (count == 0)
+                {
+                    Tbl_Product_Master obj = dbcontext.Tbl_Product_Master.Single(m => m.P_ID == id);
+                    {
+                        obj.DELETED = true;
+                        obj.DELETED_DATE = DateTime.Now;
+                        obj.DELETED_BY = deleteby;
+                    };
+                    i = dbcontext.SaveChanges();
+                }
+                else
+                {
+                    i = 100;
+                }
+            }
+            catch (Exception exe)
+            { throw exe; }
+            return i;
+        }
+
+        public int ET_Admin_Product_Yarn_Restore_Insert_DL(int id, decimal deleteby)
+        {
+            int i = 0;
+            try
+            {
+                Tbl_Product_Yarn obj = dbcontext.Tbl_Product_Yarn.Single(m => m.PRODUCT_YARN_ID == id && m.DELETED == true);
+                {
+                    obj.DELETED = false;
+                    obj.DELETED_DATE = DateTime.Now;
+                    obj.DELETED_BY = deleteby;
+                };
+                i = dbcontext.SaveChanges();
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+            return i;
+        }
+
+        public List<Tbl_Product_Yarn> ET_Admin_Product_Yarn_Restore_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Product_Yarn.Where(m => m.DELETED == true).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public Tbl_Product_Yarn ET_Admin_Product_Yarn_View_DL(int id)
+        {
+            try
+            {
+
+                var data = dbcontext.Tbl_Product_Yarn.Single(m => m.PRODUCT_YARN_ID == id);
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public Tbl_Product_Master ET_Admin_Product_Update_GetbyID_DL(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_Product_Master.Single(m => m.P_ID == id);
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+
+
+
+
+        public List<Tbl_Product_BedLinen> Product_BedLinen_list()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Product_BedLinen.Where(m => m.DELETED == false).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public List<Tbl_Product_BathLinen> Product_BathLinen_list()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Product_BathLinen.Where(m => m.DELETED == false).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public List<Tbl_Product_Fabric> Product_Fabric_list()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Product_Fabric.Where(m => m.DELETED == false).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public List<Tbl_Product_Linen> Product_Linen_list()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Product_Linen.Where(m => m.DELETED == false).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public List<Tbl_Master_Products> Master_Products_list()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_Products.Where(m => m.DELETED == false).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        //public List<Tbl_Category_Details> Categorylist()
+        //{
+        //    try
+        //    {
+        //        var Category = dbcontext.Tbl_Category_Details.Distinct().ToList();
+        //        return Category;
+        //    }
+        //    catch (Exception exe)
+        //    {
+        //        throw exe;
+        //    }
+        //}
+
+        //public List<Tbl_Category_Details> Categorylist_DL()
+        //{
+        //    try
+        //    {
+        //        // var Category = dbcontext.Tbl_Category_Details.Distinct().ToList();
+        //        //var Category = (from subc in dbcontext.Tbl_Category_Details
+        //        //                   select subc.CATEGORY).ToString();
+        //        //var Category = dbcontext.Tbl_Category_Details.Select(m => new SelectListItem { Text = m.Dept, Value = m.empid.ToString() }).Distinct().ToList()
+        //        var Category = dbcontext.Tbl_Category_Details.Select(m => m.CATEGORY).Distinct().ToList();
+        //        return Category;
+        //    }
+        //    catch (Exception exe)
+        //    {
+        //        throw exe;
+        //    }
+        //}
+        public List<string> Sub_Categorylist_DL()
+        {
+            try
+            {
+                // var SubCategory = dbcontext.Tbl_Category_Details.Select(m => m.SUB_CATEGORY).Distinct().ToList();
+                //var SubCategory = (from subc in dbcontext.Tbl_Category_Details
+                //                   select subc.SUB_CATEGORY).Distinct().ToString();
+                var SubCategory = dbcontext.Tbl_Category_Details.Where(m => m.SUB_CATEGORY != "").Select(m => m.SUB_CATEGORY).Distinct().ToList();
+                return SubCategory;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public List<Tbl_Master_UOM> UOM_DL()
+        {
+            try
+            {
+                var Uomid = dbcontext.Tbl_Master_UOM.ToList();
+                return Uomid;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public Tbl_ProductGroup ET_Admin_ProductGroup_Add_DL(Tbl_ProductGroup obj, bool automanual, string prefix)
+        {
+            Tbl_ProductGroup objgl = new Tbl_ProductGroup();
+            try
+            {
+                if (obj.PG_ID == 0)
+                {
+
+                    Tbl_ProductGroup objtpg = new Tbl_ProductGroup()
+                    {
+                        PG_NAME = obj.PG_NAME,
+                        PG_CODE = obj.PG_CODE,
+                        PG_PARENT_ID = obj.PG_PARENT_ID,
+                        PG_TYPE = obj.PG_TYPE,
+                        PG_Initial=obj.PG_Initial,
+                        CREATED_BY = obj.CREATED_BY,
+                        CREATED_DATE = DateTime.Now,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                        LAST_UPDATED_BY = obj.LAST_UPDATED_BY,
+                        DELETED = false,
+                        COM_KEY = obj.COM_KEY
+                    };
+                    dbcontext.Tbl_ProductGroup.Add(objtpg);
+                    dbcontext.SaveChanges();
+                    if (automanual == true)
+                    {
+                        string code = prefix + "0" + objtpg.PG_ID;
+                        Tbl_ProductGroup objcode = dbcontext.Tbl_ProductGroup.Single(m => m.PG_ID == objtpg.PG_ID);
+                        {
+                            objcode.PG_CODE = code;
+                        };
+                        dbcontext.SaveChanges();
+                        objtpg.PG_CODE = code;
+                    }
+                    objgl.PG_ID = objtpg.PG_ID;
+                    objgl.PG_CODE = objtpg.PG_CODE;
+                }
+                else
+                {
+                    Tbl_ProductGroup objtpg = dbcontext.Tbl_ProductGroup.Single(m => m.PG_ID == obj.PG_ID);
+                    {
+                        objtpg.PG_NAME = obj.PG_NAME;
+                        objtpg.PG_CODE = obj.PG_CODE;
+                        objtpg.PG_PARENT_ID = obj.PG_PARENT_ID;
+                        objtpg.PG_TYPE = obj.PG_TYPE;
+                        objtpg.LAST_UPDATED_DATE = DateTime.Now;
+                        objtpg.LAST_UPDATED_BY = obj.LAST_UPDATED_BY;
+                        objtpg.DELETED = obj.DELETED;
+                        objtpg.PG_Initial = obj.PG_Initial;
+                    };
+                    dbcontext.SaveChanges();
+                    objgl.PG_ID = objtpg.PG_ID;
+                    objgl.PG_CODE = objtpg.PG_CODE;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return objgl;
+        }
+        public string CheckDuplicateCode_DL(decimal id, string GroupCode)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    var count = dbcontext.Tbl_ProductGroup.Where(m => m.PG_CODE == GroupCode).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                else
+                {
+                    var count = dbcontext.Tbl_ProductGroup.Where(m => m.PG_ID != id && m.PG_CODE == GroupCode).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                return "";
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public string CheckDuplicateGroupName_DL(decimal id, string GroupName)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    var count = dbcontext.Tbl_ProductGroup.Where(m => m.PG_NAME == GroupName && m.DELETED==false).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                else
+                {
+                    var count = dbcontext.Tbl_ProductGroup.Where(m => m.PG_ID != id && m.PG_NAME == GroupName && m.DELETED == false).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                return "";
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public Tbl_ProductGroup ET_Admin_ProductGroup_Update_GetbyID_DL(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_ProductGroup.Single(m => m.PG_ID == id);
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public int ET_Admin_ProductGroup_Delete_DL(int id, decimal deleteby,string type)
+        {
+            try
+            {
+                int count;
+                if (type == "child")
+                {
+                    count = dbcontext.Tbl_Product_Master.Where(x => x.P_SubcategoryID == id && x.DELETED == false).Count();
+                }
+                else
+                {
+                    count = dbcontext.Tbl_ProductGroup.Where(x => x.PG_PARENT_ID == id && x.DELETED == false).Count();
+                }
+                if (count == 0)
+                {
+                    Tbl_ProductGroup obj = dbcontext.Tbl_ProductGroup.Single(m => m.PG_ID == id && m.DELETED == false);
+                    {
+                        obj.DELETED = true;
+                        obj.DELETED_DATE = DateTime.Now;
+                        obj.DELETED_BY = deleteby;
+                    }
+                    int i = dbcontext.SaveChanges();
+                    return i;
+                }
+                else
+                {
+                    return 100;
+                }
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public List<tbl_LookUp> ET_Admin_ProductGroup_GetUOM_DL()
+        {
+            try
+            {
+                return dbcontext.tbl_LookUp.Where(m => m.LU_Type == 2 && m.LU_Deleted == false).ToList();
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public string CheckDuplicateProCode_DL(decimal id, string Code)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    var count = dbcontext.Tbl_Product_Master.Where(m => m.P_Code == Code).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                else
+                {
+                    var count = dbcontext.Tbl_Product_Master.Where(m => m.P_ID != id && m.P_Code == Code).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                return "";
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public string CheckDuplicateProName_DL(decimal id, string Name)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    var count = dbcontext.Tbl_Product_Master.Where(m => m.P_Name == Name && m.DELETED == false).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                else
+                {
+                    var count = dbcontext.Tbl_Product_Master.Where(m => m.P_ID != id && m.P_Name == Name && m.DELETED == false).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                return "";
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+    }
+}

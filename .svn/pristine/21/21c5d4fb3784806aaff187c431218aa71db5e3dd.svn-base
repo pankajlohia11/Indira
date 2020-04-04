@@ -1,0 +1,111 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+//using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+using System.Web.Script.Serialization;
+
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_CompanyController : Controller
+    {
+        ET_Admin_Company_BL ObjBL = new ET_Admin_Company_BL();
+
+        // GET: ET_Admin_Company
+        public ActionResult ET_Admin_Company()
+        {
+            try
+            {
+                var data = ObjBL.ET_Admin_Companylist_BL();
+                Binddropdown_Country();
+                ViewBag.City = 0;
+                //  Binddropdown_City();
+                return View(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //[HttpGet]
+        //public ActionResult ET_Master_Company_Add()
+        //{
+        //    Tbl_Master_CompanyDetails Objmc = new Tbl_Master_CompanyDetails();
+        //    return PartialView("Views/Admin/ET_Admin_Company/_ET_Master_Company_Add.cshtml",Objmc);
+        //}
+
+        [HttpGet]
+        public ActionResult ET_Master_Company_Add(string CompanyName, string DisplayName, string UstId, string TaxNo, string Address, string Zip, string Email, string Fax, string Phone, string Mobile, string Remarks)
+        {
+            try
+            {
+                Tbl_Master_CompanyDetails Objmc = new Tbl_Master_CompanyDetails()
+                {
+                    // COM_CITY = CompanyName,
+                    COM_NAME = CompanyName,
+                    COM_DISPLAYNAME = DisplayName,
+                    Tax_No = TaxNo,
+                    //COM_COUNTRY = Obj.COM_COUNTRY,
+                    COM_MOBILE = Mobile,
+                    COM_PHONE = Phone,
+                    COM_FAX = Fax,
+                    COM_ZIP = Zip,
+                    COM_EMAIL = Email,
+                    COM_REMARKS = Remarks,
+                    // COM_WEB = Obj.COM_WEB,
+                    // COM_STREET = Obj.COM_STREET,
+                    // MACHINE_NAME = Obj.MACHINE_NAME,
+                    // Cust_Supp = Obj.Cust_Supp,
+                    //  CREATED_BY = Obj.CREATED_BY,
+                    CREATED_DATE = DateTime.Now,
+                    // LAST_UPDATED_BY = Obj.LAST_UPDATED_BY,
+                    LAST_UPDATED_DATE = DateTime.Now,
+                    DELETED = false,
+                    //  DELETED_BY = Obj.DELETED_BY,
+                    DELETED_DATE = DateTime.Now,
+                };
+                decimal data = ObjBL.ET_Master_Company_Add_BL(Objmc);
+                var json = "Success";
+                if (data == 0)
+                {
+                    json = "Failed";
+                }
+                return Json(json, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public ActionResult Binddropdown_Country()
+        {
+            var Country = ObjBL.Binddropdown_County_BL();
+            ViewBag.Country = Country;
+            return View();
+        }
+        public ActionResult Binddropdown_State(int id)
+        {
+            var State = ObjBL.Binddropdown_State_BL(id);
+           // Binddropdown_City(1);
+            ViewBag.State = State;
+            return View();
+        }
+        public ActionResult Binddropdown_City(int id)
+        {
+            var City = ObjBL.Binddropdown_City_BL(id);
+            ViewBag.City = City;
+            return View();
+        }
+
+        public ActionResult ET_Master_Company_Deleted_BL(int id)
+        {
+            ObjBL.ET_Master_Company_Deleted_BL(id);
+            return RedirectToAction("ET_Admin_Company");
+        }
+    }
+}

@@ -1,0 +1,619 @@
+﻿app1.controller("AC_CustomerModel", function ($scope, $http, $window, $compile) {
+    var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    GetCustomerList();
+    //Get customer list
+    function GetCustomerList() {
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_CustomerModule/GetCustomerList",
+            dataType: 'json',
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                var customerList = JSON.parse(data);
+                $scope.customers = customerList;
+            }
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+    $scope.GetPendingShipmentDetails = function ()
+    {
+        //Get Pending Shipment Details.
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_CustomerModule/GetPendingShipmentDetails",
+            dataType: 'json',
+            data: { customer: $scope.E_CustomerID },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status)
+        {
+            $scope.pendingShipmentList = data;
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    };
+
+    //Get the communication list
+    $scope.GetCompanyCommunication = function ()
+    {
+        var getcustomerinfo = $http.get("/ET_Admin_CustomerModule/GetCompanyCommList",
+            {
+                params: { id: $scope.E_CustomerID }
+            });
+
+        getcustomerinfo.then(function (CompCommList) {
+            var commList = JSON.parse(CompCommList.data);
+            $(" #Company_Comm_List").dataTable().fnDestroy();
+            $scope.CompanyCommList = commList;
+            }, function () {
+                alert("No Data Found");
+            });
+    }
+    //customer change call
+    $scope.CustomerChange = function ()
+    {
+        var getcustomerinfo = $http.get("/ET_Admin_CustomerModule/GetCustomerInfo",
+            {
+                params: { id: $scope.E_CustomerID }
+            });
+        getcustomerinfo.then(function (CustomerMaster) {
+            debugger;
+            $(" #cust_contact").dataTable().fnDestroy();
+            $(" #Order_List").dataTable().fnDestroy();
+            $(" #One_to_one").dataTable().fnDestroy();
+            $(" #One_ToMany_List").dataTable().fnDestroy();
+            $(" #Payment_List").dataTable().fnDestroy();
+            $(" #ShipmentOne_ToMany_List").dataTable().fnDestroy();
+            $(" #ShipmentOne_to_one").dataTable().fnDestroy();
+            $(" #Schedule_List").dataTable().fnDestroy();
+            $(" #Company_Comm_List").dataTable().fnDestroy();
+            $(" #Shipment_Agency_List").dataTable().fnDestroy();
+            //$("#advancedusage1").dataTable().fnDestroy();
+            var custMaster = JSON.parse(CustomerMaster.data.Result);
+            var CompContacts = JSON.parse(CustomerMaster.data.Contact);
+            var OrderLi = JSON.parse(CustomerMaster.data.Order);
+            var OneToOneLi = JSON.parse(CustomerMaster.data.OneToOne);
+            var OneToManyLi = JSON.parse(CustomerMaster.data.OneToMany);
+            var PaymentLi = JSON.parse(CustomerMaster.data.Payment);
+            var ScheduleLi = JSON.parse(CustomerMaster.data.Schedule);
+            var ShipmentLi = JSON.parse(CustomerMaster.data.Shipment);
+            var DespatchLi = JSON.parse(CustomerMaster.data.Despatch);
+            var ShipmentAgencyLi = JSON.parse(CustomerMaster.data.ShipmentAgency);
+
+            $scope.CustomerMasterList = custMaster;
+            $scope.CompanyContactsList = CompContacts;
+            $scope.OrderList = OrderLi;
+            $scope.OneToOneList = OneToOneLi;
+            $scope.OneToManyList = OneToManyLi;
+            $scope.PaymentList = PaymentLi;
+            $scope.ScheduleList = ScheduleLi;
+            $scope.ShipmentList = ShipmentLi;
+            $scope.DespatchList = DespatchLi;
+            $scope.ShipmentAgencyList = ShipmentAgencyLi;
+            $scope.GetCompanyCommunication();
+            $scope.GetPendingShipmentDetails();
+            $scope.GetCustomerSales();
+            if (data.indexOf("ERR") > -1)
+            {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+        }, function () {
+            alert("No Data Found");
+            });
+    };
+
+    $scope.GetCustomerSales = function ()
+    {
+        $("#containerForTrading").empty();
+        $("#containerForProductSales").empty();
+        $("#containerForTrading").append('<canvas id="canvasForTrading"></canvas>');
+        $("#containerForProductSales").append('<canvas id="containerForProductSales"></canvas>');
+        var currentYearData = "";
+        var previousYearData = "";
+        var currentYear = new Date().getFullYear();
+        var previousYear = currentYear - 1;
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_CustomerModule/GetCustomerSalesForBarchart",
+            dataType: 'json',
+            data: { id: $scope.E_CustomerID, startYear: previousYear, endYear: previousYear },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status)
+        {
+            previousYearData = data;
+        });
+        post.error(function (data, status)
+        {
+            $window.alert(data.Message);
+        });
+
+        var post1 = $http({
+            method: "POST",
+            url: "/ET_Admin_CustomerModule/GetCustomerSalesForBarchart",
+            dataType: 'json',
+            data: { id: $scope.E_CustomerID, startYear: currentYear, endYear:currentYear},
+            headers: { "Content-Type": "application/json" }
+        });
+        post1.success(function (data, status) {
+            currentYearData = data;
+            alert(currentYearData);
+            alert(previousYearData);
+            var dataForBar = [{
+                label: $("#drpCustomer option:selected").text().trim() + ":" + "2018",
+                backgroundColor: "#66ccff",
+                borderColor: "#66ccff",
+                borderWidth: 1,
+                data: JSON.parse(previousYearData),
+            },
+            {
+                label: $("#drpCustomer option:selected").text().trim() + ":" + "2019",
+                backgroundColor: "red",
+                borderColor: "red",
+                borderWidth: 1,
+                data: JSON.parse(currentYearData),
+            }
+            ];
+
+            var barChartData = {
+                labels: MONTHS,
+                datasets: dataForBar
+            };
+
+            var ctx = document.getElementById('canvasForTrading').getContext('2d');
+            window.myBar = new Chart(ctx,
+                {
+                    type: 'bar',
+                    data: barChartData,
+                    options: {
+                        responsive: true,
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Customer Sales'
+                        },
+                        tooltips:
+                        {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        scales:
+                        {
+                            xAxes: [{
+                                stacked: false,
+                            }],
+                            yAxes: [{
+                                stacked: false
+                            }]
+                        }
+                    }
+                });
+
+            //if (ctx.data.datasets[0].data.length === 0) {
+            //    // No data is present
+            //    var ctx1 = ctx.chart.ctx;
+            //    var width = ctx.chart.width;
+            //    var height = ctx.chart.height;
+            //    ctx.clear();
+
+            //    ctx1.save();
+            //    ctx1.textAlign = 'center';
+            //    ctx1.textBaseline = 'middle';
+            //    ctx1.font = "16px normal 'Helvetica Nueue'";
+            //    // chart.options.title.text <=== gets title from chart 
+            //    // width / 2 <=== centers title on canvas 
+            //    // 18 <=== aligns text 18 pixels from top, just like Chart.js 
+            //    ctx1.fillText('My Chart Title', width / 2, 18); // <====   ADDS TITLE
+            //    ctx1.fillText('No data to display for selected time period', width / 2, height / 2);
+            //    ctx1.restore();
+            //}
+
+            //var ctx1 = document.getElementById('containerForProductSales').getContext('2d');
+            //window.myBar = new Chart(ctx1,
+            //    {
+            //        type: 'bar',
+            //        data: barChartData,
+            //        options: {
+            //            responsive: true,
+            //            legend: {
+            //                position: 'top',
+            //            },
+            //            title: {
+            //                display: true,
+            //                text: 'Product Wise Sales'
+            //            }
+            //        }
+            //    });
+        });
+        post1.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    };
+
+    //View for one to many
+    $scope.ViewOneToMany = function (a) {
+        a = parseInt(a);
+        {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OneToManyInvoice/ET_Sales_Invoice_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        
+    }
+    //View one to one
+    $scope.ViewOneToOne = function (a) {
+        a = parseInt(a);
+         {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OneToOneInvoice/ET_Sales_Invoice_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        
+    }
+    //View schdule
+    $scope.ViewSchedule = function (a) {
+        
+        {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shedule/ET_Sales_Schedule_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        
+    }
+    //View shipment
+    $scope.ViewShipment = function (a) {
+        a = parseInt(a);
+         {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shipment/ET_Sales_Shipment_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+       
+    }
+    //View orders
+    $scope.ViewOrders = function (a) {
+        a = parseInt(a);
+       {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OrderDetails/ET_Sales_OrderDetails_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+    //View  shipment
+    $scope.ViewDespatch = function (a) {
+        a = parseInt(a);
+        {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Despatch/ET_Sales_Despatch_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+
+    }
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shipment/ET_Sales_Shipment_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+
+    }
+    //Watch for all data binding
+    
+    $scope.$watch("customers", function (value) {
+        var val = value || null;
+        if (val)
+        {
+            setTimeout(function () { $("#drpCustomer").val("").trigger("chosen:updated"); }, 100);
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("CompanyContactsList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#cust_contact');
+            }, 5);
+        }
+    }); 
+    $scope.$watch("OrderList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Order_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("OneToOneList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#One_to_one');
+            }, 5);
+        }
+    });
+    $scope.$watch("OneToManyList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#One_ToMany_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("ShipmentAgencyList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Shipment_Agency_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("PaymentList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Payment_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("ShipmentList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#ShipmentOne_to_one');
+            }, 5);
+        }
+    });
+    $scope.$watch("DespatchList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#ShipmentOne_ToMany_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("ScheduleList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Schedule_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("CompanyCommList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Company_Comm_List');
+            }, 5);
+        }
+    });
+});

@@ -1,0 +1,269 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+/*
+    Author=Manoj
+    Date = 17th Apr 2018
+    Sales Organization Data Access 
+ */
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_SalesOrganization_DL
+    {
+        // Creating Database Object for EntityClasses
+        EntityClasses dbcontext = new EntityClasses();
+
+        //Sales Organization List View
+        public List<Tbl_Sales_Organization> ET_Admin_SalesOrganizationList_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Sales_Organization.Where(m => m.DELETED != true).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        //Bind Dropdown User List
+        public List<Tbl_Master_User> Binddropdown_User_DL()
+        {
+            try
+            {
+                var Users = dbcontext.Tbl_Master_User.Where(m => m.DELETED == false ).ToList();
+                //var Users = (from usr in dbcontext.Tbl_Master_User where usr.DELETED == false && usr.USER_ID not in (1,1) ).ToList();
+                return Users;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Bind Dropdown Employees Based on User Selection
+        public List<Tbl_Master_User> Binddropdown_Employees_DL(int id)
+        {
+            try
+            {
+                dbcontext.Configuration.ProxyCreationEnabled = false;
+                var Users = dbcontext.Tbl_Master_User.Where(m => m.DELETED == false && m.USER_ID != id).ToList();
+                return Users;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Bind Dropdown Sales Organization List
+        public List<Tbl_Sales_Organization> Binddropdown_ORGParent_DL(int id)
+        {
+            try
+            {
+                dbcontext.Configuration.ProxyCreationEnabled = false;
+                var orglist = dbcontext.Tbl_Sales_Organization.Where(m => m.DELETED == false).ToList();
+                return orglist;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Insert / Update Sales Organization
+        public decimal Tbl_Sales_Organization_Add(Tbl_Sales_Organization tbl_Sales_org, bool automanual, string prefix)
+        {
+            Tbl_Sales_Organization tso = new Tbl_Sales_Organization();
+            try
+            {
+                if (tbl_Sales_org.ORG_ID == 0)
+                {
+
+                    Tbl_Sales_Organization Objtso = new Tbl_Sales_Organization()
+                    {
+                        ORG_CODE = tbl_Sales_org.ORG_CODE,
+                        ORG_NAME = tbl_Sales_org.ORG_NAME,
+                        ORG_HEAD_ID = tbl_Sales_org.ORG_HEAD_ID,
+                        ORG_TYPE = tbl_Sales_org.ORG_TYPE,
+                        ORG_PARENT_ID = tbl_Sales_org.ORG_PARENT_ID,
+                        ORG_EMPLOYEE_IDS = tbl_Sales_org.ORG_EMPLOYEE_IDS,
+                        CREATED_BY = tbl_Sales_org.CREATED_BY,
+                        CREATED_DATE = tbl_Sales_org.CREATED_DATE,
+                        DELETED = tbl_Sales_org.DELETED
+                    };
+                    dbcontext.Tbl_Sales_Organization.Add(Objtso);
+                    dbcontext.SaveChanges();
+                    if (automanual == true)
+                    {
+                        int len = 10 - (prefix + Objtso.ORG_ID).Length;
+                        string code = prefix + new String('0', len) + Objtso.ORG_ID;
+                        Tbl_Sales_Organization Objtbl_Sales_org = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == Objtso.ORG_ID);
+                        {
+                            Objtbl_Sales_org.ORG_CODE = code;
+                        };
+                        dbcontext.SaveChanges();
+                    }
+                    tso.ORG_ID = Objtso.ORG_ID;
+                }
+                else
+                {
+                    Tbl_Sales_Organization Objtbl_Sales_org = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == tbl_Sales_org.ORG_ID);
+                    {
+                        Objtbl_Sales_org.ORG_CODE = tbl_Sales_org.ORG_CODE;
+                        Objtbl_Sales_org.ORG_NAME = tbl_Sales_org.ORG_NAME;
+                        Objtbl_Sales_org.ORG_HEAD_ID = tbl_Sales_org.ORG_HEAD_ID;
+                        Objtbl_Sales_org.ORG_TYPE = tbl_Sales_org.ORG_TYPE;
+                        Objtbl_Sales_org.ORG_PARENT_ID = tbl_Sales_org.ORG_PARENT_ID;
+                        Objtbl_Sales_org.ORG_EMPLOYEE_IDS = tbl_Sales_org.ORG_EMPLOYEE_IDS;
+                        Objtbl_Sales_org.LAST_UPDATED_BY = tbl_Sales_org.CREATED_BY;
+                        Objtbl_Sales_org.LAST_UPDATED_DATE = tbl_Sales_org.CREATED_DATE;
+                        
+                    };
+                    tso.ORG_ID = Objtbl_Sales_org.ORG_ID;
+                    dbcontext.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return tso.ORG_ID;
+        }
+
+        //Edit Sales Organization Record Details
+        public Tbl_Sales_Organization ET_Admin_SalesOrganization_Update_Get(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == id);
+                // return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Sales Organizatioin View Record Details
+        public List<Tbl_Sales_Organization> ET_Admin_SalesOrganization_View(int id)
+        {
+            return dbcontext.Tbl_Sales_Organization.Where(m => m.ORG_ID == id).ToList();
+            // return data;
+        }
+
+        // Delete Record
+        public int ET_Admin_SalesOrganization_Deleted_DL(int id)
+        {
+            int result = 0;
+            //int i = 1;
+            try
+            {
+                var find = dbcontext.Tbl_Sales_Organization.Where(m => m.ORG_ID == id).ToList();
+                if (find.Count() != 0)
+                {
+                    Tbl_Sales_Organization delete = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == id);
+                    delete.DELETED = true;
+                    delete.DELETED_BY = 1;
+                    delete.DELETED_DATE = DateTime.Now;
+
+                    result = dbcontext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+        //View List Of Deleted Records
+        public List<Tbl_Sales_Organization> ET_Admin_SalesOrganization_Restore_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Sales_Organization.Where(m => m.DELETED == true).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        // Restore Deleted Record
+        public decimal ET_Admin_SalesOrganization_Restore_Insert_DL(int id)
+        {
+            int result = 0;
+            try
+            {
+                Tbl_Sales_Organization tmr = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == id);
+                {
+                    tmr.LAST_UPDATED_DATE = DateTime.Now;
+                    tmr.DELETED = false;
+                }
+                result = dbcontext.SaveChanges();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+        //Checking Duplicate code in Usermaster
+        public string CheckDuplicateCode_DA(int id, string code)
+        {
+            if (id == 0)
+            {
+                int count = dbcontext.Tbl_Sales_Organization.Where(m => m.ORG_CODE == code).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                int count = dbcontext.Tbl_Sales_Organization.Where(m => m.ORG_CODE == code && m.ORG_ID != id).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+
+            return "";
+        }
+
+        //Checking Duplicate Username in Usermaster
+        public string CheckDuplicateOrganizationName_DL(int id, string name)
+        {
+            if (id == 0)
+            {
+                int count = dbcontext.Tbl_Sales_Organization.Where(m => m.ORG_NAME == name).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                int count = dbcontext.Tbl_Sales_Organization.Where(m => m.ORG_NAME == name && m.ORG_ID != id).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+
+            return "";
+        }
+
+    }
+}

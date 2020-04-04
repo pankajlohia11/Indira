@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+    public class ShipmentReport_CM
+    {
+       public decimal shipmentID { get; set; }
+       public decimal salespersonID { get; set; }
+       public string salespersonName{ get; set; }
+
+    public decimal customerID { get; set; }
+        public string    customerName { get; set; }
+
+        public decimal supplierID { get; set; }
+        public string    supplierName { get; set; }
+        public DateTime? ETD { get; set; }
+        public string    InvNo { get; set; }
+        public DateTime? InvDate { get; set; }
+        public decimal InvAmount { get; set; }
+        public decimal   CommissionAmt { get; set; }
+    }
+}

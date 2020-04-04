@@ -1,0 +1,91 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+    public class Quotation_CM
+    {
+        public decimal Q_ID { get; set; }
+        public string Q_Code { get; set; }
+        public int Q_Type { get; set; }
+        public DateTime Q_Date { get; set; }
+
+        public decimal Q_CustomerID { get; set; }
+        public string Q_CustomerName { get; set; }
+        public decimal Q_EnquiryID { get; set; }
+        public string Q_EnquiryCode { get; set; }
+        public string Q_CurrencyCode { get; set; }
+        public decimal Q_PaymentTerms { get; set; }
+        public string Q_DeliveryTerms { get; set; }
+
+        public bool Q_Warranty { get; set; }
+
+        public int Q_ValidityDays { get; set; }
+
+        public decimal Q_Freight_Cost { get; set; }
+        public string Q_Enclosures { get; set; }
+
+
+        public decimal Q_TotalValue { get; set; }
+
+        public decimal Q_Sales_Person { get; set; }
+        public string Q_SalesPersonName { get; set; }
+        public string Q_Quotedescription { get; set; }
+        public string Q_specialdescription { get; set; }
+
+        public int Q_ApprovedStatus { get; set; }
+
+        public decimal Q_Approver { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+        public decimal QD_ID { get; set; }
+
+        public decimal QD_PID { get; set; }
+
+        public decimal QD_ProductID { get; set; }
+
+        public string QD_UOM { get; set; }
+        public string QD_ArticleNo { get; set; }
+        public string QD_ProductName { get; set; }
+
+        public decimal QD_Unit_Price { get; set; }
+
+        public decimal QD_Quantity { get; set; }
+
+        public decimal QD_Amount { get; set; }
+
+        public string QD_Description { get; set; }
+        public string Tax_No { get; set; }
+        public string CompanyCode { get; set; }
+        public string Street { get; set; }
+        public string CityState { get; set; }
+        public string CountryZip { get; set; }
+        public string USTID { get; set; }
+        public string PaymentTerms { get; set; }
+        public string PaymentTermsDescription { get; set; }
+        public decimal? VatPer { get; set; }
+
+    }
+    public class Quotation_View_CM
+    {
+        public List<Quotation_CM> QHeader { get; set; }
+        public List<Quotation_CM> QChild { get; set; }
+    }
+}

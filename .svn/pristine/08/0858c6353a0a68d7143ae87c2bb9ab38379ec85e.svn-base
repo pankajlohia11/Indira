@@ -1,0 +1,135 @@
+﻿@using System.Globalization;
+@using BusinessEntity.CustomModels;
+@using BusinessEntity.EntityModels;
+@model IEnumerable<BusinessEntity.CustomModels.PO_CM>
+    @{ int k = 0;
+        int i = 0;
+        foreach (var item in Model)
+        {
+
+
+<tr>
+    <td>
+        <select class="form-control chosen-select" ng-init="@item.PD_ProductID" id="drpProduct_@i" onchange='ProductChange(this);'><option value="">-Select-</option><option ng-repeat="product in products" value="{{ product.P_ID }}">{{ product.P_ArticleNo +"-"+product.P_Name }}</option></select>
+    </td>
+    <td>
+        <input type="text" id="txtProductNameid_@i" name="txtProductNameid_@i" class="form-control" readonly="readonly" value="@item.PD_ShortName" />
+    </td>
+    <td>
+        <input type="text" id="txtUOMid_@i" name="txtUOMid_@i" class="form-control" readonly="readonly" value="@item.PD_UOM" />
+    </td>
+  
+    <td>
+        <input type="text" id="txtDesid_@i" name="txtDesid_@i" class="form-control" readonly="readonly" value="@item.Description" />
+    </td>
+    
+    <td>
+        <input type="text" id="txtPOQtyid_@i" style="text-align:right;" maxlength="14" name="txtPOQtyid_@i" class="form-control" onchange="calculateamount(this)" value="@(Convert.ToDecimal(item.PD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td style="text-align:right;">
+        <input type="text" id="txtUnitpriceid_@i" style="text-align:right;" name="txtUnitpriceid_@i" class="form-control" onchange="calculateamount(this)"  value="@(Convert.ToDecimal(item.PD_UnitPrice).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+        @{try
+            {
+                if (item.OrderPrice != 0)
+                {
+                    if (Convert.ToDecimal(item.OrderPrice) <= Convert.ToDecimal(item.PD_UnitPrice ?? 0))
+                    {
+                        <span style="color:red;">@(Convert.ToDecimal(item.OrderPrice).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</span>
+                        k++;
+                    }
+                    else
+                    {
+                        <span style="color:green;">@(Convert.ToDecimal(item.OrderPrice).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</span>
+                    }
+                }
+            }
+            catch { }
+        }
+    </td>
+    @*<td>
+            <input type="number" id="txtTaxid_@i" name="txtTaxid_@i" class="form-control" onchange="calculateamount(this,'b')" value="@item.PD_Tax"/>
+        </td>*@
+    <td>
+        <input type="text" id="txtTotAmtid_@i" style="text-align:right;" name="txtTotAmtid_@i" class="form-control" readonly="readonly" value="@(Convert.ToDecimal(item.PD_TotalAmount).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td>
+        <input type="text" id="txtSupDesc_@i" name="txtSupDesc_@i" class="form-control" readonly="readonly" value="@item.PD_SuppDef" />
+    </td>
+    <td>
+        <a style="padding: 5px;" id="id_addnewrow" ng-click="addnewrow($event)"><i class="fa fa-plus"></i></a><a style="padding: 5px;color:red" ng-click="deleterow($event,'id_@i')"><i class="fa fa-trash"></i></a><a ng-if="isschedule == true" style="padding: 5px;color:green" title="Delivery Schedule" data-toggle="collapse" href="#collapseExampleid_@i" class="hideandshow" aria-expanded="false" aria-controls="collapseExampleid_@i" id="btnProductTarget"><i class='fa fa-truck'></i></a>
+
+    </td>
+</tr>
+   <tr>
+        <td colspan="4">
+            <div class="collapse" id="collapseExampleid_@i">
+                <div class="well">
+                    <table class="table table-custom" id="tblPOScheduleid_@i">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Quantity</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="storedetailsbody">
+                            @{
+                                EntityClasses dbcontext = new EntityClasses();
+                                var data1 = dbcontext.tbl_PurchaseOrderDeliverySchedule.Where(x => x.PODS_PID == item.PD_PID && x.PODS_PDID == item.PD_ID).ToList();
+                            }
+                            @if (data1.Count == 0)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class='input-group datepicker w-360' style='width: 100%' data-format="DD-MM-YYYY">
+                                            <input type='text' id='txtDSDate' name='txtDSDate' class='form-control' onfocus="getdatepic();" />
+                                            <span class='input-group-addon'><span class='fa fa-calendar' onclick="getdatepic()"></span></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type='text' id='txtQuantity' onchange="MoneyValidation(this);" style="text-align:right;" class='form-control' />
+                                    </td>
+                                    <td>
+                                        <a style='padding: 5px;' ng-click='addnewrowchild($event,"id_@i")'><i class='fa fa-plus'></i></a>
+                                        <a style='padding: 5px;color:red' ng-click='deleterowchild($event,"id_@i")'><i class='fa fa-trash'></i></a>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                for (int j = 0; j < data1.Count; j++)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class='input-group datepicker w-360' style='width: 100%' data-format="DD-MM-YYYY">
+                                                <input type='text' id='txtDSDate' name='txtDSDate' value='@Convert.ToDateTime(data1[j].PODS_DeliveryDate).ToShortDateString()' class='form-control' onfocus="getdatepic();" />
+                                                <span class='input-group-addon'><span class='fa fa-calendar' onclick="getdatepic()"></span></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type='text' id='txtQuantity' style="text-align:right;" onchange="MoneyValidation(this);" class='form-control' value='@(Convert.ToDecimal(data1[j].PODS_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))' />
+                                        </td>
+                                        <td>
+                                            <a style='padding: 5px;' ng-click='addnewrowchild($event,"id_@i")'><i class='fa fa-plus'></i></a>
+                                            <a style='padding: 5px;color:red' ng-click='deleterowchild($event,"id_@i")'><i class='fa fa-trash'></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </td>
+    </tr>
+                                    i++;
+                                }
+                                if (k > 0)
+                                {
+                                    <script type="text/javascript">
+                                        message = "Some of the products Supplier Price is greater than Order Price";
+                                        toastr["error"](message, "Notification");
+                                    </script>
+                                }
+                                    }

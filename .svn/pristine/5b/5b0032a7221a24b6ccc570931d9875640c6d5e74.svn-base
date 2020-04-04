@@ -1,0 +1,74 @@
+﻿
+
+@model BusinessEntity.CustomModels.Paclistdetails_View_CM
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.QHeader)
+    {
+        <h5><label><strong>Packing List</strong></label></h5>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Email">Packing List Code</label>
+                <input type="text" value="@item.PL_Code" class="form-control" disabled>
+            </div>
+          
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="Url">Date</label>
+                <input type="text" value="@((item.PL_Date??DateTime.Now).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Digits"> Customer</label>
+                <input type="text" value="@item.Customer" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">Order No</label>
+                <input type="text" value="@item.Orders" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">Remarks</label>
+                <input type="text" value='@item.PL_Remarks' class="form-control" disabled>
+            </div>
+        </div>
+}
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>Pallet No</th>
+                        <th>Design No</th>
+                        <th>No of Pieces</th>
+                        <th>Total Meters</th>
+                        <th>Nwt. in Kgs</th>
+                        <th>Gwt. in Kgs</th>
+                        <th>Individual piece lengths</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.QChild)
+            {
+                <tr>
+                    <td>@item.PD_ArticleNo</td>
+                    <td>@item.PD_ProductID</td>
+                    <td>@item.PD_PalletNo</td>
+                    <td>@item.PD_DesignNo</td>
+                    <td>@item.PD_NoOfPieces</td>
+                    <td>@item.PD_TotalMeters</td>
+                    <td>@item.PD_NwtinKGS</td>
+                    <td>@item.PD_GwtinKGS</td>
+                    <td>@item.PD_IndividualPieceLength</td>
+                </tr>
+    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

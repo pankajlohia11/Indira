@@ -1,0 +1,431 @@
+﻿
+@{
+    ViewBag.Title = "ET_Sales_OneToOneInvoice";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_OneTOOneInvoice.js"></script>
+    <style type="text/css">
+        .generaltable {
+            font-size: 14px;
+            line-height: 20px;
+        }
+
+        .mediumtable {
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .footertable {
+            font-size: 10px;
+            line-height: 20px;
+            text-align: left;
+            width: 100%;
+        }
+    </style>
+    <script type="text/javascript">
+
+        function PrintPanel() {
+            window.open($("#PAthid").attr("href"));
+            //var panel = document.getElementById("div_PrintContent");
+            //var printWindow = window.open('', '', 'height=400,width=800');
+            //printWindow.document.write('<html><head><title>Print the Sales OneToOneInvoice</title>');
+            //printWindow.document.write('</head><body style="font-family:Arial">');
+            ////document.writeln(panel.innerHtml);
+            //printWindow.document.write(panel.innerHTML);
+            //printWindow.document.write('</body></html>');
+            //printWindow.document.close();
+            //setTimeout(function () {
+            //    printWindow.print();
+            //}, 500);
+            return false;
+        }
+
+        function taxchange() {
+            debugger;
+            if ($("#txtShipmentAmount").val() == "") {
+                $("#txtTax").val("");
+                message = "Please Select Shipment No, Shipment Amount cannot be empty.";
+                toastr["error"](message, "Notification");
+            }
+            else {
+                $("#txtTaxAmt").val((parseFloat($("#txtShipmentAmount").val()) * (parseFloat($("#txtTax").val())) / 100).toFixed(3));
+                $("#txtInvAmt").val((parseFloat($("#txtShipmentAmount").val()) + (parseFloat($("#txtTaxAmt").val()))).toFixed(3));
+            }
+        }
+    </script>
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order">
+        <div class="pageheader">
+
+            <h2>Invoice(One-One) <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Invoice(One-One)</a>
+                        <a style="display:none;" id="PAthid" target="_blank">click to download</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_OneTOOneInvoiceCtrl">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Invoice(One-One)</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Invoice Date</th>
+                                    <th>Shipment Code</th>
+                                    <th>Customer Name</th>
+                                    <th>Sales Person</th>
+                                    <th>Container No.</th>
+                                    <th>Customer PO No.</th>
+                                    <th>Our Order Code.</th>
+                                    @*<th>Shipment Id</th>
+                                    <th>Shipment Amount</th>*@
+                                    <th>Tax(%)</th>
+                                    <th>Tax Amount</th>
+                                    <th>Invoice Amount</th>
+                                    <th>Approval Status</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="invoice in invoicelist">
+                                    <td>{{invoice.OTOI_Code}}</td>
+                                    <td>{{invoice.OTOI_InvoiceDate.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{invoice.S_Code}}</td>
+                                    <td style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{invoice.COM_DISPLAYNAME }}</td>
+                                    <td style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{invoice.USER_NAME }}</td>
+                                    <td>{{invoice.OTOI_ContainerNo }}</td>
+                                    <td>{{invoice.OTOI_CcusPONo }}</td>
+                                    <td>{{invoice.OTOI_OurOrderCode }}</td>
+                                    @*<td>{{invoice.OTOI_ShipmentID }}</td>
+        <td style="text-align:right;">{{invoice.OTOI_ShipmentAmount.toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>*@
+                                    <td>{{invoice.OTOI_TaxPercentage }}</td>
+                                    <td>{{invoice.OTOI_TaxAmount }}</td>
+                                    <td style="text-align:right;">{{invoice.OTOI_InvoiceAmount.toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                    <td>{{invoice.OTOI_Approval ==0 ? 'Pending' : 'Approved' }}</td>
+                                    <td>
+                                        <a ng-click="editRecords(invoice.OTOI_ID);" value="{{ invoice.OTOI_ID }}" style="color:forestgreen;padding:5px;" title="Edit"><i class="fa fa-edit"></i></a>
+                                        <a ng-click="ViewRecords(invoice.OTOI_ID);" value="{{ invoice.OTOI_ID }}" style="color:darkblue;padding:5px;" title="View"><i class="fa fa-eye"></i></a>
+                                        <a ng-click="PrintRecords(invoice.OTOI_ID,'E');" ng-if="invoice.OTOI_Approval==1" value="{{ invoice.OTOI_ID }}" style="color:green;padding:5px;" title="Print"><i class="fa fa fa-print"></i></a>
+                                        <a ng-click="Restoredeleterecords(invoice.OTOI_ID,$event,true);" style="color:red;padding:5px;" title="Delete"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> Invoice</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>n
+                    </div>
+                    <!-- This Below code is used for Tab purpose -->
+                    @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                        </ul>*@
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1">
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtInvoiceCode">Invoice Code</label>
+                                    <input type="text" name="txtInvoiceCode" id="txtInvoiceCode" ng-model="OTOI_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                    <input type="text" name="txtInvoiceID" id="txtInvoiceID" ng-model="OTOI_ID" class="hidden">
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtINVDate">Invoice Date* </label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtINVDate" name="txtINVDate" class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="drpCustomer">Customer Name*</label>
+                                    <select data-ng-model="OTOI_CustomerID" id="drpCustomer" data-parsley-trigger="change" class="form-control chosen-select" ng-change="CustomerChange()" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="customer in customers" value="{{customer.COM_ID}}">
+                                            {{customer.COM_DISPLAYNAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label">Shipment No*</label>
+                                    <select data-ng-model="OTOI_ShipmentID" id="drpShipment" data-parsley-trigger="change" class="form-control chosen-select" ng-change="ShipmentChange()">
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="shipment in shipmentlist" value="{{shipment.S_ID}}">
+                                            {{shipment.S_Code}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="drpSalesPerson">Sales Person</label>
+                                    <select data-ng-model="OTOI_SalesPerson" id="drpSalesPerson" class="form-control chosen-select" ng-change="SalesPersonChange()" disabled>
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="salesperson in salespersons" value="{{salesperson.USER_ID}}">
+                                            {{salesperson.DISPLAY_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtShipmentAmount">Net Amount</label>
+                                    <input type="text" name="txtShipmentAmount" readonly="readonly" style="text-align:right;" id="txtShipmentAmount" ng-model="OTOI_ShipmentAmount" class="form-control" data-parsley-trigger="change">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtTax">Tax *</label>
+                                    <input type="text" name="txtTax" id="txtTax" ng-model="OTOI_TaxPer" style="text-align:right;" ng-blur="taxchange();" class="form-control" maxlength="2" data-parsley-type="digits" >
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtTaxAmt">Tax Amount</label>
+                                    <input type="text" name="txtTaxAmt"  id="txtTaxAmt" style="text-align:right;" ng-model="OTOI_TaxAmount" class="form-control" data-parsley-trigger="change">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtInvAmt">Invoice Amount</label>
+                                    <input type="text" name="txtInvAmt" id="txtInvAmt"  style="text-align:right;" ng-model="OTOI_InvoiceAmount" class="form-control" data-parsley-trigger="change" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtTaxAmt">BL No</label>
+                                    <input type="text" name="txtTaxAmt"  id="txtBlno" style="text-align:right;" ng-model="OTOI_Blno" class="form-control" data-parsley-trigger="change">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtInvAmt">Container No</label>
+                                    <input type="text" name="txtInvAmt" id="txtContainerNo"  style="text-align:right;" ng-model="OTOI_ContainerNo" class="form-control" data-parsley-trigger="change" required>
+                                </div>
+                            </div>
+                            <section class="tile">
+                                <!-- tile header -->
+                                <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                    <h1 class="custom-font"><strong>Invoice</strong> Details</h1>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+
+                                    <div class="collapse" id="collapseExample">
+                                        <div class="row">
+                                            <div class="table-responsive">
+                                                <style type="text/css">
+                                                    #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                        padding: 0px;
+                                                    }
+                                                </style>
+                                                <table class="table table-custom" id="editable-usage">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>S.NO</th>
+                                                            <th>Article No</th>
+                                                            <th>Product Name</th>
+                                                            <th>UOM</th>
+                                                            <th>DesignDetail</th>
+                                                            <th>Remarks</th>
+                                                            <th>Product Description</th>
+                                                            <th>Quantity</th>
+                                                            <th>Price</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="invoicedetailsbody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /tile body -->
+                            </section>
+                        </div>
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                    </div>
+
+                </section>
+
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong>Invoice(One-One)</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Invoice Date</th>
+                                    <th>Code</th>
+                                    <th>Shipment Code</th>
+                                    <th>Customer Name</th>
+                                    <th>Sales Person</th>
+                                    <th>Container No.</th>
+                                    <th>Customer PO No.</th>
+                                    <th>Our Order Code.</th>
+                                    @*<th>Shipment Id</th>
+                                    <th>Shipment Amount</th>*@
+                                    @*<th>Tax%</th>*@
+                                    <th>Tax Amount</th>
+                                    <th>Invoice Amount</th>
+
+                                    <th>Remarks</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="invoicerestore in invoicerestorelist">
+                                    <td>{{invoicerestore.OTOI_InvoiceDate.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                    <td>{{invoicerestore.OTOI_Code}}</td>
+                                    <td>{{invoicerestore.S_Code}}</td>
+                                    <td>{{invoicerestore.COM_DISPLAYNAME }}</td>
+                                    <td>{{invoicerestore.USER_NAME }}</td>
+                                    <td>{{invoicerestore.OTOI_ContainerNo }}</td>
+                                    <td>{{invoicerestore.OTOI_CcusPONo }}</td>
+                                    <td>{{invoicerestore.OTOI_OurOrderCode }}</td>
+                                    @*<td>{{invoicerestore.OTOI_ShipmentID }}</td>
+                                    <td>{{invoicerestore.OTOI_ShipmentAmount }}</td>*@
+                                    @*<td>{{invoicerestore.OTOI_TaxPercentage }}</td>*@
+                                    <td>{{invoicerestore.OTOI_TaxAmount }}</td>
+                                    <td>{{invoicerestore.OTOI_InvoiceAmount }}</td>
+                                    <td>{{invoicerestore.OTOI_InvoiceAmount }}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(invoicerestore.OTOI_ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+                <!-- /tile body -->
+                <section class="tile" id="div_Print" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Print</strong> OneToOne InVoice</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tile-body fa-border" id="div_PrintContent1">
+                        <button class="btn bg-blue" ng-click="ChangeLanguage('E');">English</button>
+                        <button class="btn bg-green" ng-click="ChangeLanguage('G');">German</button>
+                        <div class="tile-body fa-border" id="div_PrintContent">
+                        </div>
+                    </div>>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="frmPrint" onclick="PrintPanel();">Print</button>
+                    </div>
+
+                </section>
+
+
+
+            </div>
+
+
+        </div>
+    </div>

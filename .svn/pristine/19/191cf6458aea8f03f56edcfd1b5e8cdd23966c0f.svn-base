@@ -1,0 +1,23 @@
+DataSet dst1 = objBO.SalesLead_LnkSaveSubmit1_BO(objDTO, Session["userkey"].ToString());
+                                            MailMessage mm = new MailMessage(dst1.Tables[1].Rows[0]["User_Email"].ToString(), txtEmail.Text);
+                                            mm.Subject = Session["Companyname"].ToString() + " Welcomes You";
+                                            Literal ltrl = new Literal();
+                                            if (dst1.Tables[2].Rows.Count != 0)
+                                            {
+                                                ltrl.Text = dst1.Tables[2].Rows[0][0].ToString();
+                                            }
+                                            else
+                                            {
+                                                ltrl.Text = "Welcome to " + Session["Companyname"].ToString()+"</br>Regards";
+                                            }
+                                            ltrl.Text = ltrl.Text + "</br>" + Session["UserName"].ToString();
+                                            mm.Body = string.Format(ltrl.Text, txtFirstName.Text);
+                                            mm.IsBodyHtml = true;
+                                            SmtpClient smtp = new SmtpClient();
+                                            smtp.Host = dst1.Tables[0].Rows[0]["hostname"].ToString();
+                                            NetworkCredential NetworkCred = new NetworkCredential();
+                                            NetworkCred.UserName = dst1.Tables[0].Rows[0]["Mail_Address"].ToString();
+                                            NetworkCred.Password = dst1.Tables[0].Rows[0]["password1"].ToString();
+                                            smtp.UseDefaultCredentials = true;
+                                            smtp.Credentials = NetworkCred;
+                                            smtp.Send(mm);

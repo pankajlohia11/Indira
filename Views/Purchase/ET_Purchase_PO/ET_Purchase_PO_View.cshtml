@@ -1,0 +1,200 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.POCombo_CM
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div>
+            @foreach (var item in Model.POHeader)
+            {
+                BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+                <h5><label><strong>PO Details</strong></label></h5>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Email">PO Code</label>
+                        <input type="text" value="@item.PO_Code" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Date</label>
+                        <input type="text" value='@item.PO_Date.ToString("dd-MM-yyyy")' class="form-control" disabled>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">PO Type</label>
+                        @{ string type = "Trading (One-One)";
+                            if (item.PO_Type == 3)
+                            {
+                                type = "Trading (One-Many)";
+
+                            }
+                        }
+                        <input type="text" value="@type" class="form-control" disabled>
+                    </div>
+                    @if (item.PO_Type == 2)
+                    {
+                    <div class="form-group col-md-6" id="RefernceView">
+                        <label for="Url">Order Reference</label>
+                        @{ string ordernumber = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == item.PO_OrderReference).SO_Code;}
+                        <input type="text" value="@ordernumber" class="form-control" disabled>
+                    </div>
+                            }
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Currency</label>
+                        @{ string currency = dbcontext.tbl_LookUp.Single(a => a.LU_Type == 1002 && a.LU_Code == item.Po_CurrencyKey).LU_Description; }
+                        <input type="text" value="@currency" class="form-control" disabled>
+
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Payment Terms</label>
+                        @{string payment = dbcontext.Tbl_Payment_Terms.Single(a => a.PT_ID == item.Po_PaymentTerms).PT_Name; }
+                        <input type="text" value="@payment" class="form-control" disabled>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Supplier Name</label>
+                        @{string SupplierName = dbcontext.Tbl_Master_CompanyDetails.Single(a => a.COM_ID == item.Po_Supplierkey).COM_NAME; }
+                        <input type="text" value="@SupplierName" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Supplier Address</label>
+                        <input type="text" value="@item.Po_SupplierAddress" class="form-control" disabled>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Shipping Address</label>
+                        <input type="text" value="@item.Po_ShippingAddress" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Url">Total Amount</label>
+                        <input type="text" style="text-align:right;" value="@(Convert.ToDecimal(item.Po_TotalAmount).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" class="form-control" disabled>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Special Instruction</label>
+                        <input type="text" value="@item.Po_SpecialInstruction"  class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Terms & Conditions</label>
+                        <input type="text" value="@item.Po_TermsandConditions" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Delivery Schedule</label>
+                        <input type="checkbox" checked="@item.Po_DeliveryShedule" />
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Delivery Date</label>
+                        @{string dlDate = "";
+                            if (item.Po_DeliveryShedule == false)
+                            {
+                                dlDate = item.Po_DeliveryDate.ToString("dd-MM-yyyy");
+                            } }
+                        <input type="text"  value="@dlDate" class="form-control" disabled>
+                    </div>
+                </div>
+
+                            }
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>UOM</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @{
+
+                        int i = 0;
+                        int itemIndex = 1;
+                        foreach (var item in Model.PODetails)
+                        {
+                <tr>
+                    <td>@itemIndex</td>
+                    <td>@item.PD_ArticleNo</td>
+                    <td>@item.PD_ShortName</td>
+                    <td>@item.PD_UOM</td>
+                    <td style="text-align:right;">@(Convert.ToDecimal(item.PD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    <td style="text-align:right;">@(Convert.ToDecimal(item.PD_UnitPrice).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    <td style="text-align:right;">@(Convert.ToDecimal(item.PD_TotalAmount).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    @if (Model.POHeader[0].Po_DeliveryShedule == true)
+                    {
+                    <td>
+                        <a style="padding: 5px;color:green" title="Delivery Schedule" data-toggle="collapse" href="#collapseExampleid_@i" class="hideandshow" aria-expanded="false" aria-controls="collapseExampleid_@i" id="btnProductTarget"><i class='fa fa-truck'></i></a>
+                    </td>
+}
+                </tr>
+                            if (Model.POHeader[0].Po_DeliveryShedule == true)
+                            {
+                <tr>
+                    <td colspan="4">
+                        <div class="collapse" id="collapseExampleid_@i">
+                            <div class="well">
+                                <table class="table table-custom" id="tblPOScheduleid_@i">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Quantity</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody id="storedetailsbody">
+                                        @{
+                                            BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+                                            var data1 = dbcontext.tbl_PurchaseOrderDeliverySchedule.Where(x => x.PODS_PID == item.PD_PID && x.PODS_PDID == item.PD_ID).ToList();
+                                        }
+                                        @if (data1.Count == 0)
+                                        {
+
+                                        }
+                                        else
+                                        {
+                                            for (int j = 0; j < data1.Count; j++)
+                                            {
+                                <tr>
+                                    <td>
+                                        <div class='input-group datepicker w-360' style='width: 100%' data-format="DD-MM-YYYY">
+                                            <input type='text' id='txtDSDate' name='txtDSDate' value='@Convert.ToDateTime(data1[j].PODS_DeliveryDate).ToShortDateString()' class='form-control' onfocus="getdatepic();" />
+                                            <span class='input-group-addon'><span class='fa fa-calendar' onclick="getdatepic()"></span></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type='text' id='txtQuantity' style="text-align:right;" onchange="MoneyValidation(this);" class='form-control' value='@(Convert.ToDecimal(data1[j].PODS_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))' />
+                                    </td>
+
+                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>}
+                                                    i++;
+                                                    itemIndex++;
+                                                }
+                                            }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>

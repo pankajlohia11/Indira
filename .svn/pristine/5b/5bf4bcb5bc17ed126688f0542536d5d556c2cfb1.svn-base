@@ -1,0 +1,361 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+using BusinessEntity.CustomModels;
+/*
+    Author=Manoj
+    Date = 19th Apr 2018
+    Sales Target Data Access 
+ */
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_SalesTarget_DL
+    {
+        // Creating Database Object for EntityClasses
+        EntityClasses dbcontext = new EntityClasses();
+
+        //Sales Target List View
+        public List<Tbl_Sales_Target> ET_Admin_SalesTargetList_DL()
+        {
+            try
+            {
+                var ObjSales_Org = dbcontext.Tbl_Sales_Organization.Where(m => m.DELETED != true).Select(m => m.ORG_HEAD_ID).ToList();
+                var data = dbcontext.Tbl_Sales_Target.Where(m => m.DELETED != true && ObjSales_Org.Contains(m.ST_EMP_ID)).ToList();
+
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+
+        //Bind Dropdown Sales Organization List
+        public List<Tbl_Sales_Organization> Binddropdown_Organization_DL(int com_key)
+        {
+            try
+            {
+                dbcontext.Configuration.ProxyCreationEnabled = false;
+                var orglist = dbcontext.Tbl_Sales_Organization.Where(m => m.DELETED == false && m.COM_KEY== com_key).ToList();
+                return orglist;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //BindRow User List
+        public List<SalesTarget_CM> BindRow_Employees_DL(int id, int com_key,int FIN_YEAR)
+        {
+            try
+            {
+                var ObjSales_Org = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == id && m.COM_KEY == com_key);
+
+                var userids = ObjSales_Org.ORG_HEAD_ID.ToString() + ',' + ObjSales_Org.ORG_EMPLOYEE_IDS.ToString();
+                List<decimal> UID = userids.Split(',').Select(m => Convert.ToDecimal(m)).ToList();
+                
+                var data1 = (from u in dbcontext.Tbl_Master_User
+                             join t in(dbcontext.Tbl_Sales_Target.Where(row => row.ORG_ID==id && row.ST_FINANCIAL_YEAR == FIN_YEAR))
+                             on u.USER_ID equals t.ST_EMP_ID into s
+                             from st in s.DefaultIfEmpty()
+                             where UID.Contains(u.USER_ID) select new SalesTarget_CM{
+                                 ST_EMP_Name = u.DISPLAY_NAME ?? "",
+                                 ST_EMP_ID =u.USER_ID,
+                                 ST_TARGET=st.ST_TARGET??0,
+                                 ORG_ID=id,
+                                 ST_FINANCIAL_YEAR = FIN_YEAR
+                             }).GroupBy(l => l.ST_EMP_ID).Select(cl => new SalesTarget_CM{
+                                 ST_EMP_Name= cl.FirstOrDefault().ST_EMP_Name,
+                                 ST_EMP_ID = cl.FirstOrDefault().ST_EMP_ID,
+                                 ST_TARGET = cl.Sum(c => c.ST_TARGET),
+                                 ORG_ID=cl.FirstOrDefault().ORG_ID,
+                                 ST_FINANCIAL_YEAR = cl.FirstOrDefault().ST_FINANCIAL_YEAR
+                             }).ToList();
+
+
+                //var data2 = (from u in dbcontext.Tbl_ProductGroup
+                //             join t in dbcontext.Tbl_Sales_Target
+                //             on u.PG_ID equals t.GroupTarget_ID into s
+                //             from st in s.DefaultIfEmpty()
+                //             where UID.Contains(st.ST_EMP_ID) && st.ORG_ID == id
+                //             select new SalesTarget_CM
+                //             {
+                //                 ST_M1 = st.ST_M1,
+                //                 ST_M2 = st.ST_M2,
+                //                 ST_M3 = st.ST_M3,
+                //                 ST_M4 = st.ST_M4,
+                //                 ST_M5 = st.ST_M5,
+                //                 ST_M6 = st.ST_M6,
+                //                 ST_M7 = st.ST_M7,
+                //                 ST_M8 = st.ST_M8,
+                //                 ST_M9 = st.ST_M9,
+                //                 ST_M10 = st.ST_M10,
+                //                 ST_M11 = st.ST_M11,
+                //                 ST_M12 = st.ST_M12,
+                //                 ST_TARGET = st.ST_TARGET
+                //             }).ToList();
+                //obj.SalesProducts = data2;
+                return data1;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Check Financial Year and Organization Exists
+        public string CheckFinancialORGExists_DL(int TargetID, int FinYear, int ORG_ID)
+        {
+            if (TargetID == 0)
+            {
+                int count = dbcontext.Tbl_SalesGroup_Target.Where(m => m.SGT_FIN_YEAR == FinYear && m.SGT_GROUP_ID == ORG_ID).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                int count = dbcontext.Tbl_SalesGroup_Target.Where(m => m.SGT_FIN_YEAR == FinYear && m.SGT_GROUP_ID == ORG_ID && m.SGT_ID != TargetID).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+
+            return "";
+        }
+
+        //Insert / Update Sales Organization
+        public decimal Tbl_Sales_Target_Add(SalesTarget_CM tbl_Sales_target)
+        {
+            decimal result = 0;
+            var context = new EntityClasses();
+            var transaction = context.Database.BeginTransaction();
+            bool success = true;
+            try
+            {
+                if (tbl_Sales_target.ST_ID == 0)
+                {
+
+                    Tbl_SalesGroup_Target Objtst = new Tbl_SalesGroup_Target()
+                    {
+                        SGT_FIN_YEAR = tbl_Sales_target.ST_FINANCIAL_YEAR,
+                        SGT_GROUP_ID = tbl_Sales_target.ORG_ID,
+                        SGT_TARGET = tbl_Sales_target.ST_TARGET,
+                        CREATED_BY = tbl_Sales_target.CREATED_BY,
+                        CREATED_DATE = DateTime.Now,
+                        DELETED = false,
+                        COM_KEY=tbl_Sales_target.COM_KEY
+                    };
+                    context.Tbl_SalesGroup_Target.Add(Objtst);
+                    if (context.SaveChanges() == 0)
+                    {
+                        success = false;
+                    }
+                    result = Objtst.SGT_ID;
+                }
+                else
+                {
+                    Tbl_SalesGroup_Target Objtst = context.Tbl_SalesGroup_Target.Single(m => m.SGT_ID == tbl_Sales_target.ST_ID);
+                    {
+                        Objtst.SGT_FIN_YEAR = tbl_Sales_target.ST_FINANCIAL_YEAR;
+                        Objtst.SGT_GROUP_ID = tbl_Sales_target.ORG_ID;
+                        Objtst.SGT_TARGET = tbl_Sales_target.ST_TARGET;
+                        Objtst.LAST_UPDATED_BY = tbl_Sales_target.CREATED_BY;
+                        Objtst.LAST_UPDATED_DATE = DateTime.Now;
+                        
+                    };
+                    result = Objtst.SGT_ID;
+                    if (context.SaveChanges() == 0)
+                    {
+                        success = false;
+                    }
+                }
+                context.Tbl_Sales_Target.RemoveRange(context.Tbl_Sales_Target.Where(x => x.ST_FINANCIAL_YEAR == tbl_Sales_target.ST_FINANCIAL_YEAR
+                    && x.ORG_ID == tbl_Sales_target.ORG_ID && x.GroupTarget_ID == result));
+                context.SaveChanges();
+                string[] personWiseData = tbl_Sales_target.Targetdata.Split('&');
+                for (int i = 0; i < personWiseData.Length; i++)
+                {
+                    string[] productWiseData = personWiseData[i].Split('|');
+                    for (int j = 0; j < productWiseData.Length; j++)
+                    {
+                        List<decimal> TargetRow = productWiseData[j].Split(',').Select(m => Convert.ToDecimal(m)).ToList();
+                        decimal m1= TargetRow[0], m2 = TargetRow[1], m3 = TargetRow[2], m4 = TargetRow[3], m5 = TargetRow[4], m6 = TargetRow[5], m7 = TargetRow[6],
+                            m8 = TargetRow[7], m9 = TargetRow[8], m10 = TargetRow[9], m11 = TargetRow[10], m12 = TargetRow[11],target = TargetRow[12],
+                            product = TargetRow[13],emp = TargetRow[14];
+                        Tbl_Sales_Target Objtst = new Tbl_Sales_Target()
+                        {
+                            GroupTarget_ID = result,
+                            ST_FINANCIAL_YEAR = tbl_Sales_target.ST_FINANCIAL_YEAR,
+                            ORG_ID = tbl_Sales_target.ORG_ID,
+                            ST_M1=m1,
+                            ST_M2 = m2,
+                            ST_M3 = m3,
+                            ST_M4 = m4,
+                            ST_M5 = m5,
+                            ST_M6 = m6,
+                            ST_M7 = m7,
+                            ST_M8 = m8,
+                            ST_M9 = m9,
+                            ST_M10 = m10,
+                            ST_M11 = m11,
+                            ST_M12 = m12,
+                            ST_TARGET= target,
+                            ST_ProductGroupID =product,
+                            ST_EMP_ID = emp,
+                            ST_ProductGroupName = (context.Tbl_ProductGroup.Where(x=>x.PG_ID== product)).ToList()[0].PG_NAME,
+                            CREATED_BY = tbl_Sales_target.CREATED_BY,
+                            CREATED_DATE = DateTime.Now,
+                            DELETED = false,
+                            COM_KEY = tbl_Sales_target.COM_KEY
+                        };
+                        context.Tbl_Sales_Target.Add(Objtst);
+                    }
+
+                }
+                if (context.SaveChanges() == 0)
+                {
+                    success = false;
+                }
+                if (success)
+                {
+                    transaction.Commit();
+                }
+                else
+                {
+                    result = 0;
+                    transaction.Rollback();
+                }
+            }
+            catch (Exception ex)
+            {
+                result = 0;
+                transaction.Rollback();
+                throw ex;
+            }
+            finally
+            {
+                transaction.Dispose();
+                context.Dispose();
+            }
+            return result;
+        }
+
+        //Edit Sales Organization Record Details
+        public List<Tbl_SalesGroup_Target> ET_Admin_SalesTarget_Update_Get(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_SalesGroup_Target.Where(m => m.SGT_ID == id).ToList();
+                // return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Sales Organizatioin View Record Details
+        public List<Tbl_Sales_Organization> ET_Admin_SalesOrganization_View(int id)
+        {
+            return dbcontext.Tbl_Sales_Organization.Where(m => m.ORG_ID == id).ToList();
+            // return data;
+        }
+
+        // Delete Record
+        public int ET_Admin_SalesOrganization_Deleted_DL(int id)
+        {
+            int result = 0;
+            //int i = 1;
+            try
+            {
+                var find = dbcontext.Tbl_Sales_Organization.Where(m => m.ORG_ID == id).ToList();
+                if (find.Count() != 0)
+                {
+                    Tbl_Sales_Organization delete = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == id);
+                    delete.DELETED = true;
+                    delete.DELETED_BY = 1;
+                    delete.DELETED_DATE = DateTime.Now;
+
+                    result = dbcontext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+        //View List Of Deleted Records
+        public List<Tbl_Sales_Organization> ET_Admin_SalesOrganization_Restore_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Sales_Organization.Where(m => m.DELETED == true).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        // Restore Deleted Record
+        public decimal ET_Admin_SalesOrganization_Restore_Insert_DL(int id)
+        {
+            int result = 0;
+            try
+            {
+                Tbl_Sales_Organization tmr = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == id);
+                {
+                    tmr.LAST_UPDATED_DATE = DateTime.Now;
+                    tmr.DELETED = false;
+                }
+                result = dbcontext.SaveChanges();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+        public int ET_Admin_SalesTarget_Deleted_DL(int id, bool type, int uid)
+        {
+            int result = 0;
+            //int i = 1;
+            try
+            {
+                var find = dbcontext.Tbl_SalesGroup_Target.Where(m => m.SGT_ID == id).ToList();
+                if (find.Count() != 0)
+                {
+                    Tbl_SalesGroup_Target delete = dbcontext.Tbl_SalesGroup_Target.Single(m => m.SGT_ID == id);
+                    delete.DELETED = type;
+                    delete.DELETED_BY = uid;
+                    delete.DELETED_DATE = DateTime.Now;
+                    result = dbcontext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+
+
+
+    }
+}

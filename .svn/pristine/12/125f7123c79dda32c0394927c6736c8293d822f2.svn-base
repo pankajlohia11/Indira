@@ -1,0 +1,229 @@
+﻿app1.controller("AC_ApprovalCtrl", function ($scope, $http, $window, $compile) {
+    GetPendingRecords();
+
+    function GetPendingRecords() {
+        debugger;
+        var getsalespersonlist = $http.get("/ET_Sales_Approval/GetPendingRecords");
+        getsalespersonlist.then(function (salespersonlist) {
+            debugger;
+            var res = JSON.parse(salespersonlist.data);
+            $scope.ApprovalList = res;
+        },function () {
+            alert('Data not found');
+        });
+    }
+    $scope.ViewRecords = function (a, b) {
+        if (b == "Quotation") {
+            a = parseInt(a);
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Quotation/ET_Master_Quotation_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else if (b == "Order") {
+            a = parseInt(a);
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OrderDetails/ET_Sales_OrderDetails_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+
+
+        }
+        else if (b == "Shipment") {
+            a = parseInt(a);
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shipment/ET_Sales_Shipment_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+
+
+        }
+        else if (b == "DebitNote") {
+            a = parseInt(a);
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shipment/ET_Sales_Shipment_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+
+
+        } else if (b == "PO") {
+            a = parseInt(a);
+            var post = $http({
+                method: "POST",
+                url: "/ET_Purchase_PO/ET_Purchase_PO_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                alert(data)
+                $window.alert(data.Message);
+            });
+        }
+      
+    }
+    $scope.approverejectRecords = function (a,b,c) {
+
+     
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Approval/approverejectRecords",
+                dataType: 'json',
+                data: {
+                    ID: a,
+                    FormName: b,
+                    Status: c,
+                   
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+
+            post.success(function (data, status) {
+
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+               
+                else if (data == "Success") {
+                    if (c == 1) {
+                        message = 'Record Approved Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Rejected Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    GetPendingRecords();
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+    }
+});
+    

@@ -1,0 +1,1164 @@
+﻿<!DOCTYPE html>
+<html ng-app="AngularApp">
+<head id="head_indra">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Indra</title>
+    <link rel="icon" type="image/ico" href="~/Images/icon.ico" />
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    @Styles.Render("~/Assets/css/vendor")
+    @Styles.Render("~/Assets/js/vendor/datatables")
+    @Styles.Render("~/Assets/css")
+    @Scripts.Render("~/Assets/modernizr")
+
+    <script src="~/Assets/angular.min.js"></script>
+    @*<script src="~/Scripts/angular.min.js"></script>*@
+    <script src="~/Content/AngularScripts/AppModule.js"></script>
+    @RenderSection("angularcontroller", required: false)
+    @*@{
+        var conf = System.Web.Configuration.WebConfigurationManager.OpenWebConfiguration(System.Web.Hosting.HostingEnvironment.ApplicationVirtualPath);
+        var section = (System.Web.Configuration.SessionStateSection)conf.GetSection("system.web/sessionState");
+        string timeout = section.Timeout.TotalMinutes.ToString();
+    }*@
+
+    <script type="text/javascript">
+
+        function getdatepic() {
+            $datepickerEl = $('.datepicker');
+            if ($datepickerEl.length > 0) {
+                $datepickerEl.each(function () {
+                    var element = $(this);
+                    var format = element.data('format')
+                    element.datetimepicker({
+                        format: format
+                    });
+                });
+            }
+        }
+        function HideBorder(e) {
+            $(e).css("border", "1px solid #efefef");
+        }
+        function alertmessage(a, f) {
+            toastr['warning']("Are you sure you want to delete this record?<br><button class='btn btn-greensea btn-sm mb-10' style='padding:5px;' type='button' onclick='deleteRecordConfirm(\"" + a + "\",\"" + f + "\");' class='btn dark'>YES</button> &nbsp <button type='button' style='padding:5px;' class='btn btn-red btn-sm mb-10'>NO</button>", "Alert");
+        }
+        function alertfollowupmessage(a) {
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "positionClass": "toast-top-center",
+                "onclick": null,
+                "showDuration": "1000",
+                "hideDuration": "1000",
+                "timeOut": "50000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "show",
+                "hideMethod": "fadeOut"
+            };
+            toastr['error']("Are you sure you want to delete this record?<br><button style='height:30px;text-align:center;font-size:small' type='button' onclick='closefollowupbutton(\"" + a + "\");' class='btn dark'>YES</button><button type='button' style='height:30px;text-align:center;font-size:small' class='btn default pull-right'>NO</button>", "Alert");
+        }
+
+    </script>
+</head>
+<body id="minovate" class="appWrapper hz-menu">
+
+    @if (ViewBag.Error != null)
+    {<div id="diverror"></div>
+    }
+    <a id="exceptionmessage" data-toggle="modal" data-target="#errorpopup" data-options="splash-2 splash-ef-4"></a>
+    <div class="modal splash fade" id="errorpopup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title custom-font red"><strong style="color:red">Error Occured :ERR <span id="spanErrMessage1"></span></strong></h3>
+                </div>
+                <div class="modal-body">
+                    <strong style="color:red">
+                        Sorry for the inconvience.<br />
+                        Please contact admin with error no 'ERR<span id="spanErrMessage2"></span>' as reference
+                    </strong>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default btn-border" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a id="btnviewpopup" data-toggle="modal" data-target="#viewpopupdata" data-options="splash-2 splash-ef-4"></a>
+    <div class="modal splash fade" id="viewpopupdata" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title custom-font red"><strong style="color:red">View</strong></h3>
+                </div>
+                <div class="tile-body" id="viewpopup">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default btn-border" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @RenderSection("anypopup", required: false)
+  
+
+    <!-- ====================================================s
+    ================= Application Content ===================
+    ========================================================= -->
+    <div id="wrap" class="animsition">
+
+        <!-- ===============================================
+        ================= HEADER Content ===================
+        ================================================ -->
+        <section id="header">
+            <header class="clearfix">
+
+                <!-- Branding -->
+                <div class="branding">
+                    <a href="../ET_Admin_Roles/ET_Admin_Roles">
+                        <img src="~/Images/IndraLogo.png" />
+                    </a>
+                    <a href="#" class="offcanvas-toggle visible-xs-inline"><i class="fa fa-bars"></i></a>
+                </div>
+                <!-- Branding end -->
+                <!-- Left-side navigation -->
+                <!-- Left-side navigation end -->
+                <!-- Search -->
+                <!-- Search end -->
+                <!-- Right-side navigation -->
+                <ul class="nav-right pull-right list-inline">
+                    <li class="dropdown users">
+
+                        <a class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-user"></i>
+                            <span class="badge bg-lightred">2</span>
+                        </a>
+
+                        <div class="dropdown-menu pull-right with-arrow panel panel-default animated littleFadeInUp" role="menu">
+
+                            <div class="panel-heading">
+                                You have <strong>2</strong> requests
+                            </div>
+
+                            <ul class="list-group">
+
+                                <li class="list-group-item">
+                                    <a href="#" class="media">
+                                        <span class="pull-left media-object thumb thumb-sm">
+                                            <img src="" alt="" class="img-circle">
+                                        </span>
+                                        <div class="media-body">
+                                            <span class="block">Arnold sent you a request</span>
+                                            <small class="text-muted">15 minutes ago</small>
+                                        </div>
+                                    </a>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <a href="#" class="media">
+                                        <span class="pull-left media-object  thumb thumb-sm">
+                                            <img src="" alt="" class="img-circle">
+                                        </span>
+                                        <div class="media-body">
+                                            <span class="block">George sent you a request</span>
+                                            <small class="text-muted">5 hours ago</small>
+                                        </div>
+                                    </a>
+                                </li>
+
+                            </ul>
+
+                            <div class="panel-footer">
+                                <a href="#">Show all requests <i class="fa fa-angle-right pull-right"></i></a>
+                            </div>
+
+                        </div>
+
+                    </li>
+
+                    <li class="dropdown messages">
+
+                        <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-envelope"></i>
+                            <span class="badge bg-lightred">4</span>
+                        </a>
+
+                        <div class="dropdown-menu pull-right with-arrow panel panel-default animated littleFadeInDown" role="menu">
+
+                            <div class="panel-heading">
+                                You have <strong>4</strong> messages
+                            </div>
+
+                            <ul class="list-group">
+
+                                <li class="list-group-item">
+                                    <a href="#" class="media">
+                                        <span class="pull-left media-object thumb thumb-sm">
+                                            <img src="" alt="" class="img-circle">
+                                        </span>
+                                        <div class="media-body">
+                                            <span class="block">Imrich sent you a message</span>
+                                            <small class="text-muted">12 minutes ago</small>
+                                        </div>
+                                    </a>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <a href="#" class="media">
+                                        <span class="pull-left media-object  thumb thumb-sm">
+                                            <img src="" alt="" class="img-circle">
+                                        </span>
+                                        <div class="media-body">
+                                            <span class="block">Peter sent you a message</span>
+                                            <small class="text-muted">46 minutes ago</small>
+                                        </div>
+                                    </a>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <a href="#" class="media">
+                                        <span class="pull-left media-object  thumb thumb-sm">
+                                            <img src="" alt="" class="img-circle">
+                                        </span>
+                                        <div class="media-body">
+                                            <span class="block">Bill sent you a message</span>
+                                            <small class="text-muted">1 hour ago</small>
+                                        </div>
+                                    </a>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <a href="#" class="media">
+                                        <span class="pull-left media-object  thumb thumb-sm">
+                                            <img src="" alt="" class="img-circle">
+                                        </span>
+                                        <div class="media-body">
+                                            <span class="block">Ken sent you a message</span>
+                                            <small class="text-muted">3 hours ago</small>
+                                        </div>
+                                    </a>
+                                </li>
+
+                            </ul>
+
+                            <div class="panel-footer">
+                                <a href="#">Show all messages <i class="pull-right fa fa-angle-right"></i></a>
+                            </div>
+
+                        </div>
+
+                    </li>
+
+                    <li class="dropdown notifications">
+
+                        <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-bell"></i>
+                            <span class="badge bg-lightred">3</span>
+                        </a>
+
+                        <div class="dropdown-menu pull-right with-arrow panel panel-default animated littleFadeInLeft">
+
+                            <div class="panel-heading">
+                                You have <strong>3</strong> notifications
+                            </div>
+
+                            <ul class="list-group">
+
+                                <li class="list-group-item">
+                                    <a href="#" class="media">
+                                        <span class="pull-left media-object media-icon bg-danger">
+                                            <i class="fa fa-ban"></i>
+                                        </span>
+                                        <div class="media-body">
+                                            <span class="block">User Imrich cancelled account</span>
+                                            <small class="text-muted">6 minutes ago</small>
+                                        </div>
+                                    </a>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <a href="#" class="media">
+                                        <span class="pull-left media-object media-icon bg-primary">
+                                            <i class="fa fa-bolt"></i>
+                                        </span>
+                                        <div class="media-body">
+                                            <span class="block">New user registered</span>
+                                            <small class="text-muted">12 minutes ago</small>
+                                        </div>
+                                    </a>
+                                </li>
+
+                                <li class="list-group-item">
+                                    <a href="#" class="media">
+                                        <span class="pull-left media-object media-icon bg-greensea">
+                                            <i class="fa fa-lock"></i>
+                                        </span>
+                                        <div class="media-body">
+                                            <span class="block">User Robert locked account</span>
+                                            <small class="text-muted">18 minutes ago</small>
+                                        </div>
+                                    </a>
+                                </li>
+
+                            </ul>
+
+                            <div class="panel-footer">
+                                <a href="#">Show all notifications <i class="fa fa-angle-right pull-right"></i></a>
+                            </div>
+
+                        </div>
+
+                    </li>
+
+                    <li class="dropdown nav-profile">
+
+                        <a class="dropdown-toggle" data-toggle="dropdown">
+                            <img src="" alt="" class="img-circle size-30x30">
+                            <span>John Douey <i class="fa fa-angle-down"></i></span>
+                        </a>
+
+                        <ul class="dropdown-menu animated littleFadeInRight" role="menu">
+
+                            <li>
+                                <a href="#">
+                                    <span class="badge bg-greensea pull-right">86%</span>
+                                    <i class="fa fa-user"></i>Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <span class="label bg-lightred pull-right">new</span>
+                                    <i class="fa fa-check"></i>Tasks
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-cog"></i>Settings
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-lock"></i>Lock
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../ET_Login/ET_Login?logout=logout">
+                                    <i class="fa fa-sign-out"></i>Logout
+                                </a>
+                            </li>
+
+                        </ul>
+
+                    </li>
+
+                    <li class="toggle-right-sidebar">
+                        <a href="#">
+                            <i class="fa fa-comments"></i>
+                        </a>
+                    </li>
+                </ul>
+                <!-- Right-side navigation end -->
+
+
+
+            </header>
+
+        </section>
+        <!--/ HEADER Content  -->
+        <!-- =================================================
+        ================= CONTROLS Content ===================
+        ================================================== -->
+        <div id="controls">
+
+
+
+
+
+            <!-- ================================================
+            ================= SIDEBAR Content ===================
+            ================================================= -->
+            <aside id="sidebar">
+
+
+                <div id="sidebar-wrap">
+
+                    <div class="panel-group slim-scroll" role="tablist">
+                        <div class="panel panel-default">
+                            <div class="panel-heading" role="tab">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#sidebarNav">
+                                        Navigation <i class="fa fa-angle-up"></i>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="sidebarNav" class="panel-collapse collapse in" role="tabpanel">
+                                <div class="panel-body">
+
+
+                                    <!-- ===================================================
+                                    ================= NAVIGATION Content ===================
+                                    ==================================================== -->
+                                    <ul id="navigation">
+                                        <li>
+                                            <a href="#"><i class="fa fa-shield"></i> <span>Admin</span></a>
+                                            <ul>
+                                                <li><a href="../ET_Admin_SystemSetUp/ET_Admin_SystemSetUp"><i class="fa fa-caret-right"></i>System Setup</a></li>
+                                                <li><a href="../ET_Admin_DocumentSetup/ET_Admin_DocumentSetup"><i class="fa fa-caret-right"></i>Document Setup</a></li>
+                                                <li><a href="../ET_Admin_Roles/ET_Admin_Roles"><i class="fa fa-caret-right"></i>Roles and Privilages</a></li>
+                                                <li><a href="../ET_Admin_User_Master/ET_Admin_User_Master"><i class="fa fa-caret-right"></i>User Master</a></li>
+                                                <li><a href="../ET_Admin_SalesOrganization/ET_Admin_SalesOrganization"><i class="fa fa-caret-right"></i> Sales Organization</a></li>
+                                                <li><a href="../ET_Admin_SalesTarget/ET_Admin_SalesTarget"><i class="fa fa-caret-right"></i>Sales Target</a></li>
+                                                <li><a href="../ET_Admin_Company/ET_Admin_Company"><i class="fa fa-caret-right"></i> Company Master</a></li>
+
+                                                <li><a href="../ET_Admin_bank/ET_Admin_bank"><i class="fa fa-caret-right"></i>Bank</a></li>
+                                                <li><a href="../ET_Admin_Product/ET_Admin_Product"><i class="fa fa-caret-right"></i>Product</a></li>
+                                                <li><a href="../ET_Admin_ProductCatalog/ET_Admin_ProductCatalog"><i class="fa fa-caret-right"></i>Product Catalog</a></li>
+                                                <li style="display:none;"><a href="../ET_Admin_LC_Details/ET_Admin_LC_Details"><i class="fa fa-caret-right"></i>LC Details</a></li>
+                                                <li><a href="../ET_Admin_GeneralOffer/ET_Admin_GeneralOffer"><i class="fa fa-caret-right"></i>General Offer</a></li>
+                                                <li><a href="../ET_Admin_PaymentTerms/ET_Admin_PaymentTerms"><i class="fa fa-caret-right"></i>Payment Terms</a></li>
+
+                                                @*<li><a href="../ET_Admin_SalesPerson/Et_Admin_SalesPerson"><i class="fa fa-caret-right"></i>Sales Person</a></li>*@
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <a href="#"><i class="fa fa-user"></i> <span>Sales</span></a>
+                                            <ul>
+                                                <li><a href="../ET_Sales_Enquiry/ET_Sales_Enquiry"><i class="fa fa-caret-right"></i> Enquiry</a></li>
+                                                <li><a href="../ET_Sales_Quotation/ET_Sales_Quotation"><i class="fa fa-caret-right"></i> Quotation</a></li>
+                                                <li><a href="../ET_General_Order_Details/ET_General_Order_Details"><i class="fa fa-caret-right"></i>Order Details</a></li>
+
+                                                <li><a href="../ET_Sales_Shedule/ET_Sales_Shedule"><i class="fa fa-caret-right"></i>Schedule</a></li>
+                                                <li><a href="../ET_Sales_Shipment/ET_Sales_Shipment"><i class="fa fa-caret-right"></i>Shipment Details</a></li>
+                                                <li><a href="../ET_Sales_OneToOneInvoice/ET_Sales_OneToOneInvoice"><i class="fa fa-caret-right"></i>One-One Invoice</a></li>
+                                                <li><a href="../ET_Sales_Despatch/ET_Sales_Despatch"><i class="fa fa-caret-right"></i>Despatch</a></li>
+                                                <li><a href="../ET_Sales_OneToManyInvoice/ET_Sales_OneToManyInvoice"><i class="fa fa-caret-right"></i>One-Many Invoice</a></li>
+                                                <li><a href="../ET_Sales_PackingList/ET_Sales_PackingList"><i class="fa fa-caret-right"></i>Packing List</a></li>
+                                                <li><a href="../ET_Sales_Approval/ET_Sales_Approval"><i class="fa fa-caret-right"></i>Approval status</a></li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <a href="#"><i class="fa fa-user"></i> <span>Purchase</span></a>
+                                            <ul>
+                                                <li><a href="../ET_Purchase_StoreMaster/ET_Purchase_StoreMaster"><i class="fa fa-caret-right"></i> Store</a></li>
+                                                <li><a href="../ET_Purchase_SupplierPriceList/ET_Purchase_SupplierPriceList"><i class="fa fa-caret-right"></i> Supplier Price List</a></li>
+                                                <li><a href="../ET_Purchase_PO/ET_Purchase_PO"><i class="fa fa-caret-right"></i> PO</a></li>
+                                                <li><a href="../ET_Purchase_GI/ET_Purchase_GI"><i class="fa fa-caret-right"></i> GI</a></li>
+                                                <li><a href="../ET_Purchase_Transfers/ET_Purchase_Transfers"><i class="fa fa-caret-right"></i> Transfer</a></li>
+
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <a href="../ET_Mail_Email/ET_Mail_Email" id="a_mail"><i class="fa fa-envelope-o"></i> <span>Mail</span> </a>
+
+                                        </li>
+                                        <li><a href="../ET_Admin_CustomerModule/ET_Admin_CustomerModule?id=10431" id="a_customermodule"><i class="fa fa-group"></i> <span>Customer Module</span></a></li>
+                                        <li><a href="../ET_Admin_SupplierModule/ET_Admin_SupplierModule?id=10429" id="a_suppliermodule"><i class="fa fa-group"></i> <span>Supplier Module</span></a></li>
+
+
+                                        <li><a href="#"><i class="fa fa-file"></i> <span>Reports</span></a></li>
+                                        <li><a href="../ET_Task/ET_Task"><i class="fa fa-tasks"></i> <span>Assignments</span></a></li>
+                                        <li><a href="#"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
+                                        <li>
+                                            <a href="#"><i class="fa fa-calendar-o"></i> <span>Calenders</span></a>
+                                            <ul>
+                                                <li><a href="../ET_Shipment_Schedule/ET_Shipment_Schedule"><i class="fa fa-caret-right"></i> Shipment Schedule</a></li>
+                                                <li><a href="../ET_Documentation_Calendar/ET_Documentation_Calendar"><i class="fa fa-caret-right"></i> Documentation Schedule</a></li>
+                                                <li><a href="../ET_Shipment_Calendar/ET_Shipment_Calendar"><i class="fa fa-caret-right"></i> ETA Schedule</a></li>
+
+                                            </ul>
+                                        </li>
+                                        <li><a href="#"><i class="fa fa-gear"></i> <span>Config</span></a></li>
+                                        <li><a href="../YarnController/YarnController"><i class="fa fa-calendar"></i> <span>Material Planning</span></a></li>
+                                    </ul>
+                                    <!--/ NAVIGATION Content -->
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel charts panel-default">
+                            <div class="panel-heading" role="tab">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#sidebarCharts">
+                                        Orders Summary <i class="fa fa-angle-up"></i>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="sidebarCharts" class="panel-collapse collapse in" role="tabpanel">
+                                <div class="panel-body">
+                                    <div class="summary">
+
+                                        <div class="media">
+                                            <a class="pull-right" href="#">
+                                                <span class="sparklineChart"
+                                                      values="5, 8, 3, 4, 6, 2, 1, 9, 7"
+                                                      sparkType="bar"
+                                                      sparkBarColor="#92424e"
+                                                      sparkBarWidth="6px"
+                                                      sparkHeight="36px">
+                                                    Loading...
+                                                </span>
+                                            </a>
+                                            <div class="media-body">
+                                                This week sales
+                                                <h4 class="media-heading">26, 149</h4>
+                                            </div>
+                                        </div>
+
+                                        <div class="media">
+                                            <a class="pull-right" href="#">
+                                                <span class="sparklineChart"
+                                                      values="2, 4, 5, 3, 8, 9, 7, 3, 5"
+                                                      sparkType="bar"
+                                                      sparkBarColor="#397193"
+                                                      sparkBarWidth="6px"
+                                                      sparkHeight="36px">
+                                                    Loading...
+                                                </span>
+                                            </a>
+                                            <div class="media-body">
+                                                This week balance
+                                                <h4 class="media-heading">318, 651</h4>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel settings panel-default">
+                            <div class="panel-heading" role="tab">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" href="#sidebarControls">
+                                        General Settings <i class="fa fa-angle-up"></i>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="sidebarControls" class="panel-collapse collapse in" role="tabpanel">
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <label class="col-xs-8 control-label">Switch ON</label>
+                                            <div class="col-xs-4 control-label">
+                                                <div class="onoffswitch greensea">
+                                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switch-on" checked="">
+                                                    <label class="onoffswitch-label" for="switch-on">
+                                                        <span class="onoffswitch-inner"></span>
+                                                        <span class="onoffswitch-switch"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <label class="col-xs-8 control-label">Switch OFF</label>
+                                            <div class="col-xs-4 control-label">
+                                                <div class="onoffswitch greensea">
+                                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="switch-off">
+                                                    <label class="onoffswitch-label" for="switch-off">
+                                                        <span class="onoffswitch-inner"></span>
+                                                        <span class="onoffswitch-switch"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </aside>
+            <!--/ SIDEBAR Content -->
+            <!-- =================================================
+            ================= RIGHTBAR Content ===================
+            ================================================== -->
+            <aside id="rightbar">
+
+                <div role="tabpanel">
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#users" aria-controls="users" role="tab" data-toggle="tab"><i class="fa fa-users"></i></a></li>
+                        <li role="presentation"><a href="#history" aria-controls="history" role="tab" data-toggle="tab"><i class="fa fa-clock-o"></i></a></li>
+                        <li role="presentation"><a href="#friends" aria-controls="friends" role="tab" data-toggle="tab"><i class="fa fa-heart"></i></a></li>
+                        <li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab"><i class="fa fa-cog"></i></a></li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="users">
+                            <h6><strong>Online</strong> Users</h6>
+
+                            <ul>
+
+                                <li class="online">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Ing. Imrich <strong>Kamarel</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Ulaanbaatar, Mongolia</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="online">
+                                    <div class="media">
+
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <span class="badge bg-lightred unread">3</span>
+
+                                        <div class="media-body">
+                                            <span class="media-heading">Arnold <strong>Karlsberg</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Bratislava, Slovakia</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+
+                                    </div>
+                                </li>
+
+                                <li class="online">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Peter <strong>Kay</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Kosice, Slovakia</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="online">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">George <strong>McCain</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Prague, Czech Republic</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="busy">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Lucius <strong>Cashmere</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Wien, Austria</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="busy">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Jesse <strong>Phoenix</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Berlin, Germany</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                            </ul>
+
+                            <h6><strong>Offline</strong> Users</h6>
+
+                            <ul>
+
+                                <li class="offline">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Dell <strong>MacApple</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Paris, France</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="offline">
+                                    <div class="media">
+
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+
+                                        <div class="media-body">
+                                            <span class="media-heading">Roger <strong>Flopple</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Rome, Italia</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+
+                                    </div>
+                                </li>
+
+                                <li class="offline">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Nico <strong>Vulture</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Kyjev, Ukraine</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="offline">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Bobby <strong>Socks</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Moscow, Russia</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="offline">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Anna <strong>Opichia</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Budapest, Hungary</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                            </ul>
+                        </div>
+
+                        <div role="tabpanel" class="tab-pane" id="history">
+                            <h6><strong>Chat</strong> History</h6>
+
+                            <ul>
+
+                                <li class="online">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Ing. Imrich <strong>Kamarel</strong></span>
+                                            <small>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="busy">
+                                    <div class="media">
+
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <span class="badge bg-lightred unread">3</span>
+
+                                        <div class="media-body">
+                                            <span class="media-heading">Arnold <strong>Karlsberg</strong></span>
+                                            <small>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+
+                                    </div>
+                                </li>
+
+                                <li class="offline">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Peter <strong>Kay</strong></span>
+                                            <small>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit </small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                            </ul>
+                        </div>
+
+                        <div role="tabpanel" class="tab-pane" id="friends">
+                            <h6><strong>Friends</strong> List</h6>
+                            <ul>
+
+                                <li class="online">
+                                    <div class="media">
+
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <span class="badge bg-lightred unread">3</span>
+
+                                        <div class="media-body">
+                                            <span class="media-heading">Arnold <strong>Karlsberg</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Bratislava, Slovakia</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+
+                                    </div>
+                                </li>
+
+                                <li class="offline">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Anna <strong>Opichia</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Budapest, Hungary</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="busy">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Lucius <strong>Cashmere</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Wien, Austria</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li class="online">
+                                    <div class="media">
+                                        <a class="pull-left thumb thumb-sm" href="#">
+                                            <img class="media-object img-circle" src="" alt>
+                                        </a>
+                                        <div class="media-body">
+                                            <span class="media-heading">Ing. Imrich <strong>Kamarel</strong></span>
+                                            <small><i class="fa fa-map-marker"></i> Ulaanbaatar, Mongolia</small>
+                                            <span class="badge badge-outline status"></span>
+                                        </div>
+                                    </div>
+                                </li>
+
+                            </ul>
+                        </div>
+
+                        <div role="tabpanel" class="tab-pane" id="settings">
+                            <h6><strong>Chat</strong> Settings</h6>
+
+                            <ul class="settings">
+
+                                <li>
+                                    <div class="form-group">
+                                        <label class="col-xs-8 control-label">Show Offline Users</label>
+                                        <div class="col-xs-4 control-label">
+                                            <div class="onoffswitch greensea">
+                                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show-offline" checked="">
+                                                <label class="onoffswitch-label" for="show-offline">
+                                                    <span class="onoffswitch-inner"></span>
+                                                    <span class="onoffswitch-switch"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li>
+                                    <div class="form-group">
+                                        <label class="col-xs-8 control-label">Show Fullname</label>
+                                        <div class="col-xs-4 control-label">
+                                            <div class="onoffswitch greensea">
+                                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show-fullname">
+                                                <label class="onoffswitch-label" for="show-fullname">
+                                                    <span class="onoffswitch-inner"></span>
+                                                    <span class="onoffswitch-switch"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li>
+                                    <div class="form-group">
+                                        <label class="col-xs-8 control-label">History Enable</label>
+                                        <div class="col-xs-4 control-label">
+                                            <div class="onoffswitch greensea">
+                                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show-history" checked="">
+                                                <label class="onoffswitch-label" for="show-history">
+                                                    <span class="onoffswitch-inner"></span>
+                                                    <span class="onoffswitch-switch"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li>
+                                    <div class="form-group">
+                                        <label class="col-xs-8 control-label">Show Locations</label>
+                                        <div class="col-xs-4 control-label">
+                                            <div class="onoffswitch greensea">
+                                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show-location" checked="">
+                                                <label class="onoffswitch-label" for="show-location">
+                                                    <span class="onoffswitch-inner"></span>
+                                                    <span class="onoffswitch-switch"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li>
+                                    <div class="form-group">
+                                        <label class="col-xs-8 control-label">Notifications</label>
+                                        <div class="col-xs-4 control-label">
+                                            <div class="onoffswitch greensea">
+                                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show-notifications">
+                                                <label class="onoffswitch-label" for="show-notifications">
+                                                    <span class="onoffswitch-inner"></span>
+                                                    <span class="onoffswitch-switch"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li>
+                                    <div class="form-group">
+                                        <label class="col-xs-8 control-label">Show Undread Count</label>
+                                        <div class="col-xs-4 control-label">
+                                            <div class="onoffswitch greensea">
+                                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="show-unread" checked="">
+                                                <label class="onoffswitch-label" for="show-unread">
+                                                    <span class="onoffswitch-inner"></span>
+                                                    <span class="onoffswitch-switch"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+            </aside>
+            <!--/ RIGHTBAR Content -->
+
+
+
+
+        </div>
+        <!--/ CONTROLS Content -->
+
+
+        @RenderBody();
+
+
+    </div>
+    @Scripts.Render("~/Assets/js/vedor")
+    @Scripts.Render("~/Assets/js/vendor/datatablesjs")
+
+    @RenderSection("specificjs", required: false)
+
+    @Scripts.Render("~/Assets/js/main")
+    <script type="text/javascript">
+        $(document).ready(function () {
+            if ($("#diverror").length)
+                $("#exceptionmessage").trigger("click");
+        });
+    </script>
+    <script>
+        function dynamicDataTable(e, f, g) {
+            var table4 = $(e).DataTable({
+                "aoColumnDefs": [
+                    { 'bSortable': false, 'aTargets': ["no-sort"] }
+                ]
+            });
+            var colvis = new $.fn.dataTable.ColVis(table4);
+
+            $(colvis.button()).insertAfter(g);
+            $(colvis.button()).find('button').addClass('btn btn-greensea btn-xs mb-10').removeClass('ColVis_Button');
+
+            var tt = new $.fn.dataTable.TableTools(table4, {
+                sRowSelect: 'single',
+                "aButtons": [
+                    'copy'
+                ],
+                "sSwfPath": "../Assets/js/vendor/datatables/extensions/TableTools/swf/copy_csv_xls_pdf.swf"
+            });
+
+            $(tt.fnContainer()).insertAfter(f);
+            //*initialize responsive datatable
+        }
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "positionClass": "toast-top-center",
+            "onclick": null,
+            "showDuration": "1000",
+            "hideDuration": "1000",
+            "timeOut": "50000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "show",
+            "hideMethod": "fadeOut"
+        };
+    </script>
+
+    <script>
+        $(window).load(function () {
+            $('#form1').parsley().subscribe('parsley:field:validate', function () {
+                if ($('#form1').parsley().isValid()) {
+                    $('#formSubmit').prop('disabled', false);
+                } else {
+                    $('#formSubmit').prop('disabled', true);
+                }
+            });
+
+            $('#formSubmit').on('click', function () {
+                $('#form1').submit();
+            });
+
+            $('#form2').parsley().subscribe('parsley:field:validate', function () {
+                if ($('#form2').parsley().isValid()) {
+                    $('#formSubmit1').prop('disabled', false);
+                } else {
+                    $('#formSubmit1').prop('disabled', true);
+                }
+            });
+
+            $('#formSubmit1').on('click', function () {
+                $('#form2').submit();
+            });
+        });
+
+        $(document).ready(function () {
+            // get current URL path and assign 'active' class
+            var pathname = window.location.pathname;
+            if (pathname == "/ET_Admin_CustomerModule/ET_Admin_CustomerModule") {
+                $('#navigation > li > a[id="a_customermodule"]').parent().addClass('active');
+            }
+            else {
+                $('#navigation > li > ul > li > a[href="..' + pathname + '"]').parent().addClass('active');
+                $('#navigation > li > ul > li > a[href="..' + pathname + '"]').parent().parent().parent().addClass('active open dropdown');
+            }
+
+             @*debugger;
+            var time = @timeout * 1000 * 60;
+            var timeout;
+            var isLogout = false;
+
+            timeout = setTimeout(function () {
+                //Things you need to do
+                isLogout = true;
+
+            }, time);*@
+
+            //$(document).on('click', function () {
+            //    if (!isLogout) {
+            //        clearTimeout(timeout);
+            //        timeout = setTimeout(function () {
+            //            //Things you need to do
+            //            isLogout = true;
+            //        }, time);
+            //    }
+            //});
+
+        })
+
+        $(document).ready(function () {
+            // get current URL path and assign 'active' class
+            var pathname = window.location.pathname;
+            if (pathname == "/ET_Mail_Email/ET_Mail_Email") {
+                $('#navigation > li > a[id="a_mail"]').parent().addClass('active');
+            }
+            else {
+                $('#navigation > li > ul > li > a[href="..' + pathname + '"]').parent().addClass('active');
+                $('#navigation > li > ul > li > a[href="..' + pathname + '"]').parent().parent().parent().addClass('active open dropdown');
+            }
+
+        })
+
+        $(document).ready(function () {
+            // get current URL path and assign 'active' class
+            var pathname = window.location.pathname;
+            if (pathname == "/ET_Admin_SupplierModule/ET_Admin_SupplierModule") {
+                $('#navigation > li > a[id="a_suppliermodule"]').parent().addClass('active');
+            }
+            else {
+                $('#navigation > li > ul > li > a[href="..' + pathname + '"]').parent().addClass('active');
+                $('#navigation > li > ul > li > a[href="..' + pathname + '"]').parent().parent().parent().addClass('active open dropdown');
+            }
+
+        })
+
+
+        function isNumber(evt) {
+            evt = (evt) ? evt : window.event;
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+        function DisableCutCopyPaste(id) {
+            $('#' + id).on("cut copy paste", function (e) {
+                e.preventDefault();
+            });
+        }
+
+    </script>
+    @RenderSection("dynamictablecreation", required: false)
+
+
+
+
+    <script>
+        (function (b, o, i, l, e, r) {
+            b.GoogleAnalyticsObject = l; b[l] || (b[l] =
+                function () { (b[l].q = b[l].q || []).push(arguments) }); b[l].l = +new Date;
+            e = o.createElement(i); r = o.getElementsByTagName(i)[0];
+            e.src = 'https://www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e, r)
+        }(window, document, 'script', 'ga'));
+        ga('create', 'UA-XXXXX-X', 'auto'); ga('send', 'pageview');
+    </script>
+
+
+
+</body>
+</html>

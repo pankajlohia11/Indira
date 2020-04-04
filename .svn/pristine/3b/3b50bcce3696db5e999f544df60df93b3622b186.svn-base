@@ -1,0 +1,30 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Material_Master>
+
+@foreach (var item in Model)
+{
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="Url">Code</label>
+            @Html.TextBoxFor(m => item.MATERIAL_CODE, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="col-md-6">
+            <label for="Email">Material Name</label>
+            @Html.TextBoxFor(m => item.MATERIAL_NAME, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="form-group col-md-6">
+            <label for="Url">Description</label>
+            @Html.TextBoxFor(m => item.MATERIAL_DESCRIPTION, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="form-group col-md-6">
+            <label for="Email">Role Group</label>
+            <input type="checkbox" checked="@item.COTTON_PER" disabled/>
+
+        </div>
+    </div>
+}
+
+
+

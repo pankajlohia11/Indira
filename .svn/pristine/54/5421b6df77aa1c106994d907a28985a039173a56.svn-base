@@ -1,0 +1,212 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+using DataAccess.Admin_DA;
+using BusinessEntity.CustomModels;
+
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_GeneralOffer_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+
+        // Offers List and restore
+        public List<Tbl_Offers_Master> GetOffersList(bool deleted)
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Offers_Master.Where(m => m.DELETED == deleted).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        // Offers insert and update
+        public decimal ET_Admin_LC_Details_Add_DL(Tbl_Offers_Master obj, string prefix, bool automanual, string Contactdata)
+        {
+            Tbl_Offers_Master objgl = new Tbl_Offers_Master();
+            try
+            {
+                if (obj.OFFER_ID == 0)
+                {
+                    Tbl_Offers_Master objtom = new Tbl_Offers_Master()
+                    {
+                        COM_ID = obj.COM_ID,
+                        OFFER_ID = obj.OFFER_ID,
+                        OFFER_CODE = obj.OFFER_CODE,
+                        IS_SPECIFIC = obj.IS_SPECIFIC,
+                        CUST_SUPP = obj.CUST_SUPP,
+                        CUST_ID = obj.CUST_ID,
+                        OFFER_NO = obj.OFFER_NO,
+                        OFFER_DATE = obj.OFFER_DATE,
+                        DESCRIPTION = obj.DESCRIPTION,
+                        PLACE_DEST = obj.PLACE_DEST,
+                        DESTINATION = obj.DESTINATION,
+                        CONTACT_PERSON = obj.CONTACT_PERSON,
+                        PAYMENT = obj.PAYMENT,
+                        SHIPMENT = obj.SHIPMENT,
+                        VALIDITY_DAYS = obj.VALIDITY_DAYS,
+                        VALIDITY_DATE = obj.VALIDITY_DATE,
+                        IS_ORDER = obj.IS_ORDER,
+                        AGENCY_TRADING = 0,
+                        DELETED = false,
+                        CREATED_DATE = DateTime.Now,
+                        CREATED_BY = obj.CREATED_BY,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                        LAST_UPDATED_BY = obj.LAST_UPDATED_BY,
+                        COM_KEY = obj.COM_KEY
+                    };
+                    dbcontext.Tbl_Offers_Master.Add(objtom);
+                    dbcontext.SaveChanges();
+
+                    if (automanual == true)
+                    {
+                        string code = prefix + "0" + objtom.OFFER_ID;
+                        Tbl_Offers_Master Tbl_Offers_Master = dbcontext.Tbl_Offers_Master.Single(m => m.OFFER_ID == objtom.OFFER_ID);
+                        {
+                            Tbl_Offers_Master.OFFER_CODE = code;
+                        };
+                        dbcontext.SaveChanges();
+                    }
+                    objgl.OFFER_ID = objtom.OFFER_ID;
+                }
+                else
+                {
+                    Tbl_Offers_Master objtom = dbcontext.Tbl_Offers_Master.Single(m => m.OFFER_ID == obj.OFFER_ID);
+                    {
+                        objtom.COM_ID = obj.COM_ID;
+                        objtom.OFFER_ID = obj.OFFER_ID;
+                        objtom.OFFER_CODE = obj.OFFER_CODE;
+                        objtom.IS_SPECIFIC = obj.IS_SPECIFIC;
+                        objtom.CUST_SUPP = obj.CUST_SUPP;
+                        // objtom.CUST_ID = SelectContactperson;
+                        objtom.OFFER_NO = obj.OFFER_NO;
+                        objtom.OFFER_DATE = obj.OFFER_DATE;
+                        objtom.DESCRIPTION = obj.DESCRIPTION;
+                        objtom.PLACE_DEST = obj.PLACE_DEST;
+                        objtom.DESTINATION = obj.DESTINATION;
+                        objtom.CONTACT_PERSON = obj.CONTACT_PERSON;
+                        objtom.PAYMENT = obj.PAYMENT;
+                        objtom.SHIPMENT = obj.SHIPMENT;
+                        objtom.VALIDITY_DAYS = obj.VALIDITY_DAYS;
+                        objtom.VALIDITY_DATE = obj.VALIDITY_DATE;
+                        objtom.IS_ORDER = obj.IS_ORDER;
+                        objtom.AGENCY_TRADING = 0;
+                        objtom.CREATED_BY = obj.CREATED_BY;
+                        objtom.LAST_UPDATED_BY = obj.LAST_UPDATED_BY;
+                    };
+                    objgl.OFFER_ID = objtom.OFFER_ID;
+                    dbcontext.SaveChanges();
+                }
+
+                // Delete previous Offer data
+                Tbl_Offer_Details objdeletecontact = new Tbl_Offer_Details();
+                dbcontext.Tbl_Offer_Details.RemoveRange(dbcontext.Tbl_Offer_Details.Where(m => m.OFFER_ID == obj.OFFER_ID));
+                dbcontext.SaveChanges();
+
+                // Insert new contacts data
+                string[] ChildRow = Contactdata.Split('|');
+                for (int i = 0; i < ChildRow.Length - 1; i++)
+                {
+                    string[] ChildRecord = ChildRow[i].Split('}');
+                    Tbl_Offer_Details objcontact = new Tbl_Offer_Details()
+                    {
+                        OFFER_ID = obj.OFFER_ID,
+                        PRODUCT_ID = Convert.ToDecimal(ChildRecord[0]),
+                        CATEGORY_NAME = ChildRecord[1],
+                        CURRENCY_ID = Convert.ToInt16(ChildRecord[4]),
+                        PRICE = Convert.ToDecimal(ChildRecord[5]),
+                        QUANTITY = Convert.ToDecimal(ChildRecord[6]),
+                        CREATED_BY = Convert.ToDecimal(obj.CREATED_BY),
+                        CREATED_DATE = DateTime.Now,
+                        LAST_UPDATED_BY = obj.LAST_UPDATED_BY,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                    };
+                    dbcontext.Tbl_Offer_Details.Add(objcontact);
+                    dbcontext.SaveChanges();
+                    objgl.OFFER_ID = objgl.OFFER_ID;
+                }
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+            return objgl.OFFER_ID;
+        }
+
+        public Tbl_Offers_Master ET_Admin_GeneralOffer_Update_GetbyID_DL(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_Offers_Master.Single(m => m.OFFER_ID == id);
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public int ET_Admin_GeneralOffer_Restore_Delete_DL(int id, decimal Updatedby, bool type)
+        {
+            int result = 0;
+            try
+            {
+                Tbl_Offers_Master obj = dbcontext.Tbl_Offers_Master.Single(m => m.OFFER_ID == id);
+                {
+                    obj.DELETED = type;
+                    obj.DELETED_DATE = DateTime.Now;
+                    obj.LAST_UPDATED_BY = Updatedby;
+                }
+                result = dbcontext.SaveChanges();
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+            return result;
+        }
+
+        public Tbl_Offers_Master ET_Admin_GeneralOffer_View_DL(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_Offers_Master.Single(m => m.OFFER_ID == id);
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public Tbl_Master_Products_CM ProductDetails_DL(int id, decimal companykey)
+        {
+            try
+            {
+                dbcontext.Configuration.ProxyCreationEnabled = false;
+                // var data = dbcontext.Tbl_Master_Products.Single(m => m.PRODUCT_ID == id && m.COM_KEY == companykey);
+                var data = (from item in dbcontext.Tbl_Master_Products
+                            join category in dbcontext.Tbl_Master_Category on item.CATEGORY equals category.CAT_CODE
+                            join uom in dbcontext.Tbl_Master_UOM on item.UOM equals uom.UOM_ID
+                            where item.PRODUCT_ID == id && item.COM_KEY == category.COM_KEY && item.DELETED == false
+                            select new Tbl_Master_Products_CM
+                            {
+                                PRODUCT_NAME = item.PRODUCT_NAME,
+                                CAT_NAME = category.CAT_NAME,
+                                UOM_Text = uom.UOM_NAME,
+                                PRODUCT_ID = item.PRODUCT_ID,
+                            }).FirstOrDefault();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+    }
+}

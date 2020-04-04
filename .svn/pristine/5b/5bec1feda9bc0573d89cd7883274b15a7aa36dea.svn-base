@@ -1,0 +1,130 @@
+﻿@model BusinessEntity.CustomModels.Quotation_View_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <table width="100" align="center">
+
+        <tr>
+            <td><img src="../Images/euro_logo.png" width="100"></td>
+            <td><h1 style="font-size:large"><label><strong>EUROTEXTILES</strong></label></h1></td>
+        </tr>
+    </table>
+    <table style="font-size:12px;">
+        <tr>
+
+            <td><span><label>Eurotextiles GmbH & Co,KG, Mammolshainerweg 14,61462 konigstein Ts</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>Bannari Amman Spinning Mills Limited</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>Mettupalayam Road 252</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>641043 Coimbatore</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>India</label></span></td>
+        </tr>
+
+    </table>
+    <table align="right">
+        <tr>
+            <td colspan="2"><strong>Supplier Name:@Model.QHeader[0].Q_CustomerName</strong></td>
+        </tr>
+        <tr>
+            <td>Processed by:<strong>@Model.QHeader[0].Q_SalesPersonName</strong></td>
+        </tr>
+        <tr>
+            <td>Date:<strong>@Model.QHeader[0].Q_Date.ToString("dd-MMM-yyyy")</strong></td>
+        </tr>
+    </table><br /><br />
+
+
+    <div class="row">
+
+        <div class="form-group col-md-6">
+            <label for="Email"><strong>Quotation No:</strong></label>
+            <strong>@Model.QHeader[0].Q_Code</strong>
+        </div><br /><br />
+
+        <table border="1" width="100%" align="center">
+            <thead>
+                <tr>
+                    <th align="center"><strong>Article No</strong></th>
+                    <th align="center"><strong>Product Name</strong></th>
+                    <th align="center"><strong>UOM</strong></th>
+                    <th align="center"><strong>Price</strong></th>
+                    <th align="center"><strong>Quantity</strong></th>
+                    <th align="center"><strong>Total</strong></th>
+                    <th align="center"><strong>Tax %</strong></th>
+                    <th align="center"><strong>Net</strong></th>
+                </tr>
+
+            </thead>
+            <tbody>
+                @foreach (var item in Model.QChild)
+                {
+                <tr>
+                    <td>@item.QD_ArticleNo</td>
+                    <td>@item.QD_ProductName</td>
+                    <td>@item.QD_UOM</td>
+                    <td style="text-align:right;">@Convert.ToDecimal(@item.QD_Unit_Price).ToString("0.000")</td>
+                    <td style="text-align:right;">@Convert.ToDecimal(@item.QD_Quantity).ToString("0.000")</td>
+                    <td style="text-align:right;">@Convert.ToDecimal(item.QD_Amount).ToString("0.000")</td>
+                    <td style="text-align:right;">@Convert.ToDecimal(@item.QD_Tax_Percentage).ToString("0.000")</td>
+                    @{
+                        decimal amount = Convert.ToDecimal(@item.QD_Amount);
+                        decimal per = Convert.ToDecimal(@item.QD_Tax_Percentage);
+                        decimal net = amount + (amount * per / 100);
+                    }
+                    <td style="text-align:right;">@net.ToString("0.000")</td>
+                </tr>
+                }
+                <tr>
+                    <td colspan="5">Total</td>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">@Convert.ToDecimal(@Model.QHeader[0].Q_TotalValue).ToString("0.000")</td>
+                    
+
+                </tr>
+            </tbody>
+        </table><br />
+        <p style="font-size:12px;">Terms   : CIF Hamburg(including THC at destination), CAD</p>
+        <p style="font-size:12px;">Delivery: December 2014 from India</p>
+    </div><br />
+    <table width="100%">
+        <tr>
+            <td> <p>___________________________</p><br /></td>
+            <td> <p>___________________________</p><br /></td>
+        </tr>
+        <tr>
+            <td><p style="font-size:small;">For Eurotextiles GmbH & Co.KG</p></td>
+            <td><p style="font-size:small; ">For Bannari Amman Spinning Mils Limited</p></td>
+        </tr>
+
+    </table><br />
+    <table style="font-size:12px;">
+        <tr>
+            <td><span><label>Our general terms of business apply</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>Any general variation have to be notified to us before the goods but not than 7 days on receipt of the goods.</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>No claims will be accepted after washing/using the goods.</label></span></td>
+        </tr>
+    </table><br />
+    <p> <hr style="font-weight:bold;border-top:1px solid black;"></p>
+    <table style="font-size:10px;width:100%;">
+        <tr>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Eurotextiles GmbH & Co.KG<br />Mammolshainer Weg 14<br />61462 Konigstein im Taunus<br />Fon +49 6174/25980<br />HRA 3451</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">HRA 3451<br />Amtsgericht Kongstein<br />Steuerrnummer 003 315 60117<br />USt-IdNr.DE279479010</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Kompl.Indra Enterprises GmbH<br />Geshafuher:Krishna Javaji<br />HRB 5137 Amtsgericht Konigstein<br />Steuernummer 003 236 16128</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Bankverbindung<br />Nassauische Sparkasse<br />IBAN :DE15 5105 00150270060706<br />SWIFT:-BIC NASSDE55XXX</td>
+           
+            
+        </tr>
+    </table>
+
+
+
+
+</div>

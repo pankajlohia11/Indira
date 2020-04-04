@@ -1,0 +1,28 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_DocumentSetup_DA
+    {
+        EntityClasses dbcontext = new EntityClasses();
+
+        public List<Tbl_Form_Master> FormMaster_DA()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Form_Master.ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+    }
+}

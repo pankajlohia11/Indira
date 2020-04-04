@@ -1,0 +1,261 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+/*
+    Author=Manoj
+    Date = 12th Apr 2018
+    User Master Data Access 
+ */
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_UserMaster_DL
+    {
+        // Creating Database Object for EntityClasses
+        EntityClasses dbcontext = new EntityClasses();
+
+        //User Master List View
+        public List<Tbl_Master_User> ET_Admin_UserList_DL(bool deleted,int com_key)
+        {
+            try
+            {
+                dbcontext.Configuration.ProxyCreationEnabled = false;
+                var data = dbcontext.Tbl_Master_User.Where(m => m.DELETED == deleted && m.COM_KEY== com_key).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        //Bind Dropdown Roles
+        public List<Tbl_Master_Role> Binddropdown_Role_DL(int companykey)
+        {
+            try
+            {
+                var Roles = dbcontext.Tbl_Master_Role.Where(m => m.DELETED == false && m.COM_KEY==companykey).ToList();
+                return Roles;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Insert/Update UserMaster
+        public decimal Tbl_Master_User_Add(Tbl_Master_User _tbl_Master_User, bool automanual, string prefix,out string usercode)
+        {
+            Tbl_Master_User tmu = new Tbl_Master_User();
+            try
+            {
+                if (_tbl_Master_User.USER_ID == 0)
+                {
+
+                    Tbl_Master_User Objtmu = new Tbl_Master_User()
+                    {
+                        USER_CODE = _tbl_Master_User.USER_CODE,
+                        USER_NAME = _tbl_Master_User.USER_NAME,
+                        DISPLAY_NAME = _tbl_Master_User.DISPLAY_NAME,
+                        USER_PASSWORD = _tbl_Master_User.USER_PASSWORD,
+                        ROLE_ID = _tbl_Master_User.ROLE_ID,
+                        USER_STREET = _tbl_Master_User.USER_STREET,
+                        USER_COUNTRY = _tbl_Master_User.USER_COUNTRY,
+                        USER_STATE = _tbl_Master_User.USER_STATE,
+                        USER_CITY = _tbl_Master_User.USER_CITY,
+                        USER_ZIP = _tbl_Master_User.USER_ZIP,
+                        USER_EMAIL = _tbl_Master_User.USER_EMAIL,
+                        USER_FAX = _tbl_Master_User.USER_FAX,
+                        USER_PHONE = _tbl_Master_User.USER_PHONE,
+                        USER_MOBILE = _tbl_Master_User.USER_MOBILE,
+                        USER_REMARKS = _tbl_Master_User.USER_REMARKS,
+                        CREATED_BY = _tbl_Master_User.CREATED_BY,
+                        CREATED_DATE = DateTime.Now,
+                        DELETED = false,
+                        COM_KEY=_tbl_Master_User.COM_KEY
+                    };
+                    dbcontext.Tbl_Master_User.Add(Objtmu);
+                    dbcontext.SaveChanges();
+                    if (automanual == true)
+                    {
+                        int len = 10 - (prefix + Objtmu.USER_ID).Length;
+                        //string code = prefix + new String('0', len) + Objtmu.USER_ID;
+                        string code = prefix + "0" + Objtmu.USER_ID;
+                        Tbl_Master_User Objtbl_Master_User = dbcontext.Tbl_Master_User.Single(m => m.USER_ID == Objtmu.USER_ID);
+                        {
+                            Objtbl_Master_User.USER_CODE = code;
+                        };
+                        dbcontext.SaveChanges();
+                    }
+                    tmu.USER_ID = Objtmu.USER_ID;
+                    usercode = Objtmu.USER_CODE;
+                }
+                else
+                {
+                    Tbl_Master_User Objtbl_Master_User = dbcontext.Tbl_Master_User.Single(m => m.USER_ID == _tbl_Master_User.USER_ID);
+                    {
+                        Objtbl_Master_User.USER_NAME = _tbl_Master_User.USER_NAME;
+                        Objtbl_Master_User.DISPLAY_NAME = _tbl_Master_User.DISPLAY_NAME;
+                        Objtbl_Master_User.USER_PASSWORD = _tbl_Master_User.USER_PASSWORD;
+                        Objtbl_Master_User.ROLE_ID = _tbl_Master_User.ROLE_ID;
+                        Objtbl_Master_User.USER_STREET = _tbl_Master_User.USER_STREET;
+                        Objtbl_Master_User.USER_COUNTRY = _tbl_Master_User.USER_COUNTRY;
+                        Objtbl_Master_User.USER_STATE = _tbl_Master_User.USER_STATE;
+                        Objtbl_Master_User.USER_CITY = _tbl_Master_User.USER_CITY;
+                        Objtbl_Master_User.USER_ZIP = _tbl_Master_User.USER_ZIP;
+                        Objtbl_Master_User.USER_EMAIL = _tbl_Master_User.USER_EMAIL;
+                        Objtbl_Master_User.USER_FAX = _tbl_Master_User.USER_FAX;
+                        Objtbl_Master_User.USER_PHONE = _tbl_Master_User.USER_PHONE;
+                        Objtbl_Master_User.USER_MOBILE = _tbl_Master_User.USER_MOBILE;
+                        Objtbl_Master_User.USER_REMARKS = _tbl_Master_User.USER_REMARKS;
+                        Objtbl_Master_User.LAST_UPDATED_BY =_tbl_Master_User.LAST_UPDATED_BY;
+                        Objtbl_Master_User.LAST_UPDATED_DATE = DateTime.Now;
+                    };
+
+                    dbcontext.SaveChanges();
+                    tmu.USER_ID = Objtbl_Master_User.USER_ID;
+                    usercode = Objtbl_Master_User.USER_CODE;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return tmu.USER_ID;
+        }
+
+        ///Get User Master Record while Edit
+        public Tbl_Master_User ET_Admin_User_Update_Get(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_Master_User.Single(m => m.USER_ID == id);
+                // return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //User Master Record View
+        public List<Tbl_Master_User> ET_Admin_User_View(int id)
+        {
+            return dbcontext.Tbl_Master_User.Where(m => m.USER_ID == id).ToList();
+            // return data;
+        }
+
+        // Delete User Master Record
+        public int ET_Admin_Users_Deleted_DL(int id)
+        {
+            int result = 0;
+            //int i = 1;
+            try
+            {
+                var find = dbcontext.Tbl_Master_User.Where(m => m.USER_ID == id).ToList();
+                if (find.Count() != 0)
+                {
+                    Tbl_Master_User delete = dbcontext.Tbl_Master_User.Single(m => m.USER_ID == id);
+                    delete.DELETED = true;
+                    delete.DELETED_BY = 1;
+                    delete.DELETED_DATE = DateTime.Now;
+                    
+                    result = dbcontext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+        //Restore Page Deleted records List
+        public List<Tbl_Master_User> ET_Admin_User_Restore_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_User.Where(m => m.DELETED == true).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        //Restore User Master Record
+        public decimal ET_Admin_User_Restore_Insert_DL(int id,bool type,int uid)
+        {
+            int result = 0;
+            try
+            {
+                Tbl_Master_User tmr = dbcontext.Tbl_Master_User.Single(m => m.USER_ID == id);
+                {
+                    tmr.LAST_UPDATED_DATE = DateTime.Now;
+                    tmr.DELETED = type;
+                    tmr.LAST_UPDATED_BY = uid;
+                }
+                result = dbcontext.SaveChanges();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+        //Checking Duplicate code in Usermaster
+        public string CheckDuplicateCode_DA(int id, string code)
+        {
+            if (id == 0)
+            {
+                int count = dbcontext.Tbl_Master_User.Where(m => m.USER_CODE == code).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                int count = dbcontext.Tbl_Master_User.Where(m => m.USER_CODE == code && m.USER_ID != id).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+
+            return "";
+        }
+
+        //Checking Duplicate Username in Usermaster
+        public string CheckDuplicateUserName_DL(int id, string name)
+        {
+            if (id == 0)
+            {
+                int count = dbcontext.Tbl_Master_User.Where(m => m.USER_NAME == name).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                int count = dbcontext.Tbl_Master_User.Where(m => m.USER_NAME == name && m.USER_ID != id).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+
+            return "";
+        }
+
+    }
+}

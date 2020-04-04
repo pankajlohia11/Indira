@@ -1,0 +1,158 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_CompanyDetails>
+
+
+@foreach (var item in Model)
+{
+    BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+    var countryname = "";
+    if (item.COM_COUNTRY != 0)
+    {
+        var CountryID = Convert.ToInt32(item.COM_COUNTRY);
+        countryname = (from country in dbc.locations
+                       where country.location_id == CountryID
+                       select country.name).FirstOrDefault();
+    }
+    <div class="col-md-12" id="div_company_view">
+        <div class="tile-body">
+            <div name="form1" role="form" id="form1" data-parsley-validate>
+                <h4><label><strong>Company Info</strong></label></h4>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Alpha">Code</label>
+                        <input type="text" name="Remarks" value="@item.COM_CODE" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label class="control-label">
+                            Company Type
+                        </label>
+                        <select class="form-control" id="companytype" disabled>
+                            @if (item.Cust_Supp == 0)
+            {
+                <option name="companytype" value="0">Customer</option> }
+else if (item.Cust_Supp == 0)
+{
+                <option name="companytype" value="1">Supplier</option>}
+else
+{
+                <option name="companytype" value="2">Both</option>}
+                        </select>
+                    </div>
+
+
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Email">Company Name</label>
+                        <input type="text" name="CompanyName" value="@item.COM_NAME" class="form-control" disabled>
+                        <input type="text" name="txtComID" id="txtComID" hidden>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Url">Display Name</label>
+
+                        <input type="text" name="DisplayName" value="@item.COM_DISPLAYNAME" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">UstId</label>
+                        <input type="text" name="UstId" value="@item.COM_USTID" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Tax No</label>
+
+                        <input type="text" name="TaxNo" value="@item.Tax_No" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Bank Name</label>
+                        @{ string Bankname = "";
+
+                            var count = new BusinessEntity.EntityModels.EntityClasses().Tbl__Master_CompanyBank.Where(m => m.B_PID == item.COM_ID);
+                            if (count.Count()>0)
+                            {
+                                Bankname = new BusinessEntity.EntityModels.EntityClasses().Tbl__Master_CompanyBank.Single(m => m.B_PID == item.COM_ID).B_NAME;
+                                <input type="text" name="UstId" value="@Bankname" class="form-control" disabled>
+                            }
+                            else
+                            {
+                                 <input type="text" name="UstId" value="@Bankname" class="form-control" disabled>
+                            }
+                            }
+                        
+                       
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Credit Days</label>
+
+                        <input type="text" name="TaxNo" value="@item.COM_CreditDays" class="form-control" disabled>
+                    </div>
+                </div>
+                <h4> <label><strong>Address Info</strong></label></h4>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Alphanumeric">Address</label>
+                        <input type="text" name="Address" value="@item.COM_STREET" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Alpha">Country</label>
+                        @*@Html.DropDownList("Country", new SelectList(ViewBag.Country, "location_id", "name"), new { @class = "form-control chosen-select", onchange = "State()", @id = "Country" })*@
+                        <input type="text" name="Country" value="@countryname" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Alpha">State</label>
+                        <input type="text" name="Country" value="@item.COM_STATE" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Alpha">City</label>
+                        <input type="text" name="Country" value="@item.COM_CITY" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Alphanumeric">Zip</label>
+                        <input type="text" name="Zip" value="@item.COM_ZIP" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <h4><label><strong>Contact Info</strong></label></h4>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Alphanumeric">Email</label>
+                        <input type="email" name="Email" value="@item.COM_EMAIL" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Alpha">Fax</label>
+
+                        <input type="text" name="Fax" value="@item.COM_FAX" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Alphanumeric">Phone</label>
+                        <input type="text" name="Phone" value="@item.COM_PHONE" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Alpha">Mobile</label>
+                        <input type="text" name="Mobile" value="@item.COM_MOBILE" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Alpha">Remarks</label>
+                        <input type="text" name="Remarks" value="@item.COM_REMARKS" class="form-control" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

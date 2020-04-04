@@ -1,0 +1,644 @@
+﻿app1.controller("AC_StoreCtrl", function ($scope, $http, $window, $compile) {
+    GetPrivilages();
+    GetStoreList();
+    GetCountryList();
+    GetStoreUserList();
+    GetProductList();
+    // Ger privilages
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_Purchase_StoreMaster/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    //Get the store list
+    function GetStoreList() {
+        var getstorelist = $http.get("/ET_Purchase_StoreMaster/GetStoreList",
+            {
+                params: { delete: false }
+            });
+        getstorelist.then(function (storelist) {
+            var res = JSON.parse(storelist.data);
+            $scope.storelist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    //Get the deleted store list
+    function GetStoreRestoreList() {
+        var getstorerestorelist = $http.get("/ET_Purchase_StoreMaster/GetStoreList",
+            {
+                params: { delete: true }
+            });
+        getstorerestorelist.then(function (storerestorelist) {
+            var res = JSON.parse(storerestorelist.data);
+            $scope.storerestorelist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    //Get the country list
+    function GetCountryList() {
+        var getcountrylist = $http.get("/ET_Purchase_StoreMaster/GetCountryList");
+        getcountrylist.then(function (countrylist) {
+            var res = JSON.parse(countrylist.data);
+            $scope.countrylist = res; 
+            $scope.SM_Country = "";
+            $scope.SM_State = "";
+            $scope.SM_City = "";
+        }, function () {
+            alert("No Countries Found");
+        });
+    }
+    //get the store user list
+    function GetStoreUserList() {
+        debugger;
+        var getstoreuserlist = $http.get("/ET_Purchase_StoreMaster/GetStoreUserList");
+        getstoreuserlist.then(function (storeuserlist) {
+           
+            var res = JSON.parse(storeuserlist.data);
+            $scope.storeuserlist = res; 
+            $scope.SM_Store_User = "";
+        }, function () {
+            alert("No Users Found");
+        });
+    }
+    //Get the product list
+    function GetProductList() {
+        var getproductlist = $http.get("/ET_Purchase_StoreMaster/GetProducts");
+        getproductlist.then(function (productlist) {
+            var res = JSON.parse(productlist.data);
+            $scope.products = res;
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    $scope.GetState = function () {
+        debugger;
+        if ($scope.SM_Country != "") {
+            var getstatelist = $http.get("/ET_Purchase_StoreMaster/BindStates",
+                {
+                    params: { id: $scope.SM_Country }
+                });
+            getstatelist.then(function (state) {
+                $scope.getstates = state.data;
+                $scope.getcities = {};
+            }, function () {
+                alert("No States Found");
+            });
+        }
+        else {
+            $scope.getstates = {};
+            $scope.getcities = {};
+        }
+    }
+    $scope.GetCity = function () {
+        debugger;
+        if ($scope.SM_State != "0") {
+            var getcitylist = $http.get("/ET_Purchase_StoreMaster/BindCities",
+                {
+                    params: { id: $scope.SM_State }
+                });
+            getcitylist.then(function (city) {
+                $scope.getcities = city.data;
+            }, function () {
+                alert("No Cities Found");
+            });
+        }
+        else { $scope.getcities = {}; }
+    }
+    $scope.CityChange = function () {
+    }
+    $scope.UserChange = function () {
+    } 
+   //Create the new store product
+    $scope.addnewrow = function (a) {
+        debugger;
+        var e = a.target;
+        var tr = $("#storedetailsbody").find("tr");
+        var txt = "";
+        for (var i = 0; i < tr.length; i++) {
+            var td = tr[i].cells;
+           // var Product = $(td[0]).find("select").val();
+            var Product = $(td[0]).find("p").text();
+            var Qty = $(td[3]).find("input").val();
+            var price = $(td[4]).find("input").val();
+            if (Product == "") {
+                message = "Select Product at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            }
+            else if (Qty == "") {
+                message = "Enter the Opening Qty at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            }
+            else if (price == "") {
+                message = "Enter the Opening Rate at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            }
+        }
+        if (txt == "") {
+            length = (length + 1);
+            var Rowhtml = "<tr><td><p style='display:none;'></p><select class='form-control chosen-select' id='drpProduct" + length + "' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo+'-'+product.P_ShortName }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' style='text-align:right;' onchange='MoneyValidation(this);' id='txtPackage' maxlength='21' class='form-control'/></td><td><input style='text-align:right;' type='text' id='txtQuantity' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control' /></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var temp = $compile(Rowhtml)($scope);
+            angular.element(document.getElementById('storedetailsbody')).append(temp);
+            $('.chosen-select').chosen();
+            GetProductList();
+        }
+    }
+    //Delete the store product
+    $scope.deleterow = function (a) {
+        var e = a.target;
+        var len = $("#storedetailsbody").find("tr").length;
+        if (len != 1) {
+            $(e).parent().parent().parent().fadeOut(300, function () { $(this).remove(); });
+        }
+        else {
+            message = "Atleast one Product required";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //View the store list
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        GetStoreList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    //View thw deleted store
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        GetStoreRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+    var length = 1;
+    //Create the new store
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+            $scope.SM_Id = "0";
+            $scope.SM_Code = "";
+            $scope.SM_Name = "";
+            $scope.SM_Store_User = "";
+            $scope.SM_Addressline1 = "";
+            $scope.SM_Addressline2 = ""; 
+            $scope.SM_Country = "";
+            $scope.txtState = "";
+            $scope.txtCity = "";
+            //$scope.SM_State = "";
+            //$scope.SM_City = "";
+            //$scope.getstates = {};
+            //$scope.getcities = {};
+            $scope.SM_Zipcode = "";
+            $("#drpStoreUsers").val("").trigger("chosen:updated");
+            $("#drpCountry").val("").trigger("chosen:updated");
+            var Rowhtml = "<tr><td><p style='display:none;'></p><select class='form-control chosen-select' id='drpProduct" + length + "' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo+'-'+product.P_ShortName }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' style='text-align:right;' maxlength='21' onchange='MoneyValidation(this);' class='form-control'/></td><td><input type='text' id='txtQuantity' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control' /></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var temp = $compile(Rowhtml)($scope);
+            angular.element(document.getElementById('storedetailsbody')).html("");
+            angular.element(document.getElementById('storedetailsbody')).append(temp);
+            $('.chosen-select').chosen();
+            GetProductList();
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Validate the data
+    function validate() {
+        var tr = $("#storedetailsbody").find("tr");
+        var txt = "";
+        for (i = 0; i < tr.length; i++) {
+            var td = $(tr[i]).find("td");
+           // var product = $(td[0]).find("select").val();
+            var product = $(td[0]).find("p").text();
+            var qty = $(td[3]).find("input").val();
+            var rate = $(td[4]).find("input").val();
+            if (product == "") {
+                message = "Enter Product Name at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            } else if (qty == "") {
+                message = "Enter Opening Qty at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else if (rate == "") {
+                message = "Enter Opening Rate at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else {
+                txt = txt + $(td[0]).find("p").text() + "}";
+                txt = txt + $(td[0]).find("p").text() + "}";
+                txt = txt + $(td[1]).find("input").val() + "}";
+                txt = txt + $(td[2]).find("input").val() + "}";
+                txt = txt + parseFloat($(td[3]).find("input").val().split('.').join("").replace(",", ".")) + "}";
+                txt = txt + parseFloat($(td[4]).find("input").val().split('.').join("").replace(",", ".")) + "|";
+            }
+        }
+        return txt;
+    }
+    //Save  the store
+    $scope.SubmitClick = function () {
+        debugger;
+        $("#div_loadImage").css("display", "block");
+        var txt = validate(); 
+        debugger;
+        if (txt != "") {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Purchase_StoreMaster/ET_Master_Store_Add",
+                dataType: 'json',
+                data: {
+                    SM_Id: $scope.SM_Id,
+                    SM_Code: $scope.SM_Code,
+                    SM_Name: $scope.SM_Name,
+                    SM_Store_User: $scope.SM_Store_User,
+                    SM_Addressline1: $scope.SM_Addressline1,
+                    SM_Addressline2: $scope.SM_Addressline2,
+                    SM_Country: $scope.SM_Country,
+                    SM_State: $scope.txtState,
+                    SM_City: $scope.txtCity,
+                    SM_Zipcode: $scope.SM_Zipcode,
+                    SM_Activeflag: $scope.SM_Activeflag,
+                    EnquiryDetails: txt
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+
+            post.success(function (data, status) {
+                $("#div_loadImage").css("display", "none");
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else if (data.indexOf("Success") > -1) {
+                    var res = data.split(':');
+                    if ($scope.SM_Id == 0) {
+                        message = 'Record Inserted Successfully With Code : '+res[1];
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully With Code : ' + res[1];
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.createnew();
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $("#div_loadImage").css("display", "none");
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            $("#div_loadImage").css("display", "none");
+        }
+
+    }
+    //Edit the store data
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Purchase_StoreMaster/ET_Master_Store_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var StoreByID = JSON.parse(data);
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+                    debugger;
+                    $scope.SM_Id = StoreByID.SM_Id;
+                    $scope.SM_Code = StoreByID.SM_Code;
+                    $scope.SM_Name = StoreByID.SM_Name;
+                    $scope.SM_Store_User = StoreByID.SM_Store_User;
+                    $scope.SM_Addressline1 = StoreByID.SM_Addressline1;
+                    $scope.SM_Addressline2 = StoreByID.SM_Addressline2;
+                    $scope.SM_Country = StoreByID.SM_Country;
+                    $scope.txtState = StoreByID.SM_State;
+                    $scope.txtCity = StoreByID.SM_City;
+                    $scope.SM_Zipcode = StoreByID.SM_Zipcode;
+                    $scope.SM_Activeflag = StoreByID.SM_Activeflag;
+                    $("#drpStoreUsers").val(StoreByID.SM_Store_User).trigger("chosen:updated");
+                    $("#drpCountry").val(StoreByID.SM_Country).trigger("chosen:updated"); 
+                    //$scope.GetState();
+                    //$scope.GetCity();
+                    EnquiryDetails(StoreByID.SM_Id);
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Get the store product details
+    function EnquiryDetails(e) {
+        var id = e;
+        $http({
+            method: 'POST',
+            url: '/ET_Purchase_StoreMaster/ET_Master_Store_Details_Load',
+            data: {
+                id: id,
+            },
+        }).success(function (data) {
+            debugger;
+            var enquirydata = JSON.parse(data)
+            var i = enquirydata.length;
+            var j = 0;
+            length = 1;
+            angular.element(document.getElementById('storedetailsbody')).html("");
+            while (i != 0) {
+                var Rowhtml = "<tr><td><p style='display:none;'></p><select class='form-control chosen-select' id='drpProduct" + length + "' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo+'-'+product.P_ShortName }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control'/></td><td><input type='text' id='txtQuantity' style='text-align:right;' onchange='MoneyValidation(this);' maxlength='21' class='form-control' /></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+                var temp = $compile(Rowhtml)($scope);
+                angular.element(document.getElementById('storedetailsbody')).append(temp);
+                $('.chosen-select').chosen();
+                GetProductList();
+                length++;
+                i--;
+                j++;
+            }
+            $scope.enquirydata1 = enquirydata;
+        });
+    }
+    //Restore the deleted records
+    
+    //$scope.deleteRecordConfirm = function (e, f) {
+    //    debugger; 
+    //    var res = false;
+    //    if (b)
+    //        res = $scope.Isdelete;
+    //    else
+    //        res = $scope.Isrestore
+    //    res = $scope.Isdelete;
+    //    if (res) {
+    //        var post = $http({
+    //            method: "POST",
+    //            url: "/ET_Purchase_StoreMaster/ET_Master_Store_RestoreDelete",
+    //            dataType: 'json',
+    //            data: {
+    //                id: a,
+    //                type: true
+    //            },
+    //            headers: { "Content-Type": "application/json" }
+    //        });
+    //        post.success(function (data, status) {
+    //            if (data == "Session Expired") {
+    //                $window.location.href = '/ET_Login/ET_SessionExpire';
+    //            }
+    //            else if (data.indexOf("ERR") > -1) {
+    //                $("#spanErrMessage1").html(data);
+    //                $("#spanErrMessage2").html(data);
+    //                if ($("#exceptionmessage").length)
+    //                    $("#exceptionmessage").trigger("click");
+    //            }
+    //            else {
+    //                if (data == "Success") {
+    //                    $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+    //                    if (b) {
+    //                        message = "Record Deleted Successfully.";
+    //                    }
+    //                    else {
+    //                        message = "Record Restored Successfully.";
+    //                    }
+
+    //                    toastr["success"](message, "Notification");
+    //                }
+    //                else {
+    //                    message = "Failed to do this operation.";
+    //                    toastr["error"](message, "Notification");
+    //                }
+    //            }
+    //        });
+    //        post.error(function (data, status) {
+    //            $window.alert(data.Message);
+    //        });
+    //    }
+    //}
+    $scope.Restoredeleterecords = function (a, $event, b) {
+        if (b) {
+            alertmessageModified($event, a.toString(), b, 'ET_Admin_Store', 'ET_Admin_Store_Delete');
+        }
+        else {
+            $scope.PerformRestore(a, $event, b);
+            //message = "You don't access to do this operation, please contact admin.";
+            //toastr["error"](message, "Notification");
+        }
+    };
+
+    $scope.PerformRestore = function (a, $event, b) {
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_Store/ET_Admin_Store_Delete",
+            dataType: 'json',
+            data: {
+                id: a,
+                type: b
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                if (data == "Success") {
+                    $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                    if (b) {
+                        message = "Record Deleted Successfully.";
+                    }
+                    else {
+                        message = "Record Restored Successfully.";
+                    }
+
+                    toastr["success"](message, "Notification");
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            }
+        });
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    };
+
+    //View: popup view
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Purchase_StoreMaster/ET_Master_Store_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Watch for binding data
+    $scope.$watch("products", function (value) {
+        var val = value || null;
+        if (val) {
+            debugger;
+            setTimeout(function () { $("#drpProduct" + length).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("storeuserlist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpStoreUsers").val($scope.SM_Store_User).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("countrylist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCountry").val($scope.SM_Country).trigger("chosen:updated"); }, 100);
+        }
+    });
+    //$scope.$watch("getstates", function (value) {
+    //    var val = value || null;
+    //    if (val) {
+    //        setTimeout(function () { $("#drpState").val($scope.SM_State).trigger("chosen:updated"); }, 100);
+    //    }
+    //}); 
+    //$scope.$watch("getcities", function (value) {
+    //    var val = value || null;
+    //    if (val) {
+    //        setTimeout(function () { $("#drpCity").val($scope.SM_City).trigger("chosen:updated"); }, 100);
+    //    }
+    //});
+    $scope.$watch("storelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("storerestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 5);
+        }
+    });
+    $scope.$watch("enquirydata1", function (value) {
+        var val = value || null;
+        if (val) {
+            var enquirydata = $scope.enquirydata1;
+            setTimeout(function () {
+                debugger;
+                var tr = $("#storedetailsbody").find("tr");
+                for (var i = 0; i < tr.length; i++) {
+                    var td = tr[i].cells;
+                    
+                    $(td[0]).find("select").val(enquirydata[i].productid).trigger("chosen:updated");
+                    $(td[0]).find("p").text(enquirydata[i].productid);
+                    $(td[1]).find("input").val(enquirydata[i].name);
+                    $(td[2]).find("input").val(enquirydata[i].uom);
+                    $(td[3]).find("input").val(parseFloat(enquirydata[i].openingQty).toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+                    $(td[4]).find("input").val(parseFloat(enquirydata[i].openingrate).toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+                }
+            }, 100);
+        }
+    });
+
+});

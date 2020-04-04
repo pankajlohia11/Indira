@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web;
+using BusinessEntity.EntityModels;
+
+namespace DataAccess
+{
+    public class DAL
+    {
+
+        public int Authenticate_DA(Tbl_Master_User objBE)
+        {
+            int result = 0;
+            try
+            {
+                EntityClasses dbcontext = new EntityClasses();
+                result = (dbcontext.Tbl_Master_User.Where(m => m.USER_NAME == objBE.USER_NAME && m.USER_PASSWORD == objBE.USER_PASSWORD)).ToList().Count();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+    }
+}

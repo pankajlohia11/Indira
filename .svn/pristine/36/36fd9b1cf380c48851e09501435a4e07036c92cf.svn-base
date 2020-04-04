@@ -1,0 +1,473 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DataAccess;
+using DataAccess.Admin_DA;
+using BusinessEntity.EntityModels;
+using System.Data;
+using System.Data.Entity;
+using BusinessEntity.CustomModels;
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_General_Order_Details_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+
+        public List<Tbl_Order_Details_CM> Tbl_OrderList_DL(int Comkey, bool type)
+        {
+            try
+            {
+                //var data = dbcontext.Tbl_Master_Order.Where(m => m.COM_KEY == Comkey && m.DELETED == type).ToList();
+
+                var data = (from Ol in dbcontext.Tbl_Master_Order
+                            join Od in dbcontext.Tbl_Order_Details on Ol.SO_ID equals Od.AGEN_TRAD_PO_ID
+                            join Mu in dbcontext.Tbl_Master_User on Ol.SO_SalesPersonID equals Mu.USER_ID
+                            join Cgry in dbcontext.Tbl_Master_Category on Od.CATEGORY_ID equals Cgry.CAT_CODE
+                            join Uom in dbcontext.Tbl_Master_UOM on Od.UOM equals Uom.UOM_ID
+                            select new Tbl_Order_Details_CM
+                            {
+                                SO_ID = Ol.SO_ID,
+                                USER_NAME = Mu.USER_NAME,
+                                AGEN_TRAD_PO = Od.AGEN_TRAD_PO,
+                                CAT_NAME = Cgry.CAT_NAME,
+                                UOM_NAME = Uom.UOM_NAME,
+                                QUANTITY = Od.QUANTITY,
+                                PRICE = Od.PRICE
+                            }).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public List<Tbl_Master_User> Sales_person_dropdown_DL(int com_key)
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                var ObjSales_Org = dbcontext.Tbl_Sales_Organization.Where(m => m.COM_KEY == com_key && m.DELETED==false).ToList();
+                string s = "";
+                for (int i = 0; i < ObjSales_Org.Count(); i++)
+                {
+                    if (i == 0)
+                    {
+                        s = ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                    }
+                    else
+                    {
+                        s = s + "," + ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                    }
+                }
+                List<decimal> UID = s.Split(',').Select(m => Convert.ToDecimal(m)).ToList();
+                var Users = dbcontext.Tbl_Master_User.Where(m => m.USER_ID > 0 && UID.Contains(m.USER_ID) && m.COM_KEY == com_key).ToList();
+
+                return Users;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public DataTable OrgEmp_DL(int com_key)
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+
+            DataTable dt_Org = new DataTable();
+            if (dt_Org.Columns.Count == 0)
+            {
+                dt_Org.Columns.Add("OrgID");
+                dt_Org.Columns.Add("OrgName");
+                dt_Org.Columns.Add("EmpID");
+            }
+            var ObjSales_Org = dbcontext.Tbl_Sales_Organization.Where(m => m.COM_KEY == com_key).ToList();
+            string s = "";
+            for (int i = 0; i < ObjSales_Org.Count(); i++)
+            {
+                List<decimal> emps = ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString().Split(',').Select(m => Convert.ToDecimal(m)).ToList();
+                for (int j = 0; j < emps.Count(); j++)
+                {
+                    DataRow dr = dt_Org.NewRow();
+                    dr["OrgID"] = ObjSales_Org[i].ORG_ID;
+                    dr["OrgName"] = ObjSales_Org[i].ORG_NAME;
+                    dr["EmpID"] = emps[j];
+                    dt_Org.Rows.Add(dr);
+                }
+            }
+            return dt_Org;
+        }
+
+        public decimal ET_General_Order_Details_Add_BL(Tbl_Master_Order obj, string prefix, bool automanual, string Orderdetails)
+        {
+            Tbl_Master_Order tomgl = new Tbl_Master_Order();
+            try
+            {
+                if (obj.SO_ID == 0)
+                {
+                    Tbl_Master_Order objtom = new Tbl_Master_Order()
+                    {
+                        SO_ID = obj.SO_ID,
+                        SO_Code = obj.SO_Code,
+                        SO_OrderDate = obj.SO_OrderDate,
+                        SO_SalesPersonID = obj.SO_SalesPersonID,
+                        SO_ORGID = obj.SO_ORGID,
+                        SO_OrderType = obj.SO_OrderType,
+                        SO_CutomerID = obj.SO_CutomerID,
+                        SO_SupplierID = obj.SO_SupplierID,
+
+                        SO_CusPONO = obj.SO_CusPONO,
+                        SO_CusSCNO = obj.SO_CusSCNO,
+                        SO_SupPONO = obj.SO_SupPONO,
+                        SO_SupSCNO = obj.SO_SupSCNO,
+
+                        SO_CusPODate = obj.SO_CusPODate,
+                        SO_CusSCDate = obj.SO_CusSCDate,
+                        SO_SupPODate = obj.SO_SupPODate,
+                        SO_SupSCDate = obj.SO_SupSCDate,
+
+                        SO_CusCurrency = obj.SO_CusCurrency,
+                        SO_SupCurrency = obj.SO_SupCurrency,
+                        SO_CusPaymentTermID = obj.SO_CusPaymentTermID,
+                        SO_SupPaymentTermID = obj.SO_SupPaymentTermID,
+                        SO_CusDeliveryTerms = obj.SO_CusDeliveryTerms,
+                        SO_SupDeliveryTerms = obj.SO_SupDeliveryTerms,
+                        SO_Commision = obj.SO_Commision,
+                        SO_Remarks = obj.SO_Remarks,
+                        DELETED = obj.DELETED,
+                        CREATED_BY = obj.CREATED_BY,
+                        CREATED_DATE = DateTime.Now,
+                        LAST_UPDATED_BY = obj.LAST_UPDATED_BY,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                        SO_Approval = obj.SO_Approval,
+                        COM_KEY = obj.COM_KEY
+                    };
+                    dbcontext.Tbl_Master_Order.Add(objtom);
+                    dbcontext.SaveChanges();
+
+                    if (automanual == true)
+                    {
+                        string code = prefix + "0" + objtom.SO_ID;
+                        Tbl_Master_Order Tbl_Master_Order = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == objtom.SO_ID);
+                        {
+                            Tbl_Master_Order.SO_Code = code;
+                        };
+                        dbcontext.SaveChanges();
+                    }
+                    tomgl.SO_ID = objtom.SO_ID;
+                }
+                else
+                {
+                    Tbl_Master_Order objtom = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == obj.SO_ID);
+                    {
+                        objtom.SO_ID = obj.SO_ID;
+                        objtom.SO_Code = obj.SO_Code;
+                        objtom.SO_OrderDate = obj.SO_OrderDate;
+                        objtom.SO_SalesPersonID = obj.SO_SalesPersonID;
+                        objtom.SO_ORGID = obj.SO_ORGID;
+                        objtom.SO_OrderType = obj.SO_OrderType;
+                        objtom.SO_CutomerID = obj.SO_CutomerID;
+                        objtom.SO_SupplierID = obj.SO_SupplierID;
+                        objtom.SO_CusPONO = obj.SO_CusPONO;
+                        objtom.SO_CusPODate = obj.SO_CusPODate;
+                        objtom.SO_CusSCNO = obj.SO_CusSCNO;
+                        objtom.SO_CusSCDate = obj.SO_CusSCDate;
+                        objtom.SO_SupPONO = obj.SO_SupPONO;
+                        objtom.SO_SupPODate = obj.SO_SupPODate;
+                        objtom.SO_SupSCNO = obj.SO_SupSCNO;
+                        objtom.SO_SupSCDate = obj.SO_SupSCDate;
+                        objtom.SO_CusCurrency = obj.SO_CusCurrency;
+                        objtom.SO_SupCurrency = obj.SO_SupCurrency;
+                        objtom.SO_CusPaymentTermID = obj.SO_CusPaymentTermID;
+                        objtom.SO_SupPaymentTermID = obj.SO_SupPaymentTermID;
+                        objtom.SO_CusDeliveryTerms = obj.SO_CusDeliveryTerms;
+                        objtom.SO_SupDeliveryTerms = obj.SO_SupDeliveryTerms;
+                        objtom.SO_Commision = obj.SO_Commision;
+                        objtom.SO_Remarks = obj.SO_Remarks;
+                        objtom.LAST_UPDATED_BY = obj.LAST_UPDATED_BY;
+                        objtom.LAST_UPDATED_DATE = DateTime.Now;
+                        objtom.DELETED = obj.DELETED;
+                    };
+                    dbcontext.SaveChanges();
+                    tomgl.SO_ID = objtom.SO_ID;
+                }
+
+                // Delete previous Offer data
+                Tbl_Order_Details objdeletecontact = new Tbl_Order_Details();
+                dbcontext.Tbl_Order_Details.RemoveRange(dbcontext.Tbl_Order_Details.Where(m => m.ORDER_ID == tomgl.SO_ID));
+                dbcontext.SaveChanges();
+
+                // Insert new contacts data
+                string[] ChildRow = Orderdetails.Split('|');
+
+                // var Categoryid = "";
+                // var Productid = "";
+                for (int i = 0; i < ChildRow.Length - 1; i++)
+                {
+                    string[] ChildRecord = ChildRow[i].Split('}');
+
+                    var Productid = Convert.ToDecimal(ChildRecord[0]);
+
+                    var Categoryid = (from id in dbcontext.Tbl_Master_Products
+                                      where id.PRODUCT_ID == Productid
+                                      select id.CATEGORY).FirstOrDefault();
+
+                    var Uom = (from id in dbcontext.Tbl_Master_Products
+                               where id.PRODUCT_ID == Productid
+                               select id.UOM).FirstOrDefault();
+
+
+
+                    Tbl_Order_Details objorder = new Tbl_Order_Details()
+                    {
+                        AGEN_TRAD_PO_ID = tomgl.SO_ID,
+                        AGEN_TRAD_PO = obj.SO_OrderType.ToString(),
+                        PRODUCT_ID = Convert.ToDecimal(ChildRecord[0]),
+                        CATEGORY_ID = Convert.ToDecimal(Categoryid),
+                        UOM = Convert.ToDecimal(Uom),
+                        CURRENCY_ID = Convert.ToInt16(ChildRecord[4]),
+
+                        PACKING = ChildRecord[5],
+
+                        QUANTITY = Convert.ToDecimal(ChildRecord[6]),
+                        Target_Value = Convert.ToDecimal(ChildRecord[7]),
+                        PRICE = Convert.ToInt16(ChildRecord[8]),
+                        CREATED_BY = Convert.ToDecimal(obj.CREATED_BY),
+                        CREATED_DATE = DateTime.Now,
+                        LAST_UPDATED_BY = obj.LAST_UPDATED_BY,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                        //    PENDING_QUANTITY = ,
+                        //   SHIP_ISSUED_QUANTITY = ,
+                        //   RETURN_QUANTITY = ,
+                        Selling_Price = 0,
+                        SUPPLIEROFFER_ID = Convert.ToDecimal(ChildRecord[9]),
+                        IS_CUSTOMEROFFER = false,
+                        CUSTOMEROFFER_ID = 0,
+                        IS_SUPPLIEROFFER = false,
+                        DELETED = false,
+                    };
+                    dbcontext.Tbl_Order_Details.Add(objorder);
+                    dbcontext.SaveChanges();
+                    tomgl.SO_ID = tomgl.SO_ID;
+                }
+
+
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+
+            return tomgl.SO_ID;
+        }
+
+        public List<Tbl_Payment_Terms> Payment_terms_dropdown_DL(int com_key)
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                var data = dbcontext.Tbl_Payment_Terms.Where(m => m.COM_KEY == com_key).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public Tbl_Master_Order ET_General_Order_Details_Update_GetbyID_DL(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == id);
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public int ET_General_Order_Details_Restore_Delete_DL(int id, decimal Updatedby, bool type)
+        {
+            int result = 0;
+            try
+            {
+                Tbl_Master_Order obj = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == id);
+                {
+                    obj.DELETED = type;
+                    obj.LAST_UPDATED_DATE = DateTime.Now;
+                    obj.LAST_UPDATED_BY = Updatedby;
+                }
+                result = dbcontext.SaveChanges();
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+            return result;
+        }
+
+        public Tbl_Order_Details_CM ET_General_Order_Details_View_DL(int id)
+        {
+            try
+            {
+                var data = (from MO in dbcontext.Tbl_Master_Order
+                            join OD in dbcontext.Tbl_Order_Details on MO.SO_ID equals OD.AGEN_TRAD_PO_ID
+                            join PM in dbcontext.Tbl_Master_Products on OD.PRODUCT_ID equals PM.PRODUCT_ID
+                            join CG in dbcontext.Tbl_Master_Category on OD.CATEGORY_ID equals CG.CAT_CODE
+                            join UOM in dbcontext.Tbl_Master_UOM on OD.UOM equals UOM.UOM_ID
+                            join CY in dbcontext.Tbl_Currency_Master on OD.CURRENCY_ID equals CY.CURRENCY_ID
+                            join MU in dbcontext.Tbl_Master_User on MO.SO_SalesPersonID equals MU.USER_ID
+                            join CD in dbcontext.Tbl_Master_CompanyDetails on MO.SO_CutomerID equals CD.COM_ID
+                            join SCD in dbcontext.Tbl_Master_CompanyDetails on MO.SO_SupplierID equals SCD.COM_ID
+                            where MO.SO_ID == id
+                            select new Tbl_Order_Details_CM
+                            {
+                                AGEN_TRAD_PO = OD.AGEN_TRAD_PO,
+                                CAT_NAME = CG.CAT_NAME,
+                                PRODUCT_Name = PM.PRODUCT_NAME,
+                                QUANTITY = OD.QUANTITY,
+                                UOM_NAME = UOM.UOM_NAME,
+                                CURRENCY_NAME = CY.CURRENCY_NAME,
+                                SO_OrderDate = MO.SO_OrderDate,
+                                SO_ORGID = MO.SO_ORGID,
+                                SO_OrderType = MO.SO_OrderType,
+                                SO_CutomerID = MO.SO_CutomerID,
+                                SO_SupplierID = MO.SO_SupplierID,
+                                SO_CusPONO = MO.SO_CusPONO,
+                                SO_CusPODate = MO.SO_CusPODate,
+                                SO_SupPONO = MO.SO_SupPONO,
+                                SO_SupPODate = MO.SO_SupPODate,
+                                SO_SupSCNO = MO.SO_SupSCNO,
+                                SO_SupSCDate = MO.SO_SupSCDate,
+                                SO_CusCurrencyname = CY.CURRENCY_NAME,
+                                SO_SupCurrencyname = CY.CURRENCY_NAME,
+                                SO_CusPaymentTermID = MO.SO_CusPaymentTermID,
+                                SO_SupPaymentTermID = MO.SO_SupPaymentTermID,
+                                SO_CusDeliveryTerms = MO.SO_CusDeliveryTerms,
+                                SO_SupDeliveryTerms = MO.SO_SupDeliveryTerms,
+                                SO_Commision = MO.SO_Commision,
+                                SO_Remarks = MO.SO_Remarks,
+                                PACKING = OD.PACKING,
+                                SHORT_NAME = PM.SHORT_NAME,
+                                PRICE = OD.PRICE,
+                                Target_Value = OD.Target_Value,
+                                USER_NAME = MU.USER_NAME,
+                                CUSTOMER_NAME = CD.COM_NAME,
+                                SUPPLIER_NAME = SCD.COM_NAME,
+
+
+                            }).FirstOrDefault();
+
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public List<Tbl_Order_Details_CM> ET_General_Order_Details_Update_Childtable_DL(int id)
+        {
+            try
+            {
+
+                var data = (from Ol in dbcontext.Tbl_Master_Order
+                            join Od in dbcontext.Tbl_Order_Details on Ol.SO_ID equals Od.AGEN_TRAD_PO_ID
+                            join Cgry in dbcontext.Tbl_Master_Category on Od.CATEGORY_ID equals Cgry.CAT_CODE
+                            join Uom in dbcontext.Tbl_Master_UOM on Od.UOM equals Uom.UOM_ID
+                            join Pct in dbcontext.Tbl_Master_Products on Od.PRODUCT_ID equals Pct.PRODUCT_ID
+                            where Od.AGEN_TRAD_PO_ID == id
+                            select new Tbl_Order_Details_CM
+                            {
+                                SO_ID = Ol.SO_ID,
+                                CAT_NAME = Cgry.CAT_NAME,
+                                UOM_NAME = Uom.UOM_NAME,
+                                QUANTITY = Od.QUANTITY,
+                                PRICE = Od.PRICE,
+                                SHORT_NAME = Pct.SHORT_NAME,
+                                PACKING = Od.PACKING,
+                                CURRENCY_ID = Od.CURRENCY_ID,
+                                PRODUCT_ID = Pct.PRODUCT_ID,
+                                PRODUCT_Name = Pct.PRODUCT_NAME,
+                                ORDER_ID = Od.ORDER_ID,
+                                Target_Value = Od.Target_Value
+                            }).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public Tbl_Offer_Details_CM ET_General_Order_SuplierProduct_Offer_DL(int id, int pid)
+        {
+            try
+            {      
+
+                var data = (from Ofid in dbcontext.Tbl_Offer_Details
+                            join OfM in dbcontext.Tbl_Offers_Master on Ofid.OFFER_ID equals OfM.OFFER_ID
+                            join pct in dbcontext.Tbl_Master_Products on pid equals pct.PRODUCT_ID
+                            where OfM.COM_ID == id && Ofid.PRODUCT_ID == pid
+                            select new Tbl_Offer_Details_CM
+                            {
+                                OFFER_ID = OfM.OFFER_ID,
+                                CUST_ID = OfM.CUST_ID,
+                                CUST_SUPP = OfM.CUST_SUPP,
+                                OFFER_NO = OfM.OFFER_NO,
+                                PRODUCT_NAME = pct.PRODUCT_NAME,
+                                PRICE = Ofid.PRICE,
+                                VALIDITY_DATE = OfM.VALIDITY_DATE,
+                                VALIDITY_DAYS = OfM.VALIDITY_DAYS,
+                                OFFER_DATE = OfM.OFFER_DATE,
+                                COM_ID = OfM.COM_ID,
+                                PRODUCT_ID = Ofid.PRODUCT_ID,  
+                                OFFER_CODE = OfM.OFFER_CODE
+                                
+                               // ORDER_ID = Orderid,
+                                
+
+                            }).FirstOrDefault();
+
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public string CheckDuplicateCode_DL(decimal id, string OrderCode)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    var count = dbcontext.Tbl_Master_Order.Where(m => m.SO_Code == OrderCode).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                else
+                {
+                    var count = dbcontext.Tbl_Master_Order.Where(m => m.SO_ID != id && m.SO_Code == OrderCode).Count();
+                    if (count > 0)
+                    {
+                        return "Exist";
+                    }
+                }
+                return "";
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+
+    }
+}

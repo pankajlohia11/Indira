@@ -1,0 +1,48 @@
+﻿@using System.Globalization;
+@model IEnumerable<BusinessEntity.CustomModels.Tbl_Offer_Details_CM>
+<table class="table table-custom">
+    <thead>
+        <tr>
+            @if (Model.Count() > 0)
+            {
+        <th>Offer Code</th>
+        <th>Offer Date</th>
+        <th>Validity Up To</th>
+        <th>Specific To Customer</th>
+        <th>Price</th>
+        <th>Action</th>
+            }
+            else
+            {
+        <th style="text-align:center;">No Offer Available</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            @foreach (var item in Model)
+            {
+                <td>
+                    @item.OFFER_CODE
+                </td>
+                <td>
+                    @item.OFFER_DATE.ToString("dd-MM-yyyy")
+                </td>
+                <td>
+                    @item.VALIDITY_DATE.ToString("dd-MM-yyyy")
+                </td>
+                <td>
+                    @item.OfferType
+                </td>
+                <td>
+                    @(Convert.ToDecimal(item.PRICE).ToString("N3", CultureInfo.CreateSpecificCulture("de-DE")))
+                </td>
+                <td>
+                    <button type="button" id="apply" onclick="Applyprice(@item.OFFER_ID,this);" class="btn btn-rounded btn-success btn-sm">Apply</button>
+                </td>
+            }
+        </tr>
+    </tbody>
+</table>
+<span style="color:orangered;">&nbsp;&nbsp;*Note : Select customer and check offer to get "Specific to Customer" offers</span>
+

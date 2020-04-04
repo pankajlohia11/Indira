@@ -1,0 +1,644 @@
+﻿app1.controller("AC_SalesTarget", function ($scope, $http, $window, $rootScope) {
+    var currentdate = new Date();
+    $scope.currentyear = currentdate.getFullYear();
+    GetPrivilages();
+    GetTargetList();
+    ORGBind();
+    //Checking privilage
+    function GetPrivilages() {
+        $scope.selectedtype = "0";
+        $scope.selectedemp = "";
+        var getprivilages = $http.get("/ET_Admin_SalesTarget/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+     // Get Target List
+    function GetTargetList() {
+
+        var getTargetList = $http.get("/ET_Admin_SalesTarget/GetTargetList",
+            {
+                params: { deleted: false }
+            });
+        getTargetList.then(function (org) {
+
+            var res = JSON.parse(org.data);
+            $scope.Orglist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    function GetTargetRestoreList() {
+        var getTargetRestoreList = $http.get("/ET_Admin_SalesTarget/GetTargetList",
+            {
+                params: { deleted: true }
+            });
+        getTargetRestoreList.then(function (user) {
+            var res = JSON.parse(user.data);
+            $scope.Orgrestorelist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    // Bind Dropdown Roles
+    function ORGBind() {
+        var GetTargetList = $http.get("/ET_Admin_SalesTarget/Binddropdown_Organization"
+        );
+        GetTargetList.then(function (org) {
+
+            if (org.data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (org.data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                debugger;
+                var res = JSON.parse(org.data);
+                $scope.orgData = res;
+                $scope.selectedorg = "0";
+            }
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    //Bind Sales Target Employees
+    $scope.ORGChange = function () {
+        if ($scope.selectedorg != "0") {
+            var GetTargetList = $http.get("/ET_Admin_SalesTarget/BindRow_Employees",
+                {
+                    params: { ORG_ID: $scope.selectedorg, FIN_YEAR: $scope.selectedyear }
+                }
+            );
+            GetTargetList.then(function (org) {
+
+                if (org.data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (org.data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    debugger;
+                    $scope.targetbind = $scope.selectedorg;
+                    $('#divTarget').html(org.data);
+                }
+            }, function () {
+                alert('Data not found');
+            });
+        }
+        else {
+            $scope.targetbind = $scope.selectedorg;
+            $('#divTarget').html("");
+        }
+    }
+    $scope.YearChange = function () {
+    }
+    $scope.ParentChange = function () {
+    }
+    //Show the target list
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        GetTargetList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    //Show the deleted records
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        GetTargetRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+    //Insert the new Target
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            //$("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $scope.submittext = "Submit";
+            $scope.SGT_ID = 0;
+            $scope.selectedyear = $scope.currentyear.toString();
+            $scope.selectedorg = 0;
+            $scope.SGT_TARGET = "";
+            $scope.SGT_Pending = "0";
+            $scope.selectedorg = "0";
+            $("#drpFinancialYear").val($scope.selectedyear).trigger("chosen:updated");
+            $("#drpOrganization").val("0").trigger("chosen:updated");
+            $scope.ORGChange();
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+     // Clent Side Validation for User Master
+    function validation()
+    {
+        debugger;
+        if ($("#txtTarget").val() == "") {
+            toastr["error"]("Target Cannot be empty", "Notification");
+            return "";
+        }
+        if ($("#txtTarget").val() == "0") {
+            toastr["error"]("Target Cannot be 0", "Notification");
+            return "";
+        }
+        if ($("#txtPendingTarget").val() != "0") {
+            toastr["error"]("Pending Target Amount should be 0", "Notification");
+            return "";
+        }
+        var txtTarget1 = parseInt($("#txtTarget").val());
+        var tbl = $("#tblSalesTarget button").length;
+        var totact = 0;
+        var totpen = 0;
+        for (var i = 0; i < tbl; i++) {
+            var ctrlid = "#txtTar_" + i;
+            var ctrlid1 = "#txtPen_" + i;
+            if ($(ctrlid).val() == "") {
+                $(ctrlid).val("0");
+            }
+            if ($(ctrlid1).val() == "") {
+                $(ctrlid1).val("0");
+            }
+            totact = totact + parseInt($(ctrlid).val());
+            totpen = totpen + parseInt($(ctrlid1).val());
+        }
+        if (txtTarget1 != totact || totpen != 0)
+        {
+            toastr["error"]("There should be 0 pending in user wise", "Notification");
+            return "";
+        }
+        var targetdata = "";
+        for (var k = 0; k < tbl; k++) {
+            var tblno = k;
+            var tblname = "#tblSalesTarget_" + tblno + " tbody tr";
+            var TotalRow = $(tblname).length - 1;
+            var M1 = 0, M2 = 0, M3 = 0, M4 = 0, M5 = 0, M6 = 0, M7 = 0, M8 = 0, M9 = 0, M10 = 0, M11 = 0, M12 = 0;
+            var txtTotal = 0;
+            var userId = $("#txtUserID_" + k).val();
+            for (var i = 0; i < TotalRow; i++) {
+                var txtrowTotal = "";
+                if ($("#txtM1_" + tblno + i).val() != '')
+                    M1 = $("#txtM1_" + tblno + i).val();
+                if ($("#txtM2_" + tblno + i).val() != '')
+                    M2 = $("#txtM2_" + tblno + i).val();
+                if ($("#txtM3_" + tblno + i).val() != '')
+                    M3 = $("#txtM3_" + tblno + i).val();
+                if ($("#txtM4_" + tblno + i).val() != '')
+                    M4 = $("#txtM4_" + tblno + i).val();
+                if ($("#txtM5_" + tblno + i).val() != '')
+                    M5 = $("#txtM5_" + tblno + i).val();
+                if ($("#txtM6_" + tblno + i).val() != '')
+                    M6 = $("#txtM6_" + tblno + i).val();
+                if ($("#txtM7_" + tblno + i).val() != '')
+                    M7 = $("#txtM7_" + tblno + i).val();
+                if ($("#txtM8_" + tblno + i).val() != '')
+                    M8 = $("#txtM8_" + tblno + i).val();
+                if ($("#txtM9_" + tblno + i).val() != '')
+                    M9 = $("#txtM9_" + tblno + i).val();
+                if ($("#txtM10_" + tblno + i).val() != '')
+                    M10 = $("#txtM10_" + tblno + i).val();
+                if ($("#txtM11_" + tblno + i).val())
+                    M11 = $("#txtM11_" + tblno + i).val();
+                if ($("#txtM12_" + tblno + i).val())
+                    M12 = $("#txtM12_" + tblno + i).val();
+                var productid = $("#txtProductID_" + tblno + i).val();
+                txtrowTotal = parseInt(M1) + parseInt(M2) + parseInt(M3) + parseInt(M4) + parseInt(M5) + parseInt(M6) + parseInt(M7) + parseInt(M8) + parseInt(M9) +
+                    parseInt(M10) + parseInt(M11) + parseInt(M12);
+                if (k == 0) {
+                    if (i == 0)
+                    {
+                        targetdata = parseInt(M1) +","+ parseInt(M2) +","+ parseInt(M3) +","+ parseInt(M4) +","+ parseInt(M5) +","+ parseInt(M6) +","+ parseInt(M7) +","+ parseInt(M8) +","+ parseInt(M9) +","+
+                            parseInt(M10) + "," + parseInt(M11) + "," + parseInt(M12) + "," + txtrowTotal + "," + productid + "," + userId;
+                    }
+                    else
+                    {
+                        targetdata = targetdata + "|" + parseInt(M1) + "," + parseInt(M2) + "," + parseInt(M3) + "," + parseInt(M4) + "," + parseInt(M5) + "," + parseInt(M6) + "," + parseInt(M7) + "," + parseInt(M8) + "," + parseInt(M9) + "," +
+                            parseInt(M10) + "," + parseInt(M11) + "," + parseInt(M12) + "," + txtrowTotal + "," + productid + "," + userId;
+                    }
+                }
+                else
+                {
+                    if (i == 0) {
+                        targetdata = targetdata + "&" + parseInt(M1) + "," + parseInt(M2) + "," + parseInt(M3) + "," + parseInt(M4) + "," + parseInt(M5) + "," + parseInt(M6) + "," + parseInt(M7) + "," + parseInt(M8) + "," + parseInt(M9) + "," +
+                            parseInt(M10) + "," + parseInt(M11) + "," + parseInt(M12) + "," + txtrowTotal + "," + productid + "," + userId;
+                    }
+                    else {
+                        targetdata = targetdata + "|" + parseInt(M1) + "," + parseInt(M2) + "," + parseInt(M3) + "," + parseInt(M4) + "," + parseInt(M5) + "," + parseInt(M6) + "," + parseInt(M7) + "," + parseInt(M8) + "," + parseInt(M9) + "," +
+                            parseInt(M10) + "," + parseInt(M11) + "," + parseInt(M12) + "," + txtrowTotal + "," + productid + "," + userId;
+                    }
+                }
+                M1 = 0, M2 = 0, M3 = 0, M4 = 0, M5 = 0, M6 = 0, M7 = 0, M8 = 0, M9 = 0, M10 = 0, M11 = 0, M12 = 0;
+            }
+        }
+
+        return targetdata;
+    }
+    // Insert / Update Sales Target
+    $scope.SubmitClick = function () {
+        debugger;
+        $("#div_loadImage").css("display", "block");
+        var valid = validation();
+        if (valid != "") {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_SalesTarget/ET_Admin_SalesTarget_Add",
+                dataType: 'json',
+                data: {
+                    TargetID: $scope.SGT_ID,
+                    FinYear: $scope.selectedyear,
+                    ORG_ID: $scope.selectedorg,
+                    Target: $scope.SGT_TARGET,
+                    TargetData: valid,
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                debugger;
+                $("#div_loadImage").css("display", "none");
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation:") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else if (data == "Success") {
+                    if ($scope.SGT_ID == 0) {
+                        message = 'Record Inserted Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.submittext = "Submit";
+                    $scope.createedit = "Create";
+                    // $("#formSubmit").attr('disabled', "disabled");
+                    $scope.SGT_ID = 0;
+                    $scope.selectedyear = $scope.currentyear.toString();
+                    $scope.selectedorg = 0;
+                    $scope.SGT_TARGET = "";
+                    $scope.SGT_Pending = "0";
+                    $scope.selectedorg = "0";
+                    $("#drpFinancialYear").val($scope.selectedyear).trigger("chosen:updated");
+                    $("#drpOrganization").val("0").trigger("chosen:updated");
+                    $scope.ORGChange();
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $("#div_loadImage").css("display", "none");
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            $("#div_loadImage").css("display", "none");
+        }
+    }
+     //Get: Record for Edit Row 
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_SalesTarget/ET_Admin_SalesTarget_Update_Get",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                debugger;
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+
+                    var UserByID = JSON.parse(data);
+                   // $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+
+                    $scope.SGT_ID = UserByID[0].SGT_ID;
+                    $scope.selectedyear = UserByID[0].SGT_FIN_YEAR;
+                    $scope.selectedorg = UserByID[0].SGT_GROUP_ID;
+                    $scope.SGT_TARGET = UserByID[0].SGT_TARGET;
+                    $scope.SGT_Pending = "0";
+                    $("#drpFinancialYear").val($scope.selectedyear).trigger("chosen:updated");
+                    $("#drpOrganization").val(UserByID[0].SGT_GROUP_ID).trigger("chosen:updated");
+                    $scope.ORGChange();
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Restore the delete records
+    $scope.PerformRestore = function (a, $event, b) {
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_SalesTarget/ET_Admin_SalesTarget_RestoreDelete",
+            dataType: 'json',
+            data: {
+                id: a,
+                type: b
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                if (data == "Success") {
+                    $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                    if (b) {
+                        message = "Record Deleted Successfully.";
+                    }
+                    else {
+                        message = "Record Restored Successfully.";
+                    }
+
+                    toastr["success"](message, "Notification");
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            }
+        });
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    };
+
+    $scope.Restoredeleterecords = function (a, $event, b) {
+        if (b)
+        {
+            alertmessageModified($event, a.toString(),b,'ET_Admin_SalesTarget', 'ET_Admin_SalesTarget_RestoreDelete');
+        }
+        else
+        {
+            $scope.PerformRestore(a, $event, b);
+           // message = "You don't access to do this operation, please contact admin.";
+            //toastr["error"](message, "Notification");
+        }
+    } 
+     // View : Popup View record
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_SalesTarget/ET_Admin_SalesTarget_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Watch for binding  data
+    $scope.$watch("orgHead", function (value) {
+        var val = value || null;
+        if (val) {
+
+            setTimeout(function () { $("#drpOrgHead").val($scope.selectedorghead).trigger("chosen:updated"); $scope.GetEmployee(); }, 100);
+
+        }
+    });
+    $scope.$watch("emplist", function (value) {
+        var val = value || null;
+        if (val) {
+            debugger;
+            var emps = $scope.selectedemp.toString().split(',');
+            setTimeout(function () { $("#drpEmployees").val(emps).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("parentOrg", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpOrganizationParent").val($scope.selectedparent).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("orgData", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                $("#drpOrganization").val("0").trigger("chosen:updated");
+            }, 50);
+        }
+    });
+    $scope.$watch("Orgrestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 50);
+        }
+    });
+    $scope.$watch("Orglist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("targetbind", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                setexistingtarget($scope.targetbind);
+            }, 5);
+        }
+    });
+    function setexistingtarget(a) {
+        debugger;
+        var b = a;
+        if ($("#txtTarget").val() == "")
+            $("#txtTarget").val("0");
+        var txtTarget1 = parseInt($("#txtTarget").val());
+        var tbl = $("#tblSalesTarget button").length;
+        var totact = 0;
+        for (var k = 0; k < tbl; k++) {
+            var tblno = k;
+            var tblname = "#tblSalesTarget_" + tblno + " tbody tr";
+            var TotalRow = $(tblname).length - 1;
+            var M1 = 0, M2 = 0, M3 = 0, M4 = 0, M5 = 0, M6 = 0, M7 = 0, M8 = 0, M9 = 0, M10 = 0, M11 = 0, M12 = 0;
+            var txtTotal = 0, txtM1Total = 0, txtM2Total = 0, txtM3Total = 0, txtM4Total = 0, txtM5Total = 0, txtM6Total = 0, txtM7Total = 0, txtM8Total = 0, txtM9Total = 0, txtM10Total = 0, txtM11Total = 0, txtM12Total = 0;
+
+            for (var i = 0; i < TotalRow; i++) {
+                var txtrowTotal = "";
+                if ($("#txtM1_" + tblno + i).val() != '')
+                    M1 = $("#txtM1_" + tblno + i).val();
+                if ($("#txtM2_" + tblno + i).val() != '')
+                    M2 = $("#txtM2_" + tblno + i).val();
+                if ($("#txtM3_" + tblno + i).val() != '')
+                    M3 = $("#txtM3_" + tblno + i).val();
+                if ($("#txtM4_" + tblno + i).val() != '')
+                    M4 = $("#txtM4_" + tblno + i).val();
+                if ($("#txtM5_" + tblno + i).val() != '')
+                    M5 = $("#txtM5_" + tblno + i).val();
+                if ($("#txtM6_" + tblno + i).val() != '')
+                    M6 = $("#txtM6_" + tblno + i).val();
+                if ($("#txtM7_" + tblno + i).val() != '')
+                    M7 = $("#txtM7_" + tblno + i).val();
+                if ($("#txtM8_" + tblno + i).val() != '')
+                    M8 = $("#txtM8_" + tblno + i).val();
+                if ($("#txtM9_" + tblno + i).val() != '')
+                    M9 = $("#txtM9_" + tblno + i).val();
+                if ($("#txtM10_" + tblno + i).val() != '')
+                    M10 = $("#txtM10_" + tblno + i).val();
+                if ($("#txtM11_" + tblno + i).val())
+                    M11 = $("#txtM11_" + tblno + i).val();
+                if ($("#txtM12_" + tblno + i).val())
+                    M12 = $("#txtM12_" + tblno + i).val();
+
+                txtrowTotal = parseInt(M1) + parseInt(M2) + parseInt(M3) + parseInt(M4) + parseInt(M5) + parseInt(M6) + parseInt(M7) + parseInt(M8) + parseInt(M9) +
+                    parseInt(M10) + parseInt(M11) + parseInt(M12);
+
+                $("#txtTotal_" + tblno + i).val(txtrowTotal);
+                txtTotal = parseInt(txtTotal) + parseInt($("#txtTotal_" + tblno + i).val());
+                txtM1Total = parseInt(txtM1Total) + parseInt(M1);
+                txtM2Total = parseInt(txtM2Total) + parseInt(M2);
+                txtM3Total = parseInt(txtM3Total) + parseInt(M3);
+                txtM4Total = parseInt(txtM4Total) + parseInt(M4);
+                txtM5Total = parseInt(txtM5Total) + parseInt(M5);
+                txtM6Total = parseInt(txtM6Total) + parseInt(M6);
+                txtM7Total = parseInt(txtM7Total) + parseInt(M7);
+                txtM8Total = parseInt(txtM8Total) + parseInt(M8);
+                txtM9Total = parseInt(txtM9Total) + parseInt(M9);
+                txtM10Total = parseInt(txtM10Total) + parseInt(M10);
+                txtM11Total = parseInt(txtM11Total) + parseInt(M11);
+                txtM12Total = parseInt(txtM12Total) + parseInt(M12);
+                M1 = 0, M2 = 0, M3 = 0, M4 = 0, M5 = 0, M6 = 0, M7 = 0, M8 = 0, M9 = 0, M10 = 0, M11 = 0, M12 = 0;
+            }
+            $("#txtTar_" + tblno).val(parseInt(txtTotal));
+            $("#txtPen_" + tblno).val(parseInt($("#txtTar_" + tblno).val()) - txtTotal);
+            $("#txtM1Total_" + tblno).val(txtM1Total);
+            $("#txtM2Total_" + tblno).val(txtM2Total);
+            $("#txtM3Total_" + tblno).val(txtM3Total);
+            $("#txtM4Total_" + tblno).val(txtM4Total);
+            $("#txtM5Total_" + tblno).val(txtM5Total);
+            $("#txtM6Total_" + tblno).val(txtM6Total);
+            $("#txtM7Total_" + tblno).val(txtM7Total);
+            $("#txtM8Total_" + tblno).val(txtM8Total);
+            $("#txtM9Total_" + tblno).val(txtM9Total);
+            $("#txtM10Total_" + tblno).val(txtM10Total);
+            $("#txtM11Total_" + tblno).val(txtM11Total);
+            $("#txtM12Total_" + tblno).val(txtM12Total);
+            $("#txtTotalTarget_" + tblno).val(txtM1Total + txtM2Total + txtM3Total + txtM4Total + txtM5Total + txtM6Total + txtM7Total + txtM8Total + txtM9Total + txtM10Total + txtM11Total + txtM12Total);
+        }
+        for (var i = 0; i < tbl; i++) {
+            var ctrlid = "#txtTar_" + i;
+            if ($(ctrlid).val() == "") {
+                $(ctrlid).val("0");
+            }
+            totact = totact + parseInt($(ctrlid).val());
+        }
+        $("#txtPendingTarget").val(txtTarget1 - totact);
+    }
+});
+
+    //scope.$watch("assignments", function (value) {//I change here
+    //    var val = value || null;
+    //    if (val)
+    //        element.dataTable({ "bDestroy": true });
+    //});
+
+
+//$scope.$watch(
+    //    "selectedcountry",
+    //    function (newValue, oldValue) {
+    //        // Ignore initial setup.
+    //        if (newValue === oldValue) {
+    //            return;
+    //        }
+    //        alert(newValue);
+    //    }
+    //);

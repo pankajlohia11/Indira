@@ -1,0 +1,373 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using System.Data.Entity;
+using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+using BusinessLogic.Admin_BL;
+
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_CategoryController : Controller
+    {
+        public static string prefix = "";
+        public static bool automanual = false;
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+
+        ET_Admin_Category_BL ObjBL = new ET_Admin_Category_BL();
+        // GET: ET_Admin_Category
+
+        private void SetPrivilages()
+        {
+            ViewBag.Create = "CreateYes";
+            ViewBag.Edit = "EditYes";
+            ViewBag.Delete = "DeleteYes";
+            ViewBag.Restore = "RestoreYes";
+            ViewBag.View = "ViewYes";
+            List<Tbl_AccessPermissions> ObjPermissions = bal.GetPrivilages_BL(Convert.ToInt32(Session["UserID"].ToString()), 1010);
+            foreach (var item in ObjPermissions)
+            {
+                if (item.IS_ADD)
+                {
+                    ViewBag.Create = "CreateYes";
+                }
+                if (item.IS_EDIT)
+                {
+                    ViewBag.Edit = "EditYes";
+                }
+                if (item.IS_DELETE)
+                {
+                    ViewBag.Delete = "DeleteYes";
+                }
+                if (item.IS_FULLCONTROL)
+                {
+                    ViewBag.Restore = "RestoreYes";
+                }
+                if (item.IS_VIEW)
+                {
+                    ViewBag.View = "ViewYes";
+                }
+            }
+
+        }
+        private void AutoManual()
+        {
+            ViewBag.AutoManual = false;
+            automanual = false;
+            List<Tbl_Document_Master> ObjDoc = bal.AutoManual_BL(1010);
+            if (ObjDoc.Count > 0)
+            {
+                foreach (var item in ObjDoc)
+                {
+                    if (item.autogen_type == "Automatic")
+                    {
+                        ViewBag.AutoManual = true;
+                        prefix = item.autogen_prefix;
+                        automanual = true;
+                    }
+                    else
+                    {
+                        ViewBag.Required = "required";
+                    }
+                }
+
+            }
+        }
+
+        private string validations(string CategoryCode, int CategoryID, string Category, string SubCategory, string Description)
+        {
+            if (!automanual && CategoryCode == "")
+            {
+                return "Enter the Category Code";
+            }
+            if (Category == "")
+            {
+                return "Select the Category Name";
+            }
+            if (SubCategory == "")
+            {
+                return "Select the Sub Category Name";
+            }
+            if (Description == "")
+            {
+                return "Enter the Description";
+            }
+            if (!automanual)
+            {
+                string valid = ObjBL.CheckDuplicateCode_BL(CategoryID, CategoryCode);
+                if (valid != "")
+                {
+                    return "Category Code Already Exist";
+                }
+            }
+            return "";
+        }
+
+        public ActionResult ET_Admin_Category()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    SetPrivilages();
+                    AutoManual();
+                    var data = ObjBL.ET_Admin_Category_List_BL();
+                    return View(data);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        public ActionResult ET_Admin_Category_Delete(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var i = ObjBL.ET_Admin_Category_Deleted(id);
+                    var json = "Success";
+                    if (i == 0)
+                        json = "False";
+                    else
+                    {
+                        objLOG.log_dockey = "1010";
+                        objLOG.log_operation = "Delete";
+                        objLOG.log_userid = Session["UserID"].ToString();
+                        objLOG.log_recordkey = id.ToString();
+                        objLOG.log_Remarks = "Record Deleted Successfully";
+                        bal.OperationInsertLogs_BL(objLOG);
+                    }
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ET_Admin_Category_Update_Get(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = ObjBL.ET_Admin_Category_Update_Get_BL(id);
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ET_Admin_Category_Add(int CategoryID, string CategoryCode, string Category, string SubCategory, string Description)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    string valid = validations(CategoryCode, CategoryID, Category, SubCategory, Description);
+                    if (valid == "")
+                    {
+                        Tbl_Category_Details_CM obj = new Tbl_Category_Details_CM()
+                        {
+                            CAT_DETAILS_ID = CategoryID,
+                            CATEGORY_CODE = CategoryCode,
+                            CATEGORY = Category,
+                            SUB_CATEGORY = SubCategory,
+                            DESCRIPTION = Description,
+                            DELETED = false,
+                            CREATED_BY = Convert.ToInt32(Session["UserID"]),
+                            LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"]),
+                        };
+                        decimal d = ObjBL.Tbl_Category_Details_Add_BL(obj, prefix, automanual);
+                        var json = "Success";
+                        if (d == 0)
+                        {
+                            json = "Failed";
+                        }
+                        else
+                        {
+                            objLOG.log_dockey = "1010";
+                            objLOG.log_userid = Session["UserID"].ToString();
+                            objLOG.log_recordkey = d.ToString();
+                            if (CategoryID == 0)
+                            {
+                                objLOG.log_operation = "Insert";
+                                objLOG.log_Remarks = "Record Inserted Successfully";
+                            }
+                            else
+                            {
+                                objLOG.log_operation = "Update";
+                                objLOG.log_Remarks = "Record Updated Successfully";
+                            }
+                            bal.OperationInsertLogs_BL(objLOG);
+                        }
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var json = "Validation:" + valid;
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        public ActionResult ET_Admin_Category_Restore()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = ObjBL.ET_Admin_Category_Restore_BL();
+                    return PartialView("/Views/Admin/ET_Admin_Category/_ET_Admin_Category_Restore.cshtml", data);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        public ActionResult ET_Admin_Category_Restore_Insert(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var updatedby = Convert.ToInt32(Session["UserID"]);
+                    var result = ObjBL.ET_Admin_Category_Restore_Insert_BL(id, updatedby);
+                    var json = "Failed";
+                    if (result != 0)
+                    {
+                        json = "Success";
+                    }
+                    else
+                    {
+                        objLOG.log_dockey = "1010";
+                        objLOG.log_operation = "Restore";
+                        objLOG.log_userid = Session["UserID"].ToString();
+                        objLOG.log_recordkey = id.ToString();
+                        objLOG.log_Remarks = "Record Restored Successfully";
+                        bal.OperationInsertLogs_BL(objLOG);
+                    }
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        public ActionResult ET_Admin_Category_View(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = ObjBL.ET_Admin_Category_View_BL(id);
+                    return PartialView("/Views/Admin/ET_Admin_Category/_ET_Admin_Category_View.cshtml", data);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+    }
+}

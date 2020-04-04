@@ -1,0 +1,510 @@
+﻿app1.controller("AC_EnquiryCtrl", function ($scope, $http, $window, $compile) {
+    GetPrivilages();
+    GetEnquiryList();
+    GetCustomerList();
+    GetSalesPersonList();
+    GetProductList();
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_Agency_Enquiry/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            if (privilage.length != 0) {
+                $scope.Iscreate = privilage[0].IS_ADD;
+                $scope.Isedit = privilage[0].IS_EDIT;
+                $scope.Isdelete = privilage[0].IS_DELETE;
+                $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+                $scope.Isview = privilage[0].IS_VIEW;
+            }
+            else
+            {
+                $scope.Iscreate = true;
+                $scope.Isedit = true;
+                $scope.Isdelete = true;
+                $scope.Isrestore = true;
+                $scope.Isview = true;
+            }
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    function GetEnquiryList() {
+        var getenquirylist = $http.get("/ET_Agency_Enquiry/GetEnquiryList",
+            {
+                params: { delete: false }
+            }); 
+        getenquirylist.then(function (enquirylist) {
+            var res = JSON.parse(enquirylist.data);
+            $scope.enquirylist = res;
+        }, function () {
+            alert("Enquiry List Found");
+        });
+    }
+    function GetEnquiryRestoreList() {
+        var getenquiryrestorelist = $http.get("/ET_Agency_Enquiry/GetEnquiryList",
+            {
+                params: { delete: true }
+            });
+        getenquiryrestorelist.then(function (enquiryrestorelist) {
+            var res = JSON.parse(enquiryrestorelist.data);
+            $scope.enquiryrestorelist = res;
+        }, function () {
+            alert("Enquiry Restore List Found");
+        });
+    }
+    function GetCustomerList() {
+        var getcustomerlist = $http.get("/ET_Agency_Enquiry/GetCustomers");
+        getcustomerlist.then(function (customerlist) {
+            var res = JSON.parse(customerlist.data);
+            $scope.customers = res;
+            $scope.E_CustomerID = "";
+            $scope.E_ContactID = "";
+        }, function () {
+            alert("Customer Not Found");
+        });
+    }
+    function GetContactList() {
+        if ($scope.E_CustomerID != "") {
+            var getcontactlist = $http.get("/ET_Agency_Enquiry/GetContacts",
+                {
+                    params: { id: $scope.E_CustomerID }
+                });
+            getcontactlist.then(function (contactlist) {
+                
+                var res = JSON.parse(contactlist.data);
+                $scope.contacts = res;
+            }, function () {
+                alert("Contact Not Found");
+            });
+        }
+        else
+        {
+            $scope.contacts = {};
+            $scope.E_ContactID = "";
+        }
+    }
+    function GetSalesPersonList() {
+        var getsalespersonlist = $http.get("/ET_Agency_Enquiry/GetSalesPerson");
+        getsalespersonlist.then(function (salespersonlist) {
+            var res = JSON.parse(salespersonlist.data);
+            $scope.salespersons = res;
+            $scope.E_SalesPerson = "";
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    function GetProductList() {
+        var getproductlist = $http.get("/ET_Agency_Enquiry/GetProducts");
+        getproductlist.then(function (productlist) {
+            var res = JSON.parse(productlist.data);
+            $scope.products = res;
+            $scope.selectedproduct = "";
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    $scope.CustomerChange = function () {
+        GetContactList();
+    }
+    $scope.ContactChange = function () {
+        
+    }
+    $scope.SalesPersonChange = function () {
+    }
+    $scope.ProductChange = function () {
+        
+        alert($scope.selectedproduct);
+    }
+    $scope.addnewrow = function (a) {
+        debugger;
+        var e = a.target;
+        var tr = $("#enquirydetailsbody").find("tr");
+        var txt = "";
+        for (var i = 0; i < tr.length; i++) {
+            var td = tr[i].cells;
+            var Product = $(td[0]).find("select").val();
+            var Qty = $(td[4]).find("input").val();
+            if (Product == "") {
+                message = "Select Product at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            }
+            else if (Qty == "") {
+                message = "Enter the Quantity at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            }
+        }
+        if (txt == "") {
+            var Rowhtml = "<tr><td><select class='form-control' id='drpProduct' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' class='form-control' readonly='readonly'/></td><td><input type='number' id='txtQuantity' class='form-control' /></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var temp = $compile(Rowhtml)($scope);
+            angular.element(document.getElementById('enquirydetailsbody')).append(temp);
+        }
+    }
+
+    $scope.deleterow = function (a) {
+        var e = a.target;
+        var len = $("#enquirydetailsbody").find("tr").length;
+        if (len != 1) {
+            $(e).parent().parent().parent().fadeOut(300, function () { $(this).remove(); });
+        }
+        else {
+            message = "Atleast one Product required";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        GetEnquiryList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        GetEnquiryRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+            $scope.E_ID = "0";
+            $scope.E_Code = "";
+            $scope.E_CustomerID = "";
+            $scope.E_ContactID = "";
+            $scope.E_SalesPerson = "";
+            $("#txtEnqDate").val("");
+            $("#drpCustomer").val("").trigger("chosen:updated");
+            $("#drpContact").val("").trigger("chosen:updated");
+            $("#drpSalesPerson").val("").trigger("chosen:updated");
+            $scope.contacts = {};
+            var Rowhtml = "<tr><td><select class='form-control' id='drpProduct' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' class='form-control' readonly='readonly'/></td><td><input type='number' id='txtQuantity' class='form-control' /></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var temp = $compile(Rowhtml)($scope);
+            angular.element(document.getElementById('enquirydetailsbody')).html("");
+            angular.element(document.getElementById('enquirydetailsbody')).append(temp); 
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    function validate() {
+        var tr = $("#enquirydetailsbody").find("tr");
+        var txt = "";
+        for (i = 0; i < tr.length; i++) {
+            var td = $(tr[i]).find("td");
+            var product = $(td[0]).find("select").val();
+            var qty = $(td[4]).find("input").val();
+            if (product == "") {
+                message = "Enter Product Name at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            } else if (qty == "") {
+                message = "Enter Quantity at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else {
+                txt = txt + $(td[0]).find("select").val() + ",";
+                txt = txt + $(td[0]).find("select option:selected").text()+",";
+                txt = txt + $(td[4]).find("input").val() + "|";
+            }
+        }
+        return txt;
+    }
+    $scope.SubmitClick = function () {
+        debugger;
+        var txt = validate();
+        var date = $("#txtEnqDate").val();
+        debugger;
+        if (txt != "") {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Agency_Enquiry/ET_Master_Enquiry_Add",
+                dataType: 'json',
+                data: {
+                    E_ID: $scope.E_ID,
+                    E_Code: $scope.E_Code,
+                    E_Date: date,
+                    E_CustomerID: $scope.E_CustomerID,
+                    E_ContactID: $scope.E_ContactID,
+                    E_SalesPerson: $scope.E_SalesPerson,
+                    EnquiryDetails: txt
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+
+            post.success(function (data, status) {
+
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else if (data == "Success") {
+                    if ($scope.E_ID == 0) {
+                        message = 'Record Inserted Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.createnew();
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+
+    }
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Agency_Enquiry/ET_Master_Enquiry_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var EnquiryByID = JSON.parse(data);
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+                    debugger;
+                    $scope.E_ID = EnquiryByID.E_ID;
+                    $scope.E_Code = EnquiryByID.E_Code;
+                    $scope.E_CustomerID = EnquiryByID.E_CustomerID;
+                    $scope.E_ContactID = EnquiryByID.E_ContactID;
+                    $scope.E_SalesPerson = EnquiryByID.E_SalesPerson;
+                    var Orderdate = new Date(parseInt(EnquiryByID.E_Date.substr(6)));
+                    var Orderdt = ("0" + (Orderdate.getMonth() + 1)).slice(-2) + "/" + ("0" + Orderdate.getDate()).slice(-2) + "/" + Orderdate.getFullYear();
+                    $("#txtEnqDate").val(Orderdt);;
+                    $("#drpCustomer").val($scope.E_CustomerID).trigger("chosen:updated");
+                    $("#drpSalesPerson").val($scope.E_SalesPerson).trigger("chosen:updated");
+                    GetContactList();
+                    EnquiryDetails(EnquiryByID.E_ID);
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    function EnquiryDetails(e) {
+        var id = e;
+        $http({
+            method: 'POST',
+            url: '/ET_Agency_Enquiry/ET_Master_Enquiry_ContactsLoad',
+            data: {
+                id: id,
+            },
+        }).success(function (data) {
+            debugger;
+            var enquirydata = JSON.parse(data)
+            var i = enquirydata.length;
+            var j = 0;
+            angular.element(document.getElementById('enquirydetailsbody')).html("");
+            while (i != 0) {
+                var Rowhtml = "<tr><td><select class='form-control' id='drpProduct' onchange='ProductChange(this);'><option value=''>-Select-</option><option ng-repeat='product in products' value='{{ product.P_ID }}'>{{ product.P_ArticleNo }}</option ></select></td><td><input type='text' id='txtProductName' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtPackage' class='form-control' readonly='readonly'/></td><td><input type='number' id='txtQuantity' class='form-control' /></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+                var temp = $compile(Rowhtml)($scope);
+                angular.element(document.getElementById('enquirydetailsbody')).append(temp);
+                i--;
+                j++;
+            }
+            $scope.enquirydata1 = enquirydata;
+        });
+    }
+    $scope.Restoredeleterecords = function (a, $event, b) {
+
+        var res = false;
+        if (b)
+            res = $scope.Isdelete;
+        else
+            res = $scope.Isrestore
+        if (res) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Agency_Enquiry/ET_Master_Enquiry_RestoreDelete",
+                dataType: 'json',
+                data: {
+                    id: a,
+                    type: b
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (data == "Success") {
+                        $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                        if (b) {
+                            message = "Record Deleted Successfully.";
+                        }
+                        else {
+                            message = "Record Restored Successfully.";
+                        }
+
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Agency_Enquiry/ET_Master_Enquiry_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.$watch("customers", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCustomer").val($scope.E_CustomerID).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("contacts", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpContact").val($scope.E_ContactID).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("salespersons", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesPerson").val($scope.E_SalesPerson).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("enquirylist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("enquiryrestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 5);
+        }
+    });
+    $scope.$watch("enquirydata1", function (value) {
+        var val = value || null;
+        if (val) {
+            var enquirydata = $scope.enquirydata1;
+            setTimeout(function () {
+                debugger;
+                var tr = $("#enquirydetailsbody").find("tr");
+                for (var i = 0; i < tr.length; i++) {
+                    var td = tr[i].cells;
+                    $(td[0]).find("select").val(enquirydata[i].productid);
+                    $(td[1]).find("input").val(enquirydata[i].name);
+                    $(td[2]).find("input").val(enquirydata[i].uom);
+                    $(td[3]).find("input").val(enquirydata[i].packing);
+                    $(td[4]).find("input").val(enquirydata[i].quantity);
+                }
+            }, 1000);
+        }
+    });
+
+});

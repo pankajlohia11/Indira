@@ -1,0 +1,65 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.DespatchVIew_CM
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.Header)
+            {
+                <h5><label><strong>Shipment Details</strong></label></h5>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Email">Shipment Code</label>
+                        <input type="text" value="@item.D_Code" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Url">Shipment Date</label>
+                        <input type="text" value="@item.D_DespatchDate.ToString("dd-MM-yyyy")" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Customer Name</label>
+                        <input type="text" value="@item.D_CustomerName" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Order No</label>
+                        <input type="text" value="@item.D_OrderCode" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Sales Person</label>
+                        <input type="text" value="@item.D_SalesPersonName" class="form-control" disabled>
+                    </div>
+                </div>
+            }
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>UOM</th>
+                        <th>Order Quantity</th>
+                        <th>Shipment Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Details)
+                    {
+                        <tr>
+                            <td>@item.DD_ArticleNo</td>
+                            <td>@item.DD_ProductName</td>
+                            <td>@item.DD_UOM</td>
+                            <td style="text-align:right;">@(Convert.ToDecimal(item.DD_OrderQuantity).ToString("N3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                            <td style="text-align:right;">@(Convert.ToDecimal(item.DD_DespatchQuantity).ToString("N3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

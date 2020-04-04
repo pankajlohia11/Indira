@@ -1,0 +1,109 @@
+﻿@{
+  
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Company Details.
+    The user can edit or remove and restore  a record in Company Details.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_Approval.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        };
+    </script>
+    
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order">
+        <div class="pageheader">
+
+            <h2>Approval<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Approval</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_ApprovalCtrl">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Approval</strong> List</h1>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        
+                        <!-- Table created for displaying View content-->
+
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Form</th>
+                                    <th>Code</th>
+                                    <th>Created By</th>
+                                    <th>Sales Person</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="Approval in ApprovalList">
+                                    <td>{{Approval.Form}}</td>
+                                    <td>{{Approval.Code}}</td>
+                                    <td>{{Approval.CreatedBy}}</td>
+                                    <td>{{Approval.SalesPersonName}}</td>
+                                    <td>{{Approval.Date.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                    <td>
+                                        <a title="Approve" ng-click="approverejectRecords(Approval.ID,Approval.Form,1);" value="{{ Approval.ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-thumbs-up"></i></a>
+
+                                        <a title="View" ng-click="ViewRecords(Approval.ID,Approval.Form);" value="{{ Approval.ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                        <a title="Reject" ng-click="approverejectRecords(Approval.ID,Approval.Form,2);" value="{{ Approval.ID }}" style="color:red;padding:5px;"><i class="fa fa-thumbs-down"></i></a>
+
+
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+            </div>
+        </div>
+    </div>
+</section>

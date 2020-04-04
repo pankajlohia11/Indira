@@ -1,0 +1,181 @@
+﻿
+
+@model BusinessEntity.CustomModels.Paclistdetails_View_CM
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.QHeader)
+            {
+                <h5><label><strong>Packing List</strong></label></h5>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Email">Packing List Code</label>
+                        <input type="text" value="@item.PL_Code" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Shipment Code</label>
+                        <input type="text" value="@item.PL_Code" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Date</label>
+                        <input type="text" value="@((item.PL_Date??DateTime.Now).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Digits"> Customer</label>
+                        <input type="text" value="@item.Customer" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Order No</label>
+                        <input type="text" value="@item.Orders" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Remarks</label>
+                        <input type="text" value='@item.PL_Remarks' class="form-control" disabled>
+                    </div>
+                </div>
+            }
+            @*<table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Article No</th>
+                            <th>Product Name</th>
+                            <th>Pallet No</th>
+                            <th>Design No</th>
+                            <th>No of Pieces</th>
+                            <th>Total Meters</th>
+                            <th>Nwt. in Kgs</th>
+                            <th>Gwt. in Kgs</th>
+                            <th>Individual piece lengths</th>
+                        </tr>
+
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.QChild)
+                {
+                    <tr>
+                        <td>@item.PD_ArticleNo</td>
+                        <td>@item.PD_ProductID</td>
+                        <td>@item.PD_PalletNo</td>
+                        <td>@item.PD_DesignNo</td>
+                        <td>@item.PD_NoOfPieces</td>
+                        <td>@item.PD_TotalMeters</td>
+                        <td>@item.PD_NwtinKGS</td>
+                        <td>@item.PD_GwtinKGS</td>
+                        <td>@item.PD_IndividualPieceLength</td>
+                    </tr>
+        }
+                    </tbody>
+                </table>*@
+            @if (Model.QHeader[0].PL_Type == 1)
+            {
+                <table style="width:100%" class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th style="width:10%;"><strong>S.No.</strong></th>
+                            <th style="width:30%"><strong>Product Name:</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Pallet No</strong></th>
+                            <th style="width:10%;text-align:center"><strong>No. of Cones</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Lot No.</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Nwt.in Kgs</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Gwt.in Kgs</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Remarks</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var i = 1;}
+                        @foreach (var item1 in Model.QChild)
+                        {
+                            <tr>
+                                <td>@i</td>
+                                <td>@item1.ProductName</td>
+                                <td style="text-align:center">@item1.PD_PalletNo</td>
+                                <td style="text-align:center">@item1.PD_ConesNr</td>
+                                <td style="text-align:center">@item1.PD_LotNr</td>
+                                <td style="text-align:center">@item1.PD_NwtinKGS</td>
+                                <td style="text-align:center">@item1.PD_GwtinKGS</td>
+                                <td style="text-align:center">@item1.PL_Remarks</td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            }
+            else if (Model.QHeader[0].PL_Type == 2)
+            {
+                <table style="width:100%" class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;"><strong>S.No</strong></th>
+                            <th style="width:30%"><strong>Product Name</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Pallet No</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Design No</strong></th>
+                            <th style="width:5%;text-align:center"><strong>No of Pieces</strong></th>
+                            <th style="width:5%;text-align:center"><strong>Total Meters</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Nwt.in Kgs</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Gwt.in Kgs</strong></th>
+                            <th style="text-align:center; width:5%"><strong>Individual piece lengths</strong></th>
+                            <th style="width:10%;"><strong>Remarks</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var i = 1;}
+                        @foreach (var item1 in Model.QChild)
+                        {
+                            <tr>
+                                <td>@i</td>
+                                <td>@item1.ProductName</td>
+                                <td style="text-align:center">@item1.PD_PalletNo</td>
+                                <td style="text-align:center">@item1.PD_DesignNo</td>
+                                <td style="text-align:center">@item1.PD_NoOfPieces</td>
+                                <td style="text-align:center">@item1.PD_TotalMeters</td>
+                                <td style="text-align:center">@item1.PD_NwtinKGS</td>
+                                <td style="text-align:center">@item1.PD_GwtinKGS</td>
+                                <td style="text-align:center">@item1.PD_IndividualPieceLength</td>
+                                <td style="text-align:center">@item1.PL_Remarks</td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <table style="width:100%" class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th style="width:5%;"><strong>S.No</strong></th>
+                            <th style="width:30%"><strong>Product Name:</strong></th>
+                            <th style="width:10%;text-align:center"><strong>No.of Pieces</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Packing Units</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Nwt.in Kgs</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Gwt.in Kgs</strong></th>
+                            <th style="width:10%;text-align:center"><strong>Remarks</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var i = 1;}
+                        @foreach (var item1 in Model.QChild)
+                        {
+                            <tr>
+                                <td>@i</td>
+                                <td>@item1.ProductName</td>
+                                <td style="text-align:center">@item1.PD_NoOfPieces</td>
+                                <td style="text-align:center">@item1.PD_PackingUnits</td>
+                                <td style="text-align:center">@item1.PD_NwtinKGS</td>
+                                <td style="text-align:center">@item1.PD_GwtinKGS</td>
+                                <td style="text-align:center">@item1.PL_Remarks</td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

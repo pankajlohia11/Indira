@@ -1,0 +1,1470 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Product_Yarn>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+
+    This Form is used to create a Product Details.
+    The user can edit or remove and restore  a record in Product.The user can capture Details based on the product category selected etc.
+    Author=jesmi
+    Created Date=4th Apr 2018
+    Product Form view
+    Operations[generate,reset,close,save]
+-->
+<!--this css style will give max width to container class-->
+<style>
+
+    .container {
+        max-width: 74.9em;
+    }
+</style>
+
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide display page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying view page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+       // $("#div_Default").css("display", "block");
+        $("#div_Edit").css("display", "block");
+        $("#div_yarn").css("display", "block");
+        //$("#div_BedLinen").css("display", "none");
+        //$("#div_BathLinen").css("display", "none");
+        //$("#div_Fabric").css("display", "none");
+        //$("#div_Table").css("display", "none");
+        //$("#div_Duvetcover").css("display", "none");
+        //$("#div_Tufted").css("display", "none");
+        //$("#div_Kitchenwear").css("display", "none");
+
+    }
+    /* based on the category selected it displays the respective div and hide all the other div*/
+    function GetYarnCategory(e) {
+        var a = e;
+        $("#div_General").css("display", "block");
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+        $("#div_Restore").css("display", "none");
+
+       
+        // var a = $("#ddlCategory option:selected").val();
+        if (a == 'Yarn') {          
+            $("#div_yarn").css("display", "block");
+            $("#div_BedLinen").css("display", "none");
+            $("#div_BathLinen").css("display", "none");
+            $("#div_Fabric").css("display", "none");
+            $("#div_Table").css("display", "none");
+            $("#div_Duvetcover").css("display", "none");
+            $("#div_Tufted").css("display", "none");
+            $("#div_Kitchenwear").css("display", "none");
+        }
+        else if (a == 'BedLinen') {
+            $("#div_BedLinen").css("display", "block");
+            $("#div_yarn").css("display", "none");
+            $("#div_BathLinen").css("display", "none");
+            $("#div_Fabric").css("display", "none");
+            $("#div_Table").css("display", "none");
+            $("#div_Duvetcover").css("display", "none");
+            $("#div_Tufted").css("display", "none");
+            $("#div_Kitchenwear").css("display", "none");
+
+        }
+        else if (a == 'BathLinen') {
+            $("#div_BathLinen").css("display", "block");
+            $("#div_BedLinen").css("display", "none");
+            $("#div_yarn").css("display", "none");
+            $("#div_Fabric").css("display", "none");
+            $("#div_Table").css("display", "none");
+            $("#div_Duvetcover").css("display", "none");
+            $("#div_Tufted").css("display", "none");
+            $("#div_Kitchenwear").css("display", "none");
+
+        }
+        else if (a == 'Fabric') {
+            $("#div_Fabric").css("display", "block");
+            $("#div_BathLinen").css("display", "none");
+            $("#div_BedLinen").css("display", "none");
+            $("#div_yarn").css("display", "none");
+            $("#div_Table").css("display", "none");
+            $("#div_Duvetcover").css("display", "none");
+            $("#div_Tufted").css("display", "none");
+            $("#div_Kitchenwear").css("display", "none");
+
+        }
+        else if (a == 'TableLinen') {
+            $("#div_Table").css("display", "block");
+            $("#div_Fabric").css("display", "none");
+            $("#div_BathLinen").css("display", "none");
+            $("#div_BedLinen").css("display", "none");
+            $("#div_yarn").css("display", "none");
+            $("#div_Duvetcover").css("display", "none");
+            $("#div_Tufted").css("display", "none");
+            $("#div_Kitchenwear").css("display", "none");
+
+        }
+        else if (a == 'DuvetcoverSet') {
+            $("#div_Duvetcover").css("display", "block");
+            $("#div_Table").css("display", "none");
+            $("#div_Fabric").css("display", "none");
+            $("#div_BathLinen").css("display", "none");
+            $("#div_BedLinen").css("display", "none");
+            $("#div_yarn").css("display", "none");
+            $("#div_Tufted").css("display", "none");
+            $("#div_Kitchenwear").css("display", "none");
+
+
+        }
+        else if (a == 'TuftedBathrug') {
+            $("#div_Tufted").css("display", "block");
+            $("#div_Duvetcover").css("display", "none");
+            $("#div_Table").css("display", "none");
+            $("#div_Fabric").css("display", "none");
+            $("#div_BathLinen").css("display", "none");
+            $("#div_BedLinen").css("display", "none");
+            $("#div_yarn").css("display", "none");
+            $("#div_Kitchenwear").css("display", "none");
+
+
+        }
+        else if (a == 'KitchenWear') {
+            $("#div_Kitchenwear").css("display", "block");
+            $("#div_Duvetcover").css("display", "none");
+            $("#div_Table").css("display", "none");
+            $("#div_Fabric").css("display", "none");
+            $("#div_BathLinen").css("display", "none");
+            $("#div_BedLinen").css("display", "none");
+            $("#div_yarn").css("display", "none");
+            $("#div_Tufted").css("display", "none");
+
+
+
+        }
+    }
+
+    function InsertRecords() {
+
+        var YarnID = $("#PRODUCT_YARN_ID").val();
+        if (YarnID != 0) {
+            YarnID = YarnID;
+        }
+        else {
+            YarnID = "0";
+        }
+
+        var YarnCode = $("#PRODUCT_YARN_CODE").val();
+        if (YarnCode != 0) {
+            YarnCode = YarnCode;
+        }
+        else {
+            YarnCode = "0";
+        } 
+
+        var txtShortName = $("#txtShortName").val();
+        var drpUOM = $("#drpUOM").val();
+        var drpCount = $("#drpCount").val();
+        var txtCountPercentage = $("#txtCountPercentage").val();
+        var drpBlend1 = $("#drpBlend1").val();
+        var txtBlend1 = $("#txtBlend1").val();
+        var drpBlend2 = $("#drpBlend2").val();
+        var txtBlend2 = $("#txtBlend2").val();
+        var drpBlend3 = $("#drpBlend3").val();
+        var txtBlend3 = $("#txtBlend3").val();
+        var drpBlend4 = $("#drpBlend4").val();
+        var txtBlend4 = $("#txtBlend4").val();
+
+        var drpSubRange1 = $("#drpSub-Range1").val();
+        var drpSubRange2 = $("#drpSub-Range2").val();
+        var drpSubRange3 = $("#drpSub-Range3").val();
+        var drpSubRange4 = $("#drpSub-Range4").val();
+        var drpSubRange5 = $("#drpSub-Range5").val();
+        var drpPackage = $("#drpPackage").val();
+        var drpCottontype = $("#drpCottontype").val();
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ET_Admin_Store_Add", "ET_Admin_Store")',
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            data: {
+                YarnID: YarnID,
+                YarnCode: YarnCode,
+                UOM: drpUOM,
+                ShortName: txtShortName,
+                drpCount: drpCount,
+                tCountPercentage: txtCountPercentage,
+                drpBlend1: drpBlend1,
+                txtBlend1: txtBlend1,
+                drpBlend2: drpBlend2,
+                txtBlend2: drpBlend2,
+                drpBlend3: drpBlend3,
+                txtBlend3: txtBlend3,
+                drpBlend4: drpBlend4,
+                txtBlend4: txtBlend4,
+                SubRange1: drpSubRange1,
+                SubRange2: drpSubRange2,
+                SubRange3: drpSubRange3,
+                SubRange4: drpSubRange4,
+                SubRange5: drpSubRange5,
+                Package: drpPackage,
+                Cottontype: drpCottontype
+            },
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (result == "Success") {
+                        createRecords();
+                        if (StoreID == 0) {
+                            message = 'Record Inserted Successfully.';
+                            toastr["success"](message, "Notification");
+                        }
+                        else {
+                            message = 'Record Updated Successfully.';
+                            toastr["success"](message, "Notification");
+                        }
+                    }
+                    else if (result == "Failed") {
+                        message = 'Failed to do this operation.';
+                        toastr["error"](message, "Notification");
+                    }
+                    else if (result.indexOf("Validation") > -1) {
+                        toastr["error"](result, "Notification");
+                    }
+                }
+            },
+            error: function (response) {
+               // alert(response);
+                message = "You don't access to do this operation, please contact admin.";
+                toastr["error"](message, "Notification");
+            }
+        });
+    };
+
+    function Validation() {
+        debugger;
+        var drpBlend1 = $("#drpBlend1").val();
+        var txtBlend1 = parseInt($("#txtBlend1").val());
+        var drpBlend2 = $("#drpBlend2").val();
+        var txtBlend2 = parseInt($("#txtBlend2").val());
+        var drpBlend3 = $("#drpBlend3").val();
+        var txtBlend3 = parseInt($("#txtBlend3").val());
+        var drpBlend4 = $("#drpBlend4").val();
+        var txtBlend4 = parseInt($("#txtBlend4").val());
+        var total = txtBlend1 + txtBlend2 + txtBlend3 + txtBlend4;
+        if (total != 100)
+        {
+            message = "It Should not be less than or greater than 100%";
+            toastr["error"](message, "Notification");
+        }
+        else if (drpBlend1 == drpBlend2 || drpBlend3 == drpBlend4) {
+            message = " Blend 1, Blend 2, Blend 3, Blend 4 should be different";
+            toastr["error"](message, "Notification");
+        }
+        else if (drpBlend1 == drpBlend3 || drpBlend2 == drpBlend4) {
+            message = " Blend 1, Blend 2, Blend 3, Blend 4 should be different";
+            toastr["error"](message, "Notification");
+        }
+        else if (drpBlend1 == drpBlend4 || drpBlend2 == drpBlend3) {
+            message = " Blend 1, Blend 2, Blend 3, Blend 4 should be different";
+            toastr["error"](message, "Notification");
+        }
+        else {
+            InsertRecords();
+        }
+    };
+
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Product Details<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Product Details</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><h6><p style="text-align:center;"><a href="#litab_general" aria-controls="Yarn" role="tab" data-toggle="tab" class="myIcon active"><i class="fa fa-home"></i></a><br /><a>Yarn</a></p></h6></li>
+            <li role="presentation"><h6><p style="text-align:center;"><a href="#litab_orders" aria-controls="BedLinen" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-shopping-cart"></i></a><br /><a>Bed Linen</a></p></h6></li>
+            <li role="presentation"><h6><p style="text-align:center;"><a href="#litab_invoices" aria-controls="BathLinen" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-newspaper-o"></i></a><br /><a>Bath Linen</a></p></h6></li>
+            <li role="presentation"><h6><p style="text-align:center;"><a href="#litab_payments" aria-controls="Fabric" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-money"></i></a><br /><a>Fabric</a></p></h6></li>
+            <li role="presentation"><h6><p style="text-align:center;"><a href="#litab_followups" aria-controls="TableLinen" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-phone-square"></i></a><br /><a>Table Linen</a></p></h6></li>
+            <li role="presentation"><h6><p style="text-align:center;"><a href="#litab_shipments" aria-controls="DuvetcoverSet" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-truck"></i></a><br /><a>Duvetcover Set</a></p></h6></li>
+            <li role="presentation"><h6><p style="text-align:center;"><a href="#litab_offers" aria-controls="TuftedBathrug" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-trophy"></i></a><br /><a>Tufted Bathrug</a></p></h6></li>
+            <li role="presentation"><h6><p style="text-align:center;"><a href="#litab_dashboards" aria-controls="KitchenWear" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-bar-chart-o"></i></a><br /><a>Kitchen Wear</a></p></h6></li>
+        </ul><br />
+
+        <div class="row">
+            <div class="col-md-12">
+                <!--Here user can have to see Product Details -->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Product Details</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Product Code</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Sub Category</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            @if (Model != null)
+                            {
+                                int i = 0;
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.PRODUCT_YARN_ID</td>
+                                        <td>@item.PRODUCT_NAME</td>
+                                        <td>@item.CATEGORY</td>
+                                        <td>@item.SUB_RANGE2</td>
+                                        <td>
+                                            <a onclick="editRecords(@item.PRODUCT_YARN_ID,this);" value="@item.PRODUCT_YARN_ID" id="@ViewBag.Edit@i" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                            <a onclick="ViewRecords(@item.PRODUCT_YARN_ID,this);" value="@item.PRODUCT_YARN_ID" id="@ViewBag.View@i" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                            <a onclick="deleteRecord(@item.PRODUCT_YARN_ID,this);" id="@ViewBag.Delete@i" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--Here user can have to edit Product Details -->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong>Product Details</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <!-- Contains Category and otherdetails -->
+                            <div id="div_General" runat="server">
+                                <div class="row">
+                                    @* <div class="form-group col-md-6">
+                                        <label for="lblCategory">Category</label>
+                                            <select class="form-control chosen-select" id="ddlCategory" onchange="GetYarnCategory()" runat="server" required>
+                                                <option value="1">Yarn</option>
+                                                <option value="2">Bed Linen</option>
+                                                <option value="3">Bath Linen</option>
+                                                <option value="4">Fabric</option>
+                                                <option value="5">Table Linen</option>
+                                                <option value="6">Duvetcover Set</option>
+                                                <option value="7">Tufted Bathrug</option>
+                                                <option value="8">Kitchen Wear</option>
+                                            </select>
+                                                                </div>*@
+
+                                    <div class="form-group col-md-6">
+                                        <label for="lblSubcategory">Sub Category</label>
+                                        @Html.DropDownList("drpSubCategory", new SelectList(ViewBag.subcategory), "--Select--", new { @class = "form-control chosen-select", @id = "drpSubCategory" })
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="lblUOM">UOM</label>
+                                            @Html.DropDownList("drpUOM", new SelectList(ViewBag.uom, "UOM_ID", "UOM_NAME"), "--Select--", new { @class = "form-control chosen-select", @id = "drpUOM" })                                     
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label for="lblShortName">Short Name</label>
+                                        <input type="text" name="txtShortName" class="form-control" id="txtShortName" placeholder="Short Name"
+                                               data-parsley-trigger="change"
+                                               data-parsley-type="alphanum"
+                                               required>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Contains yarn details -->
+                            <div id="div_yarn" runat="server">
+                                <div>
+                                    <div class="row">
+                                        <div class="row">
+                                            <div class="form-group col-md-4">
+                                                <label class="control-label" for="lblBlend1">Product Yarn Code</label>
+                                                <input type="text" name="PRODUCT_YARN_ID" id="PRODUCT_YARN_ID" class="form-control hidden" />
+                                                <input type="text" name="PRODUCT_YARN_CODE" id="PRODUCT_YARN_CODE" disabled="@ViewBag.AutoManual" class="form-control" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblCount">Count</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <select tabindex="3" class="chosen-select" id="drpCount" style="width:100%">
+                                                        <option value="Ne">Ne</option>
+                                                        <option value="Nm">Nm</option>
+                                                        <option value="Nf">Nf</option>
+                                                        <option value="Tex">Tex</option>
+                                                        <option value="Denier">Denier</option>
+                                                        <option value="Dtex">Dtex</option>
+                                                        <option value="Lea">Lea</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text" name="txtCountPercentage" id="txtCountPercentage" class="form-control"
+                                                           data-parsley-trigger="change"
+                                                           data-parsley-type="alphanum">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    %
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblBlend1">Blend 1</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <select tabindex="3" class="chosen-select" id="drpBlend1" style="width:100%">
+                                                        <option value="Cotton">Cotton</option>
+                                                        <option value="Polyster">Polyster</option>
+                                                        <option value="Acrylic">Acrylic</option>
+                                                        <option value="Viscose">Viscose</option>
+                                                    </select>
+
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text" name="txtBlend1" id="txtBlend1" class="form-control"
+                                                           data-parsley-trigger="change"
+                                                           data-parsley-type="digits">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    %
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblBlend2">Blend 2</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <select tabindex="3" class="chosen-select" id="drpBlend2" style="width:100%">
+                                                        <option value="Cotton">Cotton</option>
+                                                        <option value="Polyster">Polyster</option>
+                                                        <option value="Acrylic">Acrylic</option>
+                                                        <option value="Viscose">Viscose</option>
+                                                        <option value="Linen">Linen</option>
+                                                    </select>
+
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text" name="txtBlend2" id="txtBlend2" class="form-control"
+                                                           data-parsley-trigger="change"
+                                                           data-parsley-type="digits">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    %
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblBlend3">Blend 3</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <select tabindex="3" class="chosen-select" id="drpBlend3" style="width:100%">
+                                                        <option value="Cotton">Cotton</option>
+                                                        <option value="Polyster">Polyster</option>
+                                                        <option value="Acrylic">Acrylic</option>
+                                                        <option value="Viscose">Viscose</option>
+                                                        <option value="Linen">Linen</option>
+                                                        <option value="Flex">Flex</option>
+                                                    </select>
+
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text" name="txtBlend3" id="txtBlend3" class="form-control"
+                                                           data-parsley-trigger="change"
+                                                           data-parsley-type="digits">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    %
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblBlend4">Blend 4</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <select tabindex="3" class="chosen-select" id="drpBlend4" style="width:100%">
+                                                        <option value="Cotton">Cotton</option>
+                                                        <option value="Polyster">Polyster</option>
+                                                        <option value="Acrylic">Acrylic</option>
+                                                        <option value="Viscose">Viscose</option>
+                                                        <option value="Linen">Linen</option>
+                                                        <option value="Model">Model</option>
+                                                    </select>
+
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <input type="text" name="txtBlend4" id="txtBlend4" class="form-control"
+                                                           data-parsley-trigger="change"
+                                                           data-parsley-type="digits">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    %
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblSubRange1">Sub-Range 1</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" id="drpSub-Range1" style="width:100%">
+                                                        <option value="Combed">Combed</option>
+                                                        <option value="Carded">Carded</option>
+                                                        <option value="Texturised">Texturised</option>
+                                                        <option value="Flat">Flat</option>
+                                                        <option value="Open End">Open End</option>
+                                                        <option value="Vortex">Vortex</option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="row">
+
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblSubRange2">Sub-Range 2</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" id="drpSub-Range2" style="width:100%">
+                                                        <option value="Ringspun">Ringspun</option>
+                                                        <option value="Compact Spun">Compact Spun</option>
+                                                        <option value="Open End Spun">Open End Spun</option>
+                                                        <option value="Airjest Spun">Airjest Spun</option>
+                                                        <option value="Worsted Spun">Worsted Spun</option>
+                                                        <option value="Ringspun Gassed">Ringspun Gassed</option>
+                                                        <option value="Compact Gassed">Compact Gassed</option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblSubRange3">Sub-Range 3</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" id="drpSub-Range3" style="width:100%">
+                                                        <option value="Waxed">Waxed</option>
+                                                        <option value="Unwaxed">Unwaxed</option>
+                                                        <option value="Intermingled">Intermingled</option>
+                                                        <option value="Non - Intermingled">Non - Intermingled</option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="row">
+
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblSubRange4">Sub-Range 4</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" id="drpSub-Range4" style="width:100%">
+                                                        <option value="For Knitting">For Knitting</option>
+                                                        <option value="For Weaving">For Weaving</option>
+                                                        <option value="Sewing thread">Sewing thread</option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblSubRange5">Sub-Range 5</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" id="drpSub-Range5" style="width:100%">
+                                                        <option value="Grey">Grey</option>
+                                                        <option value="Bleached White">Bleached White</option>
+                                                        <option value="Reactive Dyed">Reactive Dyed</option>
+                                                        <option value="VAT Dyed">VAT Dyed</option>
+
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblPackage">Package</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" id="drpPackage" style="width:100%">
+                                                        <option value="On Paper Cone">On Paper Cone</option>
+                                                        <option value="On Hanks">On Hanks</option>
+                                                        <option value="On Dye cones">On Dye cones</option>
+                                                        <option value="On Dye Cheeses">On Dye Cheeses</option>
+                                                        <option value="On Hanks">On Hanks</option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblCottonType">Cotton Type</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" id="drpCottontype" style="width:100%">
+                                                        <option value="Australian">Australian</option>
+                                                        <option value="African">African</option>
+                                                        <option value="Giza">Giza</option>
+                                                        <option value="Giza / Indian Mix">Giza / Indian Mix</option>
+                                                        <option value="Greek">Greek</option>
+                                                        <option value="Indian">Indian</option>
+                                                        <option value="Pima">Pima</option>
+                                                        <option value="Pima / Indian Mix">Pima / Indian Mix</option>
+                                                        <option value="Egyptian Pure Giza">Egyptian Pure Giza</option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <!-- Contains Bed Linen details -->
+                            <div id="div_BedLinen" style="display:none" runat="server">
+                                <div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblMaterial">Material</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">fdsfsdf</option>
+                                                <option value="HI">Cotton / Linen</option>
+                                            </select>
+
+                                        </div>
+
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblWrapCount">Wrap Count</label>
+
+                                            <input type="text" name="txtWrapCount" class="form-control" placeholder="Wrap Count"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblWeftCount">Weft Count</label>
+
+                                            <input type="text" name="txtWeftCount" class="form-control" placeholder="Weft Count"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblEndsperinch">Ends Per Inch</label>
+
+                                            <input type="text" name="txtEndsperinch" class="form-control" placeholder="Ends Per Inch"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblPicksPerInch">Picks Per Inch</label>
+
+                                            <input type="text" name="txtlblPicksPerInch" class="form-control" placeholder="Picks Per Inch"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblGSM">GSM</label>
+
+                                            <input type="text" name="txtGSM" class="form-control" placeholder="GSM"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblLength">Length:</label>
+
+                                            <input type="text" name="txtLength" class="form-control" placeholder="Length"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblBreadth">Breadth:</label>
+
+                                            <input type="text" name="txtBreadth" class="form-control" placeholder="Breadth"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+
+
+
+                                    <div class="row">
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblSubRange1">Sub Range 1</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">Dobby</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblSubRange2">Sub Range 2:</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">Reactive Piece Dyed</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblCottonType">Cotton Type:</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">Australian</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <!-- Contains Bath Linen details -->
+                            <div id="div_BathLinen" style="display:none" runat="server">
+                                <div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblMaterial">Material</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">fdsfsdf</option>
+                                                <option value="HI">Cotton / Linen</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblWrapCount">Wrap Count</label>
+                                            <input type="text" name="txtWrapCount" class="form-control" placeholder="Wrap Count"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblWeftCount">Weft Count</label>
+
+                                            <input type="text" name="txtWeftCount" class="form-control" placeholder="Weft Count"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblPileCount">Pile Count</label>
+
+                                            <input type="text" name="txtPileCount" class="form-control" placeholder="Pile Count"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblGSM">GSM</label>
+
+                                            <input type="text" name="txtGSM" class="form-control" placeholder="GSM"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblLength">Length</label>
+
+                                            <input type="text" name="txtLength" class="form-control" placeholder="Length"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblBreadth">Breadth:</label>
+
+                                            <input type="text" name="txtBreadth" class="form-control" placeholder="Breadth"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblSpecialities">Specialities:</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">Zero Twist</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblSubRang">Sub Range 1:</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">fdsfsdf</option>
+                                                <option value="HI">Cotton / Linen</option>
+                                            </select>
+
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblSubRang2">Sub Range 2:</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">fdsfsdf</option>
+                                                <option value="HI">Cotton / Linen</option>
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblCottonTye">Cotton Type:</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">sasdsd</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+                            <!-- /completed -->
+                            <!-- Contains Wrap Count,Weft Count,... -->
+                            <div id="div_Table" style="display:none" runat="server">
+                                <div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblMateral">Material</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%" required>
+                                                <option value="AK">Alaska</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblWrapCnt">Wrap Count</label>
+
+                                            <input type="text" name="txtWrapCnt" class="form-control" placeholder="Wrap Count"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblWeftCnt">Weft Count</label>
+
+                                            <input type="text" name="txtWeftCnt" class="form-control" placeholder="Weft Count"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblEndperInc">Ends Per Inch</label>
+
+                                            <input type="text" name="txtEndperInc" class="form-control" placeholder="Ends Per Inch"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblPicksPerIch">Picks Per Inch</label>
+
+                                            <input type="text" name="txtPicksPerIch" class="form-control" placeholder="GSM"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblGS">GSM</label>
+
+                                            <input type="text" name="txtGS" class="form-control" placeholder="GSM"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblLen">Length</label>
+
+                                            <input type="text" name="txtLen" class="form-control" placeholder="Length"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblBrdth">Breadth:</label>
+
+                                            <input type="text" name="txtBreth" class="form-control" placeholder="Breadth"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblsubrng1">Sub Range 1:</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">Alaska</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblSubRan2">Sub Range 2:</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">fdsfsdf</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblCottonTpe">Cotton Type:</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%">
+                                                <option value="AK">Alaska</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblSatinBand"></label>
+                                            <input type="checkbox" name="chkCotton" />Satin Band
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+
+
+
+
+                            <!-- Contains Duvetcover details -->
+                            <div id="div_Duvetcover" runat="server">
+
+                            </div>
+
+                            <div id="div_Default" runat="server">
+
+                            </div>
+                            <!-- Contains Tufted details -->
+                            <div id="div_Tufted" runat="server">
+
+                            </div>
+                            <!-- Contains Kitchenwear details -->
+                            <div id="div_Kitchenwear" runat="server">
+
+                            </div>
+
+                            <!-- Contains Fabric details -->
+                            <div id="div_Fabric" style="display:none" runat="server">
+                                <div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+
+                                            <label class="control-label" for="lblMatl">Material</label>
+
+                                            <select tabindex="3" class="chosen-select" style="width:100%" required>
+                                                <option value="AK">Alaska</option>
+                                                <option value="HI">Hawaii</option>
+                                            </select>
+
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblBaseYarnCount">Base Yarn Count</label>
+
+                                            <input type="text" name="txtBaseYarnCount" class="form-control" placeholder="Base Yarn Count"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblSubsidiary">Subsidiary Yarn Count</label>
+
+                                            <input type="text" name="txtSubsidiary" class="form-control" placeholder="Subsidiary Yarn Count"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblMachineD">Machine Diameter</label>
+
+                                            <input type="text" name="txtMachineD" class="form-control" placeholder="Machine Diameter"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label class="control-label" for="lblGaug">Gauge:</label>
+
+                                            <input type="text" name="txtGaug" class="form-control" placeholder="Gauge"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblSubR1">Sub Range 1</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <select tabindex="3" class="chosen-select" style="width:100%">
+                                                        <option value="AK">Alaska</option>
+                                                        <option value="HI">Hawaii</option>
+                                                    </select>
+
+                                                </div>
+
+
+                                                <div class="col-md-3">
+                                                    <input type="text" name="txtSubR1" class="form-control"
+                                                           data-parsley-trigger="change"
+                                                           data-parsley-type="digits">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    cms
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="row">
+
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblSub2">Sub Range 2:</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" style="width:100%">
+                                                        <option value="AK">Alaska</option>
+                                                        <option value="HI">Hawaii</option>
+                                                    </select>
+
+                                                </div>
+
+
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblKnitType">Knit Type:</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" style="width:100%">
+                                                        <option value="AK">Alaska</option>
+                                                        <option value="HI">Hawaii</option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="row">
+
+
+                                        <div class="form-group col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <label class="control-label" for="lblCottType">Cotton Type:</label>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <select tabindex="3" class="chosen-select" style="width:100%">
+                                                        <option value="AK">Alaska</option>
+                                                        <option value="HI">Hawaii</option>
+                                                    </select>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!-- Contains Product details -->
+                            <div id="div_Product" runat="server" style="padding-top:8px">
+                                <div>
+                                    <div class="row">
+                                        <div class="form-group col-md-4">
+                                            <label for="lblCategory">Product Code:</label>
+                                            <input type="text" name="txtEAN" id="txtproductcode" class="form-control" placeholder="EAN No"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+                                        <div class="form-group col-md-6 col-md-offset-2">
+                                            <label for="lblEAN">EAN No:</label>
+                                            <input type="text" name="txtEAN" class="form-control" id="txtEANno" placeholder="EAN No"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="alphanum">
+                                        </div>
+
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="form-group col-md-6">
+                                            <label for="lblpdtName">Product Name</label>
+                                            <textarea name="txtProductName" rows="3" cols="150" id="txtproductname" class="form-control" placeholder="Product Name" data-parsley-trigger="change"
+                                                      data-parsley-type="alphanum"></textarea>
+
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label for="lblpdtName">Remarks</label>
+                                            <textarea name="txtRemarks" rows="3" cols="150" class="form-control" id="txtremarks" placeholder="Remarks" data-parsley-trigger="change"
+                                                      data-parsley-type="alphanum"></textarea>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled onclick="Validation();" id="formSubmit">Submit</button>
+                        <button type="button" class="btn btn-lightred" id="btnGenerate">Generate</button>
+                    </div>
+
+                    <!-- /tile footer -->
+
+                </section>
+                <!--Here user can have to restore Product Details -->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore Product </strong> Details</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Product Code</th>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Sub Category</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

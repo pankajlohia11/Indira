@@ -1,0 +1,613 @@
+﻿app1.controller("AC_CompanyMaster", function ($scope, $http, $window, $rootScope) {
+    GetCompanyList();
+    GetPrivilages();
+    GetCountry();
+    
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_Admin_Company/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    function GetSalesPersonList() {
+        var getsalespersonlist = $http.get("/ET_Admin_Company/GetSalesPerson",
+            {
+                params: { id: $scope.COM_ID }
+            });
+        getsalespersonlist.then(function (salespersonlist) {
+            debugger;
+            var res = JSON.parse(salespersonlist.data);
+            $scope.salespersons = res;
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    function GetCompanyList() {
+        var getcompanylist = $http.get("/ET_Admin_Company/GetCompanyList",
+            {
+                params: { deleted: false }
+            });
+        getcompanylist.then(function (company) {
+            var res = JSON.parse(company.data);
+            $scope.companylist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    function GetCompanyRestoreList() {
+        var getrestorecompanylist = $http.get("/ET_Admin_Company/GetCompanyList",
+            {
+                params: { deleted: true }
+            });
+        getrestorecompanylist.then(function (company) {
+            var res = JSON.parse(company.data);
+            $scope.companyrestorelist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    function GetCountry() {
+        var getcountryllist = $http.get("/ET_Admin_Company/GetCountryList");
+        getcountryllist.then(function (country) {
+            $scope.countrys = country.data;
+            $scope.selectedcountry = "";
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    function BindBanks() {
+
+        var getbanklist = $http.get("/ET_Admin_Company/BindBanks",
+            {
+                params: { id: $scope.COM_ID }
+            });
+        getbanklist.then(function (bank) {
+            
+            $scope.banks = bank.data;
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    $scope.BankChange = function () {
+    }
+    $scope.CountryChange = function () {
+    }
+    $scope.CompanyTypeChange = function () {
+    }
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        GetCompanyList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        GetCompanyRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+            $scope.COM_ID = "0";
+            $scope.COM_CODE = "";
+            $scope.COM_NAME = "";
+            $scope.COM_DISPLAYNAME = "";
+            $scope.COM_USTID = "";
+            $scope.Tax_No = "";
+            $scope.COM_Sales_Person = "";
+            $scope.COM_STREET = "";
+            $scope.COM_ZIP = "";
+            $scope.COM_EMAIL = "";
+            $scope.COM_FAX = "";
+            $scope.COM_PHONE = "";
+            $scope.COM_MOBILE = "";
+            $scope.COM_REMARKS = "";
+            $scope.COM_CreditDays = "";
+            $("#drpCountry").val("").trigger("chosen:updated");
+            $scope.selectedbank = "";
+            BindBanks();
+            GetSalesPersonList();
+            $("#companytype").val("0").trigger("chosen:updated");
+            $scope.selectedcompanytype = "0";
+            $scope.selectedbank = "";
+            $scope.selectedcountry = "";
+            $scope.COM_STATE = "";
+            $scope.COM_CITY = "";
+            $("#contactbody").html("");
+            $("#bankbody").html("");
+            
+            
+            $("#contactbody").append("<tr><td><select class='form-control' id='drptitle'><option value='1' selected>Mr.</option><option value='2'>Mrs.</option><option value='3'>Dr.</option><option value='4'>Drs.</option></select></td><td><input type='text' id='txtfirstname' class='form-control' /></td><td><input type='text' id='txtlastname' class='form-control' /></td><td><select class='form-control' id='drpjobtitle'><option value='MD'>MD</option><option value='Business Manager'>Business Manager</option><option value='Marketing Manager'>Marketing Manager</option><option value='Managing director'>Managing director</option></select></td><td><input type='text' onchange='isInteger(this);' id='txtphoneno' class='form-control' /></td><td><input type='text' id='txtfaxno' onchange='isInteger(this);' class='form-control' /></td><td><input type='text' onchange='isInteger(this);' id='txtmobileno' class='form-control' /></td><td><input data-parsley-trigger='change' type='email' id='txtemailc' onchange='ValidateEmail(this);' class='form-control' /></td><td><input type='text' id='txtremarksc' class='form-control' /></td><td><a style='padding: 5px;' onclick='addnewrow(this)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' onclick='deleterow(this)'><i class='fa fa-trash'></i></a></td></tr>");
+            $("#bankbody").append("<tr><td><input type='text' id='txtbankname' class='form-control' /></td><td><textarea id='bankaddress' class='form-control' /></td><td><input type='text' onchange='isInteger(this);' id='bankaccNo' class='form-control' /></td><td><input type='text' id='b_swift' class='form-control' /></td><td><input type='text' id='b_BLZ' class='form-control' /></td><td><input type='text' id='b_BIC' class='form-control' /></td><td><input type='text' id='IBAN' class='form-control' /></td><td><a style='padding: 5px;' onclick='addnewrowbank(this)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' onclick='deleterowbank(this)'><i class='fa fa-trash'></i></a></td></tr>");
+            
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    function validateContact() {
+        var tr = $("#contactbody").find("tr");
+        var txt = "";
+        for (i = 0; i < tr.length; i++) {
+            var td = $(tr[i]).find("td");
+            var firstname = $(td[1]).find("input").val();
+            var mobile = $(td[6]).find("input").val();
+            if (firstname == "") {
+                message = "Enter First Name at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else {
+                txt = txt + $(td[0]).find("select").val() + ",";
+                txt = txt + $(td[1]).find("input").val() + ",";
+                txt = txt + $(td[2]).find("input").val() + ",";
+                txt = txt + $(td[3]).find("select").val() + ",";
+                txt = txt + $(td[4]).find("input").val() + ",";
+                txt = txt + $(td[5]).find("input").val() + ",";
+                txt = txt + $(td[6]).find("input").val() + ",";
+                txt = txt + $(td[7]).find("input").val() + ",";
+                txt = txt + $(td[8]).find("input").val() + "|";
+
+            }
+        }
+        
+        return txt;
+    }
+    function validateBank() {
+        var txt1 = "";
+        var tr1 = $("#bankbody").find("tr");
+        for (j = 0; j < tr1.length; j++) {
+            var td = $(tr1[j]).find("td");
+            var txtbankname = $(td[0]).find("input").val();
+            var bankaddress = $(td[1]).find("textarea").val();
+            var bankaccNo   = $(td[2]).find("input").val();
+            var b_swift     = $(td[3]).find("input").val();
+            var b_BLZ       = $(td[4]).find("input").val();
+            var b_BIC       = $(td[5]).find("input").val();
+            var IBAN        = $(td[6]).find("input").val();
+            if (txtbankname == "") {
+                message = "Enter Bank Name" + (j + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else if (bankaddress == "") {
+                message = "Enter bankaddress" + (j + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else if (bankaccNo == "") {
+                message = "Enter Bank Account Number" + (j + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else if (b_swift == "") {
+                message = "Enter Swift" + (j + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else if (b_BLZ == "") {
+                message = "Enter BLZ" + (j + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else if (b_BIC == "") {
+                message = "Enter BIC" + (j + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else if (IBAN == "") {
+                message = "Enter IBAN" + (j + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+
+            else {
+                txt1 = txt1 + $(td[0]).find("input").val() + ",";
+                txt1 = txt1 + $(td[1]).find("textarea").val() + ",";
+                txt1 = txt1 + $(td[2]).find("input").val() + ",";
+                txt1 = txt1 + $(td[3]).find("input").val() + ",";
+                txt1 = txt1 + $(td[4]).find("input").val() + ",";
+                txt1 = txt1 + $(td[5]).find("input").val() + ",";
+                txt1 = txt1 + $(td[6]).find("input").val() + "|";
+            }
+        }
+        return txt1;
+    }
+    $scope.SubmitClick = function () {
+        var txt = validateContact();
+        if (txt != "") {
+            var txt1 = validateBank();
+            if (txt1 != "") {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Company/ET_Master_Company_Add",
+                dataType: 'json',
+                data: {
+                    ComID: $scope.COM_ID,
+                    CompanyCode: $scope.COM_CODE,
+                    CompanyName: $scope.COM_NAME,
+                    DisplayName: $scope.COM_DISPLAYNAME,
+                    COM_Sales_Person: $scope.COM_Sales_Person,
+                    BankID: $scope.selectedbank,
+                    UstId: $scope.COM_USTID,
+                    TaxNo: $scope.Tax_No,
+                    COM_CreditDays: $scope.COM_CreditDays,
+                    Address: $scope.COM_STREET,
+                    State: $scope.COM_STATE,
+                    Country: $scope.selectedcountry,
+                    City: $scope.COM_CITY,
+                    Zip: $scope.COM_ZIP,
+                    Email: $scope.COM_EMAIL,
+                    Fax: $scope.COM_FAX,
+                    Phone: $scope.COM_PHONE,
+                    Mobile: $scope.COM_MOBILE,
+                    Remarks: $scope.COM_REMARKS,
+                    companytype: $scope.selectedcompanytype,
+                    Contactdata: txt,
+                    Bankdata: txt1
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else if (data.indexOf("Success") > -1) {
+                    var res = data.split(':');
+                    if ($scope.COM_ID == 0) {
+                        message = 'Record Inserted Successfully With Code : ' + res[1].toString();
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully With Code : ' + res[1].toString()
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.COM_ID = "0";
+                    $scope.COM_CODE = "";
+                    $scope.COM_NAME = "";
+                    $scope.COM_DISPLAYNAME = "";
+                    $scope.COM_USTID = "";
+                    $scope.Tax_No = "";
+                    $scope.COM_STREET = "";
+                    $scope.COM_ZIP = "";
+                    $scope.COM_EMAIL = "";
+                    $scope.COM_FAX = "";
+                    $scope.COM_PHONE = "";
+                    $scope.COM_MOBILE = "";
+                    $scope.COM_REMARKS = "";
+                    $scope.COM_CreditDays = "";
+                    $("#drpCountry").val("").trigger("chosen:updated");
+                    $("#drpBank").val("").trigger("chosen:updated");
+                    $("#companytype").val("0").trigger("chosen:updated");
+                    $scope.selectedcompanytype = "0";
+                    $scope.selectedbank = "";
+                    $scope.selectedcountry = "";
+                    $scope.COM_STATE = "";
+                    $scope.COM_CITY = "";
+                    $("#contactbody").html("");
+                    $("#contactbody").append("<tr><td><select class='form-control' id='drptitle'><option value='1' selected>Mr.</option><option value='2'>Mrs.</option><option value='3'>Dr.</option><option value='4'>Drs.</option></select></td><td><input type='text' id='txtfirstname' class='form-control' /></td><td><input type='text' id='txtlastname' class='form-control' /></td><td><select class='form-control' id='drpjobtitle'><option value='MD'>MD</option><option value='Business Manager'>Business Manager</option><option value='Marketing Manager'>Marketing Manager</option><option value='Managing director'>Managing director</option></select></td><td><input type='text' onchange='isInteger(this);' id='txtphoneno' class='form-control' /></td><td><input type='text' id='txtfaxno' onchange='isInteger(this);' class='form-control' /></td><td><input type='text' onchange='isInteger(this);' id='txtmobileno' class='form-control' /></td><td><input data-parsley-trigger='change' type='email' id='txtemailc' onchange='ValidateEmail(this);' class='form-control' /></td><td><input type='text' id='txtremarksc' class='form-control' /></td><td><a style='padding: 5px;' onclick='addnewrow(this)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' onclick='deleterow(this)'><i class='fa fa-trash'></i></a></td></tr>");
+                    $("#bankbody").html("");
+                    $("#bankbody").append("<tr><td><input type='text' id='txtbankname' class='form-control' /></td><td><textarea id='bankaddress' class='form-control' /></td><td><input type='text' onchange='isInteger(this);' id='bankaccNo' class='form-control' /></td><td><input type='text' id='b_swift' class='form-control' /></td><td><input type='text' id='b_BLZ' class='form-control' /></td><td><input type='text' id='b_BIC' class='form-control' /></td><td><input type='text' id='IBAN' class='form-control' /></td><td><a style='padding: 5px;' onclick='addnewrowbank(this)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' onclick='deleterowbank(this)'><i class='fa fa-trash'></i></a></td></tr>");
+
+
+                    $scope.submittext = "Submit";
+                    $scope.createedit = "Create";
+                    $("#formSubmit").attr('disabled', "disabled");
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+
+    }
+
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Company/ET_Master_Company_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var CompanyByID = JSON.parse(data);
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+
+                    $scope.COM_ID = CompanyByID.COM_ID;
+                    $scope.COM_CODE = CompanyByID.COM_CODE;
+                    $scope.COM_NAME = CompanyByID.COM_NAME;
+                    $scope.COM_DISPLAYNAME = CompanyByID.COM_DISPLAYNAME;
+                    $scope.COM_USTID = CompanyByID.COM_USTID;
+                    $scope.Tax_No = CompanyByID.Tax_No;
+                    $scope.COM_STREET = CompanyByID.COM_STREET;
+                    $scope.COM_ZIP = CompanyByID.COM_ZIP;
+                    $scope.COM_EMAIL = CompanyByID.COM_EMAIL;
+                    $scope.COM_FAX = CompanyByID.COM_FAX;
+                    $scope.COM_PHONE = CompanyByID.COM_PHONE;
+                    $scope.COM_MOBILE = CompanyByID.COM_MOBILE;
+                    $scope.COM_REMARKS = CompanyByID.COM_REMARKS;
+                    $scope.COM_Sales_Person = CompanyByID.COM_Sales_Person;
+                    $scope.COM_CreditDays = CompanyByID.COM_CreditDays;
+                    $scope.selectedcountry = CompanyByID.COM_COUNTRY;
+                    $("#drpCountry").val(CompanyByID.COM_COUNTRY).trigger("chosen:updated");
+                    $scope.selectedbank = CompanyByID.BANK_ID;
+                    BindBanks();
+                    GetSalesPersonList();
+                    $("#companytype").val(CompanyByID.Cust_Supp).trigger("chosen:updated");
+                    $scope.selectedcompanytype = CompanyByID.Cust_Supp;
+                    $scope.COM_STATE = CompanyByID.COM_STATE;
+                    $scope.COM_CITY = CompanyByID.COM_CITY;
+                    var post1 = $http({
+                        method: "POST",
+                        url: "/ET_Admin_Company/ET_Master_Company_ContactsLoad",
+                        dataType: 'html',
+                        data: {
+                            id: a
+                        },
+                        headers: { "Content-Type": "application/json" }
+                    });
+                    post1.success(function (data, status) {
+                        if (data == "Session Expired") {
+                            $window.location.href = '/ET_Login/ET_SessionExpire';
+                        }
+                        else if (data.indexOf("ERR") > -1) {
+                            $("#spanErrMessage1").html(data);
+                            $("#spanErrMessage2").html(data);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                            $('#contactbody').html(data);
+                        }
+                    });
+                    post1.error(function (data, status) {
+                        $window.alert(data.Message);
+                    });
+                    var post2 = $http({
+                        method: "POST",
+                        url: "/ET_Admin_Company/ET_Master_Company_BankLoad",
+                        dataType: 'html',
+                        data: {
+                            id: a
+                        },
+                        headers: { "Content-Type": "application/json" }
+                    });
+                    post2.success(function (data, status) {
+                        if (data == "Session Expired") {
+                            $window.location.href = '/ET_Login/ET_SessionExpire';
+                        }
+                        else if (data.indexOf("ERR") > -1) {
+                            $("#spanErrMessage1").html(data);
+                            $("#spanErrMessage2").html(data);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                            $('#bankbody').html(data);
+                        }
+                    });
+                    post2.error(function (data, status) {
+                        $window.alert(data.Message);
+                    });
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.Restoredeleterecords = function (a, $event, b) {
+        
+        var res = false;
+        if (b)
+            res = $scope.Isdelete;
+        else
+            res = $scope.Isrestore
+        if (res) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Company/ET_Master_Company_RestoreDelete",
+                dataType: 'json',
+                data: {
+                    id: a,
+                    type: b
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (data == "Success") {
+                        $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                        if (b) {
+                            message = "Record Deleted Successfully.";
+                        }
+                        else {
+                            message = "Record Restored Successfully.";
+                        }
+
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Company/ET_Master_Company_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.$watch("getstates", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpstate").val($scope.selectedstate).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("getcities", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpcity").val($scope.selectedcity).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("banks", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpBank").val($scope.selectedbank).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("companylist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("companyrestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 5);
+        }
+    });
+    $scope.$watch("salespersons", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesPerson").val($scope.COM_Sales_Person).trigger("chosen:updated"); }, 100);
+        }
+    });
+});
+
+
+    //scope.$watch("assignments", function (value) {//I change here
+    //    var val = value || null;
+    //    if (val)
+    //        element.dataTable({ "bDestroy": true });
+    //});
+
+
+//$scope.$watch(
+    //    "selectedcountry",
+    //    function (newValue, oldValue) {
+    //        // Ignore initial setup.
+    //        if (newValue === oldValue) {
+    //            return;
+    //        }
+    //        alert(newValue);
+    //    }
+    //);

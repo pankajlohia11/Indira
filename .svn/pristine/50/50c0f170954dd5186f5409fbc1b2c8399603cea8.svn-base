@@ -1,0 +1,42 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_Document_Master
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int auto_key { get; set; }
+
+        [StringLength(100)]
+        public string autogen_formname { get; set; }
+
+        [StringLength(20)]
+        public string autogen_type { get; set; }
+
+        [StringLength(3)]
+        public string autogen_prefix { get; set; }
+
+        [StringLength(3)]
+        public string autogen_suffix { get; set; }
+
+        [StringLength(10)]
+        public string autogen_startno { get; set; }
+
+        [StringLength(10)]
+        public string autogen_endno { get; set; }
+
+        [StringLength(100)]
+        public string autogen_formgroup { get; set; }
+
+        public int workflow_status { get; set; }
+
+        public decimal? workflowapprover { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+    }
+}

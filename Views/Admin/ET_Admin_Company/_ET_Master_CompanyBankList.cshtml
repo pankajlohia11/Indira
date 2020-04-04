@@ -1,0 +1,33 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl__Master_CompanyBank>
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td>
+            <input type='text' id='txtbankname' value="@item.B_NAME" class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='txtbankname' value="@item.Address" class='form-control' />
+@*//<textarea id='bankaddress' class='form-control'>@item.Address</textarea>*@
+        </td>
+        <td>
+            <input type='text' id='bankaccNo' value="@item.B_AccountNo" onchange='isInteger(this);' class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='b_swift' value="@item.SWIFT"  class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='b_BLZ' value="@item.BLZ" class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='b_BIC' value="@item.BIC" class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='IBAN' value="@item.IBAN" class='form-control' />
+        </td>
+        <td>
+            <a style='padding: 5px;' onclick='addnewrowbank(this)'><i class='fa fa-plus'></i></a>
+            <a style='padding: 5px;color:red' onclick='deleterowbank(this)'><i class='fa fa-trash'></i></a>
+        </td>
+    </tr>
+}

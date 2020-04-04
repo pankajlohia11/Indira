@@ -1,0 +1,15 @@
+﻿
+@{
+    ViewBag.Title = "ET_Sales_OrderDetails_CloneOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row col-md-12">
+    <div class="form-group col-md-6">
+        <label for="CustomerName">New Order Name</label>
+        <input type="text" class="form-control" name="OrderName" />
+        <input type="text" style="display:none" name="OrderCode" $sc />
+        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="CloneRecord();">Submit</button>
+    </div>
+</div>
+

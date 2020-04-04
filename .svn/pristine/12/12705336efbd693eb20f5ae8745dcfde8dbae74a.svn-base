@@ -1,0 +1,392 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+    This Form is used to create a User Information Details for the customer and the supplier.
+    The user can edit or remove and restore  a record in User Master.
+
+    Author=jesmi
+    Created Date=6th April 2018
+    Update Date : 11 April 2018
+    Updated By Manoj
+    User Master Form view
+    Operations[Add,Edit,Delete,Restore]
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_UserMaster.js"></script>
+}
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>User Master Details<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">User Master Details</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_UserMaster">
+            <div class="col-md-12">
+                <!--[div_view] is used for displaying View List Page etc-->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>User Master Details</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                      Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>User Code</th>
+                                    <th>Display Name</th>
+                                    <th>User Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Mobile</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="user in userlist">
+                                    <td>{{user.USER_CODE}}</td>
+                                    <td>{{user.DISPLAY_NAME}}</td>
+                                    <td>{{user.USER_NAME}}</td>
+                                    <td>{{user.USER_EMAIL}}</td>
+                                    <td>{{user.USER_PHONE}}</td>
+                                    <td>{{user.USER_MOBILE}}</td>
+                                    <td>
+                                        <a ng-click="editRecords(user.USER_ID);" value="{{ user.USER_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(user.USER_ID);" value="{{ user.USER_ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                        <a ng-click="Restoredeleterecords(user.USER_ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+                <!--The user can have a option to create and edit User Information Details-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> User Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- this is link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="UserInfo"><strong>User Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtUsercode">Role Code</label>
+                                    <input type="text" name="UserID" id="UserID" class="form-control hidden" ng-model="USER_ID">
+                                    <input type="text" name="txtUsercode" minlength="5" maxlength="10" ng-model="USER_CODE" disabled="@ViewBag.AutoManual" id="txtUsercode" class="form-control" data-parsley-trigger="change" @ViewBag.Required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblUserName">User Name *</label>
+                                    <input type="text" name="txtUserName" id="txtUserName" class="form-control" ng-model="USER_NAME" placeholder="User Name"
+                                           data-parsley-trigger="change" 
+                                           required>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblDisplayName">Display Name *</label>
+                                    <input type="text" name="txtDisplayName" id="txtDisplayName" class="form-control" ng-model="DISPLAY_NAME" placeholder="Display Name"
+                                           data-parsley-trigger="change"
+                                           required>
+
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblPassword">Password *</label>
+                                    <input type="password" name="password" id="txtPassword" class="form-control" ng-model="USER_PASSWORD" placeholder="Password"
+                                           data-parsley-trigger="change" minlength="6" maxlength="10"
+                                           required>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblConfirmPassword">Confirm Password *</label>
+                                    <input type="password" name="passwordConfirm" id="txtConfirmPassword" ng-model="USER_PASSWORDConfirm" class="form-control" data-parsley-equalto="#txtPassword" placeholder="Confirm Password"
+                                           data-parsley-trigger="change" minlength="6" maxlength="10"
+                                           required>
+
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblRole">Role *</label>
+                                    <select data-ng-model="selectedrole" id="drpRole" class="form-control chosen-select" ng-change="RoleChange()">
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="role in roles" value="{{role.ROLE_ID}}">
+                                            {{role.ROLE_NAME}}
+                                        </option>
+                                    </select>   
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="AdressInfo"><strong>Address Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblStreet">Street *</label>
+                                    <input type="text" name="txtStreet" id="txtStreet" class="form-control" ng-model="USER_STREET" placeholder="Street"
+                                           data-parsley-trigger="change"
+                                           required>
+
+
+
+                                </div>
+
+
+                                <div class="form-group col-md-6">
+
+                                    <label for="Country">Country *</label>
+                                    <select data-ng-model="selectedcountry" id="drpCountry" ng-change="GetState()" class="form-control chosen-select">
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="country in countrys" value="{{country.location_id}}">
+                                            {{country.name}}
+                                        </option>
+                                    </select>
+
+                                </div>
+                            </div>
+                            <div class="row">
+
+
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">State *</label>
+                                    <select data-ng-model="selectedstate" id="drpstate" ng-change="GetCity()" class="form-control chosen-select" >
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="state1 in getstates" value="{{state1.location_id}}">
+                                            {{state1.name}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">City *</label>
+                                    <select data-ng-model="selectedcity" class="form-control chosen-select" ng-change="CityChange()" id="drpcity">
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="city in getcities" value="{{city.location_id}}">
+                                            {{city.name}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="ZipCode">Zip</label>
+
+                                    <input type="text" name="txtZipCode" id="txtZipCode" class="form-control" placeholder="Zip Code" ng-model="USER_ZIP"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits">
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="AccountsInfo"><strong>Contact Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblEmail">Email *</label>
+                                    <input type="email" name="txtEmail" id="txtEmail" class="form-control" placeholder="Email" ng-model="USER_EMAIL"
+                                           data-parsley-trigger="change"
+                                           required>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblFax">Fax</label>
+
+                                    <input type="text" name="txtFax" id="txtFax" class="form-control" placeholder="Fax" ng-model="USER_FAX"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblPhone">Phone</label> 
+                                    <input type="text" name="txtPhone" id="txtPhone" class="form-control" placeholder="Phone" ng-model="USER_PHONE"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits">
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblMobile">Mobile</label>
+                                    <input type="text" name="txtMobile" id="txtMobile" class="form-control" placeholder="Mobile" ng-model="USER_MOBILE"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblOtherInfo"><strong>Other Info</strong></label>
+                                </div>
+                            </div>
+
+
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblRemarks">Remarks</label>
+                                    <textarea name="txtRemarks" id="txtRemarks" rows="3" cols="80" class="form-control" ng-model="USER_REMARKS"
+                                              data-parsley-trigger="change">
+                                    </textarea>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <!-- Button used for submitting the record -->
+
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" disabled  ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+
+                <!--The user can have a option to restore User Information Details-->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> User Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>User Code</th>
+                                    <th>Display Name</th>
+                                    <th>User Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Mobile</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="user in userrestorelist">
+                                    <td>{{user.USER_CODE}}</td>
+                                    <td>{{user.DISPLAY_NAME}}</td>
+                                    <td>{{user.USER_NAME}}</td>
+                                    <td>{{user.USER_EMAIL}}</td>
+                                    <td>{{user.USER_PHONE}}</td>
+                                    <td>{{user.USER_MOBILE}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(user.USER_ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

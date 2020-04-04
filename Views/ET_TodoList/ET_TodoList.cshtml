@@ -1,0 +1,181 @@
+﻿
+@{
+    ViewBag.Title = "ET_TodoList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/Ac_TodoList.js"></script>
+    <script>
+        $(window).load(function () {
+           
+        });
+       
+    </script>
+}
+<section id="content">
+    <div class="page page-shop-single-order">
+        <div class="pageheader">
+
+            <h2>Todo List<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Todo List</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+        <section class="tile widget-todo" fullscreen="isFullscreen04" ng-controller="TodoWidgetCtrl">
+            <!-- tile header -->
+            <div class="tile-header dvd dvd-btm">
+                <h1 class="custom-font"><strong>Todo</strong> List</h1>
+                <ul class="controls">
+                    <li class="dropdown">
+                        <a role="button" tabindex="0" class="dropdown-toggle settings" data-toggle="dropdown">
+                            <i class="fa fa-cog"></i>
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </a>
+                        <ul class="dropdown-menu pull-right with-arrow animated littleFadeInUp">
+                            <li>
+                                <a role="button" tabindex="0" class="tile-toggle">
+                                    <span class="minimize"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;&nbsp;Minimize</span>
+                                    <span class="expand"><i class="fa fa-angle-up"></i>&nbsp;&nbsp;&nbsp;Expand</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a role="button" tabindex="0" class="tile-refresh">
+                                    <i class="fa fa-refresh"></i> Refresh
+                                </a>
+                            </li>
+                            <li>
+                                <a role="button" tabindex="0" class="tile-fullscreen">
+                                    <i class="fa fa-expand"></i> Fullscreen
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="remove"><a role="button" tabindex="0" class="tile-close"><i class="fa fa-times"></i></a></li>
+                </ul>
+            </div>
+            <!-- /tile header -->
+            <!-- tile body -->
+            <div class="tile-body lined-paper">
+                <form class="form-horizontal" role="form">
+                    <label for="todo" class="text-strong mb-0">Add Todo: </label>
+                    <div class="form-group mb-0">
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control input-unstyled" ng-model="todo" id="todo" placeholder="type todo here..." required>
+                        </div>
+                        <div class="col-sm-2">
+                            <button type="submit" ng-model="AddTodo" ng-click="AddTodoList()" class="btn btn-link"><i class="fa fa-chevron-right text-lg"></i></button>
+                        </div>
+                    </div>
+                </form>
+                <ul class="todo-list list-unstyled"></ul>
+            </div>
+            <!-- /tile body -->
+        </section>
+        <div class="col-md-4">
+            <!-- tile -->
+            <section class="tile bg-greensea widget-appointments">
+                <!-- tile header -->
+                <div class="tile-header dvd dvd-btm">
+                    <h1 class="custom-font">Appointments</h1>
+                    <ul class="controls">
+                        <li class="dropdown">
+                            <a role="button" tabindex="0" class="dropdown-toggle settings" data-toggle="dropdown">
+                                <i class="fa fa-cog"></i>
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </a>
+                            <ul class="dropdown-menu pull-right with-arrow animated littleFadeInUp">
+                                <li>
+                                    <a role="button" tabindex="0" class="tile-toggle">
+                                        <span class="minimize"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;&nbsp;Minimize</span>
+                                        <span class="expand"><i class="fa fa-angle-up"></i>&nbsp;&nbsp;&nbsp;Expand</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a role="button" tabindex="0" class="tile-refresh">
+                                        <i class="fa fa-refresh"></i> Refresh
+                                    </a>
+                                </li>
+                                <li>
+                                    <a role="button" tabindex="0" class="tile-fullscreen">
+                                        <i class="fa fa-expand"></i> Fullscreen
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="remove"><a role="button" tabindex="0" class="tile-close"><i class="fa fa-times"></i></a></li>
+                    </ul>
+                </div>
+                <!-- /tile header -->
+                <!-- tile body -->
+                <div class="tile-body">
+                    <!-- row -->
+                    <div class="row">
+                        <!-- col -->
+                        @*<div class="col-md-6 text-center">
+                            <h4 class="text-light">Bratislava</h4>
+                            <div style="width: 100%;">
+                                <canvas id="c1" class="CoolClock:minovateClock:50"></canvas>
+                            </div>
+                            <span class="text-light">30&deg;C</span>
+                        </div>*@
+                        <!-- /col -->
+                        <!-- col -->
+                        <div class="col-md-12 b-l text-center">
+                            <span class="day" id="Day">15</span><br />
+                            <span class="month" id="Month">May</span>
+                        </div>
+                        <!-- /col -->
+                    </div>
+                    <!-- /row -->
+                </div>
+                <!-- /tile body -->
+                <!-- tile footer -->
+                <div class="tile-footer dvd dvd-top mt-20">
+                    <div class="owl-carousel" id="appointments-carousel">
+                        @*<div>
+                            <p class="text-center text-strong"><i class="fa fa-clock-o"></i> 16:00, <small class="text-thin">Estimated time: 2 hours</small></p>
+                            <p>
+                                <h5 class="mt-10 mb-0 text-strong">Release Update</h5>
+                                <small class="text-thin text-transparent-white">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</small>
+                            </p>
+                        </div>*@
+                        @*<div>
+                            <p class="text-center text-strong"><i class="fa fa-clock-o"></i> 19:00, <small class="text-thin">Estimated time: 5 hours</small></p>
+                            <p>
+                                <h5 class="mt-10 mb-0 text-strong">Make a Backup</h5>
+                                <small class="text-thin text-transparent-white">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</small>
+                            </p>
+                        </div>*@
+                        @*<div>
+                            <p class="text-center text-strong"><i class="fa fa-clock-o"></i> 22:45, <small class="text-thin">Estimated time: 8 hours 45 minutes</small></p>
+                            <p>
+                                <h5 class="mt-10 mb-0 text-strong">Buy Tickets</h5>
+                                <small class="text-thin text-transparent-white">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</small>
+                            </p>
+                        </div>*@
+                    </div>
+                </div>
+                <!-- /tile footer -->
+            </section>
+            <!-- /tile -->
+        </div>
+
+    </div>
+</section>
+
+

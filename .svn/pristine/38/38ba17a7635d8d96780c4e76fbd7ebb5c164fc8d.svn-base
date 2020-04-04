@@ -1,0 +1,866 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Entity;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+using BusinessLogic.Admin_BL;
+using System.Web.Script.Serialization;
+using BusinessEntity.CustomModels;
+using System.Net.Mail;
+using System.Net;
+
+namespace Euro.Controllers.Sales
+{
+    public class ET_Sales_OneToManyInvoiceController : Controller
+    {
+        public static string prefix = "";
+        public static bool automanual = false;
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+        EntityClasses dbcontext = new EntityClasses();
+        // GET: ET_Sales_OneToManyInvoice
+        public ActionResult ET_Sales_OneToManyInvoice()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    AutoManual();
+                    return View();
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        private void AutoManual()
+        {
+            ViewBag.AutoManual = false;
+            automanual = false;
+            List<Tbl_Document_Master> ObjDoc = bal.AutoManual_BL(3012);
+            if (ObjDoc.Count > 0)
+            {
+                foreach (var item in ObjDoc)
+                {
+                    if (item.autogen_type == "Automatic")
+                    {
+                        ViewBag.AutoManual = true;
+                        prefix = item.autogen_prefix;
+                        automanual = true;
+                    }
+                    else
+                    {
+                        ViewBag.Required = "required";
+                    }
+                }
+            }
+        }
+
+        public JsonResult GetPrivilages()
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var privilagelist = bal.GetPrivilages_BL(Convert.ToInt32(Session["UserID"].ToString()), 3012);
+                    var json = new JavaScriptSerializer().Serialize(privilagelist);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public JsonResult GetInvoiceList(bool delete)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int com_key = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = (from a in dbcontext.Tbl_OneToManyInvoice
+                                join d in dbcontext.Tbl_Master_User on a.OTMI_SalesPerson equals d.USER_ID into user
+                                from z in user
+                                join w in dbcontext.Tbl_Master_CompanyDetails on a.OTMI_CustomerID equals w.COM_ID into p
+                                from enq in p.DefaultIfEmpty()
+                                where a.DELETED == delete && a.COM_KEY == com_key
+                                select new
+                                {
+                                    OTMI_ID = a.OTMI_ID,
+                                    OTMI_Code = a.OTMI_Code,
+                                    OTMI_InvoiceDate = a.OTMI_InvoiceDate.ToString(),
+                                    COM_DISPLAYNAME = enq.COM_DISPLAYNAME,
+                                    USER_NAME = z.USER_NAME,
+                                    OTMI_Approval=a.OTMI_Approval
+                                }).ToList();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public JsonResult GetTax(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+
+                    var data1 = dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == id).COM_COUNTRY;
+                    if (data1 == 82)
+                    {
+                        var data = dbcontext.Tbl_SystemSetUp.Single(m => m.COM_KEY == comkey).TAX ?? 0;
+                        return Json(data, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        return Json(0, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public JsonResult GetCustomers()
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_KEY == comkey && m.Cust_Supp != 1).ToList();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public JsonResult GetDespatches(int custid, string type, int invid)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    if (type == "Submit")
+                    {
+                        int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        var data = dbcontext.Tbl_DespatchHeader.Where(m => m.COM_KEY == comkey && m.DELETED == false && m.D_CustomerID == custid).ToList();
+                        var json = new JavaScriptSerializer().Serialize(data);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        var data1 = dbcontext.Tbl_OneToManyInvoice.Single(a => a.OTMI_ID == invid).OTMI_DespatchIDs;
+                        var data = dbcontext.Tbl_DespatchHeader.Where(m => m.D_ID == data1).ToList();
+                        var json = new JavaScriptSerializer().Serialize(data);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public ActionResult GetInvoiceDetails(string ids)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var despatchids = new HashSet<decimal>(ids.Split(',').Select(m => Convert.ToDecimal(m)).ToList());
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data1 = (from x in dbcontext.Tbl_DespatchHeader join
+                                 a in dbcontext.Tbl_DespatchDetails on x.D_ID equals a.DD_PID
+                                 join b in dbcontext.Tbl_Product_Master on a.DD_ProductID equals b.P_ID into c
+                                 from d in c
+                                 join m in dbcontext.Tbl_Order_Details on a.DD_OrderID equals m.AGEN_TRAD_PO_ID 
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into f
+                                 from g in f.DefaultIfEmpty()
+                                 where despatchids.Contains(x.D_ID) && g.LU_Type == 2 && m.PRODUCT_ID == a.DD_ProductID
+                                 select new OneToManyInvoice_CM
+                                 {
+                                     ArticleNo = d.P_ArticleNo,
+                                     ProductName = d.P_ShortName,
+                                     UOM = g.LU_Description,
+                                     SD_Quantity = a.DD_DespatchQuantity,
+                                     Despatch_Code = x.D_Code,
+                                     price=m.PRICE??0,
+                                 }).ToList();
+                    return PartialView("/Views/Sales/ET_Sales_OneToManyInvoice/ET_Sales_OneToManyInvoiceDetails.cshtml", data1);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public ActionResult GetInvoiceTotal(int ids)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data1 = (from x in dbcontext.Tbl_DespatchHeader
+                                 join a in dbcontext.Tbl_DespatchDetails on x.D_ID equals a.DD_PID
+                                 join b in dbcontext.Tbl_Product_Master on a.DD_ProductID equals b.P_ID into c
+                                 from d in c
+                                 join m in dbcontext.Tbl_Order_Details on a.DD_OrderID equals m.AGEN_TRAD_PO_ID
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into f
+                                 from g in f.DefaultIfEmpty()
+                                 where x.D_ID == ids && g.LU_Type == 2 && m.PRODUCT_ID == a.DD_ProductID
+                                 select new OneToManyInvoice_CM
+                                 {
+                                     ArticleNo = d.P_ArticleNo,
+                                     ProductName = d.P_ShortName,
+                                     UOM = g.LU_Description,
+                                     SD_Quantity = a.DD_DespatchQuantity,
+                                     Despatch_Code = x.D_Code,
+                                     price = m.PRICE ?? 0
+                                 });
+                    var data2 = data1.Select(m => (m.SD_Quantity) * (m.price)).Sum();
+                    return Json(data2, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public JsonResult GetSalesPersonForCustomer(int custid)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_KEY == comkey && m.DELETED == false && m.COM_ID == custid).Select(n => n.COM_Sales_Person).ToList();
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(data, JsonRequestBehavior.AllowGet);
+
+
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public JsonResult GetSalesPerson()
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int comkey = Convert.ToInt32(Session["CompanyKey"].ToString());
+                    var ObjSales_Org = dbcontext.Tbl_Sales_Organization.Where(m => m.COM_KEY == comkey && m.DELETED == false).ToList();
+                    string s = "";
+                    for (int i = 0; i < ObjSales_Org.Count(); i++)
+                    {
+                        if (i == 0)
+                        {
+                            s = ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                        }
+                        else
+                        {
+                            s = s + "," + ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                        }
+                    }
+                    var UID = new HashSet<decimal>(s.Split(',').Select(m => Convert.ToDecimal(m)).ToList());
+                    var Users = dbcontext.Tbl_Master_User.Where(m => m.USER_ID > 0 && UID.Contains(m.USER_ID) && m.COM_KEY == comkey).Distinct().ToList();
+                    var json = new JavaScriptSerializer().Serialize(Users);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private string Validations(int OTMI_ID,string OTMI_Code, string OTMI_InvoiceDate)
+        {
+
+            if (!automanual && OTMI_Code == "")
+            {
+                return "Enter Invoice Code";
+            }
+            if (OTMI_InvoiceDate == "")
+            {
+                return "Select Date";
+            }
+            if (!automanual)
+            {
+                if (OTMI_ID == 0)
+                {
+                    var count = dbcontext.Tbl_OneToManyInvoice.Where(m => m.OTMI_Code == OTMI_Code).ToList().Count();
+                    if (count > 0)
+                    {
+                        return "Invoice Code Already Exist";
+                    }
+                }
+                else
+                {
+                    var count = dbcontext.Tbl_OneToManyInvoice.Where(m => m.OTMI_ID != OTMI_ID && m.OTMI_Code == OTMI_Code).ToList().Count();
+                    if (count > 0)
+                    {
+                        return "Invoice Code Already Exist";
+                    }
+                }
+            }
+
+            return "";
+        }
+
+        [HttpPost]
+        public JsonResult ET_Sales_Invoice_Add(int OTMI_ID,string OTMI_Code, int OTMI_CustomerID, int OTMI_SalesPerson, int OTMI_DespatchIDs, string OTMI_InvoiceDate, decimal OTMI_OrderAmount, int OTMI_TaxPer, decimal OTMI_TaxAmount , decimal OTMI_InvoiceAmount)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    decimal user;
+                    decimal Loginuser;
+                    string valid = Validations(OTMI_ID, OTMI_Code, OTMI_InvoiceDate);
+                    if (valid == "")
+                    {
+                        var Username = Session["UserID"].ToString();
+                        int user1;
+                        user = Convert.ToInt32(Session["UserID"].ToString());
+                        Loginuser = Convert.ToInt32(Session["UserID"].ToString());
+                        if (user == OTMI_SalesPerson)
+                        {
+                            user1 = 1;
+                            user = OTMI_SalesPerson;
+                        }
+                        else
+                        {
+                            user1 = 0;
+                            user = OTMI_SalesPerson;
+                        }
+                        DateTime INVDate = DateTime.ParseExact(OTMI_InvoiceDate,"dd-MM-yyyy",null);
+                        Tbl_OneToManyInvoice Objmc = new Tbl_OneToManyInvoice()
+                        {
+                            OTMI_ID = OTMI_ID,
+                            OTMI_Code = OTMI_Code,
+                            OTMI_CustomerID = OTMI_CustomerID,
+                            OTMI_SalesPerson = OTMI_SalesPerson,
+                            OTMI_DespatchIDs = OTMI_DespatchIDs,
+                            OTMI_InvoiceDate = INVDate,
+                            OTMI_OrderAmount = OTMI_OrderAmount,
+                            OTMI_TaxPer = OTMI_TaxPer,
+                            OTMI_TaxAmount = OTMI_TaxAmount,
+                            OTMI_InvoiceAmount = OTMI_InvoiceAmount,
+                            CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                            CREATED_DATE = DateTime.Now,
+                            DELETED = false,
+                            OTMI_Approval=user1,
+                            OTMI_Approver=user,
+                            COM_KEY = Convert.ToInt32(Session["CompanyKey"])
+                        };
+                       decimal data = 0;
+                        if (Objmc.OTMI_ID == 0)
+                        {
+                            dbcontext.Tbl_OneToManyInvoice.Add(Objmc);
+                            dbcontext.SaveChanges();
+                            data = Objmc.OTMI_ID;
+                            if (automanual == true)
+                            {
+                                int len = 10 - (prefix + Objmc.OTMI_ID).Length;
+                                string code = prefix + new String('0', len) + Objmc.OTMI_ID;
+                                Tbl_OneToManyInvoice _Tbl_OneToManyInvoice = dbcontext.Tbl_OneToManyInvoice.Single(m => m.OTMI_ID == Objmc.OTMI_ID);
+                                {
+                                    _Tbl_OneToManyInvoice.OTMI_Code = code;
+                                };
+                                dbcontext.SaveChanges();
+                                OTMI_Code = code;
+                            }
+
+                        }
+                        else
+                        {
+                            Tbl_OneToManyInvoice _Tbl_OneToManyInvoice = dbcontext.Tbl_OneToManyInvoice.Single(m => m.OTMI_ID == Objmc.OTMI_ID);
+                            {
+                                _Tbl_OneToManyInvoice.OTMI_ID = OTMI_ID;
+                                _Tbl_OneToManyInvoice.OTMI_Code = OTMI_Code;
+                                _Tbl_OneToManyInvoice.OTMI_CustomerID = OTMI_CustomerID;
+                                _Tbl_OneToManyInvoice.OTMI_SalesPerson = OTMI_SalesPerson;
+                                _Tbl_OneToManyInvoice.OTMI_DespatchIDs = OTMI_DespatchIDs;
+                                _Tbl_OneToManyInvoice.OTMI_InvoiceDate = INVDate;
+                                _Tbl_OneToManyInvoice.OTMI_OrderAmount = OTMI_OrderAmount;
+                                _Tbl_OneToManyInvoice.OTMI_TaxPer = OTMI_TaxPer;
+                                _Tbl_OneToManyInvoice.OTMI_TaxAmount = OTMI_TaxAmount;
+                                _Tbl_OneToManyInvoice.OTMI_InvoiceAmount = OTMI_InvoiceAmount;
+                                _Tbl_OneToManyInvoice.LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"].ToString());
+                                _Tbl_OneToManyInvoice.LAST_UPDATED_DATE = DateTime.Now;
+                                _Tbl_OneToManyInvoice.OTMI_Approval = user1;
+                                _Tbl_OneToManyInvoice.OTMI_Approver = user;
+                            };
+                            dbcontext.SaveChanges();
+                            data = _Tbl_OneToManyInvoice.OTMI_ID;
+                            // obj.COM_ID = k;
+                        }
+                        Tbl_DespatchHeader despObj = dbcontext.Tbl_DespatchHeader.Single(m => m.D_ID == OTMI_DespatchIDs);
+                        despObj.D_Status = 1;
+                        dbcontext.SaveChanges();
+                        //Send Mail For Approver
+                        try
+                        {
+                            if (Convert.ToInt32(Session["UserID"].ToString()) != OTMI_SalesPerson)
+                            {
+                                var uid = Convert.ToInt32(Session["UserID"].ToString());
+                                var settings = dbcontext.Tbl_MailSettings.Where(a => a.MS_UserId == uid);
+                                if (settings.Count() == 1)
+                                {
+                                    string usermail = settings.Select(a => a.MS_EmailID).FirstOrDefault();
+                                    string custmail = dbcontext.Tbl_Master_CompanyDetails.Single(a => a.COM_ID == OTMI_CustomerID).COM_EMAIL;
+                                    MailMessage mm = new MailMessage(usermail, custmail);
+                                    mm.Subject = "Regarding Approval of Quotation";
+                                    string newLine = Environment.NewLine;
+                                    string body = "Dear Sir/Madam, ";
+                                    body = body + newLine;
+                                    body = body + newLine;
+                                    body = body + "Quotation with code " + OTMI_Code + " has been created and send for your approval. With your approval the Quotation will proceed to next step.";
+                                    body = body + newLine;
+                                    body = body + "You can approve the Quotation login to Indra application and follow the below steps.";
+                                    body = body + newLine;
+                                    body = body + "Step 1                    Login to Indra Application.";
+                                    body = body + newLine;
+                                    body = body + "Step 2                    Click on My Approvals.";
+                                    body = body + newLine;
+                                    body = body + "Step 3                    View all pending Approvals.";
+                                    body = body + newLine;
+                                    body = body + "Step 4                    Click Approve or Reject button.";
+                                    body = body + newLine;
+                                    body = body + newLine;
+                                    body = body + "Regards";
+                                    body = body + newLine;
+                                    body = body + newLine;
+                                    body = body + Session["UserName"].ToString();
+                                    mm.Body = string.Format(body);
+                                    SmtpClient smtp = new SmtpClient();
+                                    smtp.Host = settings.Select(a => a.MS_OutGoingHostName).FirstOrDefault();
+                                    NetworkCredential NetworkCred = new NetworkCredential();
+                                    NetworkCred.UserName = settings.Select(a => a.MS_EmailID).FirstOrDefault();
+                                    NetworkCred.Password = settings.Select(a => a.MS_Password).FirstOrDefault();
+                                    smtp.UseDefaultCredentials = true;
+                                    smtp.Credentials = NetworkCred;
+                                    smtp.Port = settings.Select(a => a.MS_OutGoingPort).FirstOrDefault();
+                                    smtp.Send(mm);
+                                }
+                            }
+                        }
+                        catch { }
+                        var json = "Success:"+ OTMI_Code;
+                        if (data == 0)
+                        {
+                            json = "Failed";
+                        }
+                        else
+                        {
+                            objLOG.log_dockey = "3012";
+                            objLOG.log_userid = Session["UserID"].ToString();
+                            objLOG.log_recordkey = data.ToString();
+                            if (OTMI_ID == 0)
+                            {
+                                objLOG.log_operation = "Insert";
+                                objLOG.log_Remarks = "Record Inserted Successfully";
+                            }
+                            else
+                            {
+                                objLOG.log_operation = "Update";
+                                objLOG.log_Remarks = "Record Updated Successfully";
+                            }
+                            bal.OperationInsertLogs_BL(objLOG);
+                        }
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var json = "Validation:" + valid;
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public ActionResult ET_Sales_Invoice_View(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    OneToManyInvoiceView_CM obj = new OneToManyInvoiceView_CM();
+                    var data1 = (from a in dbcontext.Tbl_OneToManyInvoice
+                                join d in dbcontext.Tbl_Master_User on a.OTMI_SalesPerson equals d.USER_ID into user
+                                from z in user
+                                join w in dbcontext.Tbl_Master_CompanyDetails on a.OTMI_CustomerID equals w.COM_ID into p
+                                from enq in p.DefaultIfEmpty()
+                                where a.OTMI_ID == id
+                                select new OneToManyInvoice_CM
+                                {
+                                    OTMI_ID = a.OTMI_ID,
+                                    OTMI_Code = a.OTMI_Code,
+                                    OTMI_InvoiceDate = a.OTMI_InvoiceDate,
+                                    COM_DISPLAYNAME = enq.COM_DISPLAYNAME,
+                                    USER_NAME = z.USER_NAME,
+                                    OTMI_OrderAmount = a.OTMI_OrderAmount,
+                                    OTMI_TaxPer =a.OTMI_TaxPer,
+                                    OTMI_TaxAmount= a.OTMI_TaxAmount,
+                                    OTMI_InvoiceAmount = a.OTMI_InvoiceAmount,
+                                }).ToList();
+                    var despatchids = dbcontext.Tbl_OneToManyInvoice.Single(m => m.OTMI_ID == id).OTMI_DespatchIDs;
+                    var data2 = (from x in dbcontext.Tbl_DespatchHeader
+                                 join
+a in dbcontext.Tbl_DespatchDetails on x.D_ID equals a.DD_PID
+                                 join b in dbcontext.Tbl_Product_Master on a.DD_ProductID equals b.P_ID into c
+                                 from d in c
+                                 join m in dbcontext.Tbl_Order_Details on a.DD_OrderID equals m.AGEN_TRAD_PO_ID
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into f
+                                 from g in f.DefaultIfEmpty()
+                                 where x.D_ID == despatchids && g.LU_Type == 2 && m.PRODUCT_ID == a.DD_ProductID
+                                 select new OneToManyInvoice_CM
+                                 {
+                                     Despatch_Code = x.D_Code,
+                                     ArticleNo = d.P_ArticleNo,
+                                     ProductName = d.P_ShortName,
+                                     UOM = g.LU_Description,
+                                     SD_Quantity = a.DD_DespatchQuantity,
+                                     price = m.PRICE ?? 0,
+                                 }).ToList();
+                    obj.objHeader = data1;
+                    obj.objDetail = data2;
+                    return PartialView("/Views/Sales/ET_Sales_OneToManyInvoice/ET_Sales_OneToManyInvoice_View.cshtml", obj);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        public ActionResult ET_Sales_Invoice_RestoreDelete(int id, bool type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    Tbl_OneToManyInvoice deleted = dbcontext.Tbl_OneToManyInvoice.Single(m => m.OTMI_ID == id);
+                    deleted.DELETED = type;
+                    deleted.DELETED_BY = id;
+                    deleted.DELETED_DATE = DateTime.Now;
+                    var result = dbcontext.SaveChanges();
+                    var json = "Failed";
+                    if (result != 0)
+                    {
+                        json = "Success";
+                    }
+                    else
+                    {
+                        objLOG.log_dockey = "3012";
+                        objLOG.log_operation = "Restore";
+                        objLOG.log_userid = Session["UserID"].ToString();
+                        objLOG.log_recordkey = id.ToString();
+                        objLOG.log_Remarks = "Record Restored Successfully";
+                        bal.OperationInsertLogs_BL(objLOG);
+                    }
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        public ActionResult ET_Sales_Invoice_Update_GetbyID(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    //TempData["CompaycontctID"] = id;
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = dbcontext.Tbl_OneToManyInvoice.Single(m => m.OTMI_ID == id);
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        public ActionResult ET_Sales_Invoice_Print(int id,string lang)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    OneToManyInvoiceView_CM obj = new OneToManyInvoiceView_CM();
+                    int com_key = Convert.ToInt32(Session["Companykey"]);
+                    var data1 = (from a in dbcontext.Tbl_OneToManyInvoice
+                                 join d in dbcontext.Tbl_Master_User on a.OTMI_SalesPerson equals d.USER_ID into user
+                                 from z in user
+                                 join w in dbcontext.Tbl_Master_CompanyDetails on a.OTMI_CustomerID equals w.COM_ID into p
+                                 from x in p.DefaultIfEmpty()
+                                 where a.OTMI_ID == id
+                                 select new OneToManyInvoice_CM
+                                 {
+                                     OTMI_ID = a.OTMI_ID,
+                                     OTMI_Code = a.OTMI_Code,
+                                     OTMI_InvoiceDate = a.OTMI_InvoiceDate,
+                                     USER_NAME = z.USER_NAME,
+                                     OTMI_OrderAmount = a.OTMI_OrderAmount,
+                                     OTMI_TaxPer = a.OTMI_TaxPer,
+                                     OTMI_TaxAmount = a.OTMI_TaxAmount,
+                                     OTMI_InvoiceAmount = a.OTMI_InvoiceAmount,
+                                     OTMI_DespatchIDs = (dbcontext.Tbl_DespatchHeader.Where(des=>des.D_ID ==  a.OTMI_DespatchIDs).Select(des=>des.D_Code)).FirstOrDefault(),
+                                     CompanyCode = x.COM_CODE,
+                                     CompanyName = x.COM_NAME,
+                                     Street = x.COM_STREET,
+                                     CityState = (x.COM_CITY + ", " + x.COM_STATE),
+                                     USTID = x.COM_USTID,
+                                     CountryZip = ((dbcontext.locations.Where(a => a.location_id == x.COM_COUNTRY).Select(a => a.name).FirstOrDefault()) + ", " + (x.COM_ZIP)),
+                                     VatPer = (dbcontext.Tbl_SystemSetUp.Where(a => a.COMPANY_ID == com_key).Select(a => a.TAX).FirstOrDefault()),
+                                     imgurl = (dbcontext.Tbl_SystemSetUp.Where(a => a.COMPANY_ID == com_key).Select(a => a.COMPANY_LOGO).FirstOrDefault()),
+                                     SystemCompany = (dbcontext.Tbl_SystemSetUp.Where(a => a.COMPANY_ID == com_key).Select(a => a.COMPANY_NAME).FirstOrDefault()),
+                                 }).ToList();
+                    var despatchids = dbcontext.Tbl_OneToManyInvoice.Single(m => m.OTMI_ID == id).OTMI_DespatchIDs;
+                    var data2 = (from x in dbcontext.Tbl_DespatchHeader
+                                 join
+a in dbcontext.Tbl_DespatchDetails on x.D_ID equals a.DD_PID
+                                 join b in dbcontext.Tbl_Product_Master on a.DD_ProductID equals b.P_ID into c
+                                 from d in c
+                                 join m in dbcontext.Tbl_Order_Details on a.DD_OrderID equals m.AGEN_TRAD_PO_ID
+                                 join e in dbcontext.tbl_LookUp on d.P_UOM equals e.LU_Code into f
+                                 from g in f.DefaultIfEmpty()
+                                 where x.D_ID == despatchids && g.LU_Type == 2 && m.PRODUCT_ID == a.DD_ProductID
+                                 select new OneToManyInvoice_CM
+                                 {
+                                     Despatch_Code = x.D_Code,
+                                     ArticleNo = d.P_ArticleNo,
+                                     ProductName = d.P_Description,
+                                     UOM = g.LU_Description,
+                                     SD_Quantity = a.DD_DespatchQuantity,
+                                     price = m.PRICE ?? 0,
+                                 }).ToList();
+                    obj.objHeader = data1;
+                    obj.objDetail = data2;
+                    if (lang == "E")
+                        return PartialView("/Views/Sales/ET_Sales_OneToManyInvoice/ET_Sales_OneToManyInvoice_Print.cshtml", obj);
+                    else
+                        return PartialView("/Views/Sales/ET_Sales_OneToManyInvoice/ET_Sales_OneToManyInvoice_Print_German.cshtml", obj);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+    }
+}

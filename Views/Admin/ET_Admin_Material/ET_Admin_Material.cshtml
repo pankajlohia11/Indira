@@ -1,0 +1,239 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+
+    This Form is used to create a material Details.
+    The user can edit or remove and restore  a record in Material.The user can capture Material and other Details etc.
+    Author=jesmi
+    Created Date=31st Mar 2018
+    Material Master Form view
+    Operations[Add,Edit,Restore]
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_Material.js"></script>
+}
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Material Master <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Material Details</a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+
+        <div class="row" ng-controller="AC_Material">
+            <div class="col-md-12">
+                <!--Here user can have to see Material Details -->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Material Master</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" ng-click="createnew();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Material Name</th>
+                                    <th>Material Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="material in materiallist">
+                                    <td>{{material.MATERIAL_ID}}</td>
+                                    <td>{{material.MATERIAL_NAME}}</td>
+                                    <td>
+                                        <a ng-click="editRecords(material.MATERIAL_ID);" value="{{ material.MATERIAL_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(material.MATERIAL_ID);" value="{{ material.MATERIAL_ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                        <a ng-click="Restoredeleterecords(material.MATERIAL_ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--Here user can have to edit Material Details -->
+                <section class="tile" id="div_Edit" style="display:none" >
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> Material Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblMaterialCode">Material Code</label>
+
+                                    <input type="text" name="txtMaterialID" id="txtMaterialID" class="form-control hidden" ng-model="txtMaterialID">
+                                    <input type="text" name="txtMaterialCode" id="txtMaterialCode" class="form-control" disabled="@ViewBag.AutoManual" ng-model="txtMaterialCode" @ViewBag.Required/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblMaterial">Material</label>
+                                    <input type="text" name="txtMaterial" id="txtMaterial" class="form-control"
+                                           ng-model="txtMaterialname"
+                                           placeholder="Material"
+                                           data-parsley-trigger="change"
+                                           required />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblDescription">Description</label>
+
+                                    <textarea name="txtDescription" rows="3" cols="80" id="txtDescription" class="form-control" placeholder="Description" data-parsley-trigger="change"
+                                              data-parsley-type="alphanum" ng-model="txtDescription" required></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblCotton">Cotton(100%)</label>
+                                    <input type="checkbox" name="chkCotton" id="chkCotton" ng-model="chkCotton" />
+                                    @*<label class="checkbox checkbox-custom-alt">
+                                        <input class="chk" type="checkbox" onclick="uncheckall(this);" checked="@item.IS_EDIT"><i></i>
+                                    </label>*@
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext"></button>
+
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--Here user can have to restore Material Details -->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> Material Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Material Name</th>
+                                    <th>Material Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="material in materialrestorelist">
+                                    <td>{{material.MATERIAL_ID}}</td>
+                                    <td>{{material.MATERIAL_NAME}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(material.MATERIAL_ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

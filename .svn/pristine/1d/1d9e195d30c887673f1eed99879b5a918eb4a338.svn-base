@@ -1,0 +1,473 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a PO and PO Items.
+    The user can edit or remove and restore  a record in PO and PO Items.
+    Author=RajKumar
+    Date = 11th June 2018
+    Purchase Store View
+    Operation={View,Restore,Create}
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_PurchaseOrder.js"></script>
+    <script type="text/javascript">
+        function MoneyValidation(s) {
+             
+            var re = /^[\d.]+(\,\d*)?$/;
+            var txt = s.value;
+            if (txt != "") {
+                
+                if (!re.test(txt)) {
+                    toastr["error"]("Invalid Data", "Notification");
+                    s.value = '';
+                    return false;
+                    return false;
+                }
+                else {
+                    s.value = parseFloat(txt.split('.').join("").replace(",", ".")).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                }
+            }
+            return true;
+        }
+         function calculateamount(e)
+         {
+             debugger;
+
+            if (e.id != "drpProduct") {
+                if (!MoneyValidation(e)) {
+                    $(e).val("0");
+                }
+            }
+            var total = 0;
+         
+            var td = $(e).parent().parent().find("td");
+            if ($(td[4]).find("input").val() == "")
+                $(td[4]).find("input").val("0");
+            if ($(td[5]).find("input").val() == "")
+                $(td[5]).find("input").val("0");
+            var price = parseFloat($(td[5]).find("input").val().split('.').join("").replace(",", "."));
+            var quantity = parseFloat($(td[4]).find("input").val().split('.').join("").replace(",", "."));
+            $(td[6]).find("input").val((price * quantity).toLocaleString("es-ES", { minimumFractionDigits: 2 }))
+     
+
+            var tr = $(e).parent().parent().parent().find("tr");
+            for (var i = 0; i < tr.length;) {
+                var td1 = tr[i].children;
+                var amt = parseFloat($(td1[6]).find("input").val().split('.').join("").replace(",", "."));
+                total = total + amt;
+                i = i + 4;
+            }
+             $("#txttotalamount").val(total.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+
+            
+        }
+        function ProductChange(e)
+        {
+
+            if ($("#drpsuppliername").val() != "") {
+                var id1 = parseInt($(e).val());
+                if (id1 != "") {
+                    $.ajax({
+                        type: "GET",
+                        url: '@Url.Action("GetProductDetailsByID", "ET_Purchase_PO")',
+                        data: { id: id1, sid: $("#drpsuppliername").val() },
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        success: function (result) {
+                       
+                            var res = JSON.parse(result)
+                            var td = $(e).parent().parent().find("td");
+                            $(td[1]).find("input").val(res[0].name);
+                            $(td[2]).find("input").val(res[0].uom);
+                            if (res[0].price == "")
+                            {
+                                res[0].price = "0";
+                                toastr["error"]("Supplier Price does'nt exist for this product.", "Notification");
+                            } 
+                            $(td[5]).find("input").val(parseFloat(res[0].price).toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+                            $(td[7]).find("input").val(res[0].Remarks);
+                            $(td[3]).find("input").val(res[0].Description);
+                        },
+                        error: function (response) {
+                            var td = $(e).parent().parent().find("td");
+                            $(td[1]).find("input").val("");
+                            $(td[2]).find("input").val("");
+                            $(td[3]).find("input").val("");
+                            $(td[4]).find("input").val("");
+                            $(td[5]).find("input").val("");
+                            $(td[6]).find("input").val("");
+                        }
+                    });
+                }
+                else
+                {
+                    var td = $(e).parent().parent().find("td");
+                    $(td[1]).find("input").val("");
+                    $(td[2]).find("input").val("");
+                    $(td[3]).find("input").val("");
+                    $(td[4]).find("input").val("");
+                    $(td[5]).find("input").val("");
+                    $(td[6]).find("input").val("");
+                }
+            }
+            else
+            {
+                toastr["error"]("Select Supplier", "Notification");
+            }
+            calculateamount(e);
+        }
+        
+    </script>
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order" ng-controller="AC_POCtrl">
+        <div class="pageheader">
+
+            <h2>{{Type}} Purchase Order<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">{{Type}} Purchase Order</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" >
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>{{Type}} Purchase Order</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                     Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Type</th>
+                                    <th>PO Date</th>
+                                    <th>Supplier Name</th>
+                                    @*<th>Approval Status</th>*@
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="po in storelist">
+                                    <td>{{po.Code}}</td>
+
+                                    <td>{{po.POType==2?'One-One':'One- Many'}}</td>
+                                    <td>{{po.Date.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{po.Supplier}}</td>
+                                    @*<td ng-if='po.Status==0'>Pending</td>
+                                    <td ng-if='po.Status==1'>Approved</td>
+                                    <td ng-if='po.Status==2'>Rejected</td>*@
+                                    <td>
+                                        <a ng-click="editRecords(po.ID);" ng-if="po.PO_status!=1" value="{{ po.ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(po.ID);" value="{{ po.ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                        <a ng-click="Restoredeleterecords(po.ID,$event,true);" ng-if="po.Status!=1" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong>{{Type}} Purchase Order</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- This Below code is used for Tab purpose -->
+                    @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+            </ul>*@
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtPOCode">PO Code</label>
+                                    <input type="text" name="txtPOCode" id="txtPOCode" ng-model="PO_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                    <input type="text" name="txtPOID" id="txtPOID" ng-model="PP_ID" class="hidden">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtPOdate">PO date*</label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtPODate" name="txtPODate" class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="drpType">PO Type *</label>
+                                    <select data-ng-model="PO_Type" id="drpType" data-parsley-trigger="change" class="form-control chosen-select" ng-change="OrderTypeChange();" disabled>
+                                        <option value="">-Select-</option>
+                                        <option value="2">Trading</option>
+                                        <option value="3">Store</option>
+                                    </select>
+                                  
+                                </div>
+                                <div class="form-group col-md-6" id="OrderReference" hidden>
+                                    <label for="drpOrderReference">Order Reference</label>
+                                    <select data-ng-model="PO_OrderReference" id="drpOrderReference" class="form-control chosen-select" data-parsley-trigger="change" ng-change="OrderReferenceChange()">
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="orderreferencelist in orderreferencelist" value="{{orderreferencelist.SO_ID}}">
+                                            {{orderreferencelist.SO_Code +"-"+orderreferencelist.SO_CusPONO}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label">Currency *</label>
+                                    <select data-ng-model="Po_CurrencyKey" id="drpcurrency" class="form-control chosen-select" data-parsley-trigger="change" required ng-change="CurrencyChange()">
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="currencylist1 in currencylist" value="{{currencylist1.LU_Code}}">
+                                            {{currencylist1.LU_Description}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Payment Terms*</label>
+                                    <select data-ng-model="Po_PaymentTerms" id="drpPaymentTerms" class="form-control chosen-select" ng-change="PaymentTermChange()" data-parsley-trigger="change" required>
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="paymentterm in paymenttermlist" value="{{paymentterm.PT_ID}}">
+                                            {{paymentterm.PT_Name}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label class="control-label">Supplier Name *</label>
+                                    <select data-ng-model="Po_Supplierkey" id="drpsuppliername" class="form-control chosen-select" data-parsley-trigger="change"  ng-change="SupplierChange()">
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="supplierslist in supplierslist" value="{{supplierslist.COM_ID}}">
+                                            {{supplierslist.COM_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="SupplierAddress">Supplier Address</label>
+                                    <input type="text" name="SupplierAddress" id="txtSupplierAddress" ng-model="Po_SupplierAddress" class="form-control" readonly="readonly">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="SCNO">SC NO</label>
+                                    <input type="text" name="txtScNo" id="txtScNo" ng-model="txtScNo" maxlength="50" class="form-control">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtSCdate">SC date</label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtSCDate" name="txtSCDate" class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6" id="ShippingOnetoone">
+                                    <label for="ShippingAddress">Shipping Address *</label>
+                                    <input type="text" name="ShippingAddress" id="txtShippingAddress" ng-model="Po_ShippingAddress" class="form-control" data-parsley-trigger="change">
+                                    
+                                </div>
+                                <div class="form-group col-md-6" id="ShippingOnetoMany" hidden>
+                                    <label for="ShippingAddress">Store Name *</label>
+                                    
+                                    <select data-ng-model="GI_StoreCode" id="drpStoreCode" class="form-control chosen-select" data-parsley-trigger="change" style="display:none;" ng-change="Storechange()">
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="storelists in storelists" value="{{storelists.SM_Id}}">
+                                            {{storelists.SM_Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Total Amount</label>
+                                    <input type="text" name="TotalAmount" style="text-align:right;" id="txttotalamount" ng-model="Po_TotalAmount" class="form-control" readonly="readonly">
+                                </div>
+                            </div>
+                            <div class="row"> 
+                                <div class="form-group col-md-6">
+                                    <label for="SpecialInstruction">Special Instruction</label>
+                                    <input type="text" name="SpecialInstruction" id="txtSpecialInstruction" ng-model="Po_SpecialInstruction" class="form-control"   data-parsley-trigger="change">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="TermsandConditions">Terms & Conditions</label>
+                                    <input type="text" name="TermsandConditions" id="txtTermsandConditions" ng-model="Po_TermsandConditions" class="form-control"   data-parsley-trigger="change">
+                                </div>
+                            </div>
+                            <div class="row"> 
+                                <div class="form-group col-md-6" style="display:none;">
+                                    <label for="DeliveryShedule">Delivery Schedule</label>
+                                    <input type="checkbox" name="DeliveryShedule" id="chkDeliveryShedule" ng-model="Po_DeliveryShedule" ng-change="DeliveyScheduleChange()">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="DeliveryDate">Delivery Date</label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtDeliveryDate"   name="txtDeliveryDate" class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="tile-body">
+                                        <table class="table table-custom" id="tblSalesTarget">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 130px;">Article No</th>
+                                                    <th style="width: 370px;">Product Name</th>
+                                                    <th>UOM</th>
+                                                    <th>Description</th>
+
+
+                                                    <th><span id="Target">PO Quantity</span></th>
+                                                    <th><span id="Target">Unit Price</span></th>
+                                                    <th><span id="Target">Total Amount</span></th>
+                                                    <th><span id="Target" style="width: 215px;">Remarks</span></th>
+                                                    <th ng-if="PO_Type==2">Design</th>
+                                                    <th><span id="Action">Action</span></th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody id="divTarget">
+                                                </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+                                </div>
+
+                            </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                    </div>
+                </section>
+
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> Purchase Order</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>PO Date</th>
+                                    <th>Supplier Name</th>
+                                    <th>Total Amount</th>
+                                    <th>Approval Status</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="po in porestorelist">
+                                    <td>{{po.Code}}</td>
+                                    <td>{{po.Date.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                    <td>{{po.StoreUser}}</td>
+                                    <td>{{po.AddressLine1}}</td>
+                                    <td>{{po.Status}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(po.ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+

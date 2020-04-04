@@ -1,0 +1,226 @@
+﻿
+@{
+    ViewBag.Title = "ET_Admin_SystemSetUp";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_SystemSetUp.js"></script>
+    <script type="text/javascript">
+        function ImageChanging(val) {
+            debugger;
+            var fileInput = document.getElementById('TxtCompanyLogo').value;
+            if (fileInput != "") {
+                $("[for=file]").html(val.files[0].name);
+                $("#preview").attr("src", URL.createObjectURL(val.files[0]));
+                $("#ImgCompanyLogo").attr("src", "" + URL.createObjectURL(val.files[0]) + "");
+            }
+        }
+    </script>
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>System SetUp <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">System SetUp</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <div class="row" ng-controller="AC_SystemSetUpCtrl">
+            <div class="col-md-12">
+                <!--The user can have a option to  edit System SetUp Details-->
+                <section class="tile" id="div_Edit" style="display:block">
+
+                    <!-- tile header -->
+                    
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div>
+                                    <div class="form-group col-md-6">
+                                        <label for="CompanyName">Company Name *</label>
+                                        <input type="text" name="txtCompanyName" data-parsley-trigger="change" id="txtCompanyName" ng-model="txtCompanyName" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required required />
+                                        <input type="text" name="CompanyID" id="CompanyID" ng-model="CompanyID" class="form-control hidden" />
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="CompanyAddressLine1">Company Address 1 *</label>
+                                    <input type="text" name="txtCompanyAddressLine1" data-parsley-trigger="change" id="txtCompanyAddressLine1" ng-model="txtCompanyAddressLine1" class="form-control" placeholder="Address Line 1" required />
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="CompanyAddressLine2">Company Address 2</label>
+                                    <input type="text" name="txtCompanyAddressLine2" id="txtCompanyAddressLine2" ng-model="txtCompanyAddressLine2" class="form-control" placeholder="Address Line 2" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Country">Country *</label>
+                                    <select class="form-control chosen-select" data-parsley-trigger="change" data-ng-model="SelectedCountry" id="drpCountry" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="country in countrys" value="{{country.location_id}}">
+                                            {{country.name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="State">State *</label>
+                                        <input type="text" name="txtState" data-parsley-trigger="change" id="txtState" ng-model="txtState" class="form-control" placeholder="State" required />                                  
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="City">City *</label>
+                                    <input type="text" name="txtCity" data-parsley-trigger="change" id="txtCity" ng-model="txtCity" class="form-control" placeholder="City" required />
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="ZipCode">Zip Code *</label>
+
+                                    <input type="text" name="txtZipCode" id="txtZipCode" class="form-control" placeholder="Zip Code" ng-model="USER_ZIP"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits" required maxlength="20">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="ZipCode">VAT No *</label>
+
+                                    <input type="text" name="txtVatNo" id="txtVatNo" class="form-control" placeholder="Zip Code" ng-model="txtVatNo"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits" maxlength="20" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <div class="form-group col-md-6">
+                                        <label for="Discounttype">Company Logo</label>
+                                        <input type="file" name="file1[]" id="TxtCompanyLogo" ng-model="TxtCompanyLogo" onchange="ImageChanging(this);" style="width: 100%;" />
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <img ng-src="{{ImgCompanyLogo}}" id="ImgCompanyLogo"  ng-model="ImgCompanyLogo" style="width:100px;height:80px;" />
+                                    </div>
+                                    
+                               
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Discounttype">Date Format</label>
+                                    <select data-ng-model="selectedDateFormat" data-parsley-trigger="change" class="form-control chosen-select" ng-change="DateFormatChange()" id="drpDateFormat" maxlength="50" required>
+                                        <option value="">-Select-</option>
+                                        <option value="1">DD/MM/YYYY</option>
+                                        <option value="2">MM/DD/YYYY</option>
+                                        <option value="3">YYYY/MM/DD</option>
+                                    </select>
+                                </div>
+                                
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="PasswordExpDate">PasswordExpiryDays</label>
+
+                                    <input type="text" name="txtPasswordExpireDays" id="txtPasswordExpireDays" class="form-control" placeholder="PasswordExpireDays" ng-model="txtPasswordExpireDays"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits" maxlength="20">
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblAdministratorPassword">Administrator Password</label>
+                                    <input type="password" name="password" id="txtAdministratorPassword" class="form-control" ng-model="ADMINISTRATOR_PASSWORD" placeholder="Administrator Password"
+                                           data-parsley-trigger="change" minlength="6" maxlength="10" required>
+                                </div>
+                                
+
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="SMTPHostName">SMTP Host Name</label>
+                                    <input type="text" name="txtSMTPHostName" id="txtSMTPHostName" ng-model="txtSMTPHostName" class="form-control" data-parsley-trigger="change" placeholder="SMTP Host Name" required/>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="EmailId">Email Id</label>
+                                    <input type="text" data-parsley-type="email" data-parsley-trigger="change" name="txtEmailId" id="txtEmailId" ng-model="txtEmailId" class="form-control" placeholder="Email Id" required />
+                                </div>
+                                
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblEmailPassword">Email Password</label>
+                                    <input type="password" name="password" id="txtEmailPassword" class="form-control" ng-model="EMAIL_PASSWORD" placeholder="Email Password"
+                                           data-parsley-trigger="change" minlength="6" maxlength="10" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Tax">Tax %</label>
+                                    <input type="text" data-parsley-type="digits" name="txtTax" id="txtTax" ng-model="txtTax" class="form-control" placeholder="Tax %" />
+                                </div>
+                                
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="DocumentDays">Document Days</label>
+                                    <input type="text" name="txtDocumentDays" id="txtDocumentDays" maxlength="6" ng-model="txtDocumentDays" class="form-control" placeholder="DocumentDays" />
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                            <!-- SUBMIT BUTTON -->
+                            <!-- Button used for submitting the record -->
+                            <button type="submit" class="btn btn-success" disabled id="formSubmit" ng-click="SubmitClick();" ng-bind="submittext">Update</button>
+
+                        </div>
+
+                    </div>
+                    </section>
+
+
+            </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <!-- Button used for submitting the record -->
+                    <!-- /tile footer -->
+
+         
+               
+                
+
+    </div>
+        </div>
+</section>

@@ -1,0 +1,366 @@
+﻿@model IEnumerable<BusinessEntity.CustomModels.ET_TBL_LC_DETAILS_CM>
+
+@{
+    /**/
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+
+    This Form is used to create a LC Details.
+    The user can edit or remove and restore  a record in LC.The user can capture Details LC.No,Customer,LC Date,Expiry Date  etc.
+    Author=jesmi
+    Created Date=3rd Apr 2018
+    Category Deatils Form view
+    Operations[Add,Edit,Restore]
+-->
+<!--used for datepicker -->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_LCDetails.js"></script>
+}
+
+@*<link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <link href="../css/datepicker.css" rel="stylesheet" type="text/css" />*@
+
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+
+    function dateexpiry() {
+        var day = $("#txtLCPeriod").val();
+        var date = $("#LCcalendar").val();
+        if (date) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("Add_Days", "ET_Admin_LC_Details")',
+                contentType: "application/json;charset=utf-8",
+                /// dataType: "json",
+                data: {
+                    EndDate: date,
+                    day: day
+                },
+                success: function (result) {
+                    $("#Expirydate").val(result);
+                },
+                error: function (response) {
+                    toastr["error"]("Error", "Notification");
+                }
+            });
+        }
+        else {
+                toastr["error"]("Select LC Date", "Notification");
+        }
+    };
+    function balamnt() {
+        var balamt = $('#txtamount').val()
+        $('#txtBalAmount').val(balamt)
+    };
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>LC Details <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i>Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">LC Details</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+        @*<asp:HiddenField runat="server" ID="hdnTabs" />*@
+
+        <div class="row" ng-controller="AC_LcdetailsCtrl">
+            <div class="col-md-12">
+                <!--Here user can have to see LC Details -->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>LC Details</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" ng-click="createnew();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>LC.No</th>
+                                    <th>Customer</th>
+                                    <th>LC Date</th>
+                                    <th>Expiry Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                             
+                                <tr ng-repeat="item in lcdetailslist">
+                                    <td>{{item.LC_NO}}</td>
+                                    <td>{{item.COM_NAME}}</td>
+                                    <td>{{item.LC_DATE | jsonDate : 'dd-MM-yyyy'}}</td>
+                                    <td>{{item.LC_EXPIRYDATE | jsonDate : 'dd-MM-yyyy'}}</td>
+                                    <td>
+                                        <a ng-click="editRecords(item.LC_ID);" value="{{ item.LC_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(item.LC_ID);" value="{{ item.LC_ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                        <a ng-click="Restoredeleterecords(item.LC_ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--Here user can have to edit LC Details -->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong> LC Details</h1>
+                        <ul class="controls">
+                            <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                            <li style="padding:5px">
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- this is link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6 col-md-offset-2">
+                                    <div class="form-group col-md-3 col-md-offset-5">
+                                        <input type="radio" name="chkCustomerLC" ng-click="Customer();" id="chkCustomerLC" />Customer LC
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <input type="radio" name="chkCustomerLC" ng-click="Supplier();" id="chkEuroTexttiles" />Euro Texttiles LC
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblLC">LC Code:</label>
+                                    <input type="text" name="txtLCCode" class="form-control" ng-model="txtLCCode" disabled="@ViewBag.AutoManual" id="txtLCCode" @ViewBag.Required />
+                                    <input type="text" name="txtLCID" class="form-control hidden" id="txtLCID" ng-model="txtLCID" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblLC">LC NO.:</label>
+                                    <input type="text" name="txtLCNo" class="form-control" ng-model="txtLCNo" id="txtLCNo" placeholder="LC NO"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum"
+                                           required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblLCDate">LC Date</label>
+
+                                    <div class='input-group datepicker w-360' width="100%">
+                                        <input type='text' class="form-control" ng-model="LCcalendar" id="LCcalendar" name="LCcalendar" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar" required></span>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblBankName">Customer / Supplier Name</label>
+                                    <select class="form-control chosen-select" data-ng-model="SelectedCustomer" id="drpCustomer" ng-change="CustChange()">
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in CustomerList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblBankName">Bank Name</label>
+                                    <select class="form-control chosen-select" data-ng-model="Selectedbank" id="drpBank" ng-change="BankChange()" disabled>
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in CustomerList" value="{{st.COM_ID}}">{{st.BANK_NAME}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <label for="lblLCPeriod">LC Period:</label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <input type="text" name="txtLCPeriod" id="txtLCPeriod" ng-change="dateexpiry();" ng-model="txtLCPeriod" class="form-control"
+                                                   data-parsley-trigger="change"
+                                                   data-parsley-type="digits"
+                                                   required>
+                                        </div>
+                                        <div class="col-md-1">
+                                            Days
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-4 col-md-offset-2">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <label for="lblExpiryDate">Expiry Date:</label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            @*<label for="lblExpiry"></label>*@
+                                            <input type="text" name="Expirydate" id="Expirydate" ng-model="Expirydate" class="form-control" disabled />
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblCurrency">Currency:</label>
+                                    <select class="form-control chosen-select" id="drpCurrency" data-ng-model="SelectedCurrency" ng-change="CurrencyChange()">
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="CL in Currencylist" value="{{CL.CURRENCY_ID}}">{{CL.CURRENCY_CODE}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblAmount">Amount</label>
+                                    <input type="text" name="txtAmount" class="form-control" id="txtamount" ng-change="balamnt();" ng-model="txtamount" placeholder="Amount"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits"
+                                           required />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblBalAmount">Bal.Amount:</label>
+                                    @*<label for="lblBalAmt"></label>*@
+                                    <input type="text" name="txtBalAmount" id="txtBalAmount" ng-model="txtBalAmount" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        @*<button type="submit" class="btn btn-success" disabled id="formSubmit" onclick="InsertRecords();">Submit</button>*@
+                        <button type="submit" class="btn btn-success" disabled id="formSubmit" ng-click="SubmitClick();" ng-bind="submittext">Submit</button>
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--Here user can have to restore LC Details -->
+                <section class="tile" id="div_Restore" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> LC Details</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>LC.No</th>
+                                    <th>Customer</th>
+                                    @*<th>LC Date</th>
+                                    <th>Expiry Date</th>*@
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in lcdetailrestorelist">
+                                    <td>{{item.LC_NO}}</td>
+                                    <td>{{item.COM_NAME}}</td>
+                                    @*<td>{{item.LC_DATE}}</td>
+                                    <td>{{item.LC_EXPIRYDATE}}</td>*@
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(item.LC_ID,$event,false);" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

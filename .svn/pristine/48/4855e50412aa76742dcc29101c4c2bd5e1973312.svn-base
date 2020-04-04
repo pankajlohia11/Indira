@@ -1,0 +1,159 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+
+namespace DataAccess
+{
+    public class ET_Admin_Company_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+        public List<Tbl_Master_CompanyDetails> ET_Admin_Companylist_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_CompanyDetails.ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public decimal ET_Master_Company_Add_DL(Tbl_Master_CompanyDetails obj)
+        {
+            Tbl_Master_CompanyDetails Obj = new Tbl_Master_CompanyDetails();
+            try
+            {
+                if (obj.COM_ID == 0)
+                {
+                    Tbl_Master_CompanyDetails Objmc = new Tbl_Master_CompanyDetails()
+                    {
+                        // COM_CITY = CompanyName,
+                        COM_NAME = obj.COM_NAME,
+                        COM_DISPLAYNAME = obj.COM_DISPLAYNAME,
+                        Tax_No = obj.Tax_No,
+                        //COM_COUNTRY = Obj.COM_COUNTRY,
+                        COM_MOBILE = obj.COM_MOBILE,
+                        COM_PHONE = obj.COM_PHONE,
+                        COM_FAX = obj.COM_FAX,
+                        COM_ZIP = obj.COM_ZIP,
+                        COM_EMAIL = obj.COM_EMAIL,
+                        COM_REMARKS = obj.COM_REMARKS,
+                        // COM_WEB = Obj.COM_WEB,
+                        // COM_STREET = Obj.COM_STREET,
+                        // MACHINE_NAME = Obj.MACHINE_NAME,
+                        // Cust_Supp = Obj.Cust_Supp,
+                        //  CREATED_BY = Obj.CREATED_BY,
+                        CREATED_DATE = DateTime.Now,
+                        // LAST_UPDATED_BY = Obj.LAST_UPDATED_BY,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                        DELETED = false,
+                        //  DELETED_BY = Obj.DELETED_BY,
+                        DELETED_DATE = DateTime.Now,
+                    };
+                    dbcontext.Tbl_Master_CompanyDetails.Add(Objmc);
+                    dbcontext.SaveChanges();
+                    Obj.COM_ID = Obj.COM_ID;
+               
+                }
+                else
+                {
+                    Tbl_Master_CompanyDetails ObjTbl_Master_CompanyDetails = dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == obj.COM_ID);
+                    {
+                        ObjTbl_Master_CompanyDetails.COM_NAME = obj.COM_NAME;
+                        ObjTbl_Master_CompanyDetails.COM_DISPLAYNAME = obj.COM_DISPLAYNAME;
+                        //ROLE_ID = _tbl_Master_Role.ROLE_ID,
+                        ObjTbl_Master_CompanyDetails.Tax_No = obj.Tax_No;
+                        ObjTbl_Master_CompanyDetails.COM_PHONE = obj.COM_PHONE;
+                        ObjTbl_Master_CompanyDetails.COM_MOBILE = obj.COM_MOBILE;
+                        ObjTbl_Master_CompanyDetails.COM_FAX = obj.COM_FAX;
+                        ObjTbl_Master_CompanyDetails.COM_ZIP = obj.COM_ZIP;
+
+                        ObjTbl_Master_CompanyDetails.COM_EMAIL = obj.COM_EMAIL;
+                        //ROLE_ID = _tbl_Master_Role.ROLE_ID,
+                        ObjTbl_Master_CompanyDetails.COM_REMARKS = obj.COM_REMARKS;
+                        ObjTbl_Master_CompanyDetails.CREATED_BY = 1;
+                        ObjTbl_Master_CompanyDetails.CREATED_DATE = DateTime.Now;
+                        ObjTbl_Master_CompanyDetails.DELETED = obj.DELETED;
+                    };
+                    dbcontext.SaveChanges();
+                    dbcontext.SaveChanges();
+                    Obj.COM_ID = obj.COM_ID;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return Obj.COM_ID;
+        }
+
+        public int ET_Master_Company_Deleted_DL(int id)
+        {
+            int result = 0;
+            //int i = 1;
+            try
+            {
+                var find = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID == id).ToList();
+                if (find.Count() != 0)
+                {
+                    Tbl_Master_CompanyDetails delete = dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == id);
+                    delete.DELETED = true;
+                    delete.DELETED_BY = 1;
+                    //dbcontext.Tbl_Master_Role.Add(isdelete);
+                    dbcontext.SaveChanges();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+        public List<location> Binddropdown_Country_DL()
+        {
+            try
+            {
+                var Country = dbcontext.locations.Where(m => m.location_type == 0).ToList();
+              //  dbc.emp.Select(m => new SelectListItem { Text = m.Dept, Value = m.empid.ToString() }).Distinct().ToList();
+                return Country;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }            
+        }
+
+        public List<location> Binddropdown_State_DL(int id)
+        {
+            try
+            {
+                var State = dbcontext.locations.Where(m => m.location_type == 1 && m.parent_id == id).ToList();
+                return State;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public List<location> Binddropdown_City_DL(int id)
+        {
+            try
+            {
+                var City = dbcontext.locations.Where(m => m.location_type == 2 && m.parent_id == id).ToList();
+                return City;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
+}

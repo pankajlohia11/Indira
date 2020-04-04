@@ -1,0 +1,133 @@
+﻿
+@model BusinessEntity.CustomModels.ShipmentView_CM
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.headerObj)
+    {
+        <h5><label><strong>Shipment Details</strong></label></h5>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Email">Shipment Code</label>
+                <input type="text" value="@item.S_Code" class="form-control" disabled>
+            </div>
+            
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Email">Order Code</label>
+                <input type="text" value="@item.OrderCode" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Url">ETD</label>
+                <input type="text" value="@item.S_ETD" class="form-control" disabled>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">ETA</label>
+                <input type="text" value="@item.S_ETA" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">Customer</label>
+                <input type="text" value="@item.COM_DISPLAYNAME" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">Departure Port</label>
+                <input type="text" value="@item.S_DeparturePort" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">Arrival Port</label>
+                <input type="text" value="@item.S_ArrivalPort" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">Departure Port</label>
+                <input type="text" value="@item.S_DeparturePort" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">Arrival Port</label>
+                <input type="text" value="@item.S_ArrivalPort" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">Departure Port</label>
+                <input type="text" value="@item.S_BL_NO" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">Arrival Port</label>
+                <input type="text" value="@item.S_BL_DATE" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">BL NO</label>
+                <input type="text" value="@item.S_INV_NO" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">BL Date</label>
+                <input type="text" value="@item.S_INV_DATE" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">Invoice Amount</label>
+                <input type="text" value="@item.S_INV_AMT" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">Gross Weight</label>
+                <input type="text" value="@item.S_GrossWeight" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Digits">Container No</label>
+                <input type="text" value="@item.S_ContainerNo" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">Mother Vessel</label>
+                <input type="text" value="@item.S_MotherVessel" class="form-control" disabled>
+            </div>
+        </div>
+}
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Schedule Code</th>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>Scheduled Quantity</th>
+                        <th>Shipment Quantity</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.detailsObj)
+            {
+                <tr>
+                    <td>@item.SH_Code</td>
+                    <td>@item.SD_ArticleNo</td>
+                    <td>@item.SD_ProductName</td>
+                    <td>@item.SD_ScheduledQuantity</td>
+                    <td>@item.SD_Quantity</td>
+                </tr>
+    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

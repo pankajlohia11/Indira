@@ -1,0 +1,119 @@
+﻿
+@using System.Globalization;
+@model BusinessEntity.CustomModels.OneToManyInvoiceView_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <input id="germanformat" style="display:none;" value="@Model.objHeader[0].OTMI_ID" />
+    <table style="width:100%">
+        <tr>
+            <td style="text-align:left;width:30%;"><img src="@Model.objHeader[0].imgurl" width="100"></td>
+            <td style="text-align:center;width:40%;"><h1 style="font-size:20px;font-family:'Times New Roman';"><label><strong>@Model.objHeader[0].SystemCompany</strong></label></h1></td>
+            <td style="text-align:left;width:30%;"></td>
+        </tr>
+    </table>
+    <table style="width:100%;">
+        <tr>
+            <td style="text-align:center;"><h1 style="font-size:18px"><label><strong><u>Rechnung</u></strong></label></h1></td>
+        </tr>
+    </table>
+    <table style="font-weight: 800;" class='generaltable'>
+        <tr>
+            <td><strong>@Model.objHeader[0].CompanyName</strong></td>
+        </tr>
+        <tr>
+            <td>@Model.objHeader[0].Street,</td>
+        </tr>
+        <tr>
+            <td>@Model.objHeader[0].CityState,</td>
+        </tr>
+        <tr>
+            <td>@Model.objHeader[0].CountryZip.</td>
+        </tr>
+
+    </table>
+    <table align="right">
+        <tr>
+            <td colspan="2">Kundennummer:<strong>@Model.objHeader[0].CompanyCode</strong></td>
+        </tr>
+        <tr>
+            <td>Versand Nr:<strong>@Model.objHeader[0].OTMI_DespatchIDs</strong></td>
+        </tr>
+        <tr>
+            <td>KD. USt-IdNr.:<strong>@Model.objHeader[0].USTID</strong></td>
+        </tr>
+        <tr>
+            <td>Datum:<strong>@Model.objHeader[0].OTMI_InvoiceDate.ToString("dd-MM-yyyy")</strong><br /><br /></td>
+        </tr>
+
+    </table><br /><br />
+    <div class="form-group col-md-6">
+        <label><strong>Rechnung Nr:</strong></label>
+        <strong>@Model.objHeader[0].OTMI_Code</strong>
+    </div><br /><br />
+
+
+    <table border="1" width="100%">
+        <thead>
+            <tr>
+                <th style="text-align:center"><strong>Pos</strong></th>
+                <th style="text-align:center" colspan="2"><strong>Menge</strong></th>
+                <th style="text-align:center"><strong>Text</strong></th>
+                <th style="text-align:center"><strong>Einzelpreis EUR</strong></th>
+                <th style="text-align:center"><strong>Gesamtpreis EUR</strong></th>
+            </tr>
+
+        </thead>
+        <tbody>
+            @{int i = 1;
+                decimal total = 0;
+                foreach (var item in Model.objDetail)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td style="text-align:right">@(Convert.ToDecimal(item.SD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td>@item.UOM</td>
+                        <td>@item.ProductName</td>
+                        <td style="text-align:right;">@(Convert.ToDecimal(item.price).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td style="text-align:right;">@((Convert.ToDecimal(item.price) * Convert.ToDecimal(item.SD_Quantity)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    </tr>
+                    total = total + Convert.ToDecimal(item.price) * Convert.ToDecimal(item.SD_Quantity);
+                    i++;
+                }
+            }
+            <tr>
+                <td colspan="5">Gesamt Netto</td>
+                <td colspan="3" style="text-align:right;font-weight:bold;">@total.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))</td>
+            </tr>
+            <tr>
+                <td colspan="5">zzgl. <strong>@(Convert.ToDecimal(Model.objHeader[0].OTMI_TaxPer).ToString("0"))</strong> % USt. auf</td>
+                <td colspan="3" style="text-align:right;font-weight:bold;">@(Convert.ToDecimal(total * Model.objHeader[0].OTMI_TaxPer / 100).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+            </tr>
+            <tr>
+                <td colspan="5">Gesamtbetrag</td>
+                <td colspan="3" style="text-align:right;font-weight:bold;">@((Convert.ToDecimal(total + ((total * Model.objHeader[0].OTMI_TaxPer / 100)))).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+            </tr>
+        </tbody>
+    </table><br />
+    <table style="font-size:12px;">
+        <tr>
+            <td>
+                <p>
+                    Es gelten die Allgemeinen Geschäftsbedingungen (AGB) der Eurotextiles GmbH & Co. KG.
+                    Abweichungen von Qualität/Stückzahl der Ware müssen uns vor Benutzung, aber in jedem Fall innerhalb von 7 Tagen nach Erhalt der Ware, schriftlich mitgeteilt werden. Ware die bereits gewaschen oder benutzt wurde ist von der Reklamation ausgeschlossen.
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td><p>Hinweis nach Bundesdatenschutzgesetz: Wir arbeiten mit EDV und haben Ihren Namen und die sonst im Rahmen der Angelegenheit benötigten Daten gespeichert. Eine Übermittlung an Dritte findet nicht statt.</p></td>
+        </tr>
+    </table><br />
+    <p> <hr style="font-weight:bold;border-top:1px solid black;"></p>
+    <table style="font-size:10px;width:100%;">
+        <tr>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Eurotextiles GmbH & Co.KG<br />Mammolshainer Weg 14<br />61462 Königstein im Taunus<br />Fon +49 6174/25980<br />HRA 3451</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">HRA 3451<br />Amtsgericht Kongstein<br />Steuerrnummer 003 315 60117<br />USt-IdNr.DE279479010</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Kompl.Indra Enterprises GmbH<br />Geshafuher:Krishna Javaji<br />HRB 5137 Amtsgericht Konigstein<br />Steuernummer 003 236 16128</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Bankverbindung<br />Nassauische Sparkasse<br />IBAN :DE15 5105 00150270060706<br />SWIFT:-BIC NASSDE55XXX</td>
+        </tr>
+    </table>
+</div>`
+

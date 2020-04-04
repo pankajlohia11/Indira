@@ -1,0 +1,64 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+    public class  PO_CM
+    {
+        public decimal PP_ID { get; set; }
+ 
+        public string PO_Code { get; set; }
+
+        public DateTime? PO_Date { get; set; }
+
+        public decimal? Po_CurrencyKey { get; set; }
+
+        public decimal? Po_Supplierkey { get; set; }
+
+        public bool? Po_DeliveryShedule { get; set; }
+
+       
+        public string Po_PaymentTerms { get; set; }
+
+        public DateTime? Po_DeliveryDate { get; set; }
+
+        public decimal? Po_TotalAmount { get; set; }
+          
+        public string Po_ShippingAddress { get; set; }
+
+        public decimal? Po_ApprovalStatus { get; set; }
+
+        
+        public string Po_SupplierAddress { get; set; }
+
+         
+        public string Po_SpecialInstruction { get; set; }
+
+         
+        public string Po_TermsandConditions { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+    }
+    public class POCombo_CM
+    {
+        public List<PO_CM> POHeader { get; set; }
+        public List<PO_CM> PODetails { get; set; }
+    }
+}

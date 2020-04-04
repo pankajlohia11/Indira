@@ -1,0 +1,309 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_Roles_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+
+        public List<Tbl_Master_Role> ET_Admin_RoleList_DL()        
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_Role.Where(m => m.DELETED != true).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        public decimal Tbl_Master_Role_Add(Tbl_Master_Role _tbl_Master_Role, bool automanual,string prefix,string ChildData)
+        {
+            Tbl_Master_Role tmr = new Tbl_Master_Role();
+            try
+            {
+                if (_tbl_Master_Role.ROLE_ID == 0)
+                {
+                    
+                    Tbl_Master_Role Objtmr = new Tbl_Master_Role()
+                    {
+                        ROLE_CODE = _tbl_Master_Role.ROLE_CODE,
+                        ROLE_NAME = _tbl_Master_Role.ROLE_NAME,
+                        ROLE_DESCRIPTION = _tbl_Master_Role.ROLE_DESCRIPTION,
+                        //ROLE_ID = _tbl_Master_Role.ROLE_ID,
+                        ROLE_ACCESS = _tbl_Master_Role.ROLE_ACCESS,
+                        CREATED_BY = 1,
+                        CREATED_DATE = DateTime.Now,
+                        DELETED = false
+                    };
+                    dbcontext.Tbl_Master_Role.Add(Objtmr);
+                    dbcontext.SaveChanges();
+                    if (automanual == true)
+                    {
+                        int len = 10 - (prefix + Objtmr.ROLE_ID).Length;
+                        string code=prefix+ new String('0', len) + Objtmr.ROLE_ID;
+                        Tbl_Master_Role Objtbl_Master_Role = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == Objtmr.ROLE_ID);
+                        {
+                            Objtbl_Master_Role.ROLE_CODE = code;
+                        };
+                        dbcontext.SaveChanges();
+                    }
+                    string[] ChildRow = ChildData.Split('|');
+                    for (int i = 0; i < ChildRow.Length - 1; i++)
+                    {
+                        string[] ChildRecord = ChildRow[i].Split(',');
+                        Tbl_AccessPermissions objAccess = new Tbl_AccessPermissions()
+                        {
+                            ROLE_ID = Objtmr.ROLE_ID,
+                            FORMS =ChildRecord[0].ToString(),
+                            FORM_NAME = ChildRecord[1].ToString(),
+                            IS_ADD=Convert.ToBoolean(ChildRecord[2].ToString()),
+                            IS_EDIT= Convert.ToBoolean(ChildRecord[3].ToString()),
+                            IS_DELETE = Convert.ToBoolean(ChildRecord[4].ToString()),
+                            IS_FULLCONTROL= Convert.ToBoolean(ChildRecord[5].ToString()),
+                            IS_VIEW = Convert.ToBoolean(ChildRecord[6].ToString()),
+                            CREATED_BY = 1,
+                            CREATED_DATE = DateTime.Now,
+                            DELETED = false
+                        };
+                        dbcontext.Tbl_AccessPermissions.Add(objAccess);
+                        dbcontext.SaveChanges();
+                    }
+                    tmr.ROLE_ID = Objtmr.ROLE_ID;
+                }
+                else
+                {
+                    Tbl_Master_Role Objtbl_Master_Role = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == _tbl_Master_Role.ROLE_ID);
+                    {
+                        Objtbl_Master_Role.ROLE_NAME = _tbl_Master_Role.ROLE_NAME;
+                        Objtbl_Master_Role.ROLE_DESCRIPTION = _tbl_Master_Role.ROLE_DESCRIPTION;
+                        Objtbl_Master_Role.ROLE_CODE = _tbl_Master_Role.ROLE_CODE;
+                        Objtbl_Master_Role.ROLE_ACCESS = _tbl_Master_Role.ROLE_ACCESS;
+                        Objtbl_Master_Role.CREATED_BY = 1;
+                        Objtbl_Master_Role.CREATED_DATE = DateTime.Now;
+                        Objtbl_Master_Role.DELETED = _tbl_Master_Role.DELETED;
+                    };
+                    tmr.ROLE_ID = Objtbl_Master_Role.ROLE_ID;
+                    dbcontext.SaveChanges();
+                    Tbl_AccessPermissions objAccess1 = new Tbl_AccessPermissions();
+                    dbcontext.Tbl_AccessPermissions.RemoveRange(dbcontext.Tbl_AccessPermissions.Where(x => x.ROLE_ID == Objtbl_Master_Role.ROLE_ID));
+                    dbcontext.SaveChanges();
+                    string[] ChildRow = ChildData.Split('|');
+                    for (int i = 0; i < ChildRow.Length - 1; i++)
+                    {
+                        string[] ChildRecord = ChildRow[i].Split(',');
+                        Tbl_AccessPermissions objAccess = new Tbl_AccessPermissions()
+                        {
+                            ROLE_ID = Objtbl_Master_Role.ROLE_ID,
+                            FORMS = ChildRecord[0].ToString(),
+                            FORM_NAME = ChildRecord[1].ToString(),
+                            IS_ADD = Convert.ToBoolean(ChildRecord[2].ToString()),
+                            IS_EDIT = Convert.ToBoolean(ChildRecord[3].ToString()),
+                            IS_DELETE = Convert.ToBoolean(ChildRecord[4].ToString()),
+                            IS_FULLCONTROL = Convert.ToBoolean(ChildRecord[5].ToString()),
+                            IS_VIEW = Convert.ToBoolean(ChildRecord[6].ToString()),
+                            CREATED_BY = 1,
+                            CREATED_DATE = DateTime.Now,
+                            DELETED = false
+                        };
+                        dbcontext.Tbl_AccessPermissions.Add(objAccess);
+                        dbcontext.SaveChanges();
+                    }
+                }                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return tmr.ROLE_ID;
+        }
+
+        public List<Tbl_Master_Role> ET_Admin_Roles_View(int id)
+        {
+            return dbcontext.Tbl_Master_Role.Where(m => m.ROLE_ID == id).ToList();
+            // return data;
+        }
+        public Tbl_Master_Role ET_Admin_Roles_Update_Get(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == id);
+                // return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public decimal ET_Admin_Roles_Update(Tbl_Master_Role _tbl_Master_Role)
+        {
+            try
+            {
+                Tbl_Master_Role Objtbl_Master_Role = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == _tbl_Master_Role.ROLE_ID);
+                {
+                    Objtbl_Master_Role.ROLE_NAME = _tbl_Master_Role.ROLE_NAME;
+                    Objtbl_Master_Role.ROLE_DESCRIPTION = _tbl_Master_Role.ROLE_DESCRIPTION;
+                    //ROLE_ID = _tbl_Master_Role.ROLE_ID,
+                    Objtbl_Master_Role.ROLE_ACCESS = _tbl_Master_Role.ROLE_ACCESS;
+                    Objtbl_Master_Role.CREATED_BY = 1;
+                    Objtbl_Master_Role.CREATED_DATE = DateTime.Now;
+                    Objtbl_Master_Role.DELETED = _tbl_Master_Role.DELETED;
+                };
+                dbcontext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return _tbl_Master_Role.ROLE_ID;
+        }
+        public int ET_Admin_Roles_Deleted_DL(int id)
+        {
+            int result = 0;
+            //int i = 1;
+            try
+            {
+                var find = dbcontext.Tbl_Master_Role.Where(m => m.ROLE_ID == id).ToList();
+                if (find.Count() != 0)
+                {
+                    Tbl_Master_Role delete = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == id);
+                    delete.DELETED = true;
+                    delete.DELETED_BY = 1;
+                    //dbcontext.Tbl_Master_Role.Add(isdelete);
+                    result = dbcontext.SaveChanges();
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+        public List<Tbl_Master_Role> ET_Admin_Roles_Restore_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_Role.Where(m => m.DELETED == true).ToList(); 
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public decimal ET_Admin_Roles_Restore_Insert_DL(int id)
+        {
+            int result = 0;
+            try
+            {
+                Tbl_Master_Role tmr = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == id);                
+                {
+                    tmr.CREATED_DATE = DateTime.Now;
+                    tmr.DELETED = false;
+                    tmr.LAST_UPDATED_BY = 1;
+                }
+                // dbcontext.Tbl_Master_Role.Add(tmr);
+                result= dbcontext.SaveChanges();
+           
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+        public List<RoleDetails_Role_Document_CM> ET_Admin_Roles_Get_RoleDetails_DA(int id)
+        {
+            if (id != 0)
+            {
+                var Result4 = (from doc in dbcontext.Tbl_Document_Master
+                               join access in dbcontext.Tbl_AccessPermissions
+                 on doc.auto_key.ToString() equals access.FORMS
+                               where access.ROLE_ID == id
+                               select new RoleDetails_Role_Document_CM()
+                               {
+                                   FORMS = doc.auto_key,
+                                   FORM_NAME = doc.autogen_formname,
+                                   IS_ADD = (access == null ? false : access.IS_ADD),
+                                   IS_EDIT = (access == null ? false : access.IS_EDIT),
+                                   IS_DELETE = (access == null ? false : access.IS_DELETE),
+                                   IS_FULLCONTROL = (access == null ? false : access.IS_FULLCONTROL),
+                                   IS_VIEW = (access == null ? false : access.IS_VIEW)
+                               }).ToList();
+                return Result4;
+            }
+            else
+            {
+                var Result4 = (from doc in dbcontext.Tbl_Document_Master
+                               select new RoleDetails_Role_Document_CM()
+                               {
+                                   FORMS = doc.auto_key,
+                                   FORM_NAME = doc.autogen_formname,
+                                   IS_ADD = false,
+                                   IS_EDIT = false,
+                                   IS_DELETE = false,
+                                   IS_FULLCONTROL = false,
+                                   IS_VIEW = false
+                               }).ToList();
+                return Result4;
+            }
+            // return data;
+        }
+        public string CheckDuplicateCode_DA(int id,string code)
+        {
+            if (id == 0)
+            {
+                int count = dbcontext.Tbl_Master_Role.Where(m => m.ROLE_CODE == code).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                int count = dbcontext.Tbl_Master_Role.Where(m => m.ROLE_CODE == code && m.ROLE_ID!=id).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+
+            return "";
+        }
+        public string CheckDuplicateRoleName_DA(int id, string name)
+        {
+            if (id == 0)
+            {
+                int count = dbcontext.Tbl_Master_Role.Where(m => m.ROLE_NAME == name).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                int count = dbcontext.Tbl_Master_Role.Where(m => m.ROLE_NAME == name && m.ROLE_ID != id).Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+
+            return "";
+        }
+    }
+}

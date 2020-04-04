@@ -1,0 +1,169 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.Quotation_View_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <input id="germanformat" style="display:none;" value="@Model.QHeader[0].Q_ID" />
+    <table style="width:100%">
+        <tr>
+            <td style="text-align:left;width:30%;"></td>
+            <td style="text-align:center;width:40%;"><img src="@Model.QHeader[0].imgurl" width="100">
+            @*<h1 style="font-size:20px;font-family:'Times New Roman';"><label><strong>@Model.QHeader[0].SysCompany</strong></label></h1>*@
+            </td>
+            <td style="text-align:left;width:30%;"></td>
+        </tr>
+    </table>
+    <div id="tblprintpdf" style="width:100%;">
+        <table style="width:100%;">
+            <tr>
+                <td style="text-align:center;"><h1 style="font-size:18px"><label><strong><u>ANGEBOT</u></strong></label></h1></td>
+            </tr>
+        </table>
+        <table style="font-weight: 800;" class='generaltable'>
+            <tr>
+                <td><strong>@Model.QHeader[0].Q_CustomerName</strong></td>
+            </tr>
+            <tr>
+                <td>@Model.QHeader[0].Street,</td>
+            </tr>
+            <tr>
+                <td>@Model.QHeader[0].CityState,</td>
+            </tr>
+            <tr>
+                <td>@Model.QHeader[0].CountryZip.</td>
+            </tr>
+
+        </table>
+        <table align="right" style="text-align:right" class='generaltable'>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Kunden Nr:</td>
+                <td><strong>@Model.QHeader[0].CompanyCode</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Verarbeitet Von:</td>
+                <td><strong>@Model.QHeader[0].Q_SalesPersonName</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Datum:</td>
+                <td><strong>@Model.QHeader[0].Q_Date.ToString("dd-MM-yyyy")</strong></td>
+            </tr>
+        </table>
+        <table style="width:100%;text-align:left;" class='generaltable'>
+            <tr>
+                <td><strong>Zitat No: @Model.QHeader[0].Q_Code</strong></td>
+                <td></td>
+            </tr>
+        </table>
+        <table border="1" style="width:100%;" align="center" class='generaltable'>
+            <thead>
+                <tr>
+                    <th style="text-align:center"><strong>Pos</strong></th>
+                    <th style="text-align:center" colspan="2"><strong>Menge</strong></th>
+                    <th style="text-align:center"><strong>Text</strong></th>
+                    <th style="text-align:center"><strong>Einzelpreis EUR</strong></th>
+                    <th style="text-align:center"><strong>Gesamtpreis EUR</strong></th>
+                </tr>
+
+            </thead>
+            <tbody>
+                @{int i = 1;
+                    decimal total = 0;
+                    foreach (var item in Model.QChild)
+                    {
+                        <tr>
+                            <td>@i</td>
+                            <td style="text-align:right">@(Convert.ToDecimal(item.QD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                            <td>@item.QD_UOM</td>
+                            <td>@item.QD_ProductName</td>
+                            <td style="text-align:right;">@(Convert.ToDecimal(item.QD_Unit_Price).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                            <td style="text-align:right;">@(Convert.ToDecimal(item.QD_Amount).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        </tr>
+                        total = total + Convert.ToDecimal(item.QD_Unit_Price) * Convert.ToDecimal(item.QD_Quantity);
+                        i++;
+                    }
+
+                }
+                <tr>
+                    <td colspan="5">Gesamt Netto</td>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">@total.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))</td>
+                </tr>
+                <tr>
+                    <td colspan="5">zzgl. <strong>@(Convert.ToDecimal(Model.QHeader[0].VatPer).ToString("0"))</strong> % USt. auf</td>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">@(Convert.ToDecimal(total * Model.QHeader[0].VatPer / 100).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                </tr>
+                <tr>
+                    <td colspan="5">Gesamtbetrag</td>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">@((Convert.ToDecimal(total + ((total * Model.QHeader[0].VatPer / 100)))).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                </tr>
+            </tbody>
+        </table>
+        <table class='mediumtable'>
+            <tr>
+                <td>
+                    <p>Zahlungsbedingung : @Model.QHeader[0].PaymentTermsDescription</p>
+                    <p>Delivery Terms: @Model.QHeader[0].Q_DeliveryTerms</p>
+                </td>
+            </tr>
+        </table>
+        <br />
+        <table style="width:100%;" class='generaltable'>
+            <tr>
+                <td> <p>___________________________</p></td>
+                <td> <p>___________________________</p></td>
+            </tr>
+            <tr>
+                <td><strong>For @Model.QHeader[0].SysCompany</strong></td>
+                <td><strong>For @Model.QHeader[0].Q_CustomerName</strong></td>
+            </tr>
+
+        </table><br />
+        <table class='mediumtable'>
+            <tr>
+                <td><span><label>Es gelten unsere Allgemeinen Geschäftsbedingungen.</label></span></td>
+            </tr>
+            <tr>
+                <td><span><label>Jede allgemeine Abweichung muss uns vor der Ware, nicht aber 7 Tage nach Erhalt der Ware mitgeteilt werden.</label></span></td>
+            </tr>
+            <tr>
+                <td><span><label>Nach dem Waschen / Verwenden der Ware werden keine Reklamationen akzeptiert.</label></span></td>
+            </tr>
+        </table>
+        <hr style="font-weight:bold;border-top:1px solid black;">
+        <table class='footertable'>
+            <tr>
+                <td>Eurotextiles GmbH & Co.KG</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Mammolshainer Weg 14</td>
+                <td>HRA 3451</td>
+                <td>Kompl.Indra Enterprises GmbH</td>
+                <td>Bankverbindung</td>
+            </tr>
+            <tr>
+                <td>61462 Konigstein im Taunus</td>
+                <td>Amtsgericht Kongstein</td>
+                <td>Geshafuher:Krishna Javaji</td>
+                <td>Nassauische Sparkasse</td>
+            </tr>
+            <tr>
+                <td>Fon +49 6174/25980</td>
+                <td>Steuerrnummer 003 315 60117</td>
+                <td>HRB 5137 Amtsgericht Konigstein</td>
+                <td>IBAN :DE15 5105 00150270060706</td>
+            </tr>
+            <tr>
+                <td>HRA 3451</td>
+                <td>USt-IdNr.DE279479010</td>
+                <td>Steuernummer 003 236 16128</td>
+                <td>SWIFT:-BIC NASSDE55XXX</td>
+            </tr>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,154 @@
+﻿@model BusinessEntity.EntityModels.Tbl_BankMaster
+
+<div>
+    @{
+
+        BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+
+        var CountryID = Convert.ToInt32(Model.COUNTRY);
+        var StateID = Convert.ToInt32(Model.STATE);
+        var CityID = Convert.ToInt32(Model.CITY);
+
+        var countryname = (from country in dbc.locations
+                           where country.location_id == CountryID
+                           select country.name).FirstOrDefault();
+
+        var statename = (from state in dbc.locations
+                         where state.location_id == StateID
+                         select state.name).FirstOrDefault();
+
+        var cityname = (from city in dbc.locations
+                        where city.location_id == CityID
+                        select city.name).FirstOrDefault();
+     }
+    <div class="tile-body col-md-12">
+        <form name="form1" role="form" id="form1" data-parsley-validate>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="BankInfo"><strong>Bank Info</strong></label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="BankName">Bank Name</label>
+                    <input type="text" name="txtBankName1" id="txtBankName1" value="@Model.BANK_NAME" class="form-control" placeholder="Bank Name" disabled />
+                    <input type="text" name="txtBankID1" id="txtBankID1" class="form-control hidden" />
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="DisplayName">Display Name</label>
+                    <input type="text" name="txtDisplayName1" id="txtDisplayName1" value="@Model.DISPLAY_NAME" class="form-control" placeholder="Display Name" disabled />
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="AdressInfo"><strong>Address Info</strong></label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="Address">Address</label>
+                    <textarea name="txtAddress1" rows="4" cols="80" id="txtAddress1" class="form-control" disabled>@Model.STREET</textarea>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="Alpha">Country</label>
+                    @*@Html.DropDownList("drpCountry", new SelectList(ViewBag.Country, "location_id", "name"), new { @class = "form-control chosen-select", onchange = "State()", @id = "drpCountry" })*@
+                    <input type="text" name="Country1" value="@countryname" class="form-control" disabled>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="CityName">State Name</label>
+                    <input type="text" name="statename" value="@statename" class="form-control" disabled />
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="CityName">City Name</label>
+                    <input type="text" name="cityname" value="@cityname" class="form-control" disabled />
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="ZipCode">Zip Code</label>
+
+                    <input type="text" name="txtZipCode1" id="txtZipCode1" class="form-control" value="@Model.ZIP" disabled />
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="AccountsInfo"><strong>Accounts Info</strong></label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="SWIFT">SWIFT</label>
+
+                    <input type="text" name="txtSWIFT1" id="txtSWIFT1" class="form-control" value="@Model.SWIFT" disabled />
+
+
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="BLZ">BLZ</label>
+
+                    <input type="text" name="txtBlz1" id="txtBlz1" class="form-control" value="@Model.BLZ" disabled />
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="BIC">BIC</label>
+
+                    <input type="text" name="txtBic1" id="txtBic1" class="form-control" value="@Model.BIC" disabled />
+
+                </div>
+
+
+
+                <div class="form-group col-md-6">
+                    <label for="IBAN">IBAN</label>
+
+                    <input type="text" name="txtIban1" id="txtIban1" class="form-control" value="@Model.IBAN" disabled />
+                </div>
+
+
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="AccountNo">Account No</label>
+                    <input type="text" name="txtAccountNo1" id="txtAccountNo1" class="form-control" value="@Model.ACCOUNT" disabled />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="ContactPersonInfo"><strong>Contact Person Info</strong></label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="ContactName">Contact Name</label>
+
+                    <input type="text" name="txtContactName1" id="txtContactName1" class="form-control" value="@Model.CONTACT_NAME" disabled />
+
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="ContactNo">Contact No</label>
+
+                    <input type="text" name="txtContactNo1" id="txtContactNo1" class="form-control" value="@Model.CONTACT_NO" disabled />
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="Remarks">Remarks</label>
+                    <textarea name="txtRemarks1" rows="4" id="txtRemarks1" cols="80" class="form-control" disabled> @Model.REMARKS </textarea>
+
+                </div>
+
+            </div>
+
+
+        </form>
+
+    </div>
+</div>

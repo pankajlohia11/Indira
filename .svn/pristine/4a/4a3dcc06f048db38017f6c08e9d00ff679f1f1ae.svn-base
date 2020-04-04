@@ -1,0 +1,1546 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Entity;
+//using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+using BusinessLogic.Admin_BL;
+using System.Web.Script.Serialization;
+using BusinessEntity.CustomModels;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System.IO;
+using System.Net.Mail;
+using System.Net;
+
+namespace Euro.Controllers.Enquiry
+{
+    public class ET_Sales_EnquiryController : Controller
+    {
+        public static string prefix = "";
+        public static bool automanual = false;
+        ET_Agency_Enquiry_BL ObjBL = new ET_Agency_Enquiry_BL();
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+        EntityClasses dbcontext = new EntityClasses();
+        public ActionResult ET_Sales_Enquiry(string type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                if (type != null)
+                {
+                    if (type == "Trading" || type == "Store" || type == "Agency")
+                    {
+                        try
+                        {
+                            AutoManual();
+                            ViewBag.Login_Name = Session["DisplayName"].ToString();
+                            return View();
+                        }
+                        catch (Exception exe)
+                        {
+                            string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                            string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                            objERR.err_title = controllerName + "-" + controllerName;
+                            objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                            objERR.err_details = exe.Message.Replace("'", "");
+                            int errid = bal.ExceptionInsertLogs_BL(objERR);
+                            return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction("ET_InvalidRequest", "ET_Login");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction("ET_InvalidRequest", "ET_Login");
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Getting whether this document automaic or manual
+        private void AutoManual()
+        {
+            ViewBag.AutoManual = false;
+            automanual = false;
+            List<Tbl_Document_Master> ObjDoc = bal.AutoManual_BL(7015);
+            if (ObjDoc.Count > 0)
+            {
+                foreach (var item in ObjDoc)
+                {
+                    if (item.autogen_type == "Automatic")
+                    {
+                        ViewBag.AutoManual = true;
+                        prefix = item.autogen_prefix;
+                        automanual = true;
+                    }
+                    else
+                    {
+                        ViewBag.Required = "required";
+                    }
+                }
+            }
+        }
+        //Get the Privillage access for this document
+        public JsonResult GetPrivilages()
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var privilagelist = bal.GetPrivilages_BL(Convert.ToInt32(Session["UserID"].ToString()), 7015);
+                    var json = new JavaScriptSerializer().Serialize(privilagelist);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get Enquiry details for Rfq
+        public ActionResult GetRfqDetails(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data = (from a in dbcontext.tbl_EnquiryHeader
+                                join b in dbcontext.tbl_EnquiryDetails on a.E_ID equals b.ED_PID
+                                join d in dbcontext.Tbl_Product_Master on b.ED_ProductID equals d.P_ID
+                                where a.E_ID == id
+                                select new Enquiry_CM
+                                {
+                                    E_ID=a.E_ID,
+                                    E_Date=a.E_Date,
+                                    E_CustomerID= a.E_CustomerID,
+                                    E_Type=a.E_Type,
+                                    E_CustomerName= (from d in dbcontext.Tbl_Master_CompanyDetails.Where(m=>m.COM_ID==a.E_CustomerID) select d.COM_NAME).FirstOrDefault(),
+                                    ED_ProductName = (from d in dbcontext.Tbl_Product_Master.Where(m => m.P_ID == b.ED_ProductID) select d.P_Name).FirstOrDefault(),
+                                    ED_ProductID = b.ED_ProductID,
+                                    ED_UOM= (from d in dbcontext.tbl_LookUp.Where(m => m.LU_Type == 2 && m.LU_Code==d.P_UOM) select d.LU_Description).FirstOrDefault(),
+                                    ED_Quantity=b.ED_Quantity,
+                                    ED_Description=b.ED_Description
+                                });
+                    
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        public ActionResult GetRfqDetails1(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var RfqDetails = (from a in dbcontext.Tbl_RFQ_Details
+                                      where a.Enq_NO == id
+                                      select new Shipment_CM
+                                      {
+                                          SD_ScheduleID = a.RFQ_ID,
+                                          scheduleCode = a.REQ_Code,
+                                          S_OrderID = a.Enq_Supplier ?? 0,
+                                          LAST_UPDATED_DATE = a.LAST_UPDATED_DATE,
+                                          DELETED =a.MailFlag,
+                                          SH_Code = (from d in dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID == a.Enq_Supplier) select d.COM_NAME).FirstOrDefault(),
+
+                                      }).ToList();
+                    var json = new JavaScriptSerializer().Serialize(RfqDetails);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Get the customer and supplier
+        public JsonResult GetCustomerSupplier(int id, int custsup)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        int companykey = Convert.ToInt32(Session["CompanyKey"]);
+                        if (id == 0)
+                        {
+                            var Customer = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != custsup && m.COM_KEY == companykey && m.DELETED == false).OrderBy(m => m.COM_NAME).ToList();
+                            var json = new JavaScriptSerializer().Serialize(Customer);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            if (custsup == 1)
+                            {
+                                var cust = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == id).SO_CutomerID;
+                                var Customer = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != custsup && m.COM_KEY == companykey && (m.DELETED == false || m.COM_ID == cust)).ToList();
+                                var json = new JavaScriptSerializer().Serialize(Customer);
+                                return Json(json, JsonRequestBehavior.AllowGet);
+                            }
+                            else
+                            {
+                                var cust = dbcontext.Tbl_Master_Order.Single(m => m.SO_ID == id).SO_SupplierID;
+                                var Customer = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != custsup && m.COM_KEY == companykey && (m.DELETED == false || m.COM_ID == cust)).ToList();
+                                var json = new JavaScriptSerializer().Serialize(Customer);
+                                return Json(json, JsonRequestBehavior.AllowGet);
+                            }
+                        }
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get Supplier Details
+        public JsonResult ET_Sales_SupplierDetails(string ids,int enqId,int EnqType)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            string[] validNames = ids.Split(',');
+            var context = new EntityClasses();
+            var transaction = context.Database.BeginTransaction();
+            try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var SuppDetails = (from a in dbcontext.Tbl_Master_CompanyDetails 
+                                 where validNames.Contains(a.COM_ID.ToString())
+                                 select new Shipment_CM
+                                 {
+                                     SD_ScheduleID = a.COM_ID,
+                                     SH_Code=a.COM_NAME,
+                                     scheduleCode = a.COM_STREET,
+                                     CityState= (a.COM_CITY + ", " + a.COM_STATE),
+                                     CountryZip = ((dbcontext.locations.Where(b => b.location_id == a.COM_COUNTRY).Select(b => b.name).FirstOrDefault()) + ", " + (a.COM_ZIP)),
+
+                                 }).ToList();
+                var customerDetails = (from a in dbcontext.tbl_EnquiryHeader
+                                       join b in dbcontext.Tbl_Master_CompanyDetails on a.E_CustomerID equals b.COM_ID
+                                       where a.E_ID == enqId
+                                       select new Enquiry_CM
+                                       {
+                                           E_ID=a.E_ID,
+                                           E_Date=a.E_Date,
+                                           E_Code=a.E_Code,
+                                           E_SalesPersonName= (from d in dbcontext.Tbl_Master_User.Where(m => m.USER_ID == a.E_SalesPerson) select d.DISPLAY_NAME).FirstOrDefault(),
+                                           E_CustomerName = (from d in dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID == a.E_CustomerID) select d.COM_NAME).FirstOrDefault(),
+                                           Street = b.COM_STREET,
+                                           CityState = (b.COM_CITY + ", " + b.COM_STATE),
+                                           CountryZip = ((dbcontext.locations.Where(c => c.location_id == b.COM_COUNTRY).Select(c => c.name).FirstOrDefault()) + ", " + (b.COM_ZIP)),
+
+                                       }).ToList();
+                var enqdata = (from a in dbcontext.tbl_EnquiryHeader
+                               join b in dbcontext.tbl_EnquiryDetails on a.E_ID equals b.ED_PID
+                               join d in dbcontext.Tbl_Product_Master on b.ED_ProductID equals d.P_ID
+                               where a.E_ID == enqId
+                               select new Enquiry_CM
+                               {
+                                   E_ID = a.E_ID,
+                                   E_Date = a.E_Date,
+                                   E_CustomerID = a.E_CustomerID,
+                                   E_CustomerName = (from d in dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID == a.E_CustomerID) select d.COM_NAME).FirstOrDefault(),
+                                   ED_ProductName = (from d in dbcontext.Tbl_Product_Master.Where(m => m.P_ID == b.ED_ProductID) select d.P_Name).FirstOrDefault(),
+                                   ED_ProductID = b.ED_ProductID,
+                                   ED_UOM = (from d in dbcontext.tbl_LookUp.Where(m => m.LU_Type == 2 && m.LU_Code == d.P_UOM) select d.LU_Description).FirstOrDefault(),
+                                   ED_Quantity = b.ED_Quantity,
+                                   ED_PackingQty=d.P_PackingQuantity,
+                                   ED_Description = b.ED_Description
+
+                               }).ToList();
+                
+                for (int i=0;i< SuppDetails.Count;i++)
+                {
+                    Tbl_RFQ_Details obj = new Tbl_RFQ_Details()
+                    {
+                        RFQ_ID = 0,
+                        Enq_Supplier = SuppDetails[i].SD_ScheduleID,
+                        Enq_Customer = (from d in dbcontext.tbl_EnquiryHeader.Where(m => m.E_ID == enqId) select d.E_CustomerID).FirstOrDefault(),
+                        Enq_NO = enqId,
+                        ENq_Date = (from d in dbcontext.tbl_EnquiryHeader.Where(m => m.E_ID == enqId) select d.E_Date).FirstOrDefault(),
+                        EnqPdfPth = "",
+                        RFQ_Type = EnqType,
+                        CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                        CREATED_DATE = DateTime.Now,
+                        DELETED = false,
+                        COM_KEY = Convert.ToInt32(Session["CompanyKey"])
+                    };
+
+                    dbcontext.Tbl_RFQ_Details.Add(obj);
+                    dbcontext.SaveChanges();
+                    decimal id = obj.RFQ_ID;
+                    if (automanual == true)
+                    {
+                        int len = 10 - ("RFQ" + id).Length;
+                        string code = "RFQ" + new String('0', len) + id;
+                        Tbl_RFQ_Details Obj_tTbl_RFQ_Detailss = dbcontext.Tbl_RFQ_Details.Single(m => m.RFQ_ID == id);
+                        {
+                            Obj_tTbl_RFQ_Detailss.REQ_Code = code;
+                        };
+                        if (dbcontext.SaveChanges() == 0)
+                        {
+                           bool success = false;
+                        }
+                    }
+                    var doc1 = new iTextSharp.text.Document(PageSize.A4, 25f, 25f, 25f, 25f);
+                    string subPath = "~/Sales/PDFList/";
+                    bool exists = System.IO.Directory.Exists(HttpContext.Server.MapPath(subPath));
+                    if (!exists)
+                        System.IO.Directory.CreateDirectory(HttpContext.Server.MapPath(subPath));
+                    var output = new FileStream(Server.MapPath(subPath + id + SuppDetails[i].SH_Code+".pdf"), FileMode.Create);
+                    var writer = PdfWriter.GetInstance(doc1, output);
+                    writer.PageEvent = new pdffooterclass();
+                    //PdfWriter.GetInstance(doc1, new FileStream(Request.PhysicalApplicationPath + "\\Invoice_Statement.pdf", FileMode.Create));
+                    doc1.Open();
+                    //font size change from default  added by gv on 12/12/18
+                    FontFactory.RegisterDirectories();
+                    Font font = new Font(FontFactory.GetFont("Arial", 11, Font.NORMAL));
+                    Font fontsmall = new Font(FontFactory.GetFont("Arial", 9, Font.NORMAL));
+                    Font Fontbiggest = new Font(FontFactory.GetFont("Arial", 50, Font.BOLD,Color.BLUE));
+                    Font Fontbigger = new Font(FontFactory.GetFont("Arial", 20, Font.BOLD));
+                    Font Fontsmaller = new Font(FontFactory.GetFont("Arial", 10, Font.BOLD));
+                    
+                    var logo = iTextSharp.text.Image.GetInstance(Server.MapPath("~/Images/euro_logo.png"));
+                    //logo.SetAbsolutePosition(100, 100);
+                    logo.ScaleAbsoluteHeight(120);
+                    logo.ScaleAbsoluteWidth(130);
+                    PdfPCell imageCell = new PdfPCell(logo);
+                    imageCell.HorizontalAlignment = Element.ALIGN_LEFT;
+                    imageCell.Border = 0;
+                    PdfPTable table0 = new PdfPTable(2);
+                    table0.WidthPercentage = 100f;
+                    table0.TotalWidth = 100f;
+                    float[] widths = new float[] { 25f, 75f};
+                    table0.SetWidths(widths);
+                    table0.AddCell(imageCell);
+                    Phrase phraseConstant = new Phrase("EuroTextiles\n", Fontbiggest);
+                    Phrase phraseConstant1 = new Phrase("Request for Quotation", Fontbigger);
+                    PdfPCell cell = new PdfPCell(phraseConstant);
+                    cell.HorizontalAlignment = 0;
+                    Paragraph pg1 = new Paragraph();
+                    pg1.Add(phraseConstant);
+                    pg1.Add(phraseConstant1);                    
+                    PdfPCell cell12 = new PdfPCell(pg1);
+                    cell12.HorizontalAlignment = 1;
+                    cell12.Border = 0;
+                    cell12.PaddingTop = 2.5f;
+                    cell12.PaddingLeft = 2.5f;
+                    cell12.PaddingBottom = 2.5f;
+                    table0.AddCell(cell12);
+                    doc1.Add(table0);
+
+                    PdfPTable table1 = new PdfPTable(1);
+                    table1.DefaultCell.Border = 0;
+                    table1.WidthPercentage = 90f;
+                    
+                    PdfPCell Title = new PdfPCell();
+                    Title.Border = 0;
+                    Title.AddElement(new Paragraph(new Chunk("Eurotextiles GmbH & Co. KG.Mammolshainer Weg 14,61462 Königstein", Fontsmaller)));
+                    Title.VerticalAlignment = 2;
+                    Title.PaddingTop = 1.0f;
+                    Title.PaddingBottom = 3.0f;
+                    table1.AddCell(Title);
+                    Paragraph pg2 = new Paragraph();
+                    Phrase phraseConstant2 = new Phrase("" + SuppDetails[i].SH_Code + "\n", font);
+                    Phrase phraseConstant3 = new Phrase("" + SuppDetails[i].scheduleCode + "\n", font);
+                    Phrase phraseConstant4 = new Phrase("" + SuppDetails[i].CityState + "\n", font);
+                    Phrase phraseConstant5 = new Phrase("" + SuppDetails[i].CountryZip + "\n", font);
+                    pg2.Add(phraseConstant2);
+                    pg2.Add(phraseConstant3);
+                    pg2.Add(phraseConstant4);
+                    pg2.Add(phraseConstant5);
+                    PdfPCell cell21 = new PdfPCell(pg2);
+                    cell21.HorizontalAlignment = 0;
+                    cell21.PaddingTop = 1.0f;
+                    cell21.PaddingLeft = 1.0f;
+                    cell21.Border = 0;
+                    table1.AddCell(cell21);
+                    doc1.Add(table1);
+
+                    PdfPTable table2 = new PdfPTable(1);
+                    table2.WidthPercentage = 100f;
+                    for(int k=0;k<customerDetails.Count;k++)
+                    {
+                        Phrase phraseConstant6 = new Phrase("Customer Enquiry No:" + customerDetails[k].E_Code + "\n", font);
+                        Phrase phraseConstant7 = new Phrase("Processed By:" + customerDetails[k].E_SalesPersonName + "\n", font);
+                        Phrase phraseConstant8 = new Phrase("Date:" + customerDetails[k].E_Date + "\n", font);
+                        Paragraph pg3 = new Paragraph();
+                        pg3.Add(phraseConstant6);
+                        pg3.Add(phraseConstant7);
+                        pg3.Add(phraseConstant8);
+                        PdfPCell cell26 = new PdfPCell(pg3);
+                        cell26.Border = 0;
+                        cell26.HorizontalAlignment = 2;
+                        cell26.PaddingBottom = 2.5f;
+                        table2.AddCell(cell26);
+                    }
+                    doc1.Add(table2);
+                    PdfPTable contenttable = new PdfPTable(1);
+                    contenttable.TotalWidth = 100f;
+                    contenttable.WidthPercentage = 90f;
+
+                    PdfPCell cell29 = new PdfPCell();
+                    cell29.AddElement(new Paragraph(new Chunk("You are requested to send us your offer against this enquiry for the following articles", font)));
+                    cell29.PaddingTop = 6.5f;
+                    cell29.PaddingBottom = 20.5f;
+                    cell29.Border = 0;
+                    contenttable.AddCell(cell29);
+                    doc1.Add(contenttable);
+                    PdfPTable table4 = new PdfPTable(5);
+                    float[] widths1 = new float[] { 8f, 15f,10f,42f, 25f};
+                    table4.TotalWidth = 100f;
+                    table4.WidthPercentage = 90f;
+                    table4.SetWidths(widths1);
+
+                    Phrase phraseConstantde1 = new Phrase("Item", Fontsmaller);
+                    PdfPCell cell41 = new PdfPCell(phraseConstantde1);
+
+                   // cell41.AddElement(new Paragraph(new Chunk("Item", Fontsmaller)));
+
+                    cell41.HorizontalAlignment = 1;
+                    cell41.PaddingTop = 2.5f;
+                    cell41.PaddingBottom = 2.5f;
+
+                    table4.AddCell(cell41);
+                    Phrase phraseConstantde2 = new Phrase("Qty", Fontsmaller);
+                    PdfPCell cell42 = new PdfPCell(phraseConstantde2);
+
+                    //cell42.AddElement(new Paragraph(new Chunk("Qty", Fontsmaller)));
+                    cell42.HorizontalAlignment = 1;
+                    cell42.PaddingTop = 2.5f;
+                    cell42.PaddingBottom = 2.5f;
+
+                    table4.AddCell(cell42);
+                    Phrase phraseConstantde3 = new Phrase("UOM", Fontsmaller);
+                    PdfPCell cell421 = new PdfPCell(phraseConstantde3);
+                    cell421.HorizontalAlignment = 1;
+                    //cell421.AddElement(new Paragraph(new Chunk("UOM", Fontsmaller)));
+                    cell421.PaddingTop = 2.5f;
+                    cell421.PaddingBottom = 2.5f;
+
+                    table4.AddCell(cell421);
+                    Phrase phraseConstantde4 = new Phrase("Product Name", Fontsmaller);
+                    PdfPCell cell431 = new PdfPCell(phraseConstantde4);
+                    cell431.HorizontalAlignment = 1;
+
+                    //cell431.AddElement(new Paragraph(new Chunk("Product Name", Fontsmaller)));
+
+                    cell431.PaddingTop = 2.5f;
+                    cell431.PaddingBottom = 2.5f;
+
+                    table4.AddCell(cell431);
+                    Phrase phraseConstantde5 = new Phrase("Description", Fontsmaller);
+                    PdfPCell cell43 = new PdfPCell(phraseConstantde5);
+                    cell43.HorizontalAlignment = 1;
+
+                    // cell43.AddElement(new Paragraph(new Chunk("Description", Fontsmaller)));
+
+                    cell43.PaddingTop = 2.5f;
+                    cell43.PaddingBottom = 2.5f;
+
+                    table4.AddCell(cell43);
+                   
+                    for (int j = 0; j < enqdata.Count; j++)
+                    {
+                        PdfPCell cell51 = new PdfPCell();
+
+                        cell51.AddElement(new Paragraph(new Chunk("" + (j + 1) + "", font)));
+
+                        cell51.PaddingTop = 2.5f;
+                        cell51.PaddingBottom = 2.5f;
+
+                        table4.AddCell(cell51);
+
+                        PdfPCell cell52 = new PdfPCell();
+
+                        cell52.AddElement(new Paragraph(new Chunk("" + enqdata[j].ED_Quantity + "", font)));
+
+                        cell52.PaddingTop = 2.5f;
+                        cell52.PaddingBottom = 2.5f;
+
+                        table4.AddCell(cell52);
+
+                        PdfPCell cell53 = new PdfPCell();
+
+                        cell53.AddElement(new Paragraph(new Chunk("" + enqdata[j].ED_UOM + "", font)));
+
+                        cell53.PaddingTop = 2.5f;
+                        cell53.PaddingBottom = 2.5f;
+
+                        table4.AddCell(cell53);
+                        PdfPCell cell541 = new PdfPCell();
+
+                        cell541.AddElement(new Paragraph(new Chunk("" + enqdata[j].ED_ProductName + "", font)));
+
+                        cell541.PaddingTop = 2.5f;
+                        cell541.PaddingBottom = 2.5f;
+
+                        table4.AddCell(cell541);
+
+                        PdfPCell cell54 = new PdfPCell();
+
+                        cell54.AddElement(new Paragraph(new Chunk("" + enqdata[j].ED_Description + "", font)));
+
+                        cell54.PaddingTop = 2.5f;
+                        cell54.PaddingBottom = 2.5f;
+
+                        table4.AddCell(cell54);
+
+                    }
+                    doc1.Add(table4);
+
+                    PdfPTable table6 = new PdfPTable(1);
+                    PdfPCell cell31 = new PdfPCell();
+                    cell31.Border = 0;
+                    cell31.AddElement(new Paragraph(new Chunk("", font)));
+                    cell31.PaddingTop = 20.5f;
+                    cell31.PaddingBottom = 2.5f;
+                    table6.AddCell(cell31);
+
+                    PdfPCell cell39 = new PdfPCell();
+                    cell39.Border = 0;
+                    cell39.AddElement(new Paragraph(""));
+                    //cell39.PaddingTop = 280.0f;
+                    cell39.PaddingBottom = 2.5f;
+                    table6.AddCell(cell39);
+                    doc1.Add(table6);
+
+                    PdfPTable table7 = new PdfPTable(1);
+                    table7.WidthPercentage = 100f;
+                    PdfPCell cell33 = new PdfPCell();
+
+                    cell33.AddElement(new Paragraph(new Chunk("This is computer generated print out.It doesn't require any signature", font)));
+
+                    cell33.PaddingTop = 2.5f;
+                    cell33.PaddingBottom = 2.5f;
+                    cell33.Border = 0;
+                    table7.AddCell(cell33);
+                    doc1.Add(table7);
+
+
+                    //PdfPTable table9 = new PdfPTable(1);
+                    //table9.WidthPercentage = 100;
+                    
+                    //PdfPCell cell34 = new PdfPCell();
+                    //table9.DefaultCell.Border = 1;
+
+                    //cell34.AddElement(new Paragraph("______________________________________________________________________________"));
+
+                    //cell34.PaddingTop = 2.5f;
+                    //cell34.PaddingBottom = 2.5f;
+                    //cell34.Border = 0;
+                    //table9.AddCell(cell34);
+                    //doc1.Add(table9);
+
+                    
+                    doc1.Close();
+                    Tbl_RFQ_Details Obj_tTbl_RFQ_Details = dbcontext.Tbl_RFQ_Details.Single(m => m.RFQ_ID == id);
+                    {
+                        Obj_tTbl_RFQ_Details.EnqPdfPth = output.Name;
+                    };
+                }
+                
+                var RfqDetails= (from a in dbcontext.Tbl_RFQ_Details
+                                 where a.Enq_NO==enqId
+                                 select new Shipment_CM
+                                 {
+                                   SD_ScheduleID = a.RFQ_ID,
+                                   scheduleCode=a.REQ_Code,
+                                   S_OrderID=a.Enq_Supplier??0,
+                                     DELETED = a.MailFlag,
+                                     LAST_UPDATED_DATE=a.LAST_UPDATED_DATE,
+
+                                     SH_Code = (from d in dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID == a.Enq_Supplier) select d.COM_NAME).FirstOrDefault(),
+
+                                 }).ToArray();
+                //var RfqDetails1 = (from c in dbcontext.Tbl_Master_CompanyDetails
+                //                 join a in RfqDetails1 on c.COM_ID equals a.S_OrderID
+                //            select new 
+                //            {
+                //                SD_ScheduleID = a.SD_ScheduleID,
+                //                scheduleCode = a.scheduleCode,
+                //                S_OrderID = a.S_OrderID ,
+                //                DELETED = a.DELETED,
+                //                LAST_UPDATED_DATE = a.LAST_UPDATED_DATE,
+                //                SH_Code=c.COM_NAME
+                //            }).ToList();
+
+                return Json(RfqDetails, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                transaction.Rollback();
+                string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            finally
+            {
+                transaction.Dispose();
+                context.Dispose();
+            }
+
+        }
+        public class pdffooterclass:PdfPageEventHelper
+        {
+            public override void OnEndPage(PdfWriter writer, Document document)
+            {
+                Font fontsmall = new Font(FontFactory.GetFont("Arial", 9, Font.NORMAL));
+                base.OnEndPage(writer, document);
+                PdfPTable tabFot = new PdfPTable(4);
+                tabFot.WidthPercentage = 100f;
+                tabFot.TotalWidth = 100f;
+                //PdfPCell cell;
+                tabFot.TotalWidth = 300F;
+                //PdfPTable table10 = new PdfPTable(4);
+                PdfPCell cell35 = new PdfPCell();
+
+                PdfPCell cell35line = new PdfPCell();
+                float[] widths2 = new float[] { 120f, 130f, 162f, 160f };
+                tabFot.SetTotalWidth(widths2);
+                tabFot.SetWidthPercentage(widths2, PageSize.A4);
+                tabFot.SetWidths(widths2);
+                cell35line.AddElement(new Paragraph(new Chunk("____________________________________________________________________________________________________", fontsmall)));
+                cell35line.Colspan = 4;
+                cell35line.Border = 0;
+                tabFot.AddCell(cell35line);
+                cell35.AddElement(new Paragraph(new Chunk("Eurotextiles GmbH & Co.KG", fontsmall)));
+                //cell35.PaddingTop = 7.5f;
+                //cell35.PaddingBottom = 7.5f;
+                cell35.Border = 0;
+                tabFot.AddCell(cell35);
+
+                PdfPCell cell36 = new PdfPCell();
+
+                cell36.AddElement(new Paragraph(new Chunk("HRA 3451", fontsmall)));
+                cell36.PaddingTop = 1.5f;
+                cell36.Border = 0;
+                tabFot.AddCell(cell36);
+
+                PdfPCell cell37 = new PdfPCell();
+
+                cell37.AddElement(new Paragraph(new Chunk("Kompl.Indra Enterprises GmbH", fontsmall)));
+                cell37.PaddingTop = 1.5f;
+                cell37.Border = 0;
+                tabFot.AddCell(cell37);
+
+                PdfPCell cell38 = new PdfPCell();
+
+                cell38.AddElement(new Paragraph(new Chunk("Bankverbindung", fontsmall)));
+                cell38.PaddingTop = 1.5f;
+                cell38.Border = 0;
+                tabFot.AddCell(cell38);
+
+                PdfPCell cell310 = new PdfPCell();
+
+                cell310.AddElement(new Paragraph(new Chunk("Mammolshainer Weg 14", fontsmall)));
+                cell310.PaddingTop = 1.5f;
+                cell310.Border = 0;
+                tabFot.AddCell(cell310);
+
+                PdfPCell cell40 = new PdfPCell();
+
+                cell40.AddElement(new Paragraph(new Chunk("Amtsgericht Kongstein", fontsmall)));
+                cell40.PaddingTop = 1.5f;
+                cell40.Border = 0;
+                tabFot.AddCell(cell40);
+
+                PdfPCell cell59 = new PdfPCell();
+
+                cell59.AddElement(new Paragraph(new Chunk("Geshafuher:Krishna Javaji", fontsmall)));
+                cell59.PaddingTop = 1.5f;
+                cell59.Border = 0;
+                tabFot.AddCell(cell59);
+
+                PdfPCell cell60 = new PdfPCell();
+
+                cell60.AddElement(new Paragraph(new Chunk("Nassauische Sparkasse", fontsmall)));
+                cell60.PaddingTop = 1.5f;
+                cell60.Border = 0;
+                tabFot.AddCell(cell60);
+
+                PdfPCell cell61 = new PdfPCell();
+
+                cell61.AddElement(new Paragraph(new Chunk("61462 Konigstein im Taunus", fontsmall)));
+                cell61.PaddingTop = 1.5f;
+                cell61.Border = 0;
+                tabFot.AddCell(cell61);
+
+
+                PdfPCell cell62 = new PdfPCell();
+
+                cell62.AddElement(new Paragraph(new Chunk("Steuerrnummer 003 315 60117", fontsmall)));
+                cell62.PaddingTop = 1.5f;
+                cell62.Border = 0;
+                tabFot.AddCell(cell62);
+                PdfPCell cell64 = new PdfPCell();
+
+                cell64.AddElement(new Paragraph(new Chunk("HRB 5137 Amtsgericht Konigstein", fontsmall)));
+                cell64.PaddingTop = 1.5f;
+                cell64.Border = 0;
+                tabFot.AddCell(cell64);
+
+                PdfPCell cell65 = new PdfPCell();
+
+                cell65.AddElement(new Paragraph(new Chunk("IBAN :DE15 5105 00150270060706", fontsmall)));
+                cell65.PaddingTop = 1.5f;
+                cell65.Border = 0;
+                tabFot.AddCell(cell65);
+
+                PdfPCell cell66 = new PdfPCell();
+
+                cell66.AddElement(new Paragraph(new Chunk("Fon +49 6174/25980", fontsmall)));
+                cell66.PaddingTop = 1.5f;
+                cell66.PaddingBottom = 5.5f;
+                cell66.Border = 0;
+                tabFot.AddCell(cell66);
+
+                PdfPCell cell67 = new PdfPCell();
+
+                cell67.AddElement(new Paragraph(new Chunk("USt-IdNr.DE279479010", fontsmall)));
+                cell67.PaddingTop = 1.5f;
+                cell67.PaddingBottom = 5.5f;
+                cell67.Border = 0;
+                tabFot.AddCell(cell67);
+
+                PdfPCell cell68 = new PdfPCell();
+
+                cell68.AddElement(new Paragraph(new Chunk("Steuernummer 003 236 16128", fontsmall)));
+                cell68.PaddingTop = 1.5f;
+                cell68.PaddingBottom = 5.5f;
+                cell68.Border = 0;
+                tabFot.AddCell(cell68);
+
+
+                PdfPCell cell71 = new PdfPCell();
+
+                cell71.AddElement(new Paragraph(new Chunk("SWIFT:-BIC NASSDE55XXX", fontsmall)));
+                cell71.PaddingTop = 1.5f;
+                cell71.PaddingBottom = 5.5f;
+                cell71.Border = 0;
+                tabFot.AddCell(cell71);
+                tabFot.WriteSelectedRows(-300, -1, 20, 100, writer.DirectContent);
+            }
+        }
+        public ActionResult ET_Sales_Mail_Compose_Reply_Forward(int id, int enqId,decimal SuppId)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    decimal userid = Convert.ToDecimal(Session["UserID"]);
+
+                    int com_key = Convert.ToInt32(Session["CompanyKey"]);
+                    var data = dbcontext.Tbl_MailSettings.Single(m => m.MS_UserId == userid && m.COM_KEY == com_key);
+                    var TO_IDS= dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == SuppId && m.COM_KEY == com_key);
+                    SmtpClient smtp = new SmtpClient();
+                    smtp.Host = data.MS_OutGoingHostName;
+                    NetworkCredential NetworkCred = new NetworkCredential();
+                    NetworkCred.UserName = data.MS_EmailID;
+                    NetworkCred.Password = data.MS_Password;
+                    smtp.UseDefaultCredentials = true;
+                    smtp.EnableSsl = true;
+                    smtp.Credentials = NetworkCred;
+                    smtp.Port = data.MS_OutGoingPort;
+
+
+                    MailMessage mm = new MailMessage(data.MS_EmailID, TO_IDS.COM_EMAIL);
+                    //if (Cc != "")
+                    //    mm.CC.Add(Cc);
+                    mm.Subject = "Request for Quotation";
+                    mm.IsBodyHtml = true;
+                    string body = "Dear Sir/Madam <br /><br />";
+                        body = body+ "We have received an enquiry from our customer which is attached herewith. We are requesting you to submit your competitive price, payment terms and delivery terms etc at the earliest.<br /><br /> ";
+                    body = body + "Please quote the RFQ No for all future purposes.<br /><br /> Regards,<br />";
+                    body = body + "Procurement Department<br />Euro Textiles Gmbh.";
+                    
+                    mm.Body = string.Format(body, Session["UserName"]);
+                    string[] urlList = new string[Request.Files.Count];
+                    bool sentAttachments = false;
+                    Attachment objAttachements =
+                                new Attachment(Server.MapPath("~/Sales/PDFList/" + (id + TO_IDS.COM_NAME) + ".pdf"));
+
+                    // ADD FILE ATTACHMENT TO THE EMAIL.
+                    mm.Attachments.Add(objAttachements);
+                    sentAttachments = true;
+                    if (Request.Files.Count > 0)
+                    {
+                        for (int i = 0; i < Request.Files.Count; i++)
+                        {
+                            HttpPostedFileBase file = Request.Files[i]; //Uploaded file
+                                                                        //Use the following properties to get file's name, size and MIMEType
+
+                            int fileSize = file.ContentLength;
+                            string fileName = file.FileName;
+                            string mimeType = file.ContentType;
+                            System.IO.Stream fileContent = file.InputStream;
+
+                            //To save file, use SaveAs method
+                            string subPath = "~/Mail/Sent/Attachments/";
+                            bool exists = System.IO.Directory.Exists(Server.MapPath(subPath));
+                            if (!exists)
+                                System.IO.Directory.CreateDirectory(Server.MapPath(subPath));
+
+                            string path1 = System.Web.Hosting.HostingEnvironment.MapPath(subPath) + "\\";
+                            string path = System.Web.Hosting.HostingEnvironment.MapPath(subPath) + "\\" + fileName;
+                            string url = subPath.Replace("~", "") + fileName;
+
+                            FileInfo file1 = new FileInfo(path);
+                            int k = 1;
+                            while (file1.Exists)
+                            {
+                                path = path1 + "Copy" + k + fileName;
+                                url = subPath.Replace("~", "") + "Copy" + k + fileName;
+                                k++;
+                                file1 = new FileInfo(path);
+                            }
+
+
+                            urlList[i] = url;
+
+
+
+                            file.SaveAs(path); //File will be saved in application root
+
+                            // CREATE A FILE ATTACHMENT.
+                            Attachment objAttachementss =
+                                new Attachment(file.InputStream,
+                                    "../Sales/PDFList/RFQ_Sample.pdf");
+
+                            // ADD FILE ATTACHMENT TO THE EMAIL.
+                            mm.Attachments.Add(objAttachementss);
+                            sentAttachments = true;
+                        }
+                    }
+
+
+                    bool success = false;
+                    try
+                    {
+                        smtp.Send(mm);
+                        success = true;
+
+                        Tbl_RFQ_Details Obj_Tbl_RFQ_Details = dbcontext.Tbl_RFQ_Details.Single(m => m.RFQ_ID == id);
+                        {
+                            Obj_Tbl_RFQ_Details.Sent_By = userid;
+                            Obj_Tbl_RFQ_Details.MailFlag = true;
+                            Obj_Tbl_RFQ_Details.LAST_UPDATED_BY = userid;
+                            Obj_Tbl_RFQ_Details.LAST_UPDATED_DATE = DateTime.Now;
+                        };
+
+                        //Inserting Into mailSent table
+                        Tbl_MailSent Objmst = new Tbl_MailSent()
+                        {
+                            MST_Subject = "",
+                            MST_Message = body,
+                            MST_Date = DateTime.Now,
+                            MST_To = TO_IDS.COM_EMAIL,
+                            MST_cc = "",
+                            MST_Attachment = sentAttachments,
+                            MST_UserId = Convert.ToInt32(Session["UserID"].ToString()),
+                            CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                            CREATED_DATE = DateTime.Now,
+                            DELETED = false,
+                            COM_KEY = Convert.ToInt64(Session["CompanyKey"])
+                        };
+                        dbcontext.Tbl_MailSent.Add(Objmst);
+                        dbcontext.SaveChanges();
+
+                        //If attachment is there then Insert Into mailSentAttachment table
+                        if (sentAttachments)
+                        {
+                            for (int i = 0; urlList.Count() > 0; i++)
+                            {
+                                Tbl_MailSentAttachment Objma = new Tbl_MailSentAttachment()
+                                {
+                                    MST_ID = Objmst.MST_ID,
+                                    MSTA_Path = urlList[i],
+                                    MSTA_UserId = Convert.ToInt32(Session["UserID"].ToString()),
+                                    CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                                    CREATED_DATE = DateTime.Now,
+                                    DELETED = false,
+                                    COM_KEY = Convert.ToInt64(Session["CompanyKey"])
+                                };
+                                dbcontext.Tbl_MailSentAttachment.Add(Objma);
+                                dbcontext.SaveChanges();
+                            }
+
+                        }
+                    }
+                    catch (Exception exe)
+                    {
+
+
+                    }
+
+                    return Json(success, JsonRequestBehavior.AllowGet);
+
+
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Get the Enquiry list
+        public JsonResult GetEnquiryList(bool delete,int type)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var cusomerlist = ObjBL.ET_Admin_EnquiryList_BL(delete,Convert.ToInt32(Session["CompanyKey"].ToString()),type);
+                    var json = new JavaScriptSerializer().Serialize(cusomerlist);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the customer list
+        public JsonResult GetCustomers(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        int companykey = Convert.ToInt32(Session["CompanyKey"]);
+                        if (id == 0)
+                        {
+                            var Customer = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != 1 && m.COM_KEY == companykey && m.DELETED == false).OrderBy(m => m.COM_NAME).ToList();
+                            var json = new JavaScriptSerializer().Serialize(Customer);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            var cust = dbcontext.tbl_EnquiryHeader.Single(m => m.E_ID == id).E_CustomerID;
+                            var Customer = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != 1 && m.COM_KEY == companykey && (m.DELETED == false || m.COM_ID == cust)).ToList();
+                            var json = new JavaScriptSerializer().Serialize(Customer);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the contact list
+        public JsonResult GetContacts(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var contactlist = ObjBL.ET_Admin_ContactList_BL(id);
+                    var json = new JavaScriptSerializer().Serialize(contactlist);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the salesperson list
+        public JsonResult GetSalesPerson(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        dbcontext.Configuration.ProxyCreationEnabled = false;
+                        int companykey = Convert.ToInt32(Session["CompanyKey"]);
+                        var ObjSales_Org = dbcontext.Tbl_Sales_Organization.Where(m => m.COM_KEY == companykey && m.DELETED == false).ToList();
+                        string s = "";
+                        for (int i = 0; i < ObjSales_Org.Count(); i++)
+                        {
+                            if (i == 0)
+                            {
+                                s = ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                            }
+                            else
+                            {
+                                s = s + "," + ObjSales_Org[i].ORG_EMPLOYEE_IDS.ToString();
+                            }
+                        }
+                        var UID = new HashSet<decimal>(s.Split(',').Select(m => Convert.ToDecimal(m)).ToList());
+
+                        if (id == 0)
+                        {
+                            var SalesPerson = dbcontext.Tbl_Master_User.Where(m => m.USER_ID > 0  && m.COM_KEY == companykey && UID.Contains(m.USER_ID) && m.DELETED == false).Distinct().OrderBy(a => a.DISPLAY_NAME).ToList();
+                            var json = new JavaScriptSerializer().Serialize(SalesPerson);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            var user = dbcontext.tbl_EnquiryHeader.Single(m => m.E_ID == id).E_SalesPerson;
+                            var SalesPerson = dbcontext.Tbl_Master_User.Where(m => m.USER_ID > 0 && m.COM_KEY == companykey && UID.Contains(m.USER_ID) && (m.DELETED == false  || m.USER_ID == user)).Distinct().OrderBy(a => a.DISPLAY_NAME).ToList();
+                            var json = new JavaScriptSerializer().Serialize(SalesPerson);
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the product list
+        public JsonResult GetProducts(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int companykey = Convert.ToInt32(Session["CompanyKey"]);
+                    if (id == 0)
+                    {
+                        var Customer = dbcontext.Tbl_Product_Master.Where(m => m.COM_KEY == companykey && m.DELETED == false).OrderBy(m => m.P_ArticleNo).ToList();
+                        var json = new JavaScriptSerializer().Serialize(Customer);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var product = dbcontext.tbl_QuotationDetails.Where(m => m.QD_PID == id).Select(a => a.QD_ProductID);
+                        var Customer = dbcontext.Tbl_Product_Master.Where(m => m.COM_KEY == companykey && (m.DELETED == false || product.Contains(m.P_ID))).OrderBy(m => m.P_ArticleNo).ToList();
+                        var json = new JavaScriptSerializer().Serialize(Customer);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the product Category list
+        public JsonResult GetProductsCategory(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int companykey = Convert.ToInt32(Session["CompanyKey"]);
+                   
+                        
+                        var Customer = dbcontext.Tbl_ProductGroup.Where(m => m.COM_KEY == companykey && m.DELETED == false).ToList();
+                        var json = new JavaScriptSerializer().Serialize(Customer);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Get the product details
+        public JsonResult GetProductDetailsByID(int id)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data1 = (from a in dbcontext.Tbl_Product_Master
+                                 join b in dbcontext.tbl_LookUp on a.P_UOM equals b.LU_Code
+                                 into m from n in m.DefaultIfEmpty() where a.P_ID==id && n.LU_Type == 2
+                                 select new
+                                 {
+                                     uom=n.LU_Description,
+                                     packing=a.P_PackingQuantity,
+                                     CustomerDes=a.P_Remark1
+                                 });
+                    var json = new JavaScriptSerializer().Serialize(data1);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //Validate the data
+        private string Validations(int E_ID, string E_Code, string E_Date, decimal E_CustomerID, decimal E_ContactID, decimal E_SalesPerson, string EnquiryDetails)
+        {
+            if (!automanual && E_Code == "")
+            {
+                return "Enter Enquiry Code";
+            }
+            if (E_Date == "")
+            {
+                return "Enter Date";
+            }
+            if (E_CustomerID == 0)
+            {
+                return "Select Customer";
+            }
+            if (E_ContactID == 0)
+            {
+                return "Select Contact Person";
+            }
+            if (E_SalesPerson == 0)
+            {
+                return "Select Sales Person";
+            }
+            if (!automanual)
+            {
+                string valid = ObjBL.CheckDuplicateCode_BL(E_ID, E_Code);
+                if (valid != "")
+                {
+                    return "Enquiry Code Already Exist";
+                }
+            }
+            try
+            {
+                string[] ChildRow = EnquiryDetails.Split('|');
+                string[] tableColumns = new string[ChildRow.Length];
+                for (int i = 0; i < ChildRow.Length - 1; i++)
+                {
+                    string[] ChildRecord = ChildRow[i].Split(',');
+                    if (tableColumns.Contains(Convert.ToDecimal(ChildRecord[0]).ToString()))
+                    {
+                        return "Product is repeated at row :" + (i + 1);
+                    }
+                    tableColumns[i] = Convert.ToDecimal(ChildRecord[0]).ToString();
+                }
+            }
+            catch
+            {
+                return "Unable to process your request. Please verify product data.";
+            }
+                return "";
+        }
+        //Insert/update the enquiry
+        [HttpPost]
+        public JsonResult ET_Master_Enquiry_Add(int E_ID, string E_Code,int E_Type, string E_Date, decimal E_CustomerID, decimal E_ContactID, decimal E_SalesPerson,string EnquiryDetails)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    string valid = Validations(E_ID, E_Code, E_Date, E_CustomerID, E_ContactID, E_SalesPerson, EnquiryDetails);
+                    if (valid == "")
+                    {
+                        var Username = Session["UserID"].ToString();
+                        DateTime ENqDate = DateTime.ParseExact(E_Date,"dd-MM-yyyy",null);
+                        
+                        tbl_EnquiryHeader Objmc = new tbl_EnquiryHeader()
+                        {
+                            E_ID = E_ID,
+                            E_Code = E_Code,
+                            E_Type= E_Type,
+                            E_Date = ENqDate,
+                            E_CustomerID = E_CustomerID,
+                            E_ContactID = E_ContactID,
+                            E_SalesPerson = E_SalesPerson,
+                            CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                            LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                            CREATED_DATE = DateTime.Now,
+                            DELETED = false,
+                            COM_KEY = Convert.ToInt64(Session["CompanyKey"])
+                        };
+                        string EnqCode;
+                        decimal data = ObjBL.ET_Admin_Enquiry_Add_BL(Objmc, automanual, prefix, EnquiryDetails,out EnqCode);
+                        var json = "Success:" + EnqCode;
+                        if (data == 0)
+                        {
+                            json = "Failed";
+                        }
+                        else
+                        {
+                            objLOG.log_dockey = "7015";
+                            objLOG.log_userid = Session["UserID"].ToString();
+                            objLOG.log_recordkey = data.ToString();
+                            if (E_ID == 0)
+                            {
+                                objLOG.log_operation = "Insert";
+                                objLOG.log_Remarks = "Record Inserted Successfully";
+                            }
+                            else
+                            {
+                                objLOG.log_operation = "Update";
+                                objLOG.log_Remarks = "Record Updated Successfully";
+                            }
+                            bal.OperationInsertLogs_BL(objLOG);
+                        }
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var json = "Validation:" + valid;
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        //View:popup view
+        public ActionResult ET_Master_Enquiry_View(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    var data1 = (from a in dbcontext.tbl_EnquiryHeader
+                                join b in dbcontext.Tbl_Master_CompanyDetails on a.E_CustomerID equals b.COM_ID into comp
+                                from x in comp
+                                join c in dbcontext.Tbl_Master_CompanyContacts on a.E_ContactID equals c.CONTACT_ID into contact
+                                from y in contact
+                                join d in dbcontext.Tbl_Master_User on a.E_SalesPerson equals d.USER_ID into user
+                                from z in user
+                                where a.E_ID == id
+                                 select new Enquiry_CM
+                                {
+                                    E_ID = a.E_ID,
+                                    E_Code = a.E_Code,
+                                    E_Type = a.E_Type,
+                                    E_Date = a.E_Date,
+                                    E_CustomerName = x.COM_NAME,
+                                    E_ContactName = (y.FIRST_NAME + " " + y.LAST_NAME),
+                                    E_SalesPersonName = z.DISPLAY_NAME
+                                }
+                            ).ToList();
+                    var data2 = (from c in dbcontext.tbl_EnquiryDetails
+                                 join a in dbcontext.Tbl_Product_Master on c.ED_ProductID equals a.P_ID
+                                 join b in dbcontext.tbl_LookUp on a.P_UOM equals b.LU_Code
+                                 into m
+                                 from n in m.DefaultIfEmpty()
+                                 where c.ED_PID == id && n.LU_Type == 2
+                                 select new Enquiry_CM
+                                 {
+                                     ED_ArticleNo = a.P_ArticleNo,
+                                     ED_ProductName = a.P_ShortName,
+                                     ED_UOM = n.LU_Description,
+                                     ED_PackingQty = a.P_PackingQuantity,
+                                     ED_Quantity = c.ED_Quantity,
+                                     ED_Description = c.ED_Description
+                                 }).ToList();
+                    Enquiry_View_CM obj = new Enquiry_View_CM();
+                    obj.EnqHeader = data1;
+                    obj.EnqChild = data2;
+                    return PartialView("/Views/Sales/ET_Sales_Enquiry/ET_Sales_Enquiry_View.cshtml", obj);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Restore the deleted data
+        public ActionResult ET_Master_Enquiry_RestoreDelete(int id, bool type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var result = ObjBL.ET_Admin_Enquiry_DeletRestore_BL(id, type,Convert.ToInt32(Session["UserID"]));
+                    var json = "Failed";
+                    if (result != 0)
+                    {
+                        json = "Success";
+                    }
+                    else
+                    {
+                        objLOG.log_dockey = "7015";
+                        objLOG.log_operation = "Restore";
+                        objLOG.log_userid = Session["UserID"].ToString();
+                        objLOG.log_recordkey = id.ToString();
+                        objLOG.log_Remarks = "Record Restored Successfully";
+                        bal.OperationInsertLogs_BL(objLOG);
+                    }
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Edit the enquiry details
+        public ActionResult ET_Master_Enquiry_Update_GetbyID(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    //TempData["CompaycontctID"] = id;
+                    var data = ObjBL.ET_Admin_Enquiry_Update_GetbyID_BL(id);
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        //Get the enquiry product details
+        public ActionResult ET_Master_Enquiry_ContactsLoad(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data1 = (from c in dbcontext.tbl_EnquiryDetails join 
+                                 a in dbcontext.Tbl_Product_Master on c.ED_ProductID equals a.P_ID
+                                 join b in dbcontext.tbl_LookUp on a.P_UOM equals b.LU_Code
+                                 into m
+                                 from n in m.DefaultIfEmpty()
+                                 where c.ED_PID == id && n.LU_Type == 2
+                                 select new
+                                 {
+                                     productid=a.P_ID,
+                                     name = a.P_ShortName,
+                                     uom = n.LU_Description,
+                                     packing = a.P_PackingQuantity,
+                                     quantity = c.ED_Quantity,
+                                     description = c.ED_Description
+                                 });
+                    var json = new JavaScriptSerializer().Serialize(data1);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+    }
+}

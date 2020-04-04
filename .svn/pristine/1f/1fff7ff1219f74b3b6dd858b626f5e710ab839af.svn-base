@@ -1,0 +1,13 @@
+﻿app.service("AgencyService", function ($http) {
+    this.getAgencyDetails = function () {
+        return $http.get("/ET_Agency_Agentship/GetAgencyList");
+    };
+});
+app.service("MaterialMasterService", function ($http) {
+    this.GetMaterialList = function () {
+        return $http.get("/ET_Admin_Material/GetMaterialList");
+    };
+    this.GetMaterialList = function () {
+        return $http.get("/ET_Admin_Material/GetMaterialList");
+    };
+});

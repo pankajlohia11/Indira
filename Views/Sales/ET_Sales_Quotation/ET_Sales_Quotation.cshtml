@@ -1,0 +1,564 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Company Details.
+    The user can edit or remove and restore  a record in Company Details.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_Quotation.js"></script>
+    @*<style type="text/css">
+            .generaltable {
+                font-size: 10px;
+                line-height: 10px;
+            }
+
+            .mediumtable {
+                font-size: 8px;
+                line-height: 10px;
+            }
+
+            .footertable {
+                font-size: 6px;
+                line-height: 10px;
+            }
+        </style>*@
+    <style type="text/css">
+        .generaltable {
+            font-size: 14px;
+            line-height: 20px;
+        }
+
+        .mediumtable {
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .footertable {
+            font-size: 10px;
+            line-height: 20px;
+            text-align: left;
+            width: 100%;
+        }
+    </style>
+    <script type="text/javascript">
+        function MoneyValidation(s) {
+            debugger;
+            var re = /^[\d.]+(\,\d*)?$/;
+            var txt = s.value;
+            if (txt != "") {
+                if (!re.test(txt)) {
+                    toastr["error"]("Invalid Data", "Notification");
+                    s.value = '';
+                    return false;
+                }
+                else {
+                    s.value = parseFloat(txt.split('.').join("").replace(",", ".")).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                }
+            }
+            return true;
+        }
+        function PrintPanel() {
+            window.open($("#PAthid").attr("href"));
+            //var panel = document.getElementById("div_PrintContent");
+            //var printWindow = window.open('', '', 'height=400,width=800');
+            //printWindow.document.write('<html><head><title>Print the Sales Customer Offer</title>');
+            //printWindow.document.write('</head><body style="font-family:Arial">');
+            ////document.writeln(panel.innerHtml);
+            //printWindow.document.write(panel.innerHTML);
+            //printWindow.document.write('</body></html>');
+            //printWindow.document.close();
+            //setTimeout(function () {
+            //    printWindow.print();
+            //}, 500);
+            return false;
+        }
+        function ProductChange(e)
+        {
+            var id1 = parseInt($(e).val());
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetProductDetailsByID", "ET_Sales_Quotation")',
+            data: { id: id1, catalogSelected: $("#drpCatalogSection").val() },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result)
+            {
+                
+                var res = JSON.parse(result)
+                var td = $(e).parent().parent().find("td");
+                $(td[2]).find("input").val(res[0].uom);
+                if (res[0].price == "")
+                    res[0].price = "0";
+                if (res[0].quantity == "")
+                    res[0].quantity = "0";
+
+                if (res[0].price == 0) {
+                    message = "Price is not defined in the Catalog Selected for Article:" + res[0].name;
+                    toastr["error"](message, "Notification");
+                }
+                else {
+                    message = "Price is defined in the Catalog Selected for Article:" + res[0].name;
+                    toastr["success"](message, "Notification");
+                }
+
+                $(td[3]).find("input").val(parseFloat(res[0].price).toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+                $(td[4]).find("input").val(parseFloat(res[0].quantity).toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+                //$(td[4]).find("input").val("0");
+                $(td[6]).find("input").val(res[0].Description);
+                $(td[1]).find("p").text(id1);
+                $(td[1]).find("select").val(id1).trigger("chosen:updated");
+                calculateamount(e);
+            },
+            error: function (response) {
+                toastr["error"]("Product Data Not Found", "Notification");
+                var td = $(e).parent().parent().find("td");
+                $(td[1]).find("p").text(id1);
+            }
+        });
+        }
+        function calculateamount(e)
+        {
+            if (e.id != "drpProduct") {
+                if (!MoneyValidation(e)) {
+                    $(e).val("0");
+                }
+            }
+            var total = 0;
+            var td = $(e).parent().parent().find("td");
+            if ($(td[3]).find("input").val() == "")
+                $(td[3]).find("input").val("0");
+            if ($(td[4]).find("input").val() == "")
+                $(td[4]).find("input").val("0");
+            var price = parseFloat($(td[3]).find("input").val().split('.').join("").replace(",", "."));
+            var quantity = parseFloat($(td[4]).find("input").val().split('.').join("").replace(",", "."));
+            $(td[5]).find("input").val((price * quantity).toLocaleString("es-ES", { minimumFractionDigits: 2 }))
+            var tr = $(e).parent().parent().parent().find("tr");
+            for (var i = 0; i < tr.length; i++)
+            {
+                var td1 = tr[i].children;
+                var amt = parseFloat($(td1[5]).find("input").val().split('.').join("").replace(",", "."));
+                total = total + amt;
+            }
+            $("#txtTotalValue").val(total.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+        }
+    </script>
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order" ng-controller="AC_QuotationCtrl">
+        <div class="pageheader">
+
+            <h2>{{Type}} Customer Offer<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">{{Type}} Customer Offer</a>
+                        <a style="display:none;" id="PAthid" target="_blank">click to download</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>{{Type}} Customer Offer</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <!--table class="table table-custom contattbl" id="advancedusage" style="table-layout: auto;"-->
+                            <table id="advancedusage" class="table table-custom contattbl">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Quotation Code</th>
+                                        <th>Enquiry Code</th>
+                                        <th>Customer Name</th>
+                                        <th ng-if="Q_Type==1 || Q_Type == 2">Sales Person</th>
+                                        <th>Payment Terms</th>
+                                        <th>Delivery Terms</th>
+                                        <th>Valid Until</th>
+                                        <th>Enclosures</th>
+                                        <th>Quote Description</th>
+                                        <th>Total Value</th>
+                                        <th>Approval Status</th>
+                                        <td>Action</td>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="quotation in quotationlist">
+                                        <td>{{quotation.Q_Date.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                        <td>{{quotation.Q_Code}}</td>
+                                        <td>{{quotation.Q_EnquiryCode}}</td>
+                                        <td style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{quotation.Q_CustomerName}}</td>
+                                        <td ng-if="Q_Type==1 || Q_Type == 2" style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{quotation.Q_SalesPersonName }}</td>
+                                        <td style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{quotation.Q_PaymentTerms }}</td>
+                                        <td style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{quotation.Q_DeliveryTerms }}</td>
+                                        <td>{{quotation.Q_ValidityDate.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd' }}</td>
+                                        <td style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{quotation.Q_Enclosures }}</td>
+                                        <td style="overflow: hidden;text-overflow:ellipsis;max-width:30px;white-space: nowrap;text-wrap:none;">{{quotation.Q_Quotedescription }}</td>
+                                        @*@{
+                                            var currencyName = '';
+
+                                            @foreach (var currency in Model.currencylist)
+                                            {
+                                                if (currency.LU_Code == { { quotation.Q_CurrencyCode} })
+                                                    currencyName = currency.LU_Description;
+
+                                            }
+                                        }*@
+                                        <td style="overflow: hidden;text-overflow:ellipsis;white-space: nowrap;text-align:right;">{{quotation.Q_TotalValue.toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                        @*<td style="overflow: hidden;text-overflow:ellipsis;white-space: nowrap">{{quotation.Q_TotalValue}}({{(quotation.Q_TotalValueCurrency)}})</td>*@
+                                        <td style="overflow: hidden;text-overflow:ellipsis;white-space: nowrap">{{quotation.Q_ApprovedStatus == '0'?'Pending':(quotation.Q_ApprovedStatus == '1'?'Approved':'Rejected')}}</td>
+                                        <td>
+                                            <a ng-click="editRecords(quotation.Q_ID);" ng-if="quotation.Q_Status==0" value="{{ quotation.Q_ID }}" style="color:forestgreen;padding:5px;" title="Edit"><i class="fa fa-edit"></i></a>
+
+                                            <a ng-click="ViewRecords(quotation.Q_ID);" value="{{ quotation.Q_ID }}" style="color:darkblue;padding:5px;" title="View"><i class="fa fa-eye"></i></a>
+
+                                            <a ng-click="Restoredeleterecords(quotation.Q_ID,$event,true);" ng-if="quotation.Q_ApprovedStatus!=1" style="color:red;padding:5px;" title="Delete"><i class="fa fa-trash"></i></a>
+
+                                            <a ng-click="PrintRecords(quotation.Q_ID,'E');" ng-if="quotation.Q_ApprovedStatus==1" value="{{ quotation.Q_ID }}" style="color:green;padding:5px;" title="Print"><i class="fa fa fa-print"></i></a>
+                                            <a ng-click="RedirectQuotationToOrder(quotation.Q_ID);" ng-if="quotation.Q_ApprovedStatus==1 && quotation.Q_Status==0" value="{{ quotation.Q_ID }}" style="color:darkblue;padding:5px;" title="Order"><i class="fa fa-newspaper-o"></i></a>
+
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+</div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> {{Type}} Customer Offer</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Offer Code</label>
+                                    <input type="text" name="CompanyCode" id="txtCompanyCode" ng-model="Q_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                    <input type="text" name="txtComID" id="txtComID" ng-model="Q_ID" class="hidden">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="drpType">Type</label>
+                                    <select data-ng-model="Q_Type" id="drpType" data-parsley-trigger="change" class="form-control chosen-select" ng-change="TypeChange()" disabled>
+                                        <option value="">-Select-</option>
+                                        <option value="1">Agency</option>
+                                        <option value="2">Trading</option>
+                                        <option value="3">Store</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="drpType">Catalog Selection*</label>
+                                    <select data-ng-model="Q_CatalogSelection" id="drpCatalogSection" data-parsley-trigger="change" class="form-control chosen-select" ng-change="CatalogSelection()">
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="catalogInfo in catalogList" value="{{catalogInfo.PC_CatalogueCode}}">
+                                            {{catalogInfo.PC_Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                                @*<div class="form-group col-md-6">
+                                    <label for="drpType">Price Type</label>
+                                    <select data-ng-model="Q_PriceType" id="drpPriceType" data-parsley-trigger="change" class="form-control chosen-select" ng-change="PriceTypeChange()">
+                                        <option value="">--Select--</option>
+                                        <option value="1">German Price</option>
+                                        <option value="2">Euro Price</option>
+                                        <option value="3">Exclusive Price 1</option>
+                                        <option value="4">Exclusive Price 2</option>
+                                    </select>
+                                </div>*@
+                                <div class="form-group col-md-6">
+                                    <label for="txtQDate">Offer Date* </label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtQDate" name="txtQDate" class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Customer Name*</label>
+                                    <select data-ng-model="Q_CustomerID" id="drpCustomer" data-parsley-trigger="change" class="form-control chosen-select" ng-change="CustomerChange()" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="customer in customers" value="{{customer.COM_ID}}">
+                                            {{customer.COM_DISPLAYNAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label">Enquiry No</label>
+                                    <select data-ng-model="Q_EnquiryID" id="drpEnquiry" data-parsley-trigger="change" class="form-control chosen-select" ng-change="EnquiryChange()">
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="enquiry in enquiries" value="{{enquiry.E_ID}}">
+                                            {{enquiry.E_Code}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Sales Person*</label>
+                                    <select data-ng-model="Q_Sales_Person" id="drpSalesPerson" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SalesPersonChange()" disabled>
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="salesperson in salespersons" value="{{salesperson.USER_ID}}">
+                                            {{salesperson.DISPLAY_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="drpCurrency">Currency *</label>
+                                    <select data-ng-model="Q_CurrencyCode" id="drpCurrency" class="form-control chosen-select" ng-change="CurrencyChange()" data-parsley-trigger="change" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="currency in currencylist" value="{{currency.LU_Code}}">
+                                            {{currency.LU_Description}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtDeliveryTerms">Delivery Terms *</label>
+                                    <input type="text" name="txtDeliveryTerms" id="txtDeliveryTerms" ng-model="Q_DeliveryTerms" class="form-control" data-parsley-trigger="change" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtPaymentTerms">Payment Terms *</label>
+                                    <select data-ng-model="Q_PaymentTerms" id="drpPaymentTerms" class="form-control chosen-select" ng-change="PaymentTermChange()" data-parsley-trigger="change" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="paymentterm in paymenttermlist" value="{{paymentterm.PT_ID}}">
+                                            {{paymentterm.PT_Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtValidyDays">Validity Days*</label>
+                                    <input type="text" name="txtValidyDays" style="text-align:right;" maxlength="5" id="txtValidyDays" data-parsley-type="digits" ng-model="Q_ValidityDays" class="form-control" data-parsley-trigger="change" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtTotalValue">Total Value</label>
+                                    <input type="text" name="txtTotalValue" readonly="readonly" style="text-align:right;" id="txtTotalValue" ng-model="Q_TotalValue" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtFreightCost">Freight Cost</label>
+                                    <input type="text" name="txtFreightCost" onchange="MoneyValidation(this);" style="text-align:right;" maxlength="10" id="txtFreightCost" ng-model="Q_Freight_Cost" class="form-control">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtEnclosures">Enclosures</label>
+                                    <input type="text" name="txtEnclosures" id="txtEnclosures" ng-model="Q_Enclosures" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtQuoteDescription">Quote Description</label>
+                                    <input type="text" name="txtQuoteDescription" id="txtQuoteDescription" maxlength="250" ng-model="Q_Quotedescription" class="form-control" data-parsley-trigger="change">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtSpecialDescription">Special Description</label>
+                                    <input type="text" name="txtSpecialDescription" id="txtSpecialDescription" maxlength="250" ng-model="Q_specialdescription" class="form-control" data-parsley-trigger="change">
+                                </div>
+                            </div>
+
+                            <section class="tile">
+                                <!-- tile header -->
+                                <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                    <h1 class="custom-font"><strong>Customer Offer</strong> Details</h1>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+
+                                    <div class="collapse" id="collapseExample">
+                                        <div class="row">
+                                            <div class="table-responsive">
+                                                <style type="text/css">
+                                                    #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                        padding: 0px;
+                                                    }
+                                                </style>
+                                                <table class="table table-custom" id="editable-usage">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>S.NO</th>
+                                                            <th style="width:25%;">Article No</th>
+                                                            <th>UOM</th>
+                                                            @*<th>PriceType</th>*@
+                                                            <th>Price</th>
+                                                            <th>Quantity</th>
+                                                            <th>Amount</th>
+                                                            <th>Description</th>
+                                                            <th style="width: 160px;" class="no-sort">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="quotationdetailsbody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- /tile body -->
+
+                            </section>
+
+
+                        </div>
+
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                    </div>
+
+                </section>
+
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> {{Type}} Customer Offer</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Customer Name</th>
+                                    <th>Enquiry Code</th>
+                                    <th>Sales Person</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="quotationrestore in quotationrestorelist">
+                                    <td>{{quotationrestore.Q_Code}}</td>
+                                    <td>{{quotationrestore.Q_CustomerName}}</td>
+                                    <td>{{quotationrestore.Q_EnquiryCode}}</td>
+                                    <td>{{quotationrestore.Q_SalesPersonName }}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(quotationrestore.Q_ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+                <section class="tile" id="div_Print" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Print</strong> Customer Offer</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tile-body fa-border" id="div_PrintContent1">
+                        <button class="btn bg-blue" ng-click="ChangeLanguage('E');">English</button>
+                        <button class="btn bg-green" ng-click="ChangeLanguage('G');">German</button>
+                        <div class="tile-body fa-border" id="div_PrintContent">
+                        </div>
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="frmPrint" onclick="PrintPanel();"><i class="fa fa-print"></i>Print</button>
+                        <button type="submit" class="btn btn-danger" id="frmMail" ng-click="sendMail();"><i class="fa fa-mail-forward"></i> Send Mail</button>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+    </div>
+</section>

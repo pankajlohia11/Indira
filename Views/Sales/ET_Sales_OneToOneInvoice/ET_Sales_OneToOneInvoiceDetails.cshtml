@@ -1,0 +1,35 @@
+﻿@using System.Globalization;
+@model IEnumerable<BusinessEntity.CustomModels.OneToOneInvoice_CM>
+@foreach (var item in Model)
+{
+
+<tr>
+    <td>
+        <input type='text' class='form-control' readonly='readonly' value="@item.OTOI_Serial" />
+    </td>
+    <td>
+        <input type='text' class='form-control' readonly='readonly' value="@item.ArticleNo" />
+    </td>
+    <td>
+        <input type='text' class='form-control' readonly='readonly' value="@item.ProductName" />
+    </td>
+    <td>
+        <input type='text' class='form-control' readonly='readonly' value="@item.UOM" />
+    </td>
+    <td>
+        <input type='text' class='form-control' readonly='readonly' value="@item.DesignDetail" />
+    </td>
+    <td>
+        <input type='text' class='form-control' readonly='readonly' value="@item.CustomerDes" />
+    </td>
+    <td>
+        <input type='text' class='form-control' readonly='readonly' value="@item.OrderDescription" />
+    </td>
+    <td>
+        <input style="text-align:right;" type='text' class='form-control' readonly='readonly' value="@(Convert.ToDecimal(item.SD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+    <td>
+        <input style="text-align:right;" type='text' class='form-control' readonly='readonly' value="@(Convert.ToDecimal(item.price).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" />
+    </td>
+</tr>
+}

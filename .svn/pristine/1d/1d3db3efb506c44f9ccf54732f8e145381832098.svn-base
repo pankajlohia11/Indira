@@ -1,0 +1,136 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+
+
+namespace DataAccess
+{
+    public class ET_Admin_Category_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+        public List<Tbl_Category_Details> ET_Admin_Category_Restore_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Category_Details.Where(m => m.DELETED == true).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            }
+             public List<Tbl_Category_Details> ET_Admin_CategoryList_DL()
+             {
+              try
+               {
+                var data = dbcontext.Tbl_Category_Details.ToList();
+                return data;
+               }
+               catch (Exception ex)
+               {
+                throw ex;
+              }
+
+             }
+
+        public int ET_Admin_Category_Deleted(int id)
+        {
+            int result = 0;
+            try
+            {
+                var find = dbcontext.Tbl_Category_Details.Where(m => m.CAT_DETAILS_ID==id).ToList();
+                if (find.Count() != 0)
+                {
+                    Tbl_Category_Details delete = dbcontext.Tbl_Category_Details.Single(m => m.CAT_DETAILS_ID == id);
+                    delete.DELETED = true;
+                    delete.DELETED_BY = 1;
+                    dbcontext.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+         
+
+        public Tbl_Category_Details ET_Admin_Category_Update_Get_DL(int id)
+        {
+            return dbcontext.Tbl_Category_Details.Single(m => m.CAT_DETAILS_ID == id);
+            // return data;
+        }
+        public decimal Tbl_Category_Details_Add(Tbl_Category_Details _tbl_Category_Details)
+        {
+            Tbl_Category_Details tmr = new Tbl_Category_Details();
+            try
+            {
+                if (_tbl_Category_Details.CAT_DETAILS_ID == 0)
+                {
+                    Tbl_Category_Details Objtmr = new Tbl_Category_Details()
+                    {
+                    CATEGORY = _tbl_Category_Details.CATEGORY,
+                    SUB_CATEGORY = _tbl_Category_Details.SUB_CATEGORY,
+                    DESCRIPTION = _tbl_Category_Details.DESCRIPTION,
+                    CREATED_BY = 1,
+                    CREATED_DATE = DateTime.Now,
+                    DELETED = false
+
+                };
+                    dbcontext.Tbl_Category_Details.Add(Objtmr);
+                    dbcontext.SaveChanges();
+                    tmr.CAT_DETAILS_ID = Objtmr.CAT_DETAILS_ID;
+                }
+                else
+                {
+                    Tbl_Category_Details Objtbl_Category_Details = dbcontext.Tbl_Category_Details.Single(m => m.CAT_DETAILS_ID == _tbl_Category_Details.CAT_DETAILS_ID);
+                    {
+                        Objtbl_Category_Details.CATEGORY = _tbl_Category_Details.CATEGORY;
+                        Objtbl_Category_Details.SUB_CATEGORY = _tbl_Category_Details.SUB_CATEGORY;
+                        Objtbl_Category_Details.DESCRIPTION = _tbl_Category_Details.DESCRIPTION;
+                        Objtbl_Category_Details.CREATED_BY = 1;
+                        Objtbl_Category_Details.CREATED_DATE = DateTime.Now;
+                        Objtbl_Category_Details.DELETED = _tbl_Category_Details.DELETED;
+                    };
+                    tmr.CAT_DETAILS_ID = Objtbl_Category_Details.CAT_DETAILS_ID;
+                    dbcontext.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return tmr.CAT_DETAILS_ID;
+        }
+        //   public decimal Tbl_Category_Details_Add(Tbl_Category_Details _tbl_Category_Details)
+        //    {
+        //    Tbl_Category_Details tmr = new Tbl_Category_Details();
+        //    try
+        //    {
+
+        //        {
+        //             tmr.CATEGORY = _tbl_Category_Details.CATEGORY;
+        //            tmr.SUB_CATEGORY = _tbl_Category_Details.SUB_CATEGORY;
+        //            tmr.DESCRIPTION = _tbl_Category_Details.DESCRIPTION;
+        //            tmr.CREATED_BY = 1;
+        //            tmr.CREATED_DATE = DateTime.Now;
+        //            tmr.DELETED = false;
+        //        }
+        //        dbcontext.Tbl_Category_Details.Add(tmr);
+        //        dbcontext.SaveChanges();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+
+        //    return tmr.CAT_DETAILS_ID;
+        //}
+
+    }
+}

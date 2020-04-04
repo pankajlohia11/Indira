@@ -1,0 +1,190 @@
+﻿@using System.Globalization;
+@model  IEnumerable<BusinessEntity.CustomModels.Tbl_Order_Details_CM>
+
+@{ BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+    int i = 0;}
+@foreach (var item in Model)
+{
+    if (i == 0)
+    {
+        <div class="row col-md-12">
+            <div class="form-group col-md-6">
+                <label for="CustomerName">Sales Code</label>
+                <input type="text" class="form-control" name="OrderCode" disabled value="@item.SO_Code" />
+            </div>
+        </div>
+        <div class="row col-md-12">
+            <div class="form-group col-md-6">
+                <label for="Url">Price Type</label>
+                @{ string pricetype = "";
+            switch (item.SO_PriceType)
+            {
+                case 1:
+                    pricetype = "German Price";
+                    break;
+                case 2:
+                    pricetype = "Euro Price";
+                    break;
+                case 3:
+                    pricetype = "Exclusive Price 1";
+                    break;
+                case 4:
+                    pricetype = "Exclusive Price 2";
+                    break;
+            }
+                }
+                <input type="text" value="@pricetype" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="CustomerName">Sales Person</label>
+                <input type="text" class="form-control" name="OrderCode" disabled value="@item.USER_NAME" />
+            </div>
+        </div>
+        <div class="row col-md-12">
+            <div class="form-group col-md-6">
+                <label for="Ordertype">Order Type</label>
+                <select class="form-control chosen-select" name="drpOrdertype" value="@item.SO_OrderType" disabled>
+                    @if (item.SO_OrderType == 1)
+                    {
+                        <option value="1">Agency</option>
+                    }
+                    @if (item.SO_OrderType == 2)
+                    {
+                        <option value="2">Trading</option>
+                    }
+                    else
+                    {
+                        <option value="3">Store</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="CustomerDeliveryItems">Order Date </label>
+                <div class='input-group datepicker w-360' style="width:100%">
+                    <input type='text' name="txtorderdate" class="form-control" value='@item.SO_OrderDate.ToString("dd-MM-yyyy")' disabled />
+                    <span class="input-group-addon">
+                        <span class="fa fa-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row col-md-12">
+            <h3>Customer Details</h3>
+            <div class="form-group col-md-6">
+                <label for="CustomerName">Customer Name</label>
+                <input type="text" class="form-control" name="OrderCode" disabled value="@item.CustomerName" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="PONo">Customer PO No</label>
+                <input type="text" class="form-control" name="CusPONO" disabled value="@item.SO_CusPONO" />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="PODate">Customer PO Date </label>
+                <input type="text" class="form-control" name="CusPODate" value='@((item.SO_CusPODate??DateTime.Now).ToString("dd-MM-yyyy"))' disabled />
+            </div>
+        </div>
+        <div class="row col-md-12">
+            @if (item.SO_OrderType != 3)
+            {<h3>Supplier Details</h3>
+                <div class="form-group col-md-6">
+                    <label for="SupplierName">Supplier Name</label>
+                    @{ var supp = dbcontext.Tbl_Master_CompanyDetails.Single(a => a.COM_ID == item.SO_SupplierID).COM_NAME;}
+                    <input type="text" class="form-control" name="OrderCode" disabled value="@supp" />
+                </div>
+            }
+            @if (item.SO_OrderType == 1)
+            {
+                <div class="form-group col-md-6 ">
+                    <label for="Email">Supplier SC No </label>
+                    <input type="text" class="form-control" name="SupSCNO" value="@item.SO_SupSCNO" disabled />
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="Url">Supplier SC Date  </label>
+                    <input type="text" class="form-control" name="SupSCDate" value="@((item.SO_SupSCDate??DateTime.Now).ToString("dd-MM-yyyy"))" disabled />
+                </div>
+            }
+        </div>
+        <div class="row col-md-12">
+            @if (item.SO_OrderType == 1)
+            {
+                <div class="form-group col-md-6">
+                    <label for="CustomerPayment">Commision </label>
+                    <input type="text" style="text-align:right;" class="form-control" name="Commision" value="@item.SO_Commision" disabled />
+                </div>
+            }
+            @if (item.SO_OrderType != 1 && item.Quotation != 0)
+            {
+                <div class="form-group col-md-6">
+                    <label for="CustomerPayment">Quotation </label>
+                    @{ var Qno = dbcontext.tbl_QuotationHeader.Single(a => a.Q_ID == item.Quotation).Q_Code;}
+                    <input type="text" class="form-control" name="Commision" value="@Qno" disabled />
+                </div>
+            }
+            <div class="form-group col-md-6">
+                <label for="CustomerDeliveryItems">Customer Currency </label>
+                <input type="text" class="form-control" name="CusCurrency" value="@item.SO_CusCurrencyname" disabled />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="CustomerDeliveryItems">Customer Delivery Terms </label>
+                <input type="text" class="form-control" name="CusDelivery" value="@item.SO_CusDeliveryTerms" disabled />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="CustomerPayment">Customer Payment Terms </label>
+                @{ var payment = dbcontext.Tbl_Payment_Terms.Single(a => a.PT_ID == item.SO_CusPaymentTermID).PT_Name;}
+                <input type="text" class="form-control" name="CusPayment" value="@payment" disabled />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="CustomerPayment">Remarks </label>
+                <input type="text" class="form-control" name="Remarks" value="@item.SO_Remarks" disabled />
+            </div>
+        </div>
+    }
+    i++;
+}
+<div class="tile-body">
+    <div class="table-responsive">
+        <table class="table table-custom">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Product</th>
+                    <th>UOM</th>
+                    <th>Packing UOM</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var modelItems = Model.AsEnumerable().Select((orderItem, index) => new { index = index + 1, orderItem.PRODUCT_Name, orderItem.UOM_NAME, orderItem.P_PackingQuantityUOM, orderItem.QUANTITY, orderItem.PRICE, orderItem.OrderDescription}); }
+                @foreach (var item in modelItems)
+                {
+                <tr>
+                    <td>
+                        @item.index
+                    </td>
+                    <td>
+                        @item.PRODUCT_Name
+                    </td>
+                    <td>
+                        <input type='text' id='txtUOM' value="@item.UOM_NAME" disabled class='form-control' />
+                    </td>
+                    <td>
+                        <input type='text' id='txtUOM' value="@item.P_PackingQuantityUOM" disabled class='form-control' />
+                    </td>
+                    <td>
+                        <input type='text' style="text-align:right;" id='txtqty' value="@(Convert.ToDecimal(item.QUANTITY).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))" disabled class='form-control' />
+                    </td>
+                    <td>
+                        <input type='text' style="text-align:right;" id='txtprice' value="@(Convert.ToDecimal(item.PRICE).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" disabled class='form-control' />
+                    </td>
+                    <td>
+                        <input type='text' id='txtUOM' value="@item.OrderDescription" disabled class='form-control' />
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+

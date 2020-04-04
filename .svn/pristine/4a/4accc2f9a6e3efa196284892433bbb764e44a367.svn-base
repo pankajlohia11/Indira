@@ -1,0 +1,16 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_AccessPermissions>
+@foreach (var item in Model)
+{
+<tr class="odd gradeX">
+    <td style="display:none">@item.FORMS</td>
+    <td>@item.FORM_NAME</td>
+    <td>@item.IS_ADD</td>
+    <td>@item.IS_EDIT</td>
+    <td>@item.IS_DELETE</td>
+    <td>@item.IS_FULLCONTROL</td>
+    <td>@item.IS_VIEW</td>
+    <td class="actions">
+        <a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a>
+    </td>
+</tr>
+}

@@ -1,0 +1,439 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+
+    This Form is used to create a General Offer Details.
+    The user can edit or remove and restore  a record in General Offer.The user can capture General Offer and other Details etc.
+    Author=jesmi
+    Created Date=31st Mar 2018
+    General Offer Master Form view
+    Operations[Add,Edit,Restore]
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_GeneralOffer.js"></script>
+}
+
+<script type="text/javascript">
+    function MoneyValidation(s) {
+        debugger;
+        var re = /^[\d.]+(\,\d*)?$/;
+        var txt = s.value;
+        if (txt != "") {
+            if (!re.test(txt)) {
+                toastr["error"]("Invalid Data", "Notification");
+                s.value = '';
+                return false;
+            }
+            else {
+                s.value = parseFloat(txt.replace(".", "").replace(",", ".")).toLocaleString("es-ES", { minimumFractionDigits: 3 });
+            }
+        }
+        return true;
+    }
+    function PrintPanel() {
+        var panel = document.getElementById("div_PrintContent");
+        var printWindow = window.open('', '', 'height=400,width=800');
+        printWindow.document.write('<html><head><title>Print the Sales Quotation</title>');
+        printWindow.document.write('</head><body style="font-family:Arial">');
+        //document.writeln(panel.innerHtml);
+        printWindow.document.write(panel.innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        setTimeout(function () {
+            printWindow.print();
+        }, 500);
+        return false;
+    }
+    function ChangeDetails(a) {
+        debugger;
+        var id = $(a).val();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ProductDetails", "ET_Admin_GeneralOffer")',
+            data: { id: id },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                debugger;
+                var res = JSON.parse(result)
+                var td = $(a).parent().parent().find("td");
+                $(td[1]).find("input").val(res[0].PG_NAME);
+                $(td[2]).find("input").val(res[0].P_ShortName);
+                $(td[3]).find("input").val(res[0].LU_Description);
+            },
+            error: function (response) {
+                toastr["error"]("Contacts Not Loading", "Notification");
+            }
+        });
+    }
+    function dateexpiry() {
+        // var offerdate = $("#txtOfferdate").val();
+        var valititydate = $("#txtValidityperiod").val();
+        if (date) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("Add_Days", "ET_Admin_GeneralOffer")',
+                contentType: "application/json;charset=utf-8",
+                /// dataType: "json",
+                data: {
+                    valititydate: valititydate
+                },
+                success: function (result) {
+                    $("#Expirydate").val(result);
+                },
+                error: function (response) {
+                    toastr["error"]("Error", "Notification");
+                }
+            });
+        }
+        else {
+            toastr["error"]("Select LC Date", "Notification");
+        }
+    }
+
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>General Offer <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">General Offer Details</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_GeneralOfferCtrl">
+            <div class="col-md-12">
+                <!--Here user can have to see General Offer Details -->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>General Offer</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" ng-click="createnew();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Offer Code</th>
+                                    <th>Supplier</th>
+                                    <th>Offer No.</th>
+                                    <th>Offer Date</th>
+                                    <th>Place of Origin</th>
+                                    <th>Place of Destination</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in offerlist">
+                                    <td>{{item.OFFER_CODE}}</td>
+                                    <td>{{item.COM_DISPLAYNAME}}</td>
+                                    <td>{{item.OFFER_NO}}</td>
+                                    <td>{{item.OFFER_DATE | jsonDate : 'dd-MM-yyyy'}}</td>
+                                    <td>{{item.PLACE_DEST}}</td>
+                                    <td>{{item.DESTINATION}}</td>
+                                    <td>
+                                        <a ng-click="editRecords(item.OFFER_ID);" value="{{ item.OFFER_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(item.OFFER_ID);" value="{{ item.OFFER_ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+                                        <a ng-click="PrintRecords(item.OFFER_ID);" value="{{ item.OFFER_ID }}" style="color:green;padding:5px;"><i class="fa fa fa-print"></i></a>
+                                        <a ng-click="Restoredeleterecords(item.OFFER_ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--Here user can have to edit General Offer Details -->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> General Offer</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- this is link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblOfferNo">Offer Code *</label>
+                                    <input type="text" name="Offercode" data-parsley-trigger="change" class="form-control" ng-model="Offercode" disabled="@ViewBag.AutoManual" id="Offercode" @ViewBag.Required />
+                                    <input type="text" name="OfferID" class="form-control hidden" ng-model="OfferID" id="OfferID" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblSupplier">Supplier *</label>
+                                    <select class="form-control chosen-select" data-parsley-trigger="change" data-ng-model="Selectedsupplier" id="drpSupplier" ng-change="person();" required>
+                                        <option value="">-Select-</option>
+                                        <option data-ng-repeat="st in SupplierList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblContact">Contact Person *</label>
+                                    <select class="form-control chosen-select" data-parsley-trigger="change" data-ng-model="SelectContactperson" id="drpcontactperson" ng-change="Contactchange();" required>
+                                        <option value="">-Select-</option>
+                                        <option data-ng-repeat="st in Contactperson" value="{{st.CONTACT_ID}}">{{st.FIRST_NAME}}</option>
+                                    </select>
+
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblOfferNo">Offer No *</label>
+                                    <input type="text" name="txtOfferNo" maxlength="50" class="form-control" ng-model="txtOfferNo" placeholder="Offer No:"
+                                           data-parsley-trigger="change"
+                                           required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblOfferDate">Offer Date*</label>
+                                    <div class='input-group datepicker w-360' style="width:100%">
+                                        <input type='text' id="txtOfferdate" class="form-control" ng-model="txtOfferdate" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblorigin">Place of Origin*</label>
+                                    <input type="text" name="txtOrigin" class="form-control" id="txtOrigin" maxlength="100" ng-model="txtOrigin" placeholder="Place of Origin"
+                                           data-parsley-trigger="change " required />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lbldest">Place of Destination*</label>
+
+                                    <input type="text" name="txtDest" class="form-control" ng-model="txtDest" maxlength="100" id="txtDest" placeholder="Place of Destination"
+                                           data-parsley-trigger="change" required />
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblorigin">Payment Details*</label>
+                                    <textarea name="ddlDescription" rows="3" cols="80" class="form-control" maxlength="500" ng-model="ddlDescription" placeholder="Payment Details"
+                                              data-parsley-trigger="change" required></textarea>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lbldest">Shipment Terms*</label>
+                                    <textarea name="ddlShmnt" rows="3" cols="80" class="form-control" maxlength="500" ng-model="ddlShmnt" placeholder="Shipment Terms"
+                                              data-parsley-trigger="change" required></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblValidityperiod">Valid Up To *</label>
+                                    <div class='input-group datepicker w-360' width="100%">
+                                        <input type='text' class="form-control" ng-model="txtValidityperiod" id="txtValidityperiod" name="txtValidityperiod" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="control-label" for="lblSpecificCustomer">Specific Customer</label><br />
+                                            <input type="checkbox" name="chk_SpeCus" id="chk_SpeCus" ng-model="chk_SpeCus" ng-change="SpecificCustomer();" />
+                                        </div>
+                                        <div class="col-md-6 hidden" id="hdncustomer">
+                                            <select class="form-control chosen-select" data-ng-model="SelectedCustomer" id="drpCustomer" ng-change="CustomerChange();">
+                                                <option value="0">-Select-</option>
+                                                <option data-ng-repeat="st in CustomerList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblDescription">Description*</label>
+                                    <textarea name="txtDesc" rows="3" cols="80" class="form-control" maxlength="500" ng-model="txtDesc" id="txtDesc" placeholder="Description"
+                                              data-parsley-trigger="change" required></textarea>
+                                </div>
+                            </div>
+
+                            <div class="tile-body">
+                                <div class="table-responsive">
+                                    <!-- This table is used for displaying data in the form of grid in the create/edit page-->
+                                    <table class="table table-custom" id="grd_1">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name*</th>
+                                                <th>Category</th>
+                                                <th>Product Name</th>
+                                                <th>UOM</th>
+                                                <th>Currency *</th>
+                                                <th>Price *</th>
+                                                <th>Min Quantity *</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="Contactbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled id="formSubmit" ng-click="SubmitClick();" ng-bind="submittext">Submit</button>
+
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--Here user can have to restore General Offer Details -->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>General Offer</strong> </h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Offer Code</th>
+                                    <th>Supplier</th>
+                                    <th>Offer No.</th>
+                                    <th>Offer Date</th>
+                                    <th>Place of Origin</th>
+                                    <th>Place of Destination</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in offerrestorelist">
+                                    <td>{{item.OFFER_CODE}}</td>
+                                    <td>{{item.COM_DISPLAYNAME}}</td>
+                                    <td>{{item.OFFER_NO}}</td>
+                                    <td>{{item.OFFER_DATE | jsonDate : 'dd-MM-yyyy'}}</td>
+                                    <td>{{item.PLACE_DEST}}</td>
+                                    <td>{{item.DESTINATION}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(item.OFFER_ID,$event,false);" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <section class="tile" id="div_Print" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Print</strong> Offer</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tile-body fa-border" id="div_PrintContent">
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="frmPrint" onclick="PrintPanel();">Print</button>
+                    </div>
+
+                </section>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

@@ -1,0 +1,40 @@
+﻿@model IEnumerable<BusinessEntity.CustomModels.Tbl_Offer_Details_CM>
+
+    <tr ng-repeat="item in CantactList">
+        <td>
+            <select class='form-control chosen-select' id='drpProductshortname' onchange='ChangeDetails(this);'>
+                <option value='0'>-Select-</option>
+                <option data-ng-repeat='st in ProductListshortname' value='{{ st.PRODUCT_ID }}'>{{ st.SHORT_NAME }}</option>
+            </select>
+        </td>
+        <td>
+            <input type='text' id='txtCategory' value='{{ item.CATEGORY_NAME }}'  class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='txtpctname' value='{{ item.PRODUCT_NAME }}' class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='txtUOM' value='{{ item.UOM_NAME }}' class='form-control' />
+        </td>
+        <td>
+            <select class='form-control chosen-select' id='drpCurrency'>
+                <option value='0'>-Select-</option>
+                <option data-ng-repeat='CL in Currencylist' value='{{ CL.CURRENCY_ID }}'>{{ CL.CURRENCY_CODE }}</option>
+            </select>
+        </td>
+        <td>
+            <input type='number' id='txtprice' value='{{ item.PRICE }}' class='form-control' />
+        </td>
+        <td>
+            <input type='number' id='txtqty' value='{{ item.QUANTITY }}'  class='form-control' />
+        </td>
+        <td>
+            <a style='padding: 5px;' ng-click='addnewrow($event)'>
+                <i class='fa fa-plus'></i>
+            </a>
+            <a style='padding: 5px;color:red' ng-click='deleterow($event)'>
+                <i class='fa fa-trash'></i>
+            </a>
+        </td>
+    </tr>
+

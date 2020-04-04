@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace Euro.Controllers.Admin
+{
+    public class ET_Trading_OTOSalesController : Controller
+    {
+        // GET: ET_Trading_OTOSales
+        public ActionResult ET_Trading_OTOSales()
+        {
+            ViewBag.Login_Name = Session["DisplayName"].ToString();
+            return View();
+        }
+    }
+}

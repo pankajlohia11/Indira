@@ -1,0 +1,318 @@
+﻿
+@{
+    ViewBag.Title = "CommissionDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/Reports/AC_CommissionDetails.js"></script>
+    <link href="~/Assets/jstree/jquery.treetable.css" rel="stylesheet" />
+    <link href="~/Assets/jstree/jquery.treetable.theme.default.css" rel="stylesheet" />
+    <style type="text/css">
+        table tr.selected td {
+            background-color: #3875d7 !important;
+            font-weight: 500;
+        }
+
+        table tbody tr.selected:hover td {
+            background-color: #3875d7 !important;
+            font-weight: 500;
+        }
+
+        .modalBackground {
+            background-color: Gray;
+            filter: alpha(opacity=80);
+            opacity: 0.8;
+            z-index: 10000;
+            width: 35%;
+        }
+
+        .box.box-color .box-title h5 {
+            color: #fff;
+        }
+
+        .box .box-title h5 {
+            color: #444;
+            float: left;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 20px;
+            margin: 3px 0;
+        }
+
+        #grpChkBox {
+            position: absolute;
+            z-index: 4; /* integer */
+            background-color: blanchedalmond;
+        }
+    </style>
+    <script type="text/javascript">
+        function PrintPanel() {
+            debugger;
+            $("#div_printpanel").attr("style", "display:block;");
+            var panel = document.getElementById("div_printpanel");
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<html><head><title>Print the Commission Details</title>');
+            printWindow.document.write('</head><body style="font-family:Arial">');
+            //document.writeln(panel.innerHtml);
+            printWindow.document.write(panel.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            setTimeout(function () {
+                printWindow.print();
+            }, 500);
+            $("#div_printpanel").attr("style", "display:none;");
+            return false;
+        }
+    </script>
+}
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order" ng-controller="AC_CommissionDetailsCtrl">
+        <div class="pageheader">
+
+            <h2>Commission Details Report<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Commission Details Report</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Commission Details Report</strong></h1>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            
+                            <div class="form-group col-md-3">
+                                <label for="Ordertype">Type</label>
+                                <select class="form-control chosen-select" data-parsley-trigger="change" name="drpOrdertype" ng-model="SelectedOredertype" id="drpOrdertype" ng-change="changeOrdertyper();">
+
+                                    <option value="1">Agency</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-3">
+                                <label for="drpCustomer">Customer Name</label>
+                                <select class="form-control chosen-select" name="drpCustomer" id="drpCustomer" ng-model="SelectedCustomer" ng-change="Customerchange();" data-parsley-trigger="change">
+                                    <option value="0">All</option>
+                                    <option data-ng-repeat="st in CustomerList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="drpSupplier">Supplier Name</label>
+                                <select tabindex="3" class="form-control chosen-select" name="drpSupplier" id="drpSupplier" ng-model="SelectedSupplier" ng-change="Supplierchange();">
+                                    <option value="0">All</option>
+                                    <option data-ng-repeat="st in SupplierList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="drpDuration">Duration</label>
+                                <select tabindex="3" class="form-control chosen-select" name="drpDuration" id="drpDuration" ng-model="SelectedDuration" ng-change="Durationchange();">
+                                    <option value="0">All</option>
+                                    <option value="1">This Month</option>
+                                    <option value="2">Last Month</option>
+                                    <option value="3">Last 3 Months</option>
+                                    <option value="4">Last 6 Months</option>
+                                    <option value="5">Last 9 Months</option>
+                                    <option value="6">Last 1 Year</option>
+                                    <option value="7">Custome Date</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3" style="display:{{ifcustomdate}}">
+                                <label for="FromDate">From Date</label>
+                                <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                    <input type='text' id="FromDate" name="FromDate" class="form-control" />
+                                    <span class="input-group-addon">
+                                        <span class="fa fa-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3" style="display:{{ifcustomdate}}">
+                                <label for="ToDate">To Date</label>
+                                <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                    <input type='text' id="ToDate" name="ToDate" class="form-control" />
+                                    <span class="input-group-addon">
+                                        <span class="fa fa-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <div class='input-group' style="margin-top: 23px">
+                                    <input type="button" class="btn btn-primary" ng-click="GetAgencyShipmentDetails();" value="Apply" />
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row colmd-12" style="overflow:scroll;">
+                            <table id="example-advanced" style="font-size:14px;width:120%;">
+                                <thead>
+                                    <tr style="color:white;background-color:black;height:40px;">
+                                        <th>Customer</th>
+                                        <th>Supplier</th>
+                                        <th>Currency</th>
+                                        <th>Invoice Amount</th>
+                                        <th>Debit No</th>
+                                        <th>Debit Date</th>
+                                        <th>Comm</th>
+                                        <th>Commission Amount</th>
+                                        @*<th>Commission Received</th*@>
+                                        @*<th>Recd Date</th>*@
+                                        @*<th>Comm Disc</th>*@
+                                        <th>User</th>
+                                        @*<th>Bal Amt</th>*@
+                                        @*<th>Due</th>*@
+                                        <th>Inv No</th>
+                                        <th>Inv Date</th>
+                                        <th>Sc No</th>
+                                        @*<th>Due</th>*@
+                                        @*<th>FACTOR</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody id="div_treereport"></tbody>
+                            </table>
+                            
+                            
+                        </div>
+                        <div id="div_printpanel" style="display:none;">
+                            <table style="width:100%;">
+                                <tr>
+                                    <td style="text-align:left;width:30%;"></td>
+                                    <td style="text-align:center;width:40%;">
+                                        <img src="@ViewBag.COMPANY_LOGO">
+                                        @*<h1 style="font-size:20px;font-family:'Times New Roman';"><label><strong>@ViewBag.COMPANY_NAME</strong></label></h1>*@
+                                    </td>
+                                    <td style="text-align:left;width:30%;"></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3"></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="text-align:center;font-size:16px;font-weight:bold;">Commission Details <br /></td>
+
+                                </tr>
+                                <tr style="border:1px solid;">
+                                    <td style="font-size:16px;">
+                                        <div style="width:100%">
+                                            <div style="width:50%;float:left;">Type</div>
+                                            <div style="width:50%;float:left;">
+                                                {{SelectedType}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <td style="font-size:16px;">
+                                        <div style="width:100%">
+                                            <div style="width:50%;float:left;">Customer Name</div>
+                                            <div style="width:50%;float:left;">
+                                                {{SelectedCustomerName}}
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td style="font-size:16px;">
+                                        <div style="width:100%">
+                                            <div style="width:50%;float:left;">Supplier Name</div>
+                                            <div style="width:50%;float:left;">{{SelectedSupplierName}}</div>
+                                        </div>
+                                    </td>
+                                    <td ng-if="SelectedDurationVal!=7" style="font-size:16px;">
+                                        <div style="width:100%">
+                                            <div style="width:50%;float:left;">Duration</div>
+                                            <div style="width:50%;float:left;">{{SelectedDurationtext}}</div>
+                                        </div>
+                                    </td>
+                                    <td ng-if="SelectedDurationVal==7" style="font-size:16px;">
+                                        <div style="width:100%">
+                                            <div style="width:50%;float:left;">From Date</div>
+                                            <div style="width:50%;float:left;">{{FromDateVal}}</div>
+                                        </div>
+                                    </td>
+                                    <td ng-if="SelectedDurationVal==7" style="font-size:16px;">
+                                        <div style="width:100%">
+                                            <div style="width:50%;float:left;">To Date</div>
+                                            <div style="width:50%;float:left;">{{ToDateVal}}</div>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            </table>
+
+                            <table id="Print" style="font-size:14px;width:100%;border:solid;" border="1">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Supplier</th>
+                                        <th>Currency</th>
+                                        <th>Invoice Amount</th>
+                                        <th>Debit No</th>
+                                        <th>Debit Date</th>
+                                        <th>Comm</th>
+                                        <th>Commission Amount</th>
+                                        @*<th>Commission Received</th>*@
+                                        @*<th>Recd Date</th>*@
+                                        @*<th>Comm Disc</th>*@
+                                        <th>User</th>
+                                        <th>Bal Amt</th>
+                                        @*<th>Due</th>*@
+                                        <th>Inv No</th>
+                                        <th>Inv Date</th>
+                                        <th>Sc No</th>
+                                        @*<th>Due</th>*@
+                                        @*<th>FACTOR</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody id="div_treereportprint"></tbody>
+                            </table>
+                            
+                            
+                        </div>
+                        <div class="row colmd-12" style="text-align:center;">
+                            <input type="button" class="btn btn-primary" onclick="PrintPanel();" value="Print" />
+                        </div>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section dynamictablecreation
+{
+    <script src="~/Assets/jstree/jquery.treetable.js"></script>
+    <script src="~/Assets/jstree/jquery.ui.core.js"></script>
+    <script src="~/Assets/jstree/jquery.ui.draggable.js"></script>
+    <script src="~/Assets/jstree/jquery.ui.droppable.js"></script>
+    <script src="~/Assets/jstree/jquery.ui.mouse.js"></script>
+    <script src="~/Assets/jstree/jquery.ui.widget.js"></script>
+    <script src="~/Assets/jstree/jstree.min.js"></script>
+    <script src="~/Assets/jstree/tree_view.js"></script>
+}

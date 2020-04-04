@@ -1,0 +1,83 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.Enquiry_View_CM
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.EnqHeader)
+    {
+        <h5><label><strong>Enquiry Details</strong></label></h5>
+        <div class="row">
+
+            <div class="form-group col-md-6">
+                <label for="Email">Enquiry Code</label>
+                <input type="text" value="@item.E_Code" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Email">Enquiry Type</label>
+                @{ string type = "Trading";
+                    if (item.E_Type == 3)
+                    {
+                        type = "Store";
+                    }
+                    if (item.E_Type == 1)
+                    {
+                        type = "Agency";
+                    }
+                }
+                <input type="text" value="@type" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="Url">Customer Name</label>
+                <input type="text" value="@item.E_CustomerName" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Digits">Contact Name</label>
+                <input type="text" value="@item.E_ContactName" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="Numbers">Date</label>
+                <input type="text" value='@item.E_Date.ToString("dd-MM-yyyy")' class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Numbers">Sales Person</label>
+                <input type="text" value='@item.E_SalesPersonName' class="form-control" disabled>
+            </div>
+        </div>
+}
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>UOM</th>
+                        <th>Packing Quantity</th>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @{ var itemIndex = 1;}
+                    @foreach (var item in Model.EnqChild)
+            {
+                    <tr>
+                        <td>@itemIndex</td>
+                        <td>@item.ED_ArticleNo</td>
+                        <td>@item.ED_ProductName</td>
+                        <td>@item.ED_UOM</td>
+                        <td>@item.ED_PackingQty</td>
+                        <td>@item.ED_Description</td>
+                        <td style="text-align:right;">@(Convert.ToDecimal(item.ED_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    </tr>
+                        itemIndex++;
+                    }
+                </tbody>
+            </table>
+        </div>
+        </div>
+</div>

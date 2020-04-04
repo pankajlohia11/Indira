@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+     public class Approval_CM
+    {
+        public decimal ID { get; set; }
+
+        public string Code { get; set; }
+        public string CreatedBy { get; set; }
+
+        public string SalesPersonName { get; set; }
+        public string Form { get; set; }
+        public DateTime Date { get; set; }
+
+
+    }
+    public class ApprovalView_CM
+    {
+        public List< Approval_CM> Headerobj  { get; set; }
+        public List<Approval_CM> Detailsobj  { get; set; }
+    }
+}
+    
+
+
+

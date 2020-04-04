@@ -1,0 +1,482 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_SalesGroup_Target>
+@{
+    BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+    Author=Manoj
+    Date = 24th Apr 2018
+    Sales Group Target
+-->
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide View List page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying View List page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+    }
+
+</script>
+
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Sales Group Target<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Sales Group Target</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd dvd-btm">
+                        <h1 class="custom-font"><strong>Sales Group</strong> Target</h1>
+                        <ul class="controls">
+                            <li>
+                                <a role="button" tabindex="0" id="add-entry"><i class="fa fa-plus mr-5"></i> Add Entry</a>
+                            </li>
+                            <li class="dropdown">
+
+                                <a role="button" tabindex="0" class="dropdown-toggle settings" data-toggle="dropdown">
+                                    <i class="fa fa-cog"></i>
+                                    <i class="fa fa-spinner fa-spin"></i>
+                                </a>
+
+                                <ul class="dropdown-menu pull-right with-arrow animated littleFadeInUp">
+                                    <li>
+                                        <a role="button" tabindex="0" class="tile-toggle">
+                                            <span class="minimize"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;&nbsp;Minimize</span>
+                                            <span class="expand"><i class="fa fa-angle-up"></i>&nbsp;&nbsp;&nbsp;Expand</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a role="button" tabindex="0" class="tile-refresh">
+                                            <i class="fa fa-refresh"></i> Refresh
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a role="button" tabindex="0" class="tile-fullscreen">
+                                            <i class="fa fa-expand"></i> Fullscreen
+                                        </a>
+                                    </li>
+                                </ul>
+
+                            </li>
+
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    @if (ViewBag.details == null)
+                    {
+                        <div class="tile-body">
+                            <div class="table-responsive">
+                                <table class="table table-custom" id="editable-usage">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none"></th>
+                                            <th>Financial Year</th>
+                                            <th>Sales Group</th>
+                                            <th>Target</th>
+                                            <th style="width: 160px;" class="no-sort">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            string GroupName = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == item.SGT_GROUP_ID).ORG_NAME;
+                                        <tr class="odd gradeX">
+                                            <td style="display:none">@item.SGT_ID</td>
+                                            <td>@item.SGT_FIN_YEAR</td>
+                                            <td>@GroupName</td>
+                                            <td>@item.SGT_TARGET</td>
+                                            <td class="actions">
+                                                <a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a>
+                                            </td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+@section dynamictablecreation
+{
+    <script type="text/javascript">
+        function LoadDropdown(year,org) {
+            var html = '';
+             $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetYears", "ET_Admin_SalesGroup")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+            success: function (result) {
+                html = '<option value="">--Choose Year--</option>';
+                for (i = 0; i < result.length; i++) {
+                    html += '<option value="' + result[i] + '">' + result[i]
+                        + '</option>';
+                }
+                html += '</option>';
+
+                $('#drpFinYear').html(html).trigger("chosen:updated");
+
+                if (year != '') {
+                    $('#drpFinYear').val(year).trigger("chosen:updated");
+                }
+                
+                },
+                error: function (response) {
+                    toastr["error"]("Finacial Year Not Loding", "Notification");
+                }
+            });
+
+            var html1 = '';
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetSalesGroup", "ET_Admin_SalesGroup")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+            success: function (result) {
+                html1 = '<option value="">--Choose Sales Group--</option>';
+                for (i = 0; i < result.length; i++) {
+                    html1 += '<option value="' + result[i].ORG_ID + '">' + result[i].ORG_NAME
+                        + '</option>';
+                }
+                html1 += '</option>';
+
+                $('#drpSalesOrg').html(html1).trigger("chosen:updated");
+                if (org != '') {
+                    //$('#drpSalesOrg').text(org).trigger("chosen:updated");
+                    $('#drpSalesOrg option').map(function () {
+                        if ($(this).text() == org) return this;
+                    }).attr('selected', 'selected');
+                }
+                
+                },
+                error: function (response) {
+                    toastr["error"]("Sales Group Not Loading", "Notification");
+                }
+            });
+        }
+
+        function alphaOnly(event) {
+            var key = event.keyCode;
+            return ((key >= 65 && key <= 90) || key == 8);
+        };
+
+        //initialize editable datatable
+
+            function restoreRow(oTable, nRow) {
+                debugger;
+            var aData = oTable.row(nRow).data();
+            var jqTds = $('>td', nRow);
+
+                for (var i = 0, iLen = jqTds.length; i < iLen; i++) {
+                   // alert(nRow[i]);
+                   // alert(aData[i]);
+                oTable.row(nRow).data(aData[i]);
+            }
+
+            oTable.draw();
+        }
+
+        //Edit row and bind the existing value
+        function AddRow(oTable, nRow) {
+           
+            var jqTds = $('>td', nRow);
+            jqTds[0].innerHTML = '<select id="drpFinYear" class="form-control chosen-select" name="drpFinYear"></select>';
+            jqTds[1].innerHTML = '<select id="drpSalesOrg" class="form-control chosen-select" name="drpSalesOrg"><option value = "Automatic" >Automatic</option ><option value = "Manual" >Manual</option ></select>';
+            jqTds[2].innerHTML = '<input type="number" class="form-control input-sm" value="" >';
+            jqTds[3].innerHTML = "<a role='button' tabindex='0' class='edit text-success text-uppercase text-strong text-sm mr-10'>Save</a><a role='button' tabindex='0' class='cancel text-warning text-uppercase text-strong text-sm mr-10'>Cancel</a>";
+
+            LoadDropdown();
+           
+        }
+
+        //Edit row and bind the existing value
+        function editRow(oTable, nRow) {
+            debugger;   
+            var aData = oTable.row(nRow).data();
+            var jqTds = $('>td', nRow);
+            jqTds[0].innerHTML = '<input type="hidden" class="form-control input-sm" value="' + aData[0] + '">';
+            jqTds[1].innerHTML = '<select id="drpFinYear" class="form-control" name="drpFinYear"></select>';
+            jqTds[2].innerHTML = '<select id="drpSalesOrg" class="form-control" name="drpSalesOrg"></select>';
+            jqTds[3].innerHTML = '<input type="number" class="form-control input-sm" value="' + aData[3] + '" >';
+            LoadDropdown(aData[1], aData[2]);
+            //$('#drpFinYear option').map(function () {
+            //    if ($(this).text() == aData[1]) return this;
+            //}).attr('selected', 'selected');
+            //$('#drpSalesOrg option').map(function () {
+            //    if ($(this).text() == aData[2]) return this;
+            //}).attr('selected', 'selected');
+
+            //$("#drpFinYear").text(aData[1]);
+            //$("#drpSalesOrg").text(aData[2]);
+            
+            jqTds[4].innerHTML = "<a role='button' tabindex='0' class='edit text-success text-uppercase text-strong text-sm mr-10'>Update</a><a role='button' tabindex='0' class='cancel text-warning text-uppercase text-strong text-sm mr-10'>Cancel</a>";
+        }
+
+        //Insert Sales Group Target
+        function saveRow(oTable, nRow) {
+            
+            var jqInputs = $('input', nRow);
+            var jqSelects = $('select', nRow);
+
+            
+            if (jqSelects[0].value == "") {
+                toastr["error"]("Financial Year Shouln't be Empty");
+                return false;
+            }
+            if (jqSelects[1].value == "") {
+                toastr["error"]("Sales Group Shouldn't be Empty");
+                return false;
+            }
+            if (jqInputs[0].value == "") {
+                toastr["error"]("Target Shouldn't be Empty");
+                return false;
+            }
+            
+
+            
+
+             $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesGroup_Add", "ET_Admin_SalesGroup")',
+                 data: {
+                     GroupTargetID:0,
+                     FinYear: jqSelects[0].value,
+                     Salesorg: jqSelects[1].value,
+                     Target: jqInputs[0].value
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result == "Success") {
+                        message = 'Record Added Successfully.';
+                        toastr["success"](message, "Notification");
+
+                        oTable.cell(nRow, 0).data(jqSelects[0].value);
+                        oTable.cell(nRow, 1).data($(jqSelects[1]).find("option:selected").text());
+                        oTable.cell(nRow, 2).data(jqInputs[0].value);
+                        oTable.cell(nRow, 3).data("<a role='button' tabindex='0' class='edit text-primary text-uppercase text-strong text-sm mr-10'>Edit</a>");
+                        oTable.draw();
+
+                    }
+                    else if (result == "Failed") {
+
+                        message = 'Failed to do this operation.';
+                        toastr["error"](message, "Notification");
+                    }
+                    else if (result.indexOf("Validation") > -1) {
+                        toastr["error"](result, "Notification");
+                    }
+                },
+                error: function (response) {
+                    toastr["success"]("Error in Adding Record.");
+                }
+            });
+        }
+
+         //Insert Sales Group Target
+        function updateRow(oTable, nRow) {
+            debugger;
+            var jqInputs = $('input', nRow);
+            var jqSelects = $('select', nRow);
+
+            
+            if (jqSelects[0].value == "") {
+                toastr["error"]("Financial Year Shouln't be Empty");
+                return false;
+            }
+            if (jqSelects[1].value == "") {
+                toastr["error"]("Sales Group Shouldn't be Empty");
+                return false;
+            }
+            if (jqInputs[1].value == "") {
+                toastr["error"]("Target Shouldn't be Empty");
+                return false;
+            }
+            
+
+            
+
+             $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesGroup_Add", "ET_Admin_SalesGroup")',
+                 data: {
+                     GroupTargetID: jqInputs[0].value,
+                     FinYear: jqSelects[0].value,
+                     Salesorg: jqSelects[1].value,
+                     Target: jqInputs[1].value
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result == "Success") {
+                        message = 'Record Updated Successfully.';
+                        toastr["success"](message, "Notification");
+
+                        oTable.cell(nRow, 0).data(jqInputs[0].value);
+                        oTable.cell(nRow, 1).data(jqSelects[0].value);
+                        oTable.cell(nRow, 2).data($(jqSelects[1]).find("option:selected").text());
+                        oTable.cell(nRow, 3).data(jqInputs[1].value);
+                        oTable.cell(nRow, 4).data("<a role='button' tabindex='0' class='edit text-primary text-uppercase text-strong text-sm mr-10'>Edit</a>");
+                        oTable.draw();
+
+                    }
+                    else if (result == "Failed") {
+
+                        message = 'Failed to do this operation.';
+                        toastr["error"](message, "Notification");
+                    }
+                    else if (result.indexOf("Validation") > -1) {
+                        toastr["error"](result, "Notification");
+                    }
+                },
+                error: function (response) {
+                    toastr["success"]("Error in Updating Record.");
+                }
+            });
+        }
+
+        var table2 = $('#editable-usage');
+
+        var oTable = $('#editable-usage').DataTable({
+            "aoColumnDefs": [
+                { 'bSortable': false, 'aTargets': ["no-sort"] }
+            ]
+        });
+
+        var nEditing = null;
+        var nNew = false;
+
+        $('#add-entry').click(function (e) {
+            e.preventDefault();
+
+            if (nNew && nEditing) {
+                if (confirm("Previous row is not saved yet. Save it ?")) {
+                    saveRow(oTable, nEditing); // save
+                    $(nEditing).find("td:first").html("Untitled");
+                    nEditing = null;
+                    nNew = false;
+
+                } else {
+                    oTable.row(nEditing).remove().draw(); // cancel
+                    nEditing = null;
+                    nNew = false;
+
+                    return;
+                }
+            }
+
+            var aiNew = oTable.row.add(['', '', '', '', '']).draw();
+            var nRow = oTable.row(aiNew[0]).node();
+            AddRow(oTable, nRow);
+            nEditing = nRow;
+            nNew = true;
+        });
+
+
+
+        table2.on('click', '.cancel', function (e) {
+            e.preventDefault();
+            if (nNew) {
+                oTable.row(nEditing).remove().draw();
+                nEditing = null;
+                nNew = false;
+            } else {
+                window.location = "";
+                //restoreRow(oTable, nEditing);
+                nEditing = null;
+            }
+        });
+
+        table2.on('click', '.edit', function (e) {
+            e.preventDefault();
+
+            /* Get the row as a parent of the link that was clicked on */
+            var nRow = $(this).parents('tr')[0];
+
+            if (nEditing !== null && nEditing != nRow) {
+                /* Currently editing - but not this row - restore the old before continuing to edit mode */
+                restoreRow(oTable, nEditing);
+                editRow(oTable, nRow);
+                nEditing = nRow;
+            } else if (nEditing == nRow && this.innerHTML == "Save") {
+                /* Editing this row and want to save it */
+                saveRow(oTable, nEditing);
+                //$('#add-entry').click();
+
+            }
+            else if (nEditing == nRow && this.innerHTML == "Update") {
+                /* Editing this row and want to save it */
+                updateRow(oTable, nEditing);
+                //$('#add-entry').click();
+
+            } else {
+                /* No edit in progress - let's start one */
+                editRow(oTable, nRow);
+                nEditing = nRow;
+            }
+        });
+        //*initialize editable datatable
+
+
+    </script>
+}
+
+
+

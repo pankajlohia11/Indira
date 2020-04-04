@@ -1,0 +1,357 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+using BusinessLogic.Admin_BL;
+using System.Web.Script.Serialization;
+
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_PaymentTermsController : Controller
+    {
+        // GET: ET_Admin_PaymentTerms
+
+        ET_Admin_PaymentTerms_BL ObjBL = new ET_Admin_PaymentTerms_BL();
+
+        public static string prefix = "";
+        public static bool automanual = false;
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+
+        public ActionResult ET_Admin_PaymentTerms()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    AutoManual();
+                    return View();
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        public JsonResult GetPrivilages()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    using (EntityClasses dbcontext = new EntityClasses())
+                    {
+                        var privilagelist = bal.GetPrivilages_BL(Convert.ToInt32(Session["UserID"].ToString()), 5013);
+                        var json = new JavaScriptSerializer().Serialize(privilagelist);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private void AutoManual()
+        {
+            ViewBag.AutoManual = false;
+            automanual = false;
+            List<Tbl_Document_Master> ObjDoc = bal.AutoManual_BL(5013);
+            if (ObjDoc.Count > 0)
+            {
+                foreach (var item in ObjDoc)
+                {
+                    if (item.autogen_type == "Automatic")
+                    {
+                        ViewBag.AutoManual = true;
+                        prefix = item.autogen_prefix;
+                        automanual = true;
+                    }
+                    else
+                    {
+                        ViewBag.Required = "required";
+                    }
+                }
+            }
+        }
+
+        public JsonResult GetPayment_Terms_List(bool deleted)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = ObjBL.GetPayment_Terms_List(deleted);
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private string validations(decimal pamentID, string txtpamentCode, string txtPaymentName, int txtCreditdays, string drpDiscounttype, int txtDiscountdays, bool chk_Advance, string drpAdvancetype,string txtDetails)
+        {
+            if (!automanual && txtpamentCode == "")
+            {
+                return "Enter the Payment Code";
+            }
+            if (txtPaymentName == "")
+            {
+                return "Enter the Payment Name";
+            }
+            if (txtCreditdays == 0)
+            {
+                return "Credit days should not be empty.";
+            }
+            if (drpDiscounttype == "")
+            {
+                return "Dicount type should not be empty.";
+            }
+            if (txtDiscountdays == 0)
+            {
+                return "Dicount days should not be empty.";
+            }
+            if (chk_Advance==true && drpAdvancetype == "")
+            {
+                return "Advance type should not be empty.";
+            }
+            if (txtDetails == "")
+            {
+                return "Details should not be empty.";
+            }
+            if (!automanual)
+            {
+                string valid = ObjBL.CheckDuplicateCode_BL(pamentID, txtpamentCode);
+                if (valid != "")
+                {
+                    return "Payment Code Already Exist";
+                }
+            }
+
+            return "";
+        }
+
+        [HttpPost]
+        public JsonResult ET_Admin_PaymentTerms_Add(decimal pamentID, string txtpamentCode, string txtPaymentName, int txtCreditdays, string drpDiscounttype, decimal txtpersentageamount, decimal txtAmount, int txtDiscountdays, bool chk_Advance, string drpAdvancetype, decimal txtAdvancepersentageamount, decimal txtAdvanceAmount,string txtDetails)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    string valid = validations(pamentID, txtpamentCode, txtPaymentName, txtCreditdays, drpDiscounttype, txtDiscountdays, chk_Advance,drpAdvancetype, txtDetails);
+                    if (valid == "")
+                    {
+                        Tbl_Payment_Terms obj = new Tbl_Payment_Terms()
+                        {
+                            PT_ID = pamentID,
+                            PT_Code = txtpamentCode,
+                            PT_Name = txtPaymentName,
+                            PT_CreditDays = txtCreditdays,
+                            PT_DiscountType = drpDiscounttype,
+                            PT_DiscountPer = txtpersentageamount,
+                            PT_DiscountAmount = txtAmount,
+                            PT_DiscountDays = txtDiscountdays,
+                            PT_IsAdvance = chk_Advance,
+                            PT_AdvanceType = drpAdvancetype,
+                            PT_AdvancePer = txtAdvancepersentageamount,
+                            PT_AdvanceAmount = txtAdvanceAmount,
+                            PT_Details = txtDetails,
+                            CREATED_BY = Convert.ToInt32(Session["UserID"]),
+                            LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"]),
+                            COM_KEY = Convert.ToInt32(Session["Companykey"]),
+
+                        };
+                        string PayCode;
+                        var data = ObjBL.ET_Admin_PaymentTerms_Add_BL(obj, prefix, automanual,out PayCode);
+                        var json = "Success:"+ PayCode;
+                        if (data == 0)
+                        {
+                            json = "Failed";
+                        }
+                        else
+                        {
+                            objLOG.log_dockey = "4013";
+                            objLOG.log_userid = Session["UserID"].ToString();
+                            objLOG.log_recordkey = data.ToString();
+                            if (pamentID == 0)
+                            {
+                                objLOG.log_operation = "Insert";
+                                objLOG.log_Remarks = "Record Inserted Successfully";
+                            }
+                            else
+                            {
+                                objLOG.log_operation = "Update";
+                                objLOG.log_Remarks = "Record Updated Successfully";
+                            }
+                            bal.OperationInsertLogs_BL(objLOG);
+                        }
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var json = "Validation:" + valid;
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ET_Admin_PaymentTerms_Update_GetbyID(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = ObjBL.ET_Admin_PaymentTerms_Update_GetbyID_BL(id);
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ET_Admin_PaymentTermsr_Restore_Delete(int id, bool type)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var Updatedby = Convert.ToInt64(Session["UserID"]);
+                    var result = ObjBL.ET_Admin_PaymentTerms_Restore_Delete_BL(id, Updatedby, type);
+                    var json = "Failed";
+                    if (result != 0)
+                    {
+                        json = "Success";
+                    }
+                    else
+                    {
+                        objLOG.log_dockey = "4013";
+                        objLOG.log_operation = "Restore";
+                        objLOG.log_userid = Session["UserID"].ToString();
+                        objLOG.log_recordkey = id.ToString();
+                        objLOG.log_Remarks = "Record Restored Successfully";
+                        bal.OperationInsertLogs_BL(objLOG);
+                    }
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+
+        }
+
+        public ActionResult ET_Admin_PaymentTerms_View(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = ObjBL.ET_Admin_PaymentTerms_View_BL(id);
+                    return PartialView("/Views/Admin/ET_Admin_PaymentTerms/_ET_Admin_PaymentTerms_View.cshtml", data);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+    }
+}

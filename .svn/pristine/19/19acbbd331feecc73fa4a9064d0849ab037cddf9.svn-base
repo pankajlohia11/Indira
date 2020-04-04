@@ -1,0 +1,520 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Data.Entity;
+//using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+using BusinessLogic.Admin_BL;
+using System.Web.Script.Serialization;
+using BusinessEntity.CustomModels;
+using System.Net.Mail;
+using System.Net;
+using OpenPop.Mime;
+using OpenPop.Mime.Header;
+using OpenPop.Pop3;
+using OpenPop.Pop3.Exceptions;
+using OpenPop.Common.Logging;
+using System.Data;
+using System.IO;
+using Message = OpenPop.Mime.Message;
+
+
+namespace Euro.Controllers.Mail
+{
+    public class ET_Mail_EmailController : Controller
+    {
+        public static string prefix = "";
+        public static bool automanual = false;
+        ET_Agency_Enquiry_BL ObjBL = new ET_Agency_Enquiry_BL();
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+        EntityClasses dbcontext = new EntityClasses();
+        Pop3Client pop3Client = new Pop3Client();
+        private readonly Dictionary<int, Message> messages = new Dictionary<int, Message>();
+        
+
+
+        // GET: ET_Mail_Email
+        public ActionResult ET_Mail_Email()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    return View();
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        public JsonResult GetPrivilages()
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var privilagelist = bal.GetPrivilages_BL(Convert.ToInt32(Session["UserID"].ToString()), 8019);
+                    var json = new JavaScriptSerializer().Serialize(privilagelist);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult ET_Master_Mail_Fetch_Settings()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    decimal userid = Convert.ToDecimal(Session["UserID"]);
+
+                    int com_key = Convert.ToInt32(Session["CompanyKey"]);
+                    var data = dbcontext.Tbl_MailSettings.Where(m => m.MS_UserId == userid && m.COM_KEY == com_key);
+
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+        private string Validations(int MS_ID, string MS_IncomingHostName, string MS_OutGoingHostName, string MS_EmailID, string MS_Password)
+        {
+            
+            if (MS_IncomingHostName == "")
+            {
+                return "Incoming Host Name";
+            }
+            if (MS_OutGoingHostName == "")
+            {
+                return "OutGoing Host Name";
+            }
+            if (MS_EmailID == "")
+            {
+                return "Email Id";
+            }
+            if (MS_Password == "")
+            {
+                return "Password";
+            }
+            return "";
+        }
+
+        [HttpPost]
+        public JsonResult ET_Master_Mail_Add_Update(int MS_ID, string MS_IncomingHostName, string  MS_OutGoingHostName, string MS_EmailID, string MS_Password, bool MS_UseSSL, int MS_IncomingPort, int MS_OutGoingPort, bool MS_Authentication)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    bool success1 = false;
+                    bool success2 = false;
+                    try
+                    {
+                        //incoming mail connectivity checking 
+                        
+                        if (pop3Client.Connected)
+					    pop3Client.Disconnect();
+                        pop3Client.Connect(MS_IncomingHostName, MS_IncomingPort, MS_UseSSL);
+                        pop3Client.Authenticate(MS_EmailID, MS_Password);
+                        int count = pop3Client.GetMessageCount();
+                        success1 = true;
+
+                        SmtpClient smtp = new SmtpClient();
+                        smtp.Host = MS_OutGoingHostName;
+                        NetworkCredential NetworkCred = new NetworkCredential();
+                        NetworkCred.UserName = MS_EmailID;
+                        NetworkCred.Password = MS_Password;
+                        smtp.UseDefaultCredentials = true;
+                        smtp.Credentials = NetworkCred;
+                        smtp.Port = MS_OutGoingPort;
+                        smtp.Send(new MailMessage(MS_EmailID, MS_EmailID, "test", "test"));
+                        //ServicePointManager.ServerCertificateValidationCallback =
+                        //                delegate (object s5, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+                        //                {
+                        //                    return true;
+                        //                };
+                        success2 = true;
+                    }
+                    catch(Exception ex)
+                    {
+                        string s = ex.Message;
+                    }
+                    if (success1 && success2)
+                    {
+                        decimal user;
+                        string valid = Validations(MS_ID, MS_IncomingHostName, MS_OutGoingHostName, MS_EmailID, MS_Password);
+                        if (valid == "")
+                        {
+                            var Username = Session["UserID"].ToString();
+
+                            decimal data = 0;
+                            if (MS_ID == 0)
+                            {
+                                Tbl_MailSettings Objmc = new Tbl_MailSettings()
+                                {
+                                    MS_ID = MS_ID,
+                                    MS_IncomingHostName = MS_IncomingHostName,
+                                    MS_OutGoingHostName = MS_OutGoingHostName,
+                                    MS_EmailID = MS_EmailID,
+                                    MS_Password = MS_Password,
+                                    MS_UseSSL = MS_UseSSL,
+                                    MS_IncomingPort = MS_IncomingPort,
+                                    MS_OutGoingPort = MS_OutGoingPort,
+                                    MS_Authentication = MS_Authentication,
+                                    MS_UserId = Convert.ToInt32(Session["UserID"].ToString()),
+                                    CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                                    CREATED_DATE = DateTime.Now,
+                                    DELETED = false,
+                                    COM_KEY = Convert.ToInt64(Session["CompanyKey"])
+                                };
+                                dbcontext.Tbl_MailSettings.Add(Objmc);
+                                dbcontext.SaveChanges();
+                                data = Objmc.MS_ID;
+                            }
+                            else
+                            {
+                                Tbl_MailSettings Obj_Tbl_MailSettings = dbcontext.Tbl_MailSettings.Single(m => m.MS_ID == MS_ID);
+                                {
+                                    Obj_Tbl_MailSettings.MS_ID = MS_ID;
+                                    Obj_Tbl_MailSettings.MS_IncomingHostName = MS_IncomingHostName;
+                                    Obj_Tbl_MailSettings.MS_OutGoingHostName = MS_OutGoingHostName;
+                                    Obj_Tbl_MailSettings.MS_EmailID = MS_EmailID;
+                                    Obj_Tbl_MailSettings.MS_Password = MS_Password;
+                                    Obj_Tbl_MailSettings.MS_UseSSL = MS_UseSSL;
+                                    Obj_Tbl_MailSettings.MS_IncomingPort = MS_IncomingPort;
+                                    Obj_Tbl_MailSettings.MS_OutGoingPort = MS_OutGoingPort;
+                                    Obj_Tbl_MailSettings.MS_Authentication = MS_Authentication;
+                                    Obj_Tbl_MailSettings.LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"].ToString());
+                                    Obj_Tbl_MailSettings.LAST_UPDATED_DATE = DateTime.Now;
+                                };
+                                dbcontext.SaveChanges();
+                                data = Obj_Tbl_MailSettings.MS_ID;
+                            }
+                            if (data != 0)
+                            {
+                                objLOG.log_dockey = "8019";
+                                objLOG.log_userid = Session["UserID"].ToString();
+                                objLOG.log_recordkey = data.ToString();
+                                if (MS_ID == 0)
+                                {
+                                    objLOG.log_operation = "Insert";
+                                    objLOG.log_Remarks = "Record Inserted Successfully";
+                                }
+                                else
+                                {
+                                    objLOG.log_operation = "Update";
+                                    objLOG.log_Remarks = "Record Updated Successfully";
+                                }
+                                bal.OperationInsertLogs_BL(objLOG);
+                            }
+                            return Json(data, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            var json = "Validation:" + valid;
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                    }
+                    else
+                    {
+                        if (!success1)
+                        {
+                            var json = "Validation: Failed to connect incoming server";
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                        else
+                        {
+                            var json = "Validation: Failed to connect OutGoing server";
+                            return Json(json, JsonRequestBehavior.AllowGet);
+                        }
+                        
+                    }
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult ET_Master_Mail_Fetch_Settings_insert_mailList()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    decimal userid = Convert.ToDecimal(Session["UserID"]);
+
+                    int com_key = Convert.ToInt32(Session["CompanyKey"]);
+                    var data = dbcontext.Tbl_MailSettings.Single(m => m.MS_UserId == userid && m.COM_KEY == com_key);
+
+
+                    try
+                    {
+                        if (pop3Client.Connected)
+                            pop3Client.Disconnect();
+                        pop3Client.Connect(data.MS_IncomingHostName, data.MS_IncomingPort, data.MS_UseSSL);
+                        pop3Client.Authenticate(data.MS_EmailID, data.MS_Password);
+                    
+                    List<MessageInfo> obj = pop3Client.GetMessageInfos();
+                    List<string> uids = dbcontext.Tbl_MailInbox.Where(m => m.MI_UserId == userid && m.COM_KEY == com_key).Select(m=>m.MI_UID).ToList();
+                    List<MessageInfo> obj1 = obj.Where(m => !uids.Contains(m.Identifier)).ToList();
+                   
+                    int success = 0;
+                        int fail = 0;
+                    for (int i = 0; i < obj1.Count(); i++)
+                    {
+                        try
+                        {
+                            Message message = pop3Client.GetMessage(obj1[i].Number);
+                              string s = message.Headers.Subject;
+                            
+                            string w = message.Headers.From.MailAddress.Address;
+                            string displayName = message.Headers.From.DisplayName;
+                            if (displayName == "")
+                                displayName = "";
+                                string uid = obj1[i].Identifier;
+
+                            List<MessagePart> ss = message.MessagePart.MessageParts;
+                            string body = "";
+                            try
+                            {
+                                body = ss[0].GetBodyAsText();
+                            }
+                            catch
+                            {
+                                MessagePart plainTextPart = message.FindFirstPlainTextVersion();
+                                body = plainTextPart.GetBodyAsText();
+                            }
+
+                            // Build up the attachment list
+                            List<MessagePart> attachments = message.FindAllAttachments();
+
+                            //Inserting Into mailInbox table
+                            Tbl_MailInbox Objmc = new Tbl_MailInbox()
+                            {
+                                MI_UID = uid,
+                                MI_Subject = message.Headers.Subject,
+                                MI_Message = body,
+                                MI_Address = message.Headers.From.MailAddress.Address,
+                                MI_Name = displayName,
+                                MI_Date = message.Headers.DateSent,
+                                MI_ReadStatus = 0,
+                                MI_UserId = Convert.ToInt32(Session["UserID"].ToString()),
+                                CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                                CREATED_DATE = DateTime.Now,
+                                DELETED = false,
+                                COM_KEY = Convert.ToInt64(Session["CompanyKey"])
+                            };
+                            dbcontext.Tbl_MailInbox.Add(Objmc);
+                            dbcontext.SaveChanges();
+                            bool hadAttachments = attachments.Count > 0;
+                            if (hadAttachments == true) {
+                                for (int j = 0; j < attachments.Count(); j++) {
+                                        string fileName = Path.GetFileName(attachments[j].FileName);
+
+
+                                    string subPath = "~/Mail/Attachments/"; 
+                                    bool exists = System.IO.Directory.Exists(Server.MapPath(subPath));
+                                    if (!exists) 
+                                        System.IO.Directory.CreateDirectory(Server.MapPath(subPath));
+                                    string path1 = System.Web.Hosting.HostingEnvironment.MapPath(subPath) + "\\";
+                                    string path = System.Web.Hosting.HostingEnvironment.MapPath(subPath) + "\\" + attachments[j].FileName;
+                                    string url = subPath.Replace("~","") + attachments[j].FileName;
+
+
+                                    FileInfo file = new FileInfo(path);
+                                    int k = 1;
+                                    while (file.Exists)
+                                    {
+                                        path = path1 + "Copy" + k + attachments[j].FileName  ;
+                                        url = subPath.Replace("~", "") + "Copy" + k+  attachments[j].FileName ;
+                                        k++;
+                                        file = new FileInfo(path);
+                                    }
+                                    attachments[j].Save(file);
+
+                                    //If attachment is there then Insert Into mailAttachment table
+                                    Tbl_MailAttachment Objma = new Tbl_MailAttachment()
+                                    {
+                                        MI_ID = Objmc.MI_ID,
+                                        MIA_Path = url,
+                                        MI_UserId = Convert.ToInt32(Session["UserID"].ToString()),
+                                        CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                                        CREATED_DATE = DateTime.Now,
+                                        DELETED = false,
+                                        COM_KEY = Convert.ToInt64(Session["CompanyKey"])
+                                    };
+                                    dbcontext.Tbl_MailAttachment.Add(Objma);
+                                    dbcontext.SaveChanges();
+                                }
+                            }
+
+
+                            success++;
+                        }
+                        catch (Exception e)
+                        {
+                            //DefaultLogger.Log.LogError(
+                            //    "TestForm: Message fetching failed: " + e.Message + "\r\n" +
+                            //    "Stack trace:\r\n" +
+                            //    e.StackTrace);
+                            fail++;
+                        }
+
+                    }
+                    var inboxList = dbcontext.Tbl_MailInbox.OrderByDescending(m => m.MI_Date).Where(m => m.MI_UserId == userid && m.COM_KEY == com_key);
+                    var json = new JavaScriptSerializer().Serialize(inboxList);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        public JsonResult ET_Master_Mail_Attachment(int MI_ID)
+        {
+
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    decimal userid = Convert.ToDecimal(Session["UserID"]);
+
+                    int com_key = Convert.ToInt32(Session["CompanyKey"]);
+                    var data = dbcontext.Tbl_MailAttachment.Where(m => m.MI_UserId == userid && m.COM_KEY == com_key && m.MI_ID == MI_ID);
+
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult ET_Master_Mail_Delete(string ids)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var ID = new HashSet<decimal>(ids.Split(',').Select(m => Convert.ToDecimal(m)).ToList());
+                   dbcontext.Tbl_MailInbox.RemoveRange(dbcontext.Tbl_MailInbox.Where(m=>ID.Contains(m.MI_ID)));
+                    int data = dbcontext.SaveChanges();
+                    if (data != 0)
+                    {
+                        objLOG.log_dockey = "8019";
+                        objLOG.log_userid = Session["UserID"].ToString();
+                        objLOG.log_recordkey = data.ToString();
+                        objLOG.log_operation = "Delete";
+                        objLOG.log_Remarks = "Record Deleted Successfully";
+                        bal.OperationInsertLogs_BL(objLOG);
+                    }
+                    return Json(data, JsonRequestBehavior.AllowGet);
+
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+    }
+}

@@ -1,0 +1,50 @@
+﻿@model BusinessEntity.EntityModels.Tbl_ProductGroup
+
+@{ 
+    BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+
+    var data = "";
+    if (Model.PG_PARENT_ID != 0)
+    {
+        data = dbc.Tbl_ProductGroup.Single(m => m.PG_ID == Model.PG_PARENT_ID).PG_NAME;
+    }
+    else
+    {
+        data = "-----";
+    }
+}
+<div class="tile-body col-md-12">
+
+    <div name="form1" role="form" id="form1" data-parsley-validate>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="ProductGroupCode">Product Group Code</label>
+                <input type="text" class="form-control" value="@Model.PG_CODE" disabled />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="ProductGroupName">Name Of The Product Group*</label>
+                <input type="text" class="form-control" value="@Model.PG_NAME" disabled required />
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="ProductGroupParentType">Product Group Type*</label>
+                <select class="form-control" style="width:100%" disabled >
+                    @if (Model.PG_TYPE != 2)
+                    {
+                    <option value="1">Parent</option>
+                    }
+                    else
+                    {
+                    <option value="2">Child</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="ProductGroupParent">Parent Group</label>
+                <input type="text" class="form-control" value="@data" disabled required /></div>
+        </div>
+    </div>
+
+</div>

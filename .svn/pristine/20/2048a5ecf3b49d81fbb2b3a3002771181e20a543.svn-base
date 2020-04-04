@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+using DataAccess;
+
+namespace BusinessLogic
+{
+    public class BAL
+    {
+        DAL dal = new DAL();
+        public int Authenticate_BL(Tbl_Master_User objBE)
+        {
+            return dal.Authenticate_DA(objBE);
+        }
+        public int ExceptionInsertLogs_BL(error_master objBE)
+        {
+            return dal.ExceptionInsertLogs_DA(objBE);
+        }
+        public int OperationInsertLogs_BL(tbl_loginfo objBE)
+        {
+            return dal.OperationInsertLogs_DA(objBE);
+        }
+        public List<Tbl_AccessPermissions> GetPrivilages_BL(int userid, int dockey)
+        {
+            return dal.GetPrivilages_DA(userid, dockey);
+        }
+        public List<Tbl_Document_Master> AutoManual_BL(int dockey)
+        {
+            return dal.AutoManual_DA(dockey);
+        }
+    }
+}

@@ -1,0 +1,78 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+using DataAccess;
+using DataAccess.Admin_DA;
+
+namespace BusinessLogic.Admin_BL
+{
+    public class ET_Admin_LC_Details_BL
+    {
+        ET_Admin_LC_Details_DL ObjDL = new ET_Admin_LC_Details_DL();
+
+        public List<ET_TBL_LC_DETAILS_CM> ET_Admin_LC_Detailslist_BL(bool deleted)
+        {
+            return ObjDL.ET_Admin_LC_Detailslist_DL(deleted);
+        }
+
+        public decimal ET_Admin_LC_Details_Add_BL(ET_TBL_LC_DETAILS obj, string prefix, bool automanual)
+        {
+            return ObjDL.ET_Admin_LC_Details_Add_DL(obj, prefix, automanual);
+        }
+        public ET_TBL_LC_DETAILS ET_Admin_LC_Details_Update_GetbyID_BL(int id)
+        {
+            return ObjDL.ET_Admin_LC_Details_Update_GetbyID_DL(id);
+        }
+
+        public int ET_Admin_LC_Details_Delete_BL(int id, decimal deleteby)
+        {
+            return ObjDL.ET_Admin_LC_Details_Delete_DL(id, deleteby);
+        }
+        public List<ET_TBL_LC_DETAILS> ET_Admin_LC_Details_Restore_BL()
+        {
+            return ObjDL.ET_Admin_LC_Details_Restore_DL();
+        }
+        public int ET_Admin_LC_Details_Restore_Insert_BL(int id, decimal Updatedby, bool type)
+        {
+            return ObjDL.ET_Admin_LC_Details_Restore_Insert_DL(id, Updatedby, type);
+        }
+        public ET_TBL_LC_DETAILS ET_Admin_LC_Details_View_BL(int id)
+        {
+            return ObjDL.ET_Admin_LC_Details_View_DL(id);
+        }
+
+        public List<Tbl_Master_CompanyDetails> Bind_dropdown_Customer_BL()
+        {
+            return ObjDL.Bind_dropdown_Customer_DL();
+        }
+        public List<Tbl_Master_CompanyDetails> Bind_dropdown_Supplier_BL()
+        {
+            return ObjDL.Bind_dropdown_Supplier_DL();
+        }
+        public List<Tbl_BankMaster> Bind_dropdown_Bankname_BL(int id)
+        {
+            return ObjDL.Bind_dropdown_Bankname_DL(id);
+        }
+        public List<Tbl_Currency_Master> Bind_Currency_BL()
+        {
+            return ObjDL.Bind_Currency_DL();
+        }
+        public string CheckDuplicateCode_BL(decimal id, string LCCode)
+        {
+            return ObjDL.CheckDuplicateCode_DL(id, LCCode);
+        }
+        public string CheckDuplicateLCNo_BL(decimal id, string LCNo)
+        {
+            return ObjDL.CheckDuplicateLCNo_DL(id, LCNo);
+        }
+        public string CheckDuplicateLCdate_BL(decimal id, string LCdate)
+        {
+            return ObjDL.CheckDuplicateLCdate_DL(id, LCdate);
+        }
+
+    }
+}

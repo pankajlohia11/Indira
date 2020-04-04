@@ -1,0 +1,284 @@
+﻿app1.controller("AC_Material", function ($scope, $http, $window, $rootScope) {
+    $scope.txtMaterialCodeView = "asdsad";
+    GetMaterialList();
+    GetPrivilages();
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_Admin_Material/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    function GetMaterialList() {
+        var getmateriallist = $http.get("/ET_Admin_Material/GetMaterialList");
+        getmateriallist.then(function (material) {
+            $scope.materiallist = material.data;
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    function GetMaterialRestoreList() {
+        var getmaterialrestorelist = $http.get("/ET_Admin_Material/GetMaterialRestoreList");
+        getmaterialrestorelist.then(function (material) {
+            $scope.materialrestorelist = material.data;
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    $scope.showRecords = function () {
+        GetMaterialList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.restoreRecords = function () {
+        GetMaterialRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+            $scope.txtMaterialID = "0";
+            $scope.txtMaterialCode = "";
+            $scope.txtMaterialname = "";
+            $scope.txtDescription = "";
+            $scope.chkCotton = false;
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.SubmitClick = function () {
+
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_Material/ET_Admin_Material_Add",
+            dataType: 'json',
+            data: {
+                MaterialID: $scope.txtMaterialID,
+                MaterialCode: $scope.txtMaterialCode,
+                Material: $scope.txtMaterialname,
+                Description: $scope.txtDescription,
+                chkCotton: $scope.chkCotton
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+
+        post.success(function (data, status) {
+            debugger;
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else if (data.indexOf("Validation") > -1) {
+                toastr["error"](data, "Notification");
+            }
+            else if (data == "success") {
+                if ($scope.txtMaterialID == 0) {
+                    message = 'Record Inserted Successfully.';
+                    toastr["success"](message, "Notification");
+                }
+                else {
+                    message = 'Record Updated Successfully.';
+                    toastr["success"](message, "Notification");
+                }
+                $scope.txtMaterialID = "0";
+                $scope.txtMaterialCode = "";
+                $scope.txtMaterialname = "";
+                $scope.txtDescription = "";
+                $scope.chkCotton = false;
+                $scope.submittext = "Submit";
+                $scope.createedit = "Create";
+                $("#formSubmit").attr('disabled', "disabled");
+            }
+            else {
+                message = "Failed to do this operation.";
+                toastr["error"](message, "Notification");
+            }
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+
+    }
+
+    $scope.editRecords = function (a) {
+
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Material/ET_Admin_Material_Update_Get",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var privilage = JSON.parse(data);
+                    $scope.txtMaterialID = privilage[0].MATERIAL_ID;
+                    $scope.txtMaterialCode = privilage[0].MATERIAL_CODE;
+                    $scope.txtMaterialname = privilage[0].MATERIAL_NAME;
+                    $scope.txtDescription = privilage[0].MATERIAL_DESCRIPTION;
+                    if (privilage[0].COTTON_PER == 1)
+                        $scope.chkCotton = true;
+                    else
+                        $scope.chkCotton = false;
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.Restoredeleterecords = function (a, $event, b) {
+        var res = false;
+        if (b)
+            res = $scope.Isdelete;
+        else
+            res = $scope.Isrestore
+        if (res) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Material/ET_Admin_Material_RestoreDelete",
+                dataType: 'json',
+                data: {
+                    id: a,
+                    type: b
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (data == "Success") {
+                        $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                        if (b) {
+                            message = "Record Deleted Successfully.";
+                        }
+                        else {
+                            message = "Record Restored Successfully.";
+                        }
+
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_Material/ET_Admin_Material_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+});
+//app1.controller('ParentCtrl', function ($scope, $controller, $rootScope) {
+//    $rootScope.$on("CallParentMethod", function (asd, data) {
+//        $scope.txtMaterialCodeView = data.a;
+//        $scope.txtMaterialnameView = data.b;
+//        $scope.txtDescriptionView = data.c;
+//        $scope.chkCottonView = data.d;
+//        $('#viewpopup').html($('#div_ShowView').html());
+//        $("#btnviewpopup").trigger("click");
+//    });
+    
+//});

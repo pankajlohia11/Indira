@@ -1,0 +1,640 @@
+﻿app1.controller("AC_ShipmentCtrl", function ($scope, $http, $window, $compile) {
+    GetPrivilages();
+    GetShipmentList();
+    GetSalesPersonList();
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_Sales_Shipment/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            if (privilage.length != 0) {
+                $scope.Iscreate = privilage[0].IS_ADD;
+                $scope.Isedit = privilage[0].IS_EDIT;
+                $scope.Isdelete = privilage[0].IS_DELETE;
+                $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+                $scope.Isview = privilage[0].IS_VIEW;
+            }
+            else {
+                $scope.Iscreate = true;
+                $scope.Isedit = true;
+                $scope.Isdelete = true;
+                $scope.Isrestore = true;
+                $scope.Isview = true;
+            }
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    function GetShipmentList() {
+        var getshipmentlist = $http.get("/ET_Sales_Shipment/GetShipmentList",
+            {
+                params: { delete: false }
+            });
+        getshipmentlist.then(function (shipmentlist) {
+            var res = JSON.parse(shipmentlist.data);
+            $scope.shipmentlist = res;
+        }, function () {
+            alert("Quotation List Found");
+        });
+    }
+    function GetShipmentRestoreList() {
+        var getshipmentrestorelist = $http.get("/ET_Sales_Shipment/GetShipmentList",
+            {
+                params: { delete: true }
+            });
+        getshipmentrestorelist.then(function (shipmentrestorelist) {
+            var res = JSON.parse(shipmentrestorelist.data);
+            $scope.shipmentrestorelist = res;
+        }, function () {
+            alert("Quotation Restore List Found");
+        });
+    }
+    function GetSalesPersonList() {
+        var getsalespersonlist = $http.get("/ET_Sales_Shipment/GetSalesPerson");
+        getsalespersonlist.then(function (salespersonlist) {
+            var res = JSON.parse(salespersonlist.data);
+            $scope.salespersons = res;
+            $scope.S_SalesPerson = "";
+        }, function () {
+            alert('Data not found');
+        });
+    }
+  
+    $scope.OrderTypeChange = function () {
+        $scope.S_CustSup = "";
+        $scope.S_ScheduleID = "";
+        $scope.schedules = {};
+        GetCustSup();
+    }
+    $scope.CustSupChange = function () {
+        //GetSchedules();
+        GetOrders();
+    }
+    $scope.OrderChange = function () {
+        GetSchedules();
+    }
+    function GetCustSup() {
+        if ($scope.S_Type != "") {
+            var getsalespersonlist = $http.get("/ET_Sales_Shipment/GetCustSup", {
+                params: {
+                    id: $scope.S_Type
+                }
+            });
+            getsalespersonlist.then(function (salespersonlist) {
+                var res = JSON.parse(salespersonlist.data);
+                $scope.custsups = res;
+            }, function () {
+                alert('Data not found');
+            });
+        }
+        else {
+            $scope.schedules = "";
+        }
+    }
+    function GetOrders() {
+        if ($scope.SH_Type != "") {
+            var getorderlist = $http.get("/ET_Sales_Shipment/GetOrders",
+                {
+                    params: {
+                        type: $scope.S_Type,
+                        id: $scope.S_CustSup
+                    }
+                });
+            getorderlist.then(function (orderlist) {
+                var res = JSON.parse(orderlist.data);
+                $scope.orders = res;
+            }, function () {
+                alert("Customer Not Found");
+            });
+        }
+        else {
+            $scope.orders = {};
+        }
+    }
+    function GetSchedules() {
+        if ($scope.S_CustSup != "") {
+            var getsalespersonlist = $http.get("/ET_Sales_Shipment/GetSchedules", {
+                params: {
+                    id: $scope.S_ID,
+                    custsupid: $scope.S_CustSup,
+                    ordertype: $scope.S_Type,
+                    type: $scope.submittext
+                }
+            });
+            getsalespersonlist.then(function (salespersonlist) {
+                var res = JSON.parse(salespersonlist.data);
+                $scope.schedules = res;
+            }, function () {
+                alert('Data not found');
+            });
+        }
+        else
+        {
+            $scope.schedules = "";
+        }
+    }
+    $scope.SalesPersonChange = function () {}
+    $scope.ScheduleChange = function ()
+    {
+        debugger;
+        ShipmentDetails($scope.S_ScheduleID);
+    }
+   
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        GetShipmentList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        GetShipmentRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+            $scope.S_ID = "0";
+            $scope.S_Code = "";
+            $scope.S_Type = "";
+            $scope.S_CustSup = "";
+            $scope.S_ScheduleID = "";
+            $scope.S_SalesPerson = "";
+            $("#txtETD").val("");
+            $("#txtETA").val("");
+            $scope.S_DeparturePort = "";
+            $scope.S_ArrivalPort = "";
+            $scope.S_BL_NO = "";
+            $("#txtBLDate").val("");
+            $scope.S_INV_NO = "";
+            $("#txtINVDate").val("");
+            $scope.S_INV_AMT = "";
+            $scope.S_GrossWeight = "";
+            $scope.S_ContainerNo = "";
+            $scope.S_MotherVessel = "";
+            $scope.S_FleederVessel = "";
+            $("#drpType").val("").trigger("chosen:updated");
+            $("#drpCustSup").val("").trigger("chosen:updated");
+            $("#drpScheduleID").val("").trigger("chosen:updated");
+            $("#drpSalesPerson").val("").trigger("chosen:updated");
+            $scope.schedules = {};
+            $scope.custsups = {};
+            $("#shipmentdetailsbody").html("");
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    function validate() {
+        var tr = $("#shipmentdetailsbody").find("tr");
+        var txt = "";
+        if ($scope.S_SalesPerson == "") {
+            message = "Select Sales Person";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.S_Type == "") {
+            message = "Select Order Type";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.S_CustSup == "") {
+            message = "Select Customer/Supplier";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.S_ScheduleID == "") {
+            message = "Select Schedule Codes";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($("#txtETD").val() == "") {
+            message = "Select ETD Date";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($("#txtETA").val() == "") {
+            message = "Select ETA Date";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.S_DeparturePort == "") {
+            message = "Enter Departure Port";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.S_ArrivalPort == "") {
+            message = "Enter Arrival Port";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.S_BL_NO == "") {
+            message = "Enter BL No";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($("#txtBLDate").val() == "") {
+            message = "Select BL Date";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.S_INV_NO == "") {
+            message = "Enter Invoice No";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($("#txtINVDate").val() == "") {
+            message = "Select Invoice Date";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($scope.S_GrossWeight == "") {
+            message = "Enter Gross Weight";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        if ($("#txtInvoiceAmount").val() == "" || $("#txtInvoiceAmount").val() == "0") {
+            message = "Invoice Amount Cannot be empty";
+            toastr["error"](message, "Notification");
+            return "";
+        }
+        for (i = 0; i < tr.length; i++) {
+            var td = $(tr[i]).find("td");
+            var scheduledate = $(td[4]).find("input").val();
+            var availableqty = $(td[7]).find("input").val();
+            var qty = $(td[8]).find("input").val();
+            if (scheduledate == "") {
+                message = "Enter Schedule Date at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            } else if (qty == "") {
+                message = "Enter Quantity at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            } else if (parseFloat(qty) > parseFloat(availableqty)) {
+                message = "Quantity cannot be more than Available Quantity at row:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }
+            else {
+                txt = txt + $(td[0]).find("input").val() + ",";
+                txt = txt + $(td[1]).find("input").val() + ",";
+                txt = txt + $(td[2]).find("input").val() + ",";
+                txt = txt + $(td[7]).find("input").val() + ",";
+                txt = txt + $(td[8]).find("input").val() + "|";
+            }
+        }
+        return txt;
+    }
+    $scope.SubmitClick = function () {
+        debugger;
+        var txt = validate();
+        var schids = "";
+        try {
+            schids = $scope.S_ScheduleID;
+        }
+        catch(ex)
+        {
+            schids = $scope.S_ScheduleID;
+        }
+        debugger;
+        if (txt != "") {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shipment/ET_Sales_Shipment_Add",
+                dataType: 'json',
+                data: {
+                    S_ID: $scope.S_ID,
+                    S_Code: $scope.S_Code,
+                    S_Type: $scope.S_Type,
+                    S_CustSup:$scope.S_CustSup,
+                    S_SalesPerson: $scope.S_SalesPerson,
+                    S_ScheduleID: schids,
+                    S_ETD: $("#txtETD").val(),
+                    S_ETA: $("#txtETA").val(),
+                    S_DeparturePort: $scope.S_DeparturePort,
+                    S_ArrivalPort: $scope.S_ArrivalPort,
+                    S_BL_NO: $scope.S_BL_NO,
+                    S_BL_DATE: $("#txtBLDate").val(),
+                    S_INV_NO: $scope.S_INV_NO,
+                    S_INV_DATE: $("#txtINVDate").val(),
+                    S_INV_AMT: $("#txtInvoiceAmount").val(),
+                    S_GrossWeight: $scope.S_GrossWeight,
+                    S_ContainerNo: $scope.S_ContainerNo,
+                    S_MotherVessel: $scope.S_MotherVessel,
+                    S_FleederVessel: $scope.S_FleederVessel,
+                    shipmentdetails: txt,
+                    S_OID: $scope.SH_OrderID,
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+
+            post.success(function (data, status) {
+
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else if (data == "Success") {
+                    if ($scope.S_ID == 0) {
+                        message = 'Record Inserted Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.createnew();
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+
+    }
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shipment/ET_Sales_Shipment_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var ShipmentByID = JSON.parse(data);
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+                    debugger;
+                    $scope.S_ID = ShipmentByID.S_ID;
+                    $scope.S_Code = ShipmentByID.S_Code;
+                    $scope.S_Type = ShipmentByID.S_Type;
+                    $scope.S_CustSup = ShipmentByID.S_CustSup;
+                    $scope.S_ScheduleID = ShipmentByID.S_ScheduleID;
+                    $scope.S_SalesPerson = ShipmentByID.S_SalesPerson;
+                    $scope.SH_OrderID = ShipmentByID.S_OID;
+
+                    var ETD = new Date(parseInt(ShipmentByID.S_ETD.substr(6)));
+                    var ETD1 = ("0" + (ETD.getMonth() + 1)).slice(-2) + "/" + ("0" + ETD.getDate()).slice(-2) + "/" + ETD.getFullYear();
+                    $("#txtETD").val(ETD1);
+
+                    var ETA1 = new Date(parseInt(ShipmentByID.S_ETA.substr(6)));
+                    var ETA = ("0" + (ETA1.getMonth() + 1)).slice(-2) + "/" + ("0" + ETA1.getDate()).slice(-2) + "/" + ETA1.getFullYear();
+                    $("#txtETA").val(ETA);
+
+
+                    $scope.S_DeparturePort = ShipmentByID.S_DeparturePort;
+                    $scope.S_ArrivalPort = ShipmentByID.S_ArrivalPort;
+                    $scope.S_BL_NO = ShipmentByID.S_BL_NO;
+
+                    var BLDate1 = new Date(parseInt(ShipmentByID.S_BL_DATE.substr(6)));
+                    var BLDate = ("0" + (BLDate1.getMonth() + 1)).slice(-2) + "/" + ("0" + BLDate1.getDate()).slice(-2) + "/" + BLDate1.getFullYear();
+                    $("#txtBLDate").val(BLDate);
+
+                    $scope.S_INV_NO = ShipmentByID.S_INV_NO;
+
+                    var INVDate1 = new Date(parseInt(ShipmentByID.S_INV_DATE.substr(6)));
+                    var INVDate = ("0" + (INVDate1.getMonth() + 1)).slice(-2) + "/" + ("0" + INVDate1.getDate()).slice(-2) + "/" + INVDate1.getFullYear();
+                    $("#txtINVDate").val(INVDate);
+
+
+                    $scope.S_INV_AMT = ShipmentByID.S_INV_AMT;
+                    $scope.S_GrossWeight = ShipmentByID.S_GrossWeight;
+                    $scope.S_ContainerNo = ShipmentByID.S_ContainerNo;
+                    $scope.S_MotherVessel = ShipmentByID.S_MotherVessel;
+                    $scope.S_FleederVessel = ShipmentByID.S_FleederVessel;
+                    $("#drpType").val(ShipmentByID.S_Type).trigger("chosen:updated");
+                    $("#drpSalesPerson").val(ShipmentByID.S_SalesPerson).trigger("chosen:updated");
+                    GetCustSup();
+                    GetOrders();
+                    GetSchedules();
+                    ShipmentDetails(ShipmentByID.S_ScheduleID);
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    function ShipmentDetails(a) {
+        debugger;
+        $http({
+            method: 'POST',
+            url: '/ET_Sales_Shipment/ET_Sales_ShipmentDetails',
+            dataType: 'html',
+            data: {
+                ids: a
+            },
+        }).success(function (data) {
+            debugger;
+            angular.element(document.getElementById('shipmentdetailsbody')).html(data);
+        });
+    }
+    $scope.Restoredeleterecords = function (a, $event, b) {
+        debugger;
+        var res = false;
+        if (b)
+            res = $scope.Isdelete;
+        else
+            res = $scope.Isrestore
+        if (res) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shipment/ET_Sales_Shipment_RestoreDelete",
+                dataType: 'json',
+                data: {
+                    id: a,
+                    type: b
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (data == "Success") {
+                        $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                        if (b) {
+                            message = "Record Deleted Successfully.";
+                        }
+                        else {
+                            message = "Record Restored Successfully.";
+                        }
+
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shipment/ET_Sales_Shipment_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.generateDebitNote = function (a,b) {
+        if ($scope.Isedit) {
+            $("#popFab").val("");
+            $("#popInvoice").val(b);
+            $("#popID").val(a);
+            $("#btnviewdebitnotepopup").trigger("click");
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification"); }
+    }
+    $scope.CommissionRecieve = function (a) {
+        if ($scope.Isedit) {
+            $("#popupCommissionRecieved").val("");
+            $("#popupID").val(a);
+            var getshipmentlist = $http.get("/ET_Sales_Shipment/GetCommissionDetails",
+                {
+                    params: { id: a }
+                });
+            getshipmentlist.then(function (shipmentlist) {
+                var res = JSON.parse(shipmentlist.data);
+                $("#popupInvoiceAmt").val(parseFloat(res[0].popupInvoiceAmt).toFixed(3));
+                $("#popupFabAmt").val(parseFloat(res[0].popupFabAmt).toFixed(3));
+                $("#popupCommissionAmt").val(parseFloat(res[0].popupCommission).toFixed(3));
+                $("#popupCommissionToBePaid").val((parseFloat(res[0].popupCommission) - parseFloat(res[0].popupFabAmt)).toFixed(3));
+                $("#btncommissionrecievepopup").trigger("click");
+            }, function () {
+                alert("Quotation List Found");
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.$watch("salespersons", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesPerson").val($scope.SH_SalesPerson).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("custsups", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCustSup").val($scope.S_CustSup).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("orders", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpOrder").val($scope.SH_OrderID).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("schedules", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpScheduleID").val($scope.S_ScheduleID).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("shipmentlist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("shipmentrestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 5);
+        }
+    });
+});

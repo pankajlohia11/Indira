@@ -1,0 +1,139 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.Quotation_View_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    <input id="germanformat" style="display:none;" value="@Model.QHeader[0].Q_ID" />
+    <table width="100" align="center">
+
+        <tr>
+            <td><img src="../Images/euro_logo.png" width="100"></td>
+            <td><h1 style="font-size:large"><label><strong>EUROTEXTILES</strong></label></h1></td>
+        </tr>
+    </table>
+    <table style="font-size:14px;">
+        <tr>
+            <td><span><strong>@Model.QHeader[0].Q_CustomerName</strong></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.QHeader[0].Street,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.QHeader[0].CityState,</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>@Model.QHeader[0].CountryZip.</label></span></td>
+        </tr>
+
+    </table>
+    <table align="right">
+        <tr>
+            <td colspan="2"><strong>Kunden Nr :@Model.QHeader[0].CompanyCode</strong></td>
+        </tr>
+        <tr>
+            <td>
+                Verarbeitet Von :<strong>@Model.QHeader[0].Q_SalesPersonName</strong>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Datum :<strong>@Model.QHeader[0].Q_Date.ToString("dd-MM-yyyy")</strong>
+            </td>
+        </tr>
+    </table><br /><br />
+    <div class="form-group col-md-6">
+        <label for="Email"><strong>
+    Zitat No:
+</strong></label>
+        <strong>@Model.QHeader[0].Q_Code</strong>
+    </div><br /><br />
+
+    <table border="1" width="100%" align="center">
+        <thead>
+            <tr>
+                <th style="text-align:center"><strong>Pos</strong></th>
+                <th style="text-align:center" colspan="2"><strong>Menge</strong></th>
+                <th style="text-align:center"><strong>Text</strong></th>
+                <th style="text-align:center"><strong>Einzelpreis EUR</strong></th>
+                <th style="text-align:center"><strong>Gesamtpreis EUR</strong></th>
+            </tr>
+
+        </thead>
+        <tbody>
+            @{int i = 1;
+                decimal total = 0;
+                foreach (var item in Model.QChild)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td style="text-align:right">@(Convert.ToDecimal(item.QD_Quantity).ToString("N3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td>@item.QD_UOM</td>
+                        <td>@item.QD_ProductName</td>
+                        <td style="text-align:right;">@(Convert.ToDecimal(item.QD_Unit_Price).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td style="text-align:right;">@(Convert.ToDecimal(item.QD_Amount).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    </tr>
+                    total = total + Convert.ToDecimal(item.QD_Unit_Price) * Convert.ToDecimal(item.QD_Quantity);
+                    i++;
+                }
+
+            }
+            <tr>
+                <td colspan="5">Gesamt Netto</td>
+                <td colspan="3" style="text-align:right;font-weight:bold;">@total.ToString("C3", CultureInfo.CreateSpecificCulture("de-DE"))</td>
+            </tr>
+            <tr>
+                <td colspan="5">zzgl. <strong>@(Convert.ToDecimal(Model.QHeader[0].VatPer).ToString("0"))</strong> % USt. auf</td>
+                <td colspan="3" style="text-align:right;font-weight:bold;">@(Convert.ToDecimal(total * Model.QHeader[0].VatPer / 100).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+            </tr>
+            <tr>
+                <td colspan="5">Gesamtbetrag</td>
+                <td colspan="3" style="text-align:right;font-weight:bold;">@((Convert.ToDecimal(total + ((total * Model.QHeader[0].VatPer / 100)))).ToString("C3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+            </tr>
+        </tbody>
+    </table><br />
+    <table style="font-size:13px;">
+        <tr>
+            <td>
+                <p style="font-size:12px;">Zahlungsbedingung : @Model.QHeader[0].PaymentTermsDescription</p>
+                <p style="font-size:12px;">Delivery Terms: @Model.QHeader[0].Q_DeliveryTerms</p>
+            </td>
+        </tr>
+    </table><br />
+    <table width="100%">
+        <tr>
+            <td> <p>___________________________</p><br /></td>
+            <td> <p>___________________________</p><br /></td>
+        </tr>
+        <tr>
+            <td><p style="font-size:small;">For Eurotextiles GmbH & Co.KG</p></td>
+            <td><p style="font-size:small; ">For @Model.QHeader[0].Q_CustomerName</p></td>
+        </tr>
+
+    </table><br />
+    <table style="font-size:12px;">
+        <tr>
+            <td><span><label>
+    Es gelten unsere Allgemeinen Geschäftsbedingungen
+</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>Jede allgemeine Abweichung muss uns vor der Ware, nicht aber 7 Tage nach Erhalt der Ware mitgeteilt werden.</label></span></td>
+        </tr>
+        <tr>
+            <td><span><label>Nach dem Waschen / Verwenden der Ware werden keine Reklamationen akzeptiert.</label></span></td>
+        </tr>
+    </table><br />
+    <p> <hr style="font-weight:bold;border-top:1px solid black;"></p>
+    <table style="font-size:10px;width:100%;">
+        <tr>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Eurotextiles GmbH & Co.KG<br />Mammolshainer Weg 14<br />61462 Konigstein im Taunus<br />Fon +49 6174/25980<br />HRA 3451</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">HRA 3451<br />Amtsgericht Kongstein<br />Steuerrnummer 003 315 60117<br />USt-IdNr.DE279479010</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Kompl.Indra Enterprises GmbH<br />Geshafuher:Krishna Javaji<br />HRB 5137 Amtsgericht Konigstein<br />Steuernummer 003 236 16128</td>
+            <td style="text-align:left;padding-right:40px; padding-left:20px;">Bankverbindung<br />Nassauische Sparkasse<br />IBAN :DE15 5105 00150270060706<br />SWIFT:-BIC NASSDE55XXX</td>
+
+
+        </tr>
+    </table>
+
+
+
+
+</div>

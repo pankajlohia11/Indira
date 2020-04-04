@@ -1,0 +1,308 @@
+﻿app1.controller("AC_StatusCtrl", function ($scope, $http, $window, $compile)
+{
+   
+
+    
+    function GetTaskStatus(stat, fromDate, toDate)
+    {
+        debugger;
+        //a = parseInt(a);
+        //alert("GetTaskStatus" + stat + fromDate + toDate);
+        var get = $http(
+            {
+            method: "POST",
+                url: '/ET_TaskStatus/GetTaskStatus/',
+            data: { status: stat, Fromdate: fromDate, Todate: toDate },
+            dataType: "json",
+            headers: { "Content-Type": "application/json" }
+        });
+        get.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                var res = JSON.parse(data);
+                $scope.TaskStatus = res;
+                //var contactdata = JSON.parse(data);
+                var i = res.length;
+                length = 1;
+                angular.element(document.getElementById('taskbody')).html("");
+                alert(res);
+                while (i != 0) {
+                    var Rowhtml = "<tr><td><p></p></td><td><p></p></td><td><p></p></td><td><p></p></td><td><p></p></td><td><p></p></td><td><p></p></td></tr>";
+                    
+                    var temp = $compile(Rowhtml)($scope);
+                    angular.element(document.getElementById('taskbody')).append(temp);
+                    $scope.TSK_Title = res[0].TSK_Title;
+                    $scope.TSK_Desc = res[0].TSK_Desc;
+                    $scope.TSK_Priority = res[0].TSK_Priority;
+                    $scope.TSK_Status = res[0].TSK_Status;
+                    $scope.Expec_Date = res[0].Expec_Date;
+                    $scope.TSK_Compl_Date = res[0].TSK_Compl_Date;
+                    $scope.TSK_AssignTo = res[0].TSK_AssignTo;
+                    // $("#drpStatus").val(res[0].TSK_Status).trigger("chosen:updated");
+                    i = i - 1;
+                }
+               
+                $scope.taskdata = res;
+            }
+        });
+        get.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+    function ET_submit(stat, fromDate, toDate) {
+        alert("whether function is hit or not");
+        debugger;
+        //a = parseInt(a);
+        //alert("GetTaskStatus" + stat + fromDate + toDate);
+        var get = $http(
+            {
+                method: "POST",
+                url: '/ET_TaskStatus/ET_submit/',
+                data: { status: stat, Fromdate: fromDate, Todate: toDate },
+                dataType: "json",
+                headers: { "Content-Type": "application/json" }
+            });
+        get.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                var res = JSON.parse(data);
+                $scope.TaskStatus = res;
+                //var contactdata = JSON.parse(data);
+                var i = res.length;
+                length = 1;
+                angular.element(document.getElementById('taskbody')).html("");
+                alert(res);
+                while (i != 0) {
+                    var Rowhtml = "<tr><td><p></p></td><td><p></p></td><td><p></p></td><td><p></p></td><td><p></p></td><td><p></p></td><td><p></p></td></tr>";
+
+                    var temp = $compile(Rowhtml)($scope);
+                    angular.element(document.getElementById('taskbody')).append(temp);
+                    $scope.TSK_Title = res[0].TSK_Title;
+                    $scope.TSK_Desc = res[0].TSK_Desc;
+                    $scope.TSK_Priority = res[0].TSK_Priority;
+                    $scope.TSK_Status = res[0].TSK_Status;
+                    $scope.Expec_Date = res[0].Expec_Date;
+                    $scope.TSK_Compl_Date = res[0].TSK_Compl_Date;
+                    $scope.TSK_AssignTo = res[0].TSK_AssignTo;
+                    // $("#drpStatus").val(res[0].TSK_Status).trigger("chosen:updated");
+                    i = i - 1;
+                }
+
+                $scope.taskdata = res;
+            }
+        });
+        get.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+
+
+   // GetPrivilages();
+    //alert("task status");
+    //default load operations
+    var today = new Date();
+    var taskstartDate = ("0" + today.getDate()).slice(-2) + "-" + ("0" + (today.getMonth() + 1)).slice(-2) + "-" + 2017;
+    var taskCurrentDate = ("0" + today.getDate()).slice(-2) + "-" + ("0" + (today.getMonth() + 1)).slice(-2) + "-" + today.getFullYear();
+    $("#txtFromDate").val(taskstartDate);
+    $("#txtToDate").val(taskCurrentDate);
+    $("#drpStatus").val("0");
+    var statusValue = $("#drpStatus").val();
+    //alert("stat:" + statusValue);
+    GetTaskStatus(statusValue, taskstartDate, taskCurrentDate);
+
+
+function shipping(a) {
+    debugger;
+    a = parseInt(a);
+    $.ajax({
+        type: "GET",
+        url: '@Url.Action("ET_TaskStatus_View", "ET_TaskStatus")',
+        data: { id: a },
+        contentType: "application/json;charset=utf-8",
+        dataType: "json",
+        success: function (result) {
+
+            if (result.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(result);
+                $("#spanErrMessage2").html(result);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                var assign;
+                var res = JSON.parse(result);
+                for (var i = 0; i < res.length;) {
+                    var Rowhtml = "<tr><td><input readonly='readonly' type='text' id='txtTitle' value='" + length + "' class='form-control' /></td></tr><tr><td><input readonly='readonly' type='text' id='txtdesc' value='" + length + "' class='form-control' /></td></tr><tr><td><input readonly='readonly' type='text' id='txtPriority' value='" + length + "' class='form-control' /></td></tr><tr><td><input readonly='readonly' type='text' id='txtStatus' value='" + length + "' class='form-control' /></td></tr><tr><td><input readonly='readonly' type='text' id='txtExcepdate' value='" + length + "' class='form-control' /></td></tr><tr><td><input readonly='readonly' type='text' id='txtAcual' value='" + length + "' class='form-control' /></td></tr><tr><td><input readonly='readonly' type='text' id='txtAssignto' value='" + length + "' class='form-control' /></td></tr>";
+                    var temp = $compile(Rowhtml)($scope);
+                    angular.element(document.getElementById('taskBody')).append(temp);
+                    var tr = $("#Contactbody").find("tr");
+                    var td = tr[i].cells;
+                    $(td[0]).find("input").val(res[i]["TSK_Title"]);
+                    $(td[1]).find("input").val(res[i]["TSK_Desc"]);
+                    $(td[2]).find("input").val(res[i]["TSK_Priority"]);
+                    $(td[3]).find("input").val(res[i]["TSK_Status"]);
+
+                    var Expecdate = new Date(parseInt(res[i]["Excep_Date"].substr(6)));
+                    var ampm = Expecdate.getHours() >= 12 ? 'PM' : 'AM';
+                    if (Expecdate.getMinutes() <= 9) {
+                        var DT = '';
+                        if (Expecdate.getHours() <= 9) {
+                            DT = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + (Expecdate.getMonth() + 1)).slice(-2) + "\/" + Expecdate.getFullYear() + " " + "0" + Expecdate.getHours().toLocaleString().replace(/:\d{2}\s/, ' ') + ":0" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                        }
+                        else {
+                            DT = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + (Expecdate.getMonth() + 1)).slice(-2) + "\/" + Expecdate.getFullYear() + " " + Expecdate.getHours() + ":0" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                        }
+
+                        $(td[4]).find("input").val(DT);
+                    }
+                    else {
+                        var DT
+                        if (Expecdate.getHours() <= 9) {
+
+                            DT = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + (Expecdate.getMonth() + 1)).slice(-2) + "\/" + Expecdate.getFullYear() + " " + "0" + Expecdate.getHours().toLocaleString().replace(/:\d{2}\s/, ' ') + ":" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                        }
+                        else {
+                            DT = ("0" + Expecdate.getDate()).slice(-2) + "\/" + ("0" + (Expecdate.getMonth() + 1)).slice(-2) + "\/" + Expecdate.getFullYear() + " " + Expecdate.getHours() + ":" + Expecdate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                        }
+
+                        $(td[4]).find("input").val(DT);
+                    }
+
+                    var CompletionDate = new Date(parseInt(res[i]["TSK_Compl_date"].substr(6)));
+                    ampm = CompletionDate.getHours() >= 12 ? 'PM' : 'AM';
+                    if (CompletionDate.getMinutes() <= 9) {
+                        var DT1 = '';
+                        if (CompletionDate.getHours() <= 9) {
+                            DT1 = ("0" + CompletionDate.getDate()).slice(-2) + "\/" + ("0" + (CompletionDate.getMonth() + 1)).slice(-2) + "\/" + CompletionDate.getFullYear() + " " + "0" + CompletionDate.getHours().toLocaleString().replace(/:\d{2}\s/, ' ') + ":0" + CompletionDate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                        }
+                        else {
+                            DT1 = ("0" + CompletionDate.getDate()).slice(-2) + "\/" + ("0" + (CompletionDate.getMonth() + 1)).slice(-2) + "\/" + CompletionDate.getFullYear() + " " + CompletionDate.getHours() + ":0" + CompletionDate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                        }
+
+                        $(td[5]).find("input").val(DT1);
+                    }
+                    else {
+                        var DT1
+                        if (CompletionDate.getHours() <= 9) {
+
+                            DT1 = ("0" + CompletionDate.getDate()).slice(-2) + "\/" + ("0" + (CompletionDate.getMonth() + 1)).slice(-2) + "\/" + CompletionDate.getFullYear() + " " + "0" + CompletionDate.getHours().toLocaleString().replace(/:\d{2}\s/, ' ') + ":" + CompletionDate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                        }
+                        else {
+                            DT1 = ("0" + CompletionDate.getDate()).slice(-2) + "\/" + ("0" + (CompletionDate.getMonth() + 1)).slice(-2) + "\/" + CompletionDate.getFullYear() + " " + CompletionDate.getHours() + ":" + CompletionDate.getMinutes().toLocaleString().replace(/:\d{2}\s/, ' ') + ' ' + ampm;
+                        }
+
+                        $(td[5]).find("input").val(DT1);
+                    }
+
+                    if (res[i]["TSK_Type"] == true) {
+                        type = 1;
+                        $('#drpEmpList').css('display', 'block');
+                        assign = JSON.parse("[" + res[i]['TSK_AssignTo'].replace(/['']+/g, '') + "]");
+                        var assignLength = assign.length;
+                        var assignedMembers = '';
+                        for (var assignId = 0; assignId < assignLength; assignId++) {
+                            var assignedMember = Int32.parse(assignId[i]);
+                            $.ajax({
+                                type: "GET", url: '@Url.Action("GetTaskAssingedUserName", "ET_TaskStatus")',
+                                data: { currentemployee: assignedMember }, contentType: "application/json;charset=utf-8", dataType: "json",
+                                success: function (result) {
+                                    var displayname = JSON.parse(result);
+                                    assignedMembers += displayname;
+                                },
+                                error: function (response) {
+                                    if ($("#exceptionmessage").length)
+                                        $("#exceptionmessage").trigger("click");
+                                }
+                            });
+                        }
+                        //Fill up in the specific colummn where the assinged members 
+                        $(td[6]).find("input").val(assignedMembers);
+
+                    } else { type = 0; }
+
+                    i++;
+                }
+
+
+                //$("td[0]").val(res[i]["TSK_Title"]);
+                //$("#title-desc").val(res[0]["TSK_Desc"]);
+                //$("td[1]").val(res[i]["TSK_Priority"]);
+                //$("#TSK_ID").val(res[0]["TSK_ID"]);
+                //var type = 0;
+
+            }
+        },
+        error: function (response) {
+            if ($("#exceptionmessage").length)
+                $("#exceptionmessage").trigger("click");
+        }
+    });
+    }
+    $scope.$watch("TaskStatus", function (value) {
+        //alert("welcome");
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+
+    $scope.$watch("taskdata", function (value) {
+        var val = true;
+        if (val)
+        {
+            alert("welcom");
+            var res = $scope.taskdata;
+            setTimeout(function ()
+            {
+                //debugger;
+                var tr = $("#taskbody").find("tr");
+                for (var i = 0; i < tr.length; i++)
+                {
+                    var td = tr[i].cells;
+                    var res = $scope.taskdata;
+                    $(td[0]).find("p").text(res[i].TSK_Title);
+                    $(td[1]).find("p").text(res[i].TSK_Desc);
+                    $(td[2]).find("p").text(res[i].TSK_Priority);
+                    $(td[3]).find("p").text(res[i].TSK_Status);
+                    var Expecdt = "";
+                    if (res[i].Expec_Date != null) {
+                        var Expecdate = new Date(parseInt(res[i].Expec_Date.substr(6)));
+                        Expecdt = ("0" + Expecdate.getDate()).slice(-2) + "-" + ("0" + (Expecdate.getMonth() + 1)).slice(-2) + "-" + Expecdate.getFullYear();
+                    }
+                    //$("#txtFromDate").val(Expecdt);
+                    if (res[i].TSK_Compl_Date != null) {
+
+
+                        var Compldate = new Date(parseInt(res[i].TSK_Compl_Date.substr(6)));
+                        var Compldt = ("0" + Compldate.getDate()).slice(-2) + "-" + ("0" + (Compldate.getMonth() + 1)).slice(-2) + "-" + Compldate.getFullYear();
+                        //$("#txtToDate").val(Compldt);
+                    }
+
+                    $(td[4]).find("p").text(Expecdt);
+                    $(td[5]).find("p").text(Compldt);
+                    $(td[6]).find("p").text(res[i].TSK_AssignTo);
+                }
+            }, 5000);
+        }
+    });
+
+});
+

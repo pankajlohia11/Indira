@@ -1,0 +1,230 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Script.Serialization; 
+using System.Web.Routing;
+using BusinessEntity.EntityModels;
+using BusinessEntity.CustomModels;
+using BusinessLogic.Admin_BL;
+using BusinessLogic;
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_CustomerModuleController : Controller
+    {
+        // GET: ET_Admin_CompanyModule
+        ET_Admin_CustomerModule_BL objBL = new ET_Admin_CustomerModule_BL();
+        error_master objERR = new error_master();
+        BAL bal = new BAL();
+        EntityClasses dbcontext = new EntityClasses();
+        public ActionResult ET_Admin_CustomerModule()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    return View();
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+
+        }
+        public ActionResult GetCustomerList()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    
+                    CompanyModule__CM objMaster = new CompanyModule__CM();
+                    objMaster.CustomerMasterList = objBL.GetCustomers_BL();
+                    //var data = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.Cust_Supp != 1);
+                    var json = new JavaScriptSerializer().Serialize(objMaster.CustomerMasterList);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+
+        }
+        public ActionResult GetCustomerInfo(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    
+                    var data1 = (from a in dbcontext.Tbl_Master_CompanyDetails
+                                 where a.COM_ID == id
+                                 select new
+                                 {
+                                     a.COM_DISPLAYNAME,
+                                     a.COM_NAME,
+                                     a.COM_MOBILE,
+                                     a.COM_EMAIL,
+                                     a.COMPANY_CODE,
+                                     a.COM_USTID,
+                                     a.Tax_No,
+                                     a.COM_STREET,
+                                     a.COM_ZIP,
+                                    CustType =
+                                    (
+                                    a.Cust_Supp == 0 ? "Customer" :
+                                    a.Cust_Supp == 1 ? "Supervisor" : "Both"
+                                    ),
+                                     a.CREATED_DATE,
+                                     activeStatus = a.DELETED == true ? "Active" : "InActive",
+                                     country =(dbcontext.locations.Where(m=>m.location_id == a.COM_COUNTRY).Select(m=>m.name)),
+                                     city = (dbcontext.locations.Where(m => m.location_id == a.COM_CITY).Select(m => m.name)),
+                                     state = (dbcontext.locations.Where(m => m.location_id == a.COM_STATE).Select(m => m.name))
+                                 });
+                    var json1 = new JavaScriptSerializer().Serialize(data1);
+                    var data2 = dbcontext.Tbl_Master_CompanyContacts.Where(m => m.COM_ID == id);
+                    var json2 = new JavaScriptSerializer().Serialize(data2);
+                    int com_key = Convert.ToInt32(Session["Companykey"]);
+                    var data3 = (from Ol in dbcontext.Tbl_Master_Order
+                                join Mu in dbcontext.Tbl_Master_User on Ol.SO_SalesPersonID equals Mu.USER_ID
+                                where Ol.DELETED == false && Ol.COM_KEY == com_key && Ol.SO_CutomerID == id
+                                select new
+                                {
+                                    SO_ID = Ol.SO_ID,
+                                    SO_CODE = Ol.SO_Code,
+                                    USER_NAME = Mu.USER_NAME,
+                                    Ol.SO_OrderDate,
+                                    Ol.SO_CusPONO,
+                                    Ol.SO_CusPODate,
+                                    Type =
+                                    (
+                                    Ol.SO_OrderType == 1 ? "Agency" :
+                                    Ol.SO_OrderType == 2 ? "PO" : "Trading"
+                                    ),
+                                    Status = Ol.SO_Approval == 1 ? "Approved" : "Unapproved"
+                                }).ToList();
+                    var json3 = new JavaScriptSerializer().Serialize(data3);
+                    var data4 = (from a in dbcontext.Tbl_Shipment_Header
+                                join c in dbcontext.Tbl_Master_CompanyDetails on a.S_CustSup equals c.COM_ID into ord
+                                from y in ord
+                                where a.DELETED == false && a.COM_KEY == com_key && a.S_CustSup == id && a.S_Type == 2
+                                select new Shipment_CM
+                                {
+                                    S_ID = a.S_ID,
+                                    S_Code = a.S_Code,
+                                    S_ETD = a.S_ETD.ToString(),
+                                    S_ETA = a.S_ETA.ToString(),
+                                    COM_DISPLAYNAME = y.COM_DISPLAYNAME,
+                                    S_DeparturePort = a.S_DeparturePort,
+                                    S_ArrivalPort = a.S_ArrivalPort,
+                                    S_Type = a.S_Type,
+                                    S_STATUS = a.S_STATUS,
+                                    S_DebitNoteStatus = a.S_DebitNoteStatus,
+                                    S_CommissionRecievedStatus = a.S_CommissionRecievedStatus,
+                                    S_DebitNoteApprovalStatus = a.S_DebitNoteApprovalStatus,
+                                    S_INV_AMT = a.S_INV_AMT
+                                }).ToList();
+                    var json4 = new JavaScriptSerializer().Serialize(data4);
+                    var data5 = (from a in dbcontext.Tbl_Schedule
+                                join b in dbcontext.Tbl_Product_Master on a.SH_ProductID equals b.P_ID into comp
+                                from x in comp
+                                join c in dbcontext.Tbl_Master_Order on a.SH_OrderID equals c.SO_ID into ord
+                                from y in ord
+                                where a.DELETED == false && a.COM_KEY == com_key && y.SO_CutomerID == id
+                                select new Schedule_CM
+                                {
+                                    SH_ID = a.SH_ID,
+                                    SH_Code = a.SH_Code,
+                                    SH_DATE = a.SH_DATE.ToString(),
+                                    SO_Code = y.SO_Code,
+                                    SH_Status = a.SH_Status,
+                                    SH_Type = a.SH_Type
+                                }
+                                ).ToList().GroupBy(x => x.SH_Code).Select(x => x.FirstOrDefault()); ;
+                    var json5 = new JavaScriptSerializer().Serialize(data5);
+                    var data6 = (from a in dbcontext.Tbl_OneToOneInvoice
+                                join b in dbcontext.Tbl_Shipment_Header on a.OTOI_ShipmentID equals b.S_ID into comp
+                                from x in comp
+                                join d in dbcontext.Tbl_Master_User on a.OTOI_SalesPerson equals d.USER_ID into user
+                                from z in user
+                                join w in dbcontext.Tbl_Master_CompanyDetails on a.OTOI_CustomerID equals w.COM_ID into p
+                                from enq in p.DefaultIfEmpty()
+                                where a.DELETED == false && a.COM_KEY == com_key && a.OTOI_CustomerID == id
+                                select new
+                                {
+                                    OTOI_ID = a.OTOI_ID,
+                                    OTOI_Code = a.OTOI_Code,
+                                    OTOI_InvoiceDate = a.OTOI_InvoiceDate.ToString(),
+                                    S_Code = x.S_Code,
+                                    COM_DISPLAYNAME = enq.COM_DISPLAYNAME,
+                                    USER_NAME = z.USER_NAME
+                                }).ToList();
+                    var json6 = new JavaScriptSerializer().Serialize(data6);
+                    var data7 = (from a in dbcontext.Tbl_OneToManyInvoice
+                                join b in dbcontext.Tbl_Master_Order on a.OTMI_OrderID equals b.SO_ID into comp
+                                from x in comp
+                                join d in dbcontext.Tbl_Master_User on a.OTMI_SalesPerson equals d.USER_ID into user
+                                from z in user
+                                join w in dbcontext.Tbl_Master_CompanyDetails on a.OTMI_CustomerID equals w.COM_ID into p
+                                from enq in p.DefaultIfEmpty()
+                                where a.DELETED == false && a.COM_KEY == com_key
+                                select new
+                                {
+                                    OTMI_ID = a.OTMI_ID,
+                                    OTMI_Code = a.OTMI_Code,
+                                    OTMI_InvoiceDate = a.OTMI_InvoiceDate.ToString(),
+                                    SO_Code = x.SO_Code,
+                                    COM_DISPLAYNAME = enq.COM_DISPLAYNAME,
+                                    USER_NAME = z.USER_NAME
+                                }).ToList();
+                    var json7 = new JavaScriptSerializer().Serialize(data7);
+
+                    var result = new { Result = json1, Contact = json2, Order = json3, Shipment = json4, Schedule = json5, OneToOne = json6, OneToMany = json7 };
+                    return Json(result, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+
+        }
+    }
+}

@@ -1,0 +1,447 @@
+﻿
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+
+Store One to One trading Details
+    This page contains Customer info, and Supplier info and List of Contracts Trading.
+    Author=RajKumar
+    Date = 4th Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide View List page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying View List page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+    }
+       /* This fuction is to hide and show the divisions in Edit page*/
+    function Customerdetais() {
+        $("#div_customerInfo").css("display", "block");
+        $("#div_SupplierInfo").css("display", "none"); 
+    }
+    /* This fuction is to hide and show the divisions in Edit page*/
+    function Supplierdetails() {
+        $("#div_customerInfo").css("display", "none");
+        $("#div_SupplierInfo").css("display", "block"); 
+    }
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>One To One<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">One To One</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>One To One</strong> List</h1>
+                        <ul class="controls">
+                            <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                            <li style="padding:5px">
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Supplier</th>
+                                    <th>Deal Date</th>
+                                    <th>Deal No</th>
+                                    <th>Supplier PO No</th>
+                                    <th>Supplier SC No</th> 
+                                    <th>Sales Person</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong> One To One </h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <form name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Sales Person</label>
+                                    <select class="chosen-select" style="width:100%" required> </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Sales Group</label>
+                                    <select class="chosen-select" style="width:100%" required>
+                                        <option value="0">--Select--</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Customer</label>
+                                    <select class="chosen-select" style="width:100%" required></select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Supplier</label>
+                                    <select class="chosen-select" style="width:100%" required></select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Deal No</label>
+                                    <input type="text" class="form-control" data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Deal Date </label>
+                                    <div class='input-group datepicker w-360' style="width:100%;">
+                                        <input type='text' class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Remarks</label>
+                                    <input type="text" class="form-control" data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" />
+                                </div>
+                            </div>
+                            <ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                                <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="Customerdetais();"></a><i class="icon-calculator"></i></li>
+                                <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" onclick="Supplierdetails();"></a></li>
+                            </ul>
+                            <div id="div_customerInfo">
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Customer Po No</label>
+                                        <input type="text" class="form-control" data-parsley-trigger="change"
+                                               data-parsley-type="alphanum" required />
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">PO Date</label>
+                                        <div class='input-group datepicker w-360' style="width:100%;">
+                                            <input type='text' class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Customer Sc No</label>
+                                        <input type="text" class="form-control" data-parsley-trigger="change"
+                                               data-parsley-type="alphanum" />
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">SC Date</label>
+                                        <div class='input-group datepicker w-360' style="width:100%;">
+                                            <input type='text' class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Currency</label>
+                                        <select class="chosen-select" style="width:100%" required></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Delivery Terms</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Payment Type</label>
+                                        <select class="chosen-select" style="width:100%" required></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Credit Days</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Advance Type</label>
+                                        <select class="chosen-select" style="width:100%"></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Advance Amount</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Advance%</label>
+                                        <select class="chosen-select" style="width:100%"></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Advance Days</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Discount Type</label>
+                                        <select class="chosen-select" style="width:100%"></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Discount%</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Discount Amount</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="div_SupplierInfo">
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Supplier Po No</label>
+                                        <input type="text" class="form-control" data-parsley-trigger="change"
+                                               data-parsley-type="alphanum" />
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">PO Date</label>
+                                        <div class='input-group datepicker w-360' style="width:100%;">
+                                            <input type='text' class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Supplier Sc No</label>
+                                        <input type="text" class="form-control" data-parsley-trigger="change"
+                                               data-parsley-type="alphanum" required />
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">SC Date</label>
+                                        <div class='input-group datepicker w-360' style="width:100%;">
+                                            <input type='text' class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Currency</label>
+                                        <select class="chosen-select" style="width:100%" required></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Delivery Terms</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Payment Type</label>
+                                        <select class="chosen-select" style="width:100%" required></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Credit Days</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Advance Type</label>
+                                        <select class="chosen-select" style="width:100%"></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Advance Amount</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Advance%</label>
+                                        <select class="chosen-select" style="width:100%"></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Advance Days</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Discount Type</label>
+                                        <select class="chosen-select" style="width:100%"></select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Discount%</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Discount Amount</label>
+                                        <input type="text" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled id="formSubmit">Submit</button>
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--The user can have a option to restore-->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore One To One</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Supplier</th>
+                                    <th>Deal Date</th>
+                                    <th>Deal No</th>
+                                    <th>Supplier PO No</th>
+                                    <th>Supplier SC No</th>
+                                    <th>Sales Person</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+

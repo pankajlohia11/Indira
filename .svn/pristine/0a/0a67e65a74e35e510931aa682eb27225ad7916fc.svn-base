@@ -1,0 +1,253 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+
+namespace Euro.Controllers.Admin
+{
+
+    public class ET_Admin_ProductCatalogController : Controller
+    {
+        // GET: ET_Admin_ProductCatalog
+        EntityClasses DbContext = new EntityClasses();
+        public static string prefix = "";
+        public static bool automanual = false;
+        BAL bal = new BAL();
+        error_master objERR = new error_master();
+        tbl_loginfo objLOG = new tbl_loginfo();
+        private void AutoManual()
+        {
+            ViewBag.AutoManual = false;
+            automanual = false;
+            List<Tbl_Document_Master> ObjDoc = bal.AutoManual_BL(8024);
+            if (ObjDoc.Count > 0)
+            {
+                foreach (var item in ObjDoc)
+                {
+                    if (item.autogen_type == "Automatic")
+                    {
+                        ViewBag.AutoManual = true;
+                        prefix = item.autogen_prefix;
+                        automanual = true;
+                    }
+                    else
+                    {
+                        ViewBag.Required = "required";
+                    }
+                }
+
+            }
+        }
+        public ActionResult ET_Admin_ProductCatalog()
+        {
+            return View();
+        }
+        public JsonResult GetProductCatalogList(bool deleted)
+        {
+            try
+            {
+                var data = DbContext.Tbl_ProductCatalog.Where(m => m.PC_ID != 0 && m.DELETED == false).ToList();
+                return Json(data, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public JsonResult GetProductCatalogRestoreList(bool deleted)
+        {
+            try
+            {
+                var data = DbContext.Tbl_ProductCatalog.Where(m => m.PC_ID != 0 && m.DELETED == true).ToList();
+                return Json(data, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+        public JsonResult ET_Admin_ProductCatalog_Update_GetbyID(int id)
+        {
+            var data = DbContext.Tbl_ProductCatalog.Single(m => m.PC_ID == id);
+            var json = new JavaScriptSerializer().Serialize(data);
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult GetProductList()
+        {
+            var ProductList = DbContext.Tbl_Product_Master.Where(m => m.DELETED == false).ToList();
+            return Json(ProductList, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult GetUOMList()
+        {
+            var ProductList = DbContext.Tbl_Master_UOM.Where(m => m.DELETED == false).ToList();
+            return Json(ProductList, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult GetProductDetails(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = DbContext.Tbl_Product_Master.Single(m => m.P_ID == id);
+                    var json = new JavaScriptSerializer().Serialize(data);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    // Insert Error Log
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+
+                }
+            }
+            else
+            {
+                //Session Expiry
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+        }
+        public decimal ET_Admin_ProductCatalog_Add(decimal PriceBookId, string PriceBookCode, string ProductId, string ProductCode,string ProductSpecification,string uom, int unitprice, string lastpricerewisedate)
+            {
+             try
+            {
+                string valid = validations(PriceBookId, PriceBookCode);
+                if(valid=="")
+                {
+                    if (PriceBookId == 0)
+                    {
+                        int data = DbContext.Tbl_ProductCatalog.Where(m => m.PRODUCT_ID == ProductId && m.DELETED == false).Count();
+                        if (data > 0)
+                        {
+                            var ActiveRecords = DbContext.Tbl_ProductCatalog.Where(m => m.PRODUCT_ID == ProductId && m.DELETED == false).ToList();
+                            ActiveRecords.ForEach(m => m.ACTIVE_STATUS = false);
+                        }
+
+                        Tbl_ProductCatalog objtpt = new Tbl_ProductCatalog()
+                        {
+                            PC_ID = PriceBookId,
+                            PC_CODE = PriceBookCode,
+                            PRODUCT_ID = ProductId,
+                            UNIT_PRICE = unitprice,
+                            PRODUCT_UOM = uom,
+                            LAST_PRICE_REWISE_DATE = lastpricerewisedate,
+                            ACTIVE_STATUS = true,
+                            DELETED = false,
+                            CREATED_DATE = DateTime.Now,
+                            CREATED_BY = Convert.ToInt32(Session["UserID"]),
+                            LAST_UPDATED_DATE = DateTime.Now,
+                            LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"]),
+                            COM_KEY = Convert.ToInt32(Session["Companykey"])
+                        };
+                        DbContext.Tbl_ProductCatalog.Add(objtpt);
+                        DbContext.SaveChanges();
+                        if (automanual == true)
+                        {
+                            int len = 10 - (prefix + objtpt.PC_ID).Length;
+                            string code = prefix + new String('0', len) + objtpt.PC_ID;
+                            Tbl_ProductCatalog ProductBookCode = DbContext.Tbl_ProductCatalog.Single(m => m.PC_ID == objtpt.PC_ID);
+                            {
+                                ProductBookCode.PC_CODE = code;
+                            };
+                            DbContext.SaveChanges();
+                        }
+
+                        return objtpt.PC_ID;
+                    }
+                    else
+                    {
+                        Tbl_ProductCatalog objtpt = DbContext.Tbl_ProductCatalog.Single(m => m.PC_ID == PriceBookId);
+                        {
+                            objtpt.PC_ID = PriceBookId;
+                            objtpt.PC_CODE = PriceBookCode;
+                            objtpt.PRODUCT_ID = ProductId;
+                            objtpt.UNIT_PRICE = unitprice;
+                            objtpt.PRODUCT_UOM = uom;
+                            objtpt.LAST_PRICE_REWISE_DATE = lastpricerewisedate;
+                            objtpt.ACTIVE_STATUS = true;
+                            objtpt.DELETED = false;
+                            objtpt.CREATED_DATE = DateTime.Now;
+                            objtpt.CREATED_BY = Convert.ToInt32(Session["UserID"]);
+                            objtpt.LAST_UPDATED_DATE = DateTime.Now;
+                            objtpt.LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"]);
+                            objtpt.COM_KEY = Convert.ToInt32(Session["Companykey"]);
+                        };
+                        objtpt.PC_ID = DbContext.SaveChanges();
+                        return objtpt.PC_ID;
+                    }
+                }
+                else
+                {
+                    return 0;
+                }
+
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+            }
+        private string validations(decimal ProductBookId, string productbookcode)
+        {
+            if (!automanual && productbookcode == "")
+            {
+                return "Enter the Product Book Code";
+            }
+
+            if (!automanual)
+            {
+                string valid = "";
+                if (ProductBookId == 0)
+                {
+                    int count = DbContext.Tbl_ProductCatalog.Where(m => m.PC_CODE == productbookcode).Count();
+                    if (count > 0)
+                    {
+                         valid="exist";
+                    }
+                }
+                else
+                {
+                    int count = DbContext.Tbl_ProductCatalog.Where(m => m.PC_CODE == productbookcode && m.PC_ID != ProductBookId).Count();
+                    if (count > 0)
+                    {
+                         valid= "exist";
+                    }
+                }
+                if (valid != "")
+                {
+                    return "Product Book Code Already Exist";
+                }
+            }
+
+            return "";
+        }
+        public decimal ET_Admin_ProductCatalog_Restore_delete(decimal id,bool type)
+        {
+            int result = 0;
+            try
+            {
+                Tbl_ProductCatalog obj = DbContext.Tbl_ProductCatalog.Single(m => m.PC_ID == id);
+                {
+                    obj.DELETED = type;
+                    obj.LAST_UPDATED_DATE = DateTime.Now;
+                    obj.LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"]);
+                }
+                result = DbContext.SaveChanges();
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+            return result;
+        }
+    }
+}

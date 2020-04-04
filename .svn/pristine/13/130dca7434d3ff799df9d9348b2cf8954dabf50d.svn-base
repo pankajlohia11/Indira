@@ -1,0 +1,630 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Sales_Organization>
+@{
+    /**/
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+This form is used to create Sales Organization. Name of the Organization whether it is parent or child.
+    Author=RajKumar
+    Date = 5th Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+
+
+    /* This function is used for displaying View List page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+
+    }
+
+     /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords(f) {
+        if ($(f).attr("id").toString().indexOf("CreateYes") > -1) {
+            $("#txtRolecode").val("");
+            $("#txtRolename").val("");
+            $("#txtDescription").val("");
+            $("#drpRoleGroup").val("1");
+            $("#RoleID").val(0);
+            var id = 0;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Roles_Get_RoleDetails", "ET_Admin_Roles")',
+                data: { id: id },
+                contentType: "application/json;charset=utf-8",
+                dataType: "html",
+                success: function (result) {
+
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $("#div_View").css("display", "none");
+                        $("#div_Edit").css("display", "block");
+                        $("#formSubmit").html("Submit");
+                        $("#span_tabtext").html("Add");
+                        $('#tbl_body_roledetails').html(result);
+
+                    }
+                },
+                error: function (response) {
+
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function editRecords(e,f) {
+        if ($(f).attr("id").toString().indexOf("EditYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesOrganization_Update_Get", "ET_Admin_SalesOrganization")',
+                data: { id: id },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        var res = JSON.parse(result);
+                        $("#div_View").css("display", "none");
+                        $("#div_Edit").css("display", "block");
+                        $("#formSubmit").html("Update");
+                        $("#span_tabtext").html("Edit");
+
+                        $("#OrganizationID").val(res.ORG_ID);
+                        $("#txtOrganizationCode").val(res.ORG_CODE);
+                        $("#txtOrganizationName").val(res.ORG_NAME);
+                        $("#drpOrganizationHead").val(res.ORG_HEAD_ID).trigger("chosen:updated");
+                        $("#drpOrganizationType").val(res.ORG_TYPE).trigger("chosen:updated");
+                        ORGParentBind(res.ORG_PARENT_ID, );
+                        var emplist = res.ORG_EMPLOYEE_IDS.split(',');
+                        Employees(emplist);
+                        
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+
+    };
+    function deleteRecord(e, f) {
+        if ($(f).attr("id").toString().indexOf("DeleteYes") > -1) {
+            alertmessage(e, $(f).attr("id").toString());
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    function deleteRecordConfirm(e,f) {
+        var id = e;
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ET_Admin_SalesOrganization_Delete", "ET_Admin_SalesOrganization")',
+            data: { id: id },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (result == "Success") {
+                        message = 'Record Deleted Successfully. You can retrive it from Restore page';
+                        toastr["success"](message, "Notification");
+                        var ctrl = "#" + f;
+                        $(ctrl).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                    }
+                    else {
+                        message = 'Failed To Delete';
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            },
+            error: function (response) {
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+        });
+    };
+
+    function InsertRecords() {
+       
+        var OrganizationCode = $("#txtOrganizationCode").val();
+        var OrganizationName = $("#txtOrganizationName").val();
+        var OrganizationHead = $("#drpOrganizationHead").val();
+        var OrganizationType = $("#drpOrganizationType").val();
+        var OrganizationParent = $("#drpOrganizationParent").val();
+        if (OrganizationParent == null)
+            OrganizationParent = "0";
+        var Employees = $("#drpEmployees").val();
+        
+        var OrganizationID   = $("#OrganizationID").val();
+        if (OrganizationID != 0) {
+            OrganizationID = $("#OrganizationID").val();
+        }
+        else {
+            OrganizationID = "0";
+        }
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesOrganization_Add", "ET_Admin_SalesOrganization")',
+                data: {
+                    OrganizationID: OrganizationID,
+                    txtOrganizationCode: OrganizationCode,
+                    txtOrganizationName: OrganizationName,
+                    drpOrganizationHead: OrganizationHead,
+                    drpOrganizationType: OrganizationType,
+                    drpOrganizationParent: OrganizationParent,
+                    drpEmployees: Employees.toString()
+                    
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        if (result == "Success") {
+                            $("#txtOrganizationCode").val("");
+                            $("#txtOrganizationName").val("");
+                            $("#drpOrganizationHead").val("");
+                            $("#drpOrganizationType").val("0");
+                            $("#drpOrganizationParent").val("0");
+                            $("#drpEmployees").val("");
+                            
+                            $("#formSubmit").html("Submit");
+                            $("#span_tabtext").html("Add");
+
+                            //if (UserID=="0")
+                            //    message = 'Record Inserted Successfully.';
+                            //else
+                            message = 'Record Inserted Successfully.';
+
+                            toastr["success"](message, "Notification");
+                        }
+                        else if (result == "Success") {
+
+                            message = 'Failed to do this operation.';
+                            toastr["error"](message, "Notification");
+                        }
+                    }
+                },
+                error: function (response) {
+                   
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+    };
+
+    function restoreRecords(f) {
+        if ($(f).attr("id").toString().indexOf("RestoreYes") > -1) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesOrganization_Restore", "ET_Admin_SalesOrganization")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $("#div_View").css("display", "none");
+                        $("#div_Restore").css("display", "block");
+
+                        $('#restorediv').html(result);
+                        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+                    }
+                },
+                error: function (response) {
+                    toastr["error"]("Erroe in Restore Page", "Notification");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+
+    };
+
+    function Restoredeleterecords(id,f) {
+        var id = id;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesOrganization_Restore_Insert", "ET_Admin_SalesOrganization")',
+                data: {
+                    id: id
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        if (result == "Success") {
+                            $("#div_View").css("display", "none");
+                            $("#div_Restore").css("display", "block");
+
+                            message = 'Record Restored Successfully';
+                            toastr["success"](message, "Notification");
+                            $(f).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                        }
+                        else if (result == "Success") {
+                            message = 'Failed to do this operation.';
+                            toastr["error"](message, "Notification");
+                        }
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+    };
+
+
+     function ViewRecords(e,f) {
+        if ($(f).attr("id").toString().indexOf("ViewYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesOrganization_View", "ET_Admin_SalesOrganization")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: { id: id },
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $('#viewpopup').html(result);
+                        $("#btnviewpopup").trigger("click");
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+
+    };
+
+    function Employees(f) {
+        
+        var id = ($("#drpOrganizationHead").val());
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_Employees", "ET_Admin_SalesOrganization")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+             success: function (result) {
+                  
+                var html = '';
+                 for (i = 0; i < result.length; i++) {
+                     html += '<option value="' + result[i].USER_ID + '">' + result[i].DISPLAY_NAME
+                        + '</option>';
+                }
+                html += '</option>';
+
+                 $('#drpEmployees').html(html).trigger("chosen:updated");
+                 $("#drpEmployees").val(f).trigger("chosen:updated");
+                },
+                error: function (response) {
+                    toastr["error"]("Employees Not Loading", "Notification");
+                }
+            });
+    };
+
+    function ORGParentBind(f) {
+        var id = ($("#drpOrganizationType").val());
+
+        if (id == 2) {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("Binddropdown_ORGParent", "ET_Admin_SalesOrganization")',
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    data: {id : id },
+                 success: function (result) {
+                  
+                    var html = '';
+                     for (i = 0; i < result.length; i++) {
+                         html += '<option value="' + result[i].ORG_ID + '">' + result[i].ORG_NAME
+                            + '</option>';
+                    }
+                    html += '</option>';
+
+                     $('#drpOrganizationParent').html(html).trigger("chosen:updated");
+                    $("#drpOrganizationParent").val(f).trigger("chosen:updated");
+                    },
+                    error: function (response) {
+                        toastr["error"]("Parent Organization Not Loading", "Notification");
+                    }
+                });
+        }
+    }
+
+
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Sales Organization<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Sales Organization</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Sales Organization</strong> List</h1>
+                        <ul class="controls">
+                            <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                            <li style="padding:5px">
+                                <a tabindex="0" onclick="createRecords(this);" id="@ViewBag.Create">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" id="@ViewBag.Restore" onclick="restoreRecords(this);"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Organization Code</th>
+                                    <th>Organization Name</th>
+                                    <th>Organization Head</th>
+                                    <th>Organization Type</th>
+                                    <th>Parent Organization</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null)
+                                {
+                        BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+                        int i = 0;
+                        foreach (var item in Model)
+                        {
+                            string orgtype = "";
+                            string ParentORGName = "    ------------------";
+                            if (item.ORG_TYPE == 1)
+                            {
+                                orgtype = "Parent";
+                            }
+                            else
+                            {
+                                orgtype = "Child";
+                                ParentORGName = dbcontext.Tbl_Sales_Organization.Single(m => m.ORG_ID == item.ORG_PARENT_ID).ORG_NAME;
+                            }
+
+
+                            string ORGHeadName = dbcontext.Tbl_Master_User.Single(m => m.USER_ID == item.ORG_HEAD_ID).DISPLAY_NAME;
+
+
+                            <tr>
+                                <td>
+                                    @item.ORG_CODE
+                                </td>
+                                <td>
+                                    @item.ORG_NAME
+                                </td>
+                                <td>
+                                    @ORGHeadName
+                                </td>
+                                <td>
+                                    @orgtype
+                                </td>
+                                <td>
+                                    @ParentORGName
+                                </td>
+
+                                <td>
+                                    <a onclick="editRecords(@item.ORG_ID,this);" value="@item.ORG_ID" id="@ViewBag.Edit@i" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                    <a onclick="ViewRecords(@item.ORG_ID,this);" value="@item.ORG_ID" id="@ViewBag.View@i" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                    <a onclick="deleteRecord(@item.ORG_ID,this);" id="@ViewBag.Delete@i" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    @*@Html.ActionLink("Delete", "ET_Admin_Roles_Delete", "ET_Admin_Roles", new { id = item.ROLE_ID, @class = "icon-trash" }, null)*@
+
+
+                                </td>
+                            </tr>
+                i++;
+            }
+        }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong><span id="span_tabtext"></span></strong> Sales Organization </h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <form name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="OrganizationCode">Sales Organization Code</label>
+                                    <input type="text" name="OrganizationID" id="OrganizationID" class="form-control hidden">
+                                    <input type="text" class="form-control" name="txtOrganizationCode" id="txtOrganizationCode" data-parsley-trigger="change" disabled
+                                           data-parsley-type="alphanum" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="OrganizationName">Name Of The Sales Organization*</label>
+                                    <input type="text" class="form-control" name="txtOrganizationName" id="txtOrganizationName" pattern="/^[a-zA-Z]+$/" data-parsley-trigger="change" required />
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Organization Head">Organization Head*</label>
+                                    @Html.DropDownList("OrganizationHead", new SelectList(ViewBag.Users, "USER_ID", "DISPLAY_NAME"), new { @class = "form-control chosen-select", onchange = "Employees()", @id = "drpOrganizationHead" })
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Organization Type">Organization Type*</label>
+                                    <select class="chosen-select" style="width:100%" required id="drpOrganizationType" name="drpOrganizationType" onchange="ORGParentBind()">
+                                        <option value="0">--Select--</option>
+                                        <option value="1">Parent</option>
+                                        <option value="2">Child</option>
+                                    </select>
+                                </div>
+                                @*This field should Display when Parent or Child Field selected as Child. If Parent or Child Field selected as Child then Parent Organization field should be Mandatory*@
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Parent Organization">Parent Organization</label>
+                                    <select class="chosen-select" name="drpOrganizationParent" id="drpOrganizationParent" style="width:100%"></select>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="Employees">Employees</label>
+                                    <select class="chosen-select" name="drpEmployees" id="drpEmployees" multiple="" style="width:100%"></select>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled id="formSubmit" onclick="InsertRecords();">Submit</button>
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--The user can have a option to restore-->
+                <section class="tile" id="div_Restore" style="display:none">
+                    <div id="restorediv">
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+

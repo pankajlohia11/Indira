@@ -1,0 +1,55 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class tbl_StoreMaster
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal SM_Id { get; set; }
+
+        [StringLength(50)]
+        public string SM_Code { get; set; }
+
+        [Required]
+        public string SM_Name { get; set; }
+
+        public decimal? SM_Store_User { get; set; }
+
+        public string SM_Addressline1 { get; set; }
+
+        public string SM_Addressline2 { get; set; }
+
+        [StringLength(50)]
+        public string SM_Country { get; set; }
+
+        [StringLength(50)]
+        public string SM_State { get; set; }
+
+        [StringLength(50)]
+        public string SM_City { get; set; }
+
+        [StringLength(50)]
+        public string SM_Zipcode { get; set; }
+
+        public bool? SM_Activeflag { get; set; }
+
+        public bool? SM_DeleteStatus { get; set; }
+
+        [StringLength(50)]
+        public string SM_EnteredBy { get; set; }
+
+        public DateTime? SM_EnteredDate { get; set; }
+
+        [StringLength(50)]
+        public string SM_UpdatedBy { get; set; }
+
+        public DateTime? SM_UpdatedDate { get; set; }
+
+        public int? SM_CompanyKey { get; set; }
+    }
+}

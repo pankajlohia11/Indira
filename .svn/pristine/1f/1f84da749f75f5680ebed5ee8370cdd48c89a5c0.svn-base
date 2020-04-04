@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_BankController : Controller
+    {
+        // GET: ET_Admin_Bank
+        public ActionResult ET_Admin_Bank()
+        {
+            return View();
+        }
+    }
+}

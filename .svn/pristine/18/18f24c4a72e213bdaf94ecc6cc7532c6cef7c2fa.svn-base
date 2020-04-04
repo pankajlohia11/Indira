@@ -1,0 +1,612 @@
+﻿
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+
+Order Details will use for common Agency, PO, and Trading.
+    This page contains Add, Modify, Delete, View and Restore.
+    Author=RajKumar
+    Date = 4th Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_Orderdetails.js"></script>
+    }
+<script type="text/javascript">
+    function ChangeDetails(a) {
+                debugger;
+                var id = $(a).val();
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("ProductDetails", "ET_General_Order_Details")',
+                    data: { id: id },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        debugger;
+                        var res = JSON.parse(result);
+                        var td = $(a).parent().parent().find("td");
+                        $(td[1]).find("input").val(res[0].PG_NAME);
+                        $(td[2]).find("input").val(res[0].P_ShortName);
+                        $(td[3]).find("input").val(res[0].LU_Description);
+                        $(td[8]).find("input").val("");
+                        $(td[8]).find("input").removeAttr('disabled')
+                        $(td[9]).find("input").prop('checked', false);
+                    },
+                    error: function (response) {
+                        toastr["error"]("Product Data Not Loading", "Notification");
+                    }
+                });
+            }
+</script>
+    <script type="text/javascript">
+        /* BEGIN EXTERNAL SOURCE */
+        /* This function is used for window onload */
+        function PrintPanel() {
+            var panel = document.getElementById("div_PrintContent");
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<html><head><title>Print the Sales Quotation</title>');
+            printWindow.document.write('</head><body style="font-family:Arial">');
+            //document.writeln(panel.innerHtml);
+            printWindow.document.write(panel.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            setTimeout(function () {
+                printWindow.print();
+            }, 500);
+            return false;
+        }
+
+            function taxchange() {
+                debugger;
+                if ($("#txtShipmentAmount").val() == "") {
+                    $("#txtTax").val("");
+                    message = "Please Select Shipment No, Shipment Amount cannot be empty.";
+                    toastr["error"](message, "Notification");
+                }
+                else {
+                    $("#txtTaxAmt").val((parseFloat($("#txtShipmentAmount").val()) * (parseFloat($("#txtTax").val())) / 100).toFixed(3));
+                    $("#txtInvAmt").val((parseFloat($("#txtShipmentAmount").val()) + (parseFloat($("#txtTaxAmt").val()))).toFixed(3));
+                }
+            }
+            function checkvalidate() {
+                var tr = $("#Contactbody").find("tr");
+                var txt = "";
+
+                for (i = 0; i < tr.length; i++) {
+                    var td = $(tr[i]).find("td");
+                    var Shortname = $(td[0]).find("select").val();
+                    if (Shortname == "0") {
+                        message = "Choose Shortname:" + (i + 1);
+                        toastr["error"](message, "Notification");
+                        return "";
+                    }
+                    else {
+                        txt = txt + $(td[0]).find("select").val();
+                    }
+                }
+                return txt;
+            };
+
+
+        function checkoffer(a) {
+            var id = $(a).attr("id");
+            var tr = $(a).parent().parent();
+            var td = tr.find("td");
+            var Price = td[8].children;
+            if ($(a).prop('checked')) {
+
+                var pid = id.split("_");
+                var Sid = $("#drpSupplier").val();
+                if ($("#drpOrdertype").val() == 1) {
+                    if (Sid != 0) {
+                        var Shortname = "";
+
+                        Shortname = $(td[0].children).val();
+                        if (Shortname == "0") {
+                            message = "Choose Shortname:" + (i + 1);
+                            toastr["error"](message, "Notification");
+                            $('#' + id + '').prop('checked', false);
+                        }
+                        else {
+                            if (Shortname != 0) {
+                                $.ajax({
+                                    type: "GET",
+                                    url: '@Url.Action("ET_General_Order_SuplierProduct_Offer", "ET_General_Order_Details")',
+                                    dataType: 'json',
+                                    data: {
+                                        id: Sid,
+                                        pid: Shortname
+                                    },
+                                    contentType: "application/json;charset=utf-8",
+                                    dataType: "html",
+                                    success: function (result, textStatus, XMLHttpRequest) {
+                                        if (result.indexOf("ERR") > -1) {
+                                            $("#spanErrMessage1").html(result);
+                                            $("#spanErrMessage2").html(result);
+                                            if ($("#exceptionmessage").length)
+                                                $("#exceptionmessage").trigger("click");
+                                            $(Price).removeAttr('disabled');
+                                            $('#' + id + '').prop('checked', false);
+                                        }
+                                        else {
+                                            $(Price).val("");
+                                            $('#checkpricepobup').html(result);
+                                            $("#checkviewpopup").trigger("click");
+                                            $('#' + id).prop('checkedh', true);
+                                            $(Price).attr('disabled', 'disabled');
+                                            $("#chk_offerid").val(id);
+                                            $("#chk_offerpriceid").val(Price[0].id);
+                                        }
+
+                                    },
+                                    error: function (response) {
+                                        toastr["error"]("Popup Not Loading", "Notification");
+                                        $(Price).removeAttr('disabled');
+                                        $('#' + id + '').prop('checked', false);
+                                    }
+                                });
+                            }
+                            else {
+                                message = "Select Product Short name";
+                                toastr["error"](message, "Notification");
+                                $('#' + id + '').prop('checked', false);
+                                $(Price).removeAttr('disabled');
+                            }
+                        }
+
+                    }
+                    else {
+                        message = "Select Supplier";
+                        toastr["error"](message, "Notification");
+                        $('#' + id + '').prop('checked', false);
+                        $(Price).removeAttr('disabled');
+                    }
+                }
+
+                else {
+                    message = "Only For Agency";
+                    toastr["error"](message, "Notification");
+                    $('#' + id + '').prop('checked', false);
+                    $(Price).removeAttr('disabled');
+                }
+            }
+            else {
+                $('#' + id + '').prop('checked', false);
+                $('#' + id + '').val("0");
+                $(Price).removeAttr('disabled');
+            }
+        }
+
+        function Applyprice(offerid, f) {
+            var tr = $(f).parent().parent();
+            var td = tr.find("td");
+            var price = td[3].innerText;
+
+            var chkid = $("#chk_offerid").val();
+            var priceid = $("#chk_offerpriceid").val();
+            $("#" + chkid).val(offerid);
+            $("#" + priceid).val(price);
+            $("#close_offerpopup").click();
+        }
+
+    </script>
+            <!-- ====================================================
+                       ================= CONTENT ===============================
+                       ===================================================== -->
+            <!-- This section is used for displaying link menu on header bar-->
+            <section id="content">
+
+                <div class="page page-shop-single-order">
+
+                    <div class="pageheader">
+
+                        <h2>Order Details<span>@*You can place subtitle here*@</span></h2>
+
+                        <div class="page-bar">
+
+                            <ul class="page-breadcrumb">
+                                <li>
+                                    <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                                </li>
+                                <li>
+                                    <a href="#">Admin</a>
+                                </li>
+                                <li>
+                                    <a href="#">Order Details</a>
+                                </li>
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row" ng-controller="AC_OrderdetailsCtrl">
+                        <div class="col-md-12">
+                            <section class="tile" id="div_View">
+                                <!--[div_view] All view list contents datas will be written here-->
+                                <!-- tile header -->
+                                <div class="tile-header dvd-btm">
+                                    <h1 class="custom-font"><strong>Order Details</strong> List</h1>
+                                    <ul class="controls">
+                                        <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                        <li style="padding:5px">
+                                            <a tabindex="0" ng-click="createnew();">
+                                                <span class="btn btn-slategray btn-xs mb-10">
+                                                    Create
+                                                </span>
+                                            </a>
+                                        </li>
+                                        <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                                        <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                                    </ul>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+                                    <div class="row">
+                                        <div class="col-md-6"><div id="tableTools"></div></div>
+                                        <div class="col-md-6"><div id="colVis"></div></div>
+                                    </div>
+                                    <!-- Table created for displaying View content-->
+                                    <table class="table table-custom" id="advancedusage">
+                                        <thead>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>User Name</th>
+                                                <th>Order Type</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in orderlist">
+                                                <td>{{item.SO_CODE}}</td>
+                                                <td>{{item.USER_NAME}}</td>
+                                                <td>{{item.Type}}</td>
+                                                <td>
+                                                    <a ng-click="editRecords(item.SO_ID);" ng-if="item.SO_Approval!=1" value="{{ item.SO_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                                    <a ng-click="ViewRecords(item.SO_ID);" value="{{ item.SO_ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+                                                    <a ng-click="PrintRecords(item.SO_ID);" value="{{ item.SO_ID }}" style="color:green;padding:5px;"><i class="fa fa fa-print"></i></a>
+                                                    <a ng-click="Restoredeleterecords(item.SO_ID,$event,true);" ng-if="item.SO_Approval!=1" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- /tile body -->
+
+                            </section>
+                            <!--The user can have a option to create and edit records-->
+                            <section class="tile" id="div_Edit" style="display:none">
+
+                                <!-- tile header -->
+                                <div class="tile-header dvd-btm">
+                                    <h1 class="custom-font"><strong>Create</strong> Order Details</h1>
+                                    <ul class="controls">
+                                        <li style="padding:5px">
+                                            <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                            <a tabindex="0" ng-click="showRecords();">
+                                                <span class="btn btn-hotpink btn-xs mb-10">
+                                                    <i class="fa fa-arrow-left"></i> Back
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+
+                                    <div name="form1" role="form" id="form1" data-parsley-validate>
+
+                                        <div class="row">
+
+                                            <div class="form-group col-md-6">
+                                                <label for="CustomerName">Sales Code</label>
+                                                <input type="text" class="form-control" name="OrderCode" id="OrderCode" disabled="@ViewBag.AutoManual" @ViewBag.Required ng-model="OrderCode" />
+                                                <input type="text" class="form-control hidden" name="OrderID" id="OrderID" ng-model="OrderID" />
+                                                <input type="text" class="form-control hidden" name="chk_offerid" id="chk_offerid" />
+                                                <input type="text" class="form-control hidden" name="chk_offerpriceid" id="chk_offerpriceid" />
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="CustomerName">Sales Person*</label>
+                                                <select class="form-control chosen-select" data-parsley-trigger="change" name="drpSalesperson" id="drpSalesperson" ng-model="SelectedSalesperson" ng-change="Salesgroup();" required>
+                                                    <option value="">-Select-</option>
+                                                    <option data-ng-repeat="st in Salesperson" value="{{st.USER_ID}}">{{st.USER_NAME}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="SupplierName">Sales Group</label>
+                                                <input type="text" class="form-control" readonly="readonly" name="ORGNAMEText" id="ORGNAMEText" ng-model="ORGNAMEText" />
+                                                <input type="text" class="form-control hidden" name="ORGIDValue" id="ORGIDValue" ng-model="ORGIDValue" />
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="Ordertype">Order Type</label>
+                                                <select class="form-control chosen-select" data-parsley-trigger="change" name="drpOrdertype" ng-model="SelectedOredertype" id="drpOrdertype" ng-change="changeOrdertyper();" required>
+                                                    <option value="">--Select--</option>
+                                                    <option value="1">Agency</option>
+                                                    <option value="2">PO</option>
+                                                    <option value="3">Trading</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="CustomerDeliveryItems">Order Date </label>
+                                                <div class='input-group datepicker w-360' style="width:100%" data-format="L">
+                                                    <input type='text' id="txtorderdate" name="txtorderdate" class="form-control" ng-model="txtorderdate" required />
+                                                    <span class="input-group-addon">
+                                                        <span class="fa fa-calendar"></span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Cus_name">
+                                                <label for="CustomerName">Customer Name</label>
+                                                <select class="form-control chosen-select" name="drpCustomer" id="drpCustomer" ng-model="SelectedCustomer" ng-change="Customerchange();">
+                                                    <option value="0">-Select-</option>
+                                                    <option data-ng-repeat="st in CustomerList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Quote_No">
+                                                <label for="CustomerName">Quotation No</label>
+                                                <select class="form-control chosen-select" name="drpQuotationNo" id="drpQuotationNo" ng-model="SelectedQuotationNo" ng-change="QuotationChange();">
+                                                    <option value="0">-Select-</option>
+                                                    <option data-ng-repeat="Quotation in QuotationList" value="{{Quotation.Q_ID}}">{{Quotation.Q_Code}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Sub_name">
+                                                <label for="SupplierName">Supplier Name</label>
+                                                <select tabindex="3" class="form-control chosen-select" name="drpSupplier" id="drpSupplier" ng-model="SelectedSupplier" ng-change="Supplierchange();">
+                                                    <option value="0">-Select-</option>
+                                                    <option data-ng-repeat="st in SupplierList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                                </select>
+                                            </div>
+                                            <div id="Cus_po" class="form-group col-md-6 hidden">
+                                                <div class="form-group col-md-6">
+                                                    <label for="PONo">Customer PO No</label>
+                                                    <input type="text" class="form-control" data-parsley-trigger="change" name="txtcusponumber" id="txtcusponumber" ng-model="txtcusponumber" />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="PODate">Customer PO Date </label>
+                                                    <div class='input-group datepicker w-360' style="width:100%" data-format="L">
+                                                        <input type='text' id="cuspodate" name="cuspodate" class="form-control" ng-model="cuspodate" />
+                                                        <span class="input-group-addon">
+                                                            <span class="fa fa-calendar"></span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="Cus_sc" class="form-group col-md-6 hidden">
+                                                <div class="form-group col-md-6">
+                                                    <label for="Email">Customer SC No </label>
+                                                    <input type="text" class="form-control" data-parsley-trigger="change" name="txtcusscnumber" id="txtcusscnumber" ng-model="txtcusscnumber" />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="Url">Customer SC Date  </label>
+                                                    <div class='input-group datepicker w-360' style="width:100%" data-format="L">
+                                                        <input type='text' id="cusscdate" name="cusscdate" class="form-control" ng-model="cusscdate" />
+                                                        <span class="input-group-addon">
+                                                            <span class="fa fa-calendar"></span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="Sup_po" class="form-group col-md-6 hidden">
+                                                <div class="form-group col-md-6">
+                                                    <label for="PONo">Supplier PO No</label>
+                                                    <input type="text" class="form-control" data-parsley-trigger="change" ng-model="txtsubponumber" name="txtsubponumber" id="txtsubponumber" />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="PODate">Supplier PO Date </label>
+                                                    <div class='input-group datepicker w-360' style="width:100%" data-format="L">
+                                                        <input type='text' id="subpodate" name="subpodate" class="form-control" ng-model="subpodate" />
+                                                        <span class="input-group-addon">
+                                                            <span class="fa fa-calendar"></span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Sup_sc">
+                                                <div class="form-group col-md-6 ">
+                                                    <label for="Email">Supplier SC No </label>
+                                                    <input type="text" class="form-control" data-parsley-trigger="change" ng-model="txtsubscnumber" name="txtsubscnumber" id="txtsubscnumber" />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="Url">Supplier SC Date  </label>
+                                                    <div class='input-group datepicker w-360' style="width:100%" data-format="L">
+                                                        <input type='text' id="subscdate" name="subscdate" class="form-control" ng-model="subscdate" />
+                                                        <span class="input-group-addon">
+                                                            <span class="fa fa-calendar"></span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Cus_currency">
+                                                <label for="CustomerDeliveryItems">Customer Currency </label>
+                                                <select class="form-control chosen-select" name="drpCusCurrency" data-ng-model="SelectedCusCurrency" id="drpCusCurrency" ng-change="CusCurrencyChange">
+                                                    <option value="0">-Select-</option>
+                                                    <option data-ng-repeat="st in Currencylist" value="{{st.CURRENCY_ID}}">{{st.CURRENCY_CODE}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Sup_currency">
+                                                <label for="CustomerDeliveryItems">Supplier Currency </label>
+                                                <select class="form-control chosen-select" name="drpSupCurrency" data-ng-model="SelectedSupCurrency" id="drpSupCurrency" ng-change="SupCurrencyChange">
+                                                    <option value="0">-Select-</option>
+                                                    <option data-ng-repeat="st in Currencylist" value="{{st.CURRENCY_ID}}">{{st.CURRENCY_CODE}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="commision">
+                                                <label for="CustomerPayment">Commision </label>
+                                                <input type="text" class="form-control" data-parsley-trigger="change" data-parsley-type="digits" name="txtcommisionagy" id="txtcommisionagy" ng-model="txtcommisionagy" />
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Cus_deliterms">
+                                                <label for="CustomerDeliveryItems">Customer Delivery Terms </label>
+                                                <input type="text" class="form-control" name="txtCusdeliveryterms" id="txtCusdeliveryterms" ng-model="txtCusdeliveryterms" />
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Sup_deliterms">
+                                                <label for="CustomerPayment">Supplier Delivery Terms </label>
+                                                <input type="text" class="form-control" ng-model="txtsupdeliveryterms" name="txtsupdeliveryitems" id="txtsupdeliveryitems" />
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Cus_paymet">
+                                                <label for="CustomerPayment">Customer Payment Terms </label>
+                                                <select tabindex="3" class="form-control chosen-select" name="drpCusPaymenttype" ng-model="SelectedCuspaymenttype" id="drpCusPaymenttype" ng-change="CusPymtchange();">
+                                                    <option value="0">-Select-</option>
+                                                    <option data-ng-repeat="st in Cuspayment" value="{{st.PT_ID}}">{{st.PT_Name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6 hidden" id="Sup_payment">
+                                                <label for="CustomerPayment">Supplier Payment Terms </label>
+                                                <select tabindex="3" class="form-control chosen-select" name="drpSupPaymenttype" ng-model="SelectedSuppaymenttype" id="drpSupPaymenttype" ng-change="SupPymtchange();">
+                                                    <option value="0">-Select-</option>
+                                                    <option data-ng-repeat="st in Suppayment" value="{{st.PT_ID}}">{{st.PT_Name}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="CustomerPayment">Remarks </label>
+                                                <input type="text" class="form-control" name="remarks" id="remarks" ng-model="remarks" />
+                                            </div>
+                                        </div>
+
+                                        <div class="tile-body">
+                                            <div class="table-responsive">
+                                                <!-- This table is used for displaying data in the form of grid in the create/edit page-->
+                                                <table class="table table-custom" id="grd_1">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Short Name</th>
+                                                            <th>Category</th>
+                                                            <th>Product</th>
+                                                            <th>UOM</th>
+                                                            <th>Currency</th>
+                                                            <th>Packing</th>
+                                                            <th>Quantity</th>
+                                                            <th>Target Value</th>
+                                                            <th>Price</th>
+                                                            <th>Is Offer</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="Contactbody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                                <!-- /tile body -->
+                                <!-- tile footer -->
+                                <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                                    <!-- SUBMIT BUTTON -->
+                                    <!-- Button used for submitting the record -->
+                                    <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick();" ng-bind="submittext">Submit</button>
+                                </div>
+                                <!-- /tile footer -->
+
+                            </section>
+                            <!--The user can have a option to restore-->
+                            <section class="tile" id="div_Restore" style="display:none">
+
+                                <!-- tile header -->
+                                <div class="tile-header dvd-btm">
+                                    <h1 class="custom-font"><strong>Restore Order Details</strong> List</h1>
+                                    <ul class="controls">
+                                        <li style="padding:5px">
+                                            <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                            <a tabindex="0" ng-click="showRecords();">
+                                                <!-- This is used as a link for back. It wil navigates to View List Page -->
+                                                <span class="btn btn-hotpink btn-xs mb-10">
+                                                    <i class="fa fa-arrow-left"></i>Back
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+                                    <div class="row">
+                                        <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                                        <div class="col-md-6"><div id="colVisRestore"></div></div>
+                                    </div>
+                                    <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                                    <table class="table table-custom" id="advancedusageRestore">
+                                        <thead>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>User Name</th>
+                                                <th>Order Type</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in orderRestorelist">
+                                                <td>{{item.SO_CODE}}</td>
+                                                <td>{{item.USER_NAME}}</td>
+                                                <td>{{item.Type}}</td>
+                                                <td>
+                                                    <a ng-click="Restoredeleterecords(item.SO_ID,$event,false);" style="color:red"><i class="fa fa-undo"></i></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                                <!-- /tile body -->
+                            </section>
+                            <section class="tile" id="div_Print" style="display:none">
+                                <!-- tile header -->
+                                <div class="tile-header dvd-btm">
+                                    <h1 class="custom-font"><strong>Print</strong> Order</h1>
+                                    <ul class="controls">
+                                        <li style="padding:5px">
+                                            <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                            <a tabindex="0" ng-click="showRecords();">
+                                                <span class="btn btn-hotpink btn-xs mb-10">
+                                                    <i class="fa fa-arrow-left"></i> Back
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="tile-body fa-border" id="div_PrintContent">
+                                </div>
+                                <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                                    <!-- SUBMIT BUTTON -->
+                                    <!-- Button used for submitting the record -->
+                                    <button type="submit" class="btn btn-success" id="frmPrint" onclick="PrintPanel();">Print</button>
+                                </div>
+
+                            </section>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+            @section anypopup
+{
+                <a id="checkviewpopup" data-toggle="modal" data-target="#checkpobup" data-options="splash-2 splash-ef-4"></a>
+                <div class="modal splash fade" id="checkpobup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title custom-font red"><strong style="color:red">Offer</strong></h3>
+                            </div>
+                            <div class="tile-body" id="checkpricepobup">
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-default btn-border" id="close_offerpopup" data-dismiss="modal">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+

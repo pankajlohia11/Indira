@@ -1,0 +1,56 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_CompanyDetails>
+
+<div id="partialdiv">
+    <div class="tile-header dvd-btm">
+        <h1 class="custom-font"><strong>Restore Roles and Privilege</strong> List</h1>
+        <ul class="controls">
+            <li style="padding:5px">
+                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                <a tabindex="0" onclick="showRecords();">
+                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                    <span class="btn btn-hotpink btn-xs mb-10">
+                        <i class="fa fa-arrow-left"></i>Back
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- /tile header -->
+    <!-- tile body -->
+    <div class="tile-body">
+        <div class="row">
+            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+            <div class="col-md-6"><div id="colVisRestore"></div></div>
+        </div>
+        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+        <table class="table table-custom" id="advancedusageRestore">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Company Name</th>
+                    <th>Display name</th>
+                    <th>Country</th>
+                    <th>City</th>
+                    <th>Zipcode</th>
+                    <th>Mobile</th>
+                    <td>Action</td>
+                </tr>
+            </thead>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.COM_ID</td>
+                    <td>@item.COM_NAME</td>
+                    <td>@item.COM_DISPLAYNAME</td>
+                    <td>@item.COM_COUNTRY</td>
+                    <td>@item.COM_CITY</td>
+                    <td>@item.COM_ZIP</td>
+                    <td>@item.COM_MOBILE</td>
+                    <td>
+                        <a onclick="Restoredeleterecords(@item.COM_ID,this);" style="color:red"><i class="fa fa-undo"></i></a>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

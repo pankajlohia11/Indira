@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+    public class CheckStockQtyofanItem_CM
+    {
+        public DateTime Date { get; set; }
+        public string TrnTpe { get; set; }
+        public string PartyName { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal UOM { get; set; }
+        public decimal OpeningQty { get; set; }
+        public decimal ClosingQty { get; set; }
+    }
+}

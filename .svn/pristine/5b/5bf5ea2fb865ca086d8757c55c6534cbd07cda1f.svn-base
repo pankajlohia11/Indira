@@ -1,0 +1,972 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_CompanyDetails>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Company Details.
+    The user can edit or remove and restore  a record in Company Details.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+        /* This function is used to restore records from Contacts details records*/
+        function restoreRow(oTable, nRow) {
+            var aData = oTable.row(nRow).data();
+            var jqTds = $('>td', nRow);
+
+            for (var i = 0, iLen = jqTds.length; i < iLen; i++) {
+                oTable.row(nRow).data(aData[i]);
+            }
+
+            oTable.draw();
+        }
+        /* This function is used to Edit records from Contacts details records*/
+        function editRow(oTable, nRow) {
+            var aData = oTable.row(nRow).data();
+            var jqTds = $('>td', nRow);
+            jqTds[0].innerHTML = '<select class="form-control input-sm" value="' + aData[0] + '">';
+            jqTds[1].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[1] + '">';
+            jqTds[2].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[2] + '">';
+            jqTds[3].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[3] + '">';
+            jqTds[4].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[4] + '">';
+            jqTds[5].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[5] + '">';
+            jqTds[6].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[6] + '">';
+            jqTds[7].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[7] + '">';
+            jqTds[8].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[8] + '">';
+            jqTds[9].innerHTML = '<a role="button" tabindex="0" class="edit text-success text-uppercase text-strong text-sm mr-10">Save</a><a role="button" tabindex="0" class="cancel text-warning text-uppercase text-strong text-sm mr-10">Cancel</a>';
+        }
+        //this function  is used edit row in Bank Accounts details
+        function editRow1(oTable, nRow) {
+            var aData = oTable.row(nRow).data();
+            var jqTds = $('>td', nRow);
+            jqTds[0].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[0] + '">';
+            jqTds[1].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[1] + '">';
+            jqTds[2].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[2] + '">';
+            jqTds[3].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[3] + '">';
+            jqTds[4].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[4] + '">';
+            jqTds[5].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[5] + '">';
+            jqTds[6].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[6] + '">';
+            jqTds[7].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[7] + '">';
+            jqTds[8].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[8] + '">';
+            jqTds[9].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[9] + '">';
+            jqTds[10].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[10] + '">';
+            jqTds[11].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[11] + '">';
+            jqTds[12].innerHTML = '<input type="text" class="form-control input-sm" value="' + aData[12] + '">';
+            jqTds[13].innerHTML = '<a role="button" tabindex="0" class="edit text-success text-uppercase text-strong text-sm mr-10">Save</a><a role="button" tabindex="0" class="cancel text-warning text-uppercase text-strong text-sm mr-10">Cancel</a>';
+        }
+        /* This function is used to Save records from Contacts details records*/
+        function saveRow(oTable, nRow) {
+            var jqInputs = $('input', nRow);
+            oTable.cell(nRow, 0).data(jqInputs[0].value);
+            oTable.cell(nRow, 1).data(jqInputs[1].value);
+            oTable.cell(nRow, 2).data(jqInputs[2].value);
+            oTable.cell(nRow, 3).data(jqInputs[3].value);
+            oTable.cell(nRow, 4).data(jqInputs[4].value);
+            oTable.cell(nRow, 5).data(jqInputs[5].value);
+            oTable.cell(nRow, 6).data(jqInputs[6].value);
+            oTable.cell(nRow, 7).data(jqInputs[7].value);
+            oTable.cell(nRow, 8).data(jqInputs[8].value);
+            oTable.cell(nRow, 9).data('<a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a>');
+            oTable.draw();
+        }
+        //This function is used for to save records in Bank Details
+        function saveRow1(oTable, nRow) {
+            var jqInputs = $('input', nRow);
+            oTable.cell(nRow, 0).data(jqInputs[0].value);
+            oTable.cell(nRow, 1).data(jqInputs[1].value);
+            oTable.cell(nRow, 2).data(jqInputs[2].value);
+            oTable.cell(nRow, 3).data(jqInputs[3].value);
+            oTable.cell(nRow, 4).data(jqInputs[4].value);
+            oTable.cell(nRow, 5).data(jqInputs[5].value);
+            oTable.cell(nRow, 6).data(jqInputs[6].value);
+            oTable.cell(nRow, 7).data(jqInputs[7].value);
+            oTable.cell(nRow, 8).data(jqInputs[8].value);
+            oTable.cell(nRow, 9).data(jqInputs[9].value);
+            oTable.cell(nRow, 10).data(jqInputs[10].value);
+            oTable.cell(nRow, 11).data(jqInputs[11].value);
+            oTable.cell(nRow, 12).data(jqInputs[12].value);
+            oTable.cell(nRow, 13).data('<a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a>');
+            oTable.draw();
+        }
+        /*
+        * this script is used for Contacts table details to perform operations
+        */
+        var table2 = $('#editable-usage');
+
+        var oTable = $('#editable-usage').DataTable({
+            "aoColumnDefs": [
+                { 'bSortable': false, 'aTargets': ["no-sort"] }
+            ]
+        });
+        /*
+         * this script is used for Banks table details to perform operations
+         */
+        var table2 = $('#editable-usage1');
+
+        var oTable = $('#editable-usage1').DataTable({
+            "aoColumnDefs": [
+                { 'bSortable': false, 'aTargets': ["no-sort"] }
+            ]
+        });
+        /* This function is used to add new rows in Bank Accounts details view list page*/
+        var nEditing = null;
+        var nNew = false;
+        $('#add-entry1').click(function (e) {
+            e.preventDefault();
+            if (nNew && nEditing) {
+                if (confirm("Previous row is not saved yet. Save it ?")) {
+                    saveRow1(oTable, nEditing); // save
+                    $(nEditing).find("td:first").html("Untitled");
+                    nEditing = null;
+                    nNew = false;
+
+                } else {
+                    oTable.row(nEditing).remove().draw(); // cancel
+                    nEditing = null;
+                    nNew = false;
+
+                    return;
+                }
+            }
+
+            var aiNew = oTable.row.add(['', '', '', '', '', '', '']).draw();
+            var nRow = oTable.row(aiNew[0]).node();
+            editRow1(oTable, nRow);
+            nEditing = nRow;
+            nNew = true;
+        });
+        /* This function is used to add new rows in Contacts details view list page*/
+        $('#add-entry').click(function (e) {
+            e.preventDefault();
+            if (nNew && nEditing) {
+                if (confirm("Previous row is not saved yet. Save it ?")) {
+                    saveRow(oTable, nEditing); // save
+                    $(nEditing).find("td:first").html("Untitled");
+                    nEditing = null;
+                    nNew = false;
+
+                } else {
+                    oTable.row(nEditing).remove().draw(); // cancel
+                    nEditing = null;
+                    nNew = false;
+
+                    return;
+                }
+            }
+
+            var aiNew = oTable.row.add(['', '', '', '', '', '', '']).draw();
+            var nRow = oTable.row(aiNew[0]).node();
+            editRow(oTable, nRow);
+            nEditing = nRow;
+            nNew = true;
+        });
+        /*
+        * this script is used for Contacts table details to perform cancel operations
+        */
+        table2.on('click', '.delete', function (e) {
+            e.preventDefault();
+
+            if (confirm("Are you sure?") == false) {
+                return;
+            }
+
+            var nRow = $(this).parents('tr')[0];
+            oTable.row(nRow).remove().draw();
+            alert("Deleted!");
+        });
+        /*
+       * this script is used for Contacts table details to perform cancel operations
+       */
+        table2.on('click', '.cancel', function (e) {
+            e.preventDefault();
+            if (nNew) {
+                oTable.row(nEditing).remove().draw();
+                nEditing = null;
+                nNew = false;
+            } else {
+                restoreRow(oTable, nEditing);
+                nEditing = null;
+            }
+        });
+
+        table2.on('click', '.edit', function (e) {
+            e.preventDefault();
+
+            /* Get the row as a parent of the link that was clicked on */
+            var nRow = $(this).parents('tr')[0];
+
+            alert("passed");
+            if (nEditing !== null && nEditing != nRow) {
+                /* Currently editing - but not this row - restore the old before continuing to edit mode */
+                restoreRow(oTable, nEditing);
+                editRow(oTable, nRow);
+                nEditing = nRow;
+            } else if (nEditing == nRow && this.innerHTML == "Save") {
+                /* Editing this row and want to save it */
+                saveRow(oTable, nEditing);
+                nEditing = null;
+                alert("Updated!");
+            } else {
+                /* No edit in progress - let's start one */
+                editRow(oTable, nRow);
+                nEditing = nRow;
+            }
+        });
+        //*initialize editable datatable
+        //initialize responsive datatable
+        var table3 = $('#responsive-usage').DataTable({
+            "ajax": 'assets/extras/datatables-responsive.json',
+            "columns": [
+                { "data": "id" },
+                { "data": "firstName" },
+                { "data": "lastName" },
+                { "data": "tel" },
+                { "data": "address" },
+                { "data": "city" },
+                { "data": "state" },
+                { "data": "zip" }
+            ],
+            "aoColumnDefs": [
+                { 'bSortable': false, 'aTargets': ["no-sort"] }
+            ]
+        });
+        //*initialize responsive datatable
+        //initialize responsive datatable
+        function stateChange(iColumn, bVisible) {
+            console.log('The column', iColumn, ' has changed its status to', bVisible);
+        }
+
+        var table4 = $('#advanced-usage').DataTable({
+            "ajax": 'assets/extras/datatables-basic.json',
+            "columns": [
+                { "data": "id" },
+                { "data": "firstName" },
+                { "data": "lastName" }
+            ],
+            "aoColumnDefs": [
+                { 'bSortable': false, 'aTargets': ["no-sort"] }
+            ]
+        });
+
+        var colvis = new $.fn.dataTable.ColVis(table4);
+
+        $(colvis.button()).insertAfter('#colVis');
+        $(colvis.button()).find('button').addClass('btn btn-default').removeClass('ColVis_Button');
+
+        var tt = new $.fn.dataTable.TableTools(table4, {
+            sRowSelect: 'single',
+            "aButtons": [
+                'copy',
+                'print', {
+                    'sExtends': 'collection',
+                    'sButtonText': 'Save',
+                    'aButtons': ['csv', 'xls', 'pdf']
+                }
+            ],
+            "sSwfPath": "assets/js/vendor/datatables/extensions/TableTools/swf/copy_csv_xls_pdf.swf",
+        });
+
+        $(tt.fnContainer()).insertAfter('#tableTools');
+    };
+    /* This function is used for displaying restore page and hide display page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This fuction is to hide and show the divisions in Edit page*/
+    function companydetais() {
+        $("#div_company").css("display", "block");
+        $("#div_contacts").css("display", "none");
+        $("#div_BankDetails").css("display", "none");
+    }
+    /* This fuction is to hide and show the divisions in Edit page*/
+    function contactdetails() {
+        $("#div_company").css("display", "none");
+        $("#div_contacts").css("display", "block");
+        $("#div_BankDetails").css("display", "none");
+    }
+    /* This fuction is to hide and show the divisions in Edit page*/
+    function bankdetails() {
+        $("#div_company").css("display", "none");
+        $("#div_contacts").css("display", "none");
+        $("#div_BankDetails").css("display", "block");
+    }
+    /* This function is used for displaying View list pagee */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying Edit list pagee */
+
+    //function tadi() {
+    //    debugger;
+    //    var companytype = $('input[name=companytype]:checked', '#Typeradiobtn').val();
+    //    alert(companytype);
+    //}
+
+    function InsertRecords() {
+        var ComID = $("#txtComID").val();
+        if (ComID != 0) {
+            ComID = $("#RoleID").val();
+        }
+        else {
+            ComID = "0";
+        }
+        var CompanyName = $("#txtCompanyName").val();
+        var DisplayName = $("#txtDisplayName").val();
+        var UstId = $("#UstId").val();
+        var TaxNo = $("#txtTaxNo").val();
+        var Address = $("#txtAddress").val(); 
+        var Country = $("#Country").val();
+        var State = $(".txtState").val();
+        var City = $(".txtCity").val();
+        var Zip = $("#txtZip").val();
+        var Email = $("#txtEmail").val();
+        var Fax = $("#txtFax").val();
+        var Phone = $("#txtPhone").val();
+        var Mobile = $("#txtMobile").val();
+        var Remarks = $("#txtRemarks").val();
+        var companytype = $("#companytype").val();
+        $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Master_Company_Add", "ET_Admin_Company")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+            data: {
+                    ComID: ComID,
+                    CompanyName: CompanyName,
+                    DisplayName: DisplayName,
+                    UstId: UstId,
+                    TaxNo: TaxNo,
+                    Address: Address,
+                    State: State,
+                    Country: Country,
+                    City:City,
+                    Zip: Zip,
+                    Email: Email,
+                    Fax: Fax,
+                    Phone: Phone,
+                    Mobile: Mobile,
+                    Remarks: Remarks,
+                    companytype: companytype
+                },
+            success: function (result) {
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $("#div_company").css("display", "block");
+                    $("#div_contacts").css("display", "none");
+                    $("#div_BankDetails").css("display", "none");
+
+                alert(result);
+                if (result == "Success") {
+                        $("#txtCompanyName").val("");
+                        $("#txtDisplayName").val("");
+                        $("#UstId").val("");
+                        $("#txtTaxNo").val("");
+                        $("#txtAddress").val("");
+                        $(".txtState").val("");
+                        $(".txtCity").val("");
+                        $("#txtZip").val("");
+                        $("#txtEmail").val("");
+                        $("#txtFax").val("");
+                        $("#txtPhone").val("");
+                        $("#txtMobile").val("");
+                        $("#txtRemarks").val("");
+                        $("#companytype").val("0");
+                        $("#txtComID").val("0");
+                        alert(result);
+                    }
+                 
+                },
+                error: function (response) {
+
+                    alert('eror');
+                }
+            });
+    };
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+        $("#div_company").css("display", "block");
+        $("#div_contacts").css("display", "none");
+        $("#div_BankDetails").css("display", "none");
+    };
+
+    function City() {
+        var id = ($(".txtState option:selected").val());
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_City", "ET_Admin_Company")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+            success: function (result) {
+                var html = '<option value="">--Select--</option>';
+                for (i = 0; i < result.length; i++) {
+                    html += '<option value="' + result[i].location_id + '">' + result[i].name
+                        + '</option>';
+                }
+                html += '</option>';
+
+                $('.txtCity').html(html);
+                },
+                error: function (response) {
+                    alert('error');
+                }
+            });
+    };
+
+    function State() {
+        var id = ($("#Country option:selected").val());
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_State", "ET_Admin_Company")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+             success: function (result) {
+                 var html = '<option value="">--Select--</option>';
+                 for (i = 0; i < result.length; i++) {
+                     html += '<option value="' + result[i].location_id + '">' + result[i].name + '</option>';
+                 }
+                 html += '</option>';
+
+                 $('.txtState').html(html);
+                },
+                error: function (response) {
+                    alert('error');
+                }
+            });
+    };
+
+    @*$(function () {
+        $('#Country').on('change', function () {
+            debugger;
+            var id = $("#Country").val();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_City", "ET_Admin_Company")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+            success: function (result) {
+                alert(result);
+                },
+                error: function (response) {
+                    alert('error');
+                }
+            });
+
+        });
+
+    });*@
+
+</script>
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="pageheader">
+
+        <h2>Company<span>@*You can place subtitle here*@</span></h2>
+
+        <div class="page-bar">
+
+            <ul class="page-breadcrumb">
+                <li>
+                    <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                </li>
+                <li>
+                    <a href="#">Admin</a>
+                </li>
+                <li>
+                    <a href="#">Company Master</a>
+                </li>
+            </ul>
+
+        </div>
+
+    </div>
+    <div class="tile-body">
+        <div class="page page-shop-single-order">
+            <section class="tile" id="div_View">
+                <!--[div_view] All view list contents datas will be written here-->
+                <!-- tile header -->
+                <div class="tile-header dvd-btm">
+                    <h1 class="custom-font"><strong>Company Master</strong> List</h1>
+                    <ul class="controls">
+                        <li style="padding:5px">
+                            <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                            <a tabindex="0" onclick="createRecords();">
+                                <span class="btn btn-slategray btn-xs mb-10">
+                                    <i class="fa fa-plus"></i>
+                                    Add
+                                </span>
+                            </a>
+                        </li>
+                        <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                        <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                    </ul>
+                </div>
+                <!-- /tile header -->
+                <!-- tile body -->
+                <div class="tile-body">
+                    <div class="row">
+                        <div class="col-md-6"><div id="tableTools"></div></div>
+                        <div class="col-md-6"><div id="colVis"></div></div>
+                    </div>
+                    <!-- Table created for displaying View content-->
+                    <table class="table table-custom" id="advancedusage">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Company Name</th>
+                                <th>Display name</th>
+                                <th>Country</th>
+                                <th>City</th>
+                                <th>Zipcode</th>
+                                <th>Mobile</th>
+                                <td>Delete</td>
+                            </tr>
+
+                        </thead>
+                        @foreach (var item in Model)
+                        {
+                        <tr>
+                            <td>@item.COM_ID</td>
+                            <td>@item.COM_NAME</td>
+                            <td>@item.COM_DISPLAYNAME</td>
+                            <td>@item.COM_COUNTRY</td>
+                            <td>@item.COM_CITY</td>
+                            <td>@item.COM_ZIP</td>
+                            <td>@item.COM_MOBILE</td>
+                            <td>Delete</td>
+                        </tr>
+                        }
+                    </table>
+                </div>
+                <!-- /tile body -->
+
+            </section>
+            <!--The user can have a option to create and edit records-->
+            <section class="tile" id="div_Edit" style="display:none">
+                <!-- tile header -->
+                <div class="tile-header dvd-btm">
+                    <h1 class="custom-font"><strong>Create</strong> Company Master</h1>
+                    <ul class="controls">
+                        <li style="padding:5px">
+                            <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                            <a tabindex="0" onclick="showRecords();">
+                                <span class="btn btn-hotpink btn-xs mb-10">
+                                    <i class="fa fa-arrow-left"></i> Back
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- This Below code is used for Tab purpose -->
+                <ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                    <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                    <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" onclick="contactdetails();"></a></li>
+                    <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                </ul>
+                <!-- /tile header -->
+                <!-- tile body -->
+                <div id="div_company">
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <h5><label><strong>Company Info</strong></label></h5>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Company Name</label>
+                                    <input type="text" name="CompanyName" id="txtCompanyName" class="form-control" data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/" required>
+                                    <input type="text" name="txtComID" id="txtComID" hidden>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Display Name</label>
+
+                                    <input type="text" name="DisplayName" id="txtDisplayName" class="form-control" data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="Digits">UstId</label>
+                                    <input type="text" name="UstId" id="UstId" class="form-control">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Numbers">Tax No</label>
+
+                                    <input type="text" name="TaxNo" id="txtTaxNo" class="form-control">
+                                </div>
+                            </div>
+
+                            <h5> <label><strong>Address Info</strong></label></h5>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Alphanumeric">Address</label>
+                                    <input type="text" name="Address" id="txtAddress" class="form-control" data-parsley-trigger="change" data-parsley-type="alphanum" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">Country</label>
+                                    @*<select class="form-control"></select>*@
+                                    @Html.DropDownList("Country", new SelectList(ViewBag.Country, "location_id", "name"), new { @class = "form-control chosen-select", onchange = "State()", @id = "Country" })
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">State</label>
+                                    <select class="form-control txtState" onchange="City()"></select>
+                                    @*@Html.DropDownList("City", new SelectList(ViewBag.City, "location_id", "name"), new { @class = "form-control chosen-select" })*@
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">City</label>
+                                    <select class="form-control txtCity"></select>
+                                    @*@Html.DropDownList("State", new SelectList(ViewBag.State, "location_id", "name"), new { @class = "form-control chosen-select", onchange = "City()", @id = "City" })*@
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Alphanumeric">Zip</label>
+                                    <input type="text" name="Zip" id="txtZip" class="form-control" data-parsley-trigger="change" data-parsley-type="digits" required>
+                                </div>
+                            </div>
+
+                            <h5><label><strong>Contact Info</strong></label></h5>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Alphanumeric">Email</label>
+                                    <input type="email" name="Email" id="txtEmail" class="form-control" data-parsley-trigger="change" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">Fax</label>
+
+                                    <input type="text" name="Fax" id="txtFax" class="form-control" data-parsley-trigger="change" data-parsley-type="digits">
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="Alphanumeric">Phone</label>
+                                    <input type="text" name="Phone" id="txtPhone" class="form-control" data-parsley-trigger="change" data-parsley-type="digits">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">Mobile</label>
+
+                                    <input type="text" name="Mobile" id="txtMobile" class="form-control" data-parsley-trigger="change" data-parsley-type="digits">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            Company Type
+                                        </label>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <select class="form-control" id="companytype">
+                                            <option name="companytype" value="0">Customer</option>
+                                            <option name="companytype" value="1">Supplier</option>
+                                            <option name="companytype" value="2">Both</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">Remarks</label>
+                                    <input type="text" name="Remarks" id="txtRemarks" class="form-control" data-parsley-trigger="change" data-parsley-type="alphanum">
+                                </div>
+                            </div>
+                            <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                                <!-- SUBMIT BUTTON -->
+                                <!-- Button used for submitting the record -->
+                                <button type="submit" class="btn btn-success" onclick="InsertRecords();">Submit</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div id="div_contacts">
+                    <div class="tile-header dvd dvd-btm">
+                        <h1 class="custom-font"><strong>Contacts</strong></h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" id="add-entry">
+                                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                            <table class="table table-custom" id="editable-usage">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Job Title</th>
+                                        <th>Phone</th>
+                                        <th>Fax</th>
+                                        <th>Mobile</th>
+                                        <th>Email</th>
+                                        <th>Remarks</th>
+                                        <th style="width: 160px;" class="no-sort">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="odd gradeX">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>X</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>X</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                    <tr class="even gradeC">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 5.0</td>
+                                        <td>Win 95+</td>
+                                        <td>5</td>
+                                        <td>C</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>X</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                    <tr class="odd gradeA">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 5.5</td>
+                                        <td>Win 95+</td>
+                                        <td>5.5</td>
+                                        <td>A</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>X</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                    <tr class="even gradeA">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 6</td>
+                                        <td>Win 98+</td>
+                                        <td>6</td>
+                                        <td>A</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>X</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                    <tr class="odd gradeA">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 7</td>
+                                        <td>Win XP SP2+</td>
+                                        <td>7</td>
+                                        <td>A</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>X</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+                <div id="div_BankDetails">
+                    <div class="tile-header dvd dvd-btm">
+                        <h1 class="custom-font"><strong>Bank</strong> Accounts</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <a tabindex="0" id="add-entry1">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tile-body">
+                        <div class="table-responsive">
+                            <table class="table table-custom" id="editable-usage1">
+                                <thead>
+                                    <tr>
+                                        <th>Bank Name</th>
+                                        <th>Display Name </th>
+                                        <th>Address</th>
+                                        <th>City Name </th>
+                                        <th>Zip Code</th>
+                                        <th>Country</th>
+                                        <th>SWIFT</th>
+                                        <th>BLZ</th>
+                                        <th>BIC</th>
+                                        <th>IBAN</th>
+                                        <th>Contact Name</th>
+                                        <th>Contact No</th>
+                                        <th>Remarks</th>
+                                        <th style="width: 160px;" class="no-sort">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="odd gradeX">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>X</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                    <tr class="even gradeC">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 5.0</td>
+                                        <td>Win 95+</td>
+                                        <td>5</td>
+                                        <td>C</td>
+                                        <td>X</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                    <tr class="odd gradeA">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 5.5</td>
+                                        <td>Win 95+</td>
+                                        <td>5.5</td>
+                                        <td>A</td>
+                                        <td>X</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                    <tr class="even gradeA">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 6</td>
+                                        <td>Win 98+</td>
+                                        <td>6</td>
+                                        <td>A</td>
+                                        <td>X</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                    <tr class="odd gradeA">
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 7</td>
+                                        <td>Win XP SP2+</td>
+                                        <td>7</td>
+                                        <td>A</td>
+                                        <td>X</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td> 4</td>
+                                        <td>Trident</td>
+                                        <td>Internet Explorer 4.0</td>
+                                        <td>Win 95+</td>
+                                        <td class="actions"><a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a><a role="button" tabindex="0" class="delete text-danger text-uppercase text-strong text-sm mr-10">Remove</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tile" id="div_Restore" style="display:none">
+
+                <!-- tile header -->
+                <div class="tile-header dvd-btm">
+                    <h1 class="custom-font"><strong>Restore Company Master</strong> List</h1>
+                    <ul class="controls">
+                        <li style="padding:5px">
+                            <a tabindex="0" onclick="showRecords();">
+                                <span class="btn btn-hotpink btn-xs mb-10">
+                                    <i class="fa fa-arrow-left"></i>Back
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /tile header -->
+                <!-- tile body -->
+                <div class="tile-body">
+                    <div class="row">
+                        <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                        <div class="col-md-6"><div id="colVisRestore"></div></div>
+                    </div>
+                    <table class="table table-custom" id="advancedusageRestore">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Company Name</th>
+                                <th>Display name</th>
+                                <th>Country</th>
+                                <th>City</th>
+                                <th>Zipcode</th>
+                                <th>Mobile</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- /tile body -->
+
+            </section>
+
+
+        </div>
+
+    </div>
+</section>

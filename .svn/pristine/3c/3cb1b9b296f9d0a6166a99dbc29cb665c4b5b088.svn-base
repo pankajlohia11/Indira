@@ -1,0 +1,356 @@
+﻿
+@{
+    /**/
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Stores and Store Items.
+    The user can edit or remove and restore  a record in Stores and Store Items.
+    Author=RajKumar
+    Date = 4th May 2018
+    Purchase Store View
+    Operation={View,Restore,Create}
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_PackingList.js"></script>
+    <script type="text/javascript">
+        function PrintPanel()
+        {
+            var panel = document.getElementById("div_PrintContent");
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<html><head><title>Print the Sales OneToOneInvoice</title>');
+            printWindow.document.write('</head><body style="font-family:Arial">');
+            //document.writeln(panel.innerHtml);
+            printWindow.document.write(panel.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            setTimeout(function () {
+                printWindow.print();
+            }, 500);
+            return false;
+        }
+
+        function taxchange() {
+            debugger;
+            if ($("#txtShipmentAmount").val() == "") {
+                $("#txtTax").val("");
+                message = "Please Select Shipment No, Shipment Amount cannot be empty.";
+                toastr["error"](message, "Notification");
+            }
+            else {
+                $("#txtTaxAmt").val((parseFloat($("#txtShipmentAmount").val()) * (parseFloat($("#txtTax").val())) / 100).toFixed(3));
+                $("#txtInvAmt").val((parseFloat($("#txtShipmentAmount").val()) + (parseFloat($("#txtTaxAmt").val()))).toFixed(3));
+            }
+        }
+     function ProductChange(e)
+        {
+            debugger;
+            var id1 = parseInt($(e).val());
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetProductDetailsByID", "ET_Purchase_StoreMaster")',
+            data: {id:id1},
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+            debugger;
+            var res = JSON.parse(result)
+            var td = $(e).parent().parent().find("td");
+            $(td[1]).find("input").val(res[0].name);
+            },
+            error: function (response) {
+            toastr["error"]("Product Data Not Found", "Notification");
+            }
+            });
+            }
+
+    </script>
+}
+
+}
+
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order">
+        <div class="pageheader">
+
+            <h2>Packing list<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Packing list</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_PacinglistCtrl">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Packing </strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Date</th>
+                                    <th>Order No</th>
+                                    <th>Remarks</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="store in storelist">
+                                    <td>{{store.Code}}</td>
+                                    <td>{{store.Date.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                    <td>{{store.OrderNo}}</td>
+                                    <td>{{store.remarks}}</td>
+                                    <td>
+                                        <a ng-click="editRecords(store.ID);" value="{{ store.ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(store.ID);" value="{{ store.ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+                                        <a ng-click="PrintRecords(store.ID);" value="{{ store.ID }}" style="color:green;padding:5px;"><i class="fa fa fa-print"></i></a>
+                                        <a ng-click="Restoredeleterecords(store.ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> Packing List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- This Below code is used for Tab purpose -->
+                    @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                        </ul>*@
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtStoreCode">Packing List Code</label>
+                                    <input type="text" name="txtCode" id="txtCode" ng-model="PL_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                    <input type="text" name="txtID" id="txtID" ng-model="PL_ID" class="hidden">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtStorename">Date*</label>
+                                    <div class='input-group datepicker w-360' data-format="L" style="width:100%">
+                                        <input type='text' id="txtDate" name="txtDate" class="form-control" required />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label">Order No*</label>
+                                    <select data-ng-model="SM_Store_User" id="drporderUsers" class="form-control chosen-select" data-parsley-trigger="change" required ng-change="UserChange()">
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="StoreUser in storeuserlist" value="{{StoreUser.SO_ID}}">
+                                            {{StoreUser.SO_Code}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Remarks</label>
+                                    <input type="text" name="Remarks" id="txtRemarks" ng-model="PL_Remarks" class="form-control">
+                                </div>
+                            </div>
+
+                            <section class="tile">
+                                <!-- tile header -->
+                                <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                    <h1 class="custom-font"><strong>Detail </strong> Packliste</h1>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+
+                                    <div class="collapse" id="collapseExample">
+                                        <div class="row">
+                                            <div class="table-responsive">
+                                                <style type="text/css">
+                                                    #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                        padding: 0px;
+                                                    }
+                                                </style>
+                                                <table class="table table-custom" id="editable-usage">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Article No</th>
+                                                            <th>Product Name</th>
+                                                            <th>Pallet No</th>
+                                                            <th>Design No</th>
+                                                            <th>No of Pieces</th>
+                                                            <th>Total Meters</th>
+                                                            <th>Nwt. in Kgs</th>
+                                                            <th>Gwt. in Kgs</th>
+                                                            <th>Individual piece lengths</th>
+                                                            <th style="width: 160px;" class="no-sort">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="storedetailsbody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- /tile body -->
+
+                            </section>
+
+
+                        </div>
+
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                    </div>
+                </section>
+
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> Packing List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Date</th>
+                                    <th>Order No</th>
+                                    <th>Remarks</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="store in storerestorelist">
+                                    <td>{{store.Code}}</td>
+                                    <td>{{store.Date.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                    <td>{{store.OrderNo}}</td>
+                                    <td>{{store.remarks}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(store.ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+
+                </section>
+                <section class="tile" id="div_Print" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Print</strong>OneToOneVoice</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tile-body fa-border" id="div_PrintContent">
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="frmPrint" onclick="PrintPanel();">Print</button>
+                    </div>
+
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+

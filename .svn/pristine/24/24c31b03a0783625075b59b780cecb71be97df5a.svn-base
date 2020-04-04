@@ -1,0 +1,365 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Document_Master>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+
+This Form is used to create a form wise Code setting with prefix and suffix.
+    Set Approval required for Particular form and Set Workflow required for that form.
+    Here can set Controls for Auto generated code Start and end level.
+    Author=RajKumar
+    Date = 4th Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide View List page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying View List page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+    }
+
+     function InsertRecords() {
+         var Formname           = $("#drpFormName").val();
+         var CodeGeneration     = $("#drpCodeGeneration").val();
+         var RequireApprover    = $("#chkRequireApprover").val();
+         var RequireWorkFlow    = $("#chkRequireWorkFlow").val();
+         var CodePrefix         = $("#txtCodePrefix").val();
+         var CodeSuffix         = $("#txtCodeSuffix").val();
+         var CodeStartNo        = $("#txtCodeStartNo").val();
+         var CodeEndNo          = $("#txtCodeEndNo").val();
+         var DocumentID         = $("#DocumentID").val();
+
+         if (DocumentID != 0) 
+             DocumentID = $("#DocumentID").val();
+         else 
+             DocumentID = "0";
+        
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_DocumentSetup_Add", "ET_Admin_DocumentSetup")',
+                data: {
+                    drpFormName: Formname,
+                    drpCodeGeneration: CodeGeneration,
+                    chkRequireApprover: RequireApprover,
+                    chkRequireWorkFlow: RequireWorkFlow,
+                    txtCodePrefix: CodePrefix,
+                    txtCodeSuffix: CodeSuffix,
+                    txtCodeStartNo: CodeStartNo,
+                    txtCodeEndNo: CodeEndNo,
+                    DocumentID: DocumentID
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    $("#div_View").css("display", "none");
+                    $("#div_Restore").css("display", "block");
+
+                    if (result == "Success") {
+                        $("#drpFormName").val("1");
+                        $("#drpCodeGeneration").val("0");
+                        $("#chkRequireApprover").attr('checked', false);
+                        $('#chkRequireWorkFlow').attr('checked', false);
+                        $("#txtCodePrefix").val("");
+                        $("#txtCodeSuffix").val("");
+                        $("#txtCodeStartNo").val("");
+                        $("#txtCodeEndNo").val("");
+                        $("#DocumentID").val(0);
+                        alert(result);
+                    }
+                    else {
+
+                    }
+                },
+                error: function (response) {
+
+                    alert('error');
+                }
+            });
+    };
+</script>
+
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Document Master<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Document Master</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd dvd-btm">
+                        <h1 class="custom-font"><strong>Document</strong> Setup</h1>
+                        <ul class="controls">
+
+                            <li class="dropdown">
+
+                                <a role="button" tabindex="0" class="dropdown-toggle settings" data-toggle="dropdown">
+                                    <i class="fa fa-cog"></i>
+                                    <i class="fa fa-spinner fa-spin"></i>
+                                </a>
+
+                                <ul class="dropdown-menu pull-right with-arrow animated littleFadeInUp">
+                                    <li>
+                                        <a role="button" tabindex="0" class="tile-toggle">
+                                            <span class="minimize"><i class="fa fa-angle-down"></i>&nbsp;&nbsp;&nbsp;Minimize</span>
+                                            <span class="expand"><i class="fa fa-angle-up"></i>&nbsp;&nbsp;&nbsp;Expand</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a role="button" tabindex="0" class="tile-refresh">
+                                            <i class="fa fa-refresh"></i> Refresh
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a role="button" tabindex="0" class="tile-fullscreen">
+                                            <i class="fa fa-expand"></i> Fullscreen
+                                        </a>
+                                    </li>
+                                </ul>
+
+                            </li>
+
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    @if (ViewBag.details == null)
+                    {
+                <div class="tile-body">
+                    <div class="table-responsive">
+                        <table class="table table-custom" id="editable-usage">
+                            <thead>
+                                <tr>
+                                    <th style="display:none"></th>
+                                    <th>Form Group</th>
+                                    <th>Form Name</th>
+                                    <th>Code Type</th>
+                                    <th>Prefix</th>
+                                    <th>Suffix</th>
+                                    <th>Start No</th>
+                                    <th>End No</th>
+                                    <th>Work Flow</th>
+                                    <th style="width: 160px;" class="no-sort">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                <tr class="odd gradeX">
+                                    <td style="display:none">@item.auto_key</td>
+                                    <td>@item.autogen_formgroup</td>
+                                    <td>@item.autogen_formname</td>
+                                    <td>@item.autogen_type</td>
+                                    <td>@item.autogen_prefix</td>
+                                    <td>@item.autogen_suffix</td>
+                                    <td>@item.autogen_startno</td>
+                                    <td>@item.autogen_endno</td>
+                                    <td>@item.workflowrequired</td>
+                                    <td class="actions">
+                                        <a role="button" tabindex="0" class="edit text-primary text-uppercase text-strong text-sm mr-10">Edit</a>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                    }
+                <!-- /tile body -->
+
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong> Document Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <form name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                @*<div class="form-group col-md-6">
+                                    <label for="Url">Document Code</label>
+                                    <input type="text" class="form-control" data-parsley-trigger="change" disabled
+                                           data-parsley-type="alphanum" />
+                                </div>*@
+                                <div class="form-group col-md-6">
+                                    <label for="Form Name">Form Name*</label>
+                                    <input type="text" name="DocumentID" id="DocumentID" class="form-control hidden">
+
+        @*@Html.DropDownList("drpFormName", new SelectList(ViewBag.drpmaster, "Form_Key", "Form_Name"),
+                                          new { @class = "form-control chosen-select", required = "required"
+                                          })*@
+
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Code Generation">Code Generation*</label>
+                                    <select class="chosen-select" style="width:100%" name="drpCodeGeneration" id="drpCodeGeneration" required>
+                                        <option value="0">--Select--</option>
+                                        <option value="Automatic">Automatic</option>
+                                        <option value="Manual">Manual</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label></label>
+                                    <label class="checkbox checkbox-custom-alt">
+                                        <input type="checkbox" name="chkRequireApprover" id="chkRequireApprover" value="1"><i></i>Require Approver
+                                    </label>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label></label>
+                                    <label class="checkbox checkbox-custom-alt">
+                                        <input type="checkbox"  name="chkRequireWorkFlow" id="chkRequireWorkFlow" value="1"><i></i>Require Work Flow
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Code Prefix">Code Prefix*</label>
+                                    <input type="text" name="txtCodePrefix" id="txtCodePrefix" class="form-control" required pattern="/^[a-zA-Z]+$/" data-parsley-trigger="change" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Code Suffix">Code Suffix*</label>
+                                    <input type="text" name="txtCodeSuffix" id="txtCodeSuffix" class="form-control" required pattern="/^[a-zA-Z]+$/" data-parsley-trigger="change" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Code Start No">Code Start No*</label>
+                                    <input type="text" class="form-control" name="txtCodeStartNo" id="txtCodeStartNo" data-parsley-trigger="change"
+                                           data-parsley-type="digits" required />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Code End No">Code End No*</label>
+                                    <input type="text" class="form-control" name="txtCodeEndNo" id="txtCodeEndNo" data-parsley-trigger="change"
+                                           data-parsley-type="digits" required />
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled id="formSubmit" onclick="InsertRecords();">Submit</button>
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--The user can have a option to restore-->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore Document Master</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Document Code</th>
+                                    <th>Form Name</th>
+                                    <th>Auto Code Type</th>
+                                    <th>Start No</th>
+                                    <th>End No</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+

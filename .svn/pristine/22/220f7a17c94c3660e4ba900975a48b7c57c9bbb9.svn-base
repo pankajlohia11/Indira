@@ -1,0 +1,387 @@
+﻿app1.controller("AC_DashboardCtrl", function ($scope, $http, $window, $rootScope) {
+    var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var color = Chart.helpers.color;
+    debugger;
+   
+    //alert("Dashboard");
+    var current_date = new Date();
+
+    month_value = current_date.getMonth();
+    $("#Month").text(MONTHS[month_value]);
+    $("#Day").text(current_date.getDate());
+    CheckIfAdminUser();
+    GetSalesPersonList();
+    GetSalesPersonListForTrading();
+    GetSalesPersonListForStore();
+    GetMonthwiseSalesForAgency();
+    SalespersonPieChart();
+    GetTaskList();
+    function GetTaskList() {
+
+        var getshipmentlist = $http.get("/ET_TodoList/GetTaskList",
+            {
+                params: { delete: false }
+            });
+        getshipmentlist.then(function (Quotationlist) {
+            debugger;
+            var res = Quotationlist;
+            if (Quotationlist.data.length > 0) {
+                $("#TotalTask").text(Quotationlist.data.length);
+            }
+            
+            for (i = 0; i < Quotationlist.data.length; i++) {
+                var Quotationdate = new Date(parseInt(Quotationlist.data[i].Expec_Date.substr(6)));
+                var QDT = Quotationdate.getHours() + ":" + Quotationdate.getMinutes();
+                $(".todo-list").append('<li><div class="view"><label class="checkbox checkbox-custom m-0 text-muted inline" ><input type="checkbox" class="CheckingTodoList" ><i></i></label><span>' + Quotationlist.data[i].TSK_Title + ' </span><a role="button" tabindex="0" class="text-danger remove-todo pull-right"><i class="fa fa-times"></i> </a></div ></li>');
+                $("#appointments-carousel").append('<div><p class="text-center text-strong"> <i class="fa fa-clock-o"></i> ' + QDT + '</p><p><h5 class="mt-10 mb-0 text-strong">' + Quotationlist.data[i].TSK_Title + '</h5><small class="text-thin text-transparent-white">' + Quotationlist.data[i].TSK_Desc + '</small></p></div >');
+
+            }
+            $('#appointments-carousel').owlCarousel({
+                autoPlay: 5000,
+                stopOnHover: true,
+                slideSpeed: 300,
+                paginationSpeed: 400,
+                navigation: true,
+                navigationText: ['<i class=\'fa fa-chevron-left\'></i>', '<i class=\'fa fa-chevron-right\'></i>'],
+                singleItem: true
+            });
+
+        }, function () {
+
+        });
+    }
+
+    function CheckIfAdminUser()
+    {
+        var adminPrivilege = $http.get("/ET_TaskStatus/CheckIfAdminUser");
+        adminPrivilege.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            //$scope.Iscreate = privilage[0].IS_ADD;
+            //$scope.Isedit = privilage[0].IS_EDIT;
+            //$scope.Isdelete = privilage[0].IS_DELETE;
+            //$scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            //$scope.Isview = privilage[0].IS_VIEW;
+            if (privilage)
+            {
+                //$(document).find("#adminStatus").prop('style', 'display:block');
+                $('#navigation > li[id="adminStatus"]').prop('style', 'display:block');
+                //alert("true value");
+            }
+            else
+            {
+                //alert("fasle");
+                //$(document).find("#adminStatus").prop('style', 'display:none');
+                $('#navigation > li[id="adminStatus"]').prop('style', 'display:none');
+            }
+
+        }, function () {
+            //alert('Privilages Not Found');
+        }
+        );
+    }
+
+    $scope.SalesPersonChange = function () {
+        $("#container").empty();
+        $("#container").append('<canvas id="canvas"></canvas>');
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_Dashboard/GetAgencySales",
+            dataType: 'json',
+            data: { id: $scope.S_SalesPerson },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            debugger;
+            var dataForBar = [{
+                label: $("#drpSalesPerson option:selected").text().trim(),
+                backgroundColor: "red",
+                borderColor: "red",
+                borderWidth: 1,
+                data: JSON.parse(data),
+            }];
+            var barChartData = {
+                labels: MONTHS,
+                datasets: dataForBar
+
+            };
+            var ctx = document.getElementById('canvas').getContext('2d');
+            window.myBar = new Chart(ctx, {
+                type: 'bar',
+                data: barChartData,
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Agency(Salesperson wise)'
+                    }
+                }
+            });
+           
+            
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+    $scope.SalesPersonChangeForTrading = function () {
+        debugger;
+        $("#containerForTrading").empty();
+        $("#containerForTrading").append('<canvas id="canvasForTrading"></canvas>');
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_Dashboard/GetTradingSalesForBarchart",
+            dataType: 'json',
+            data: { id: $scope.S_SalesPersonForTrading },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            debugger;
+            var dataForBar = [{
+                label: $("#drpSalesPersonForTrading option:selected").text().trim(),
+                backgroundColor: "#66ccff",
+                borderColor: "#66ccff",
+                borderWidth: 1,
+                data: JSON.parse(data),
+            }];
+            var barChartData = {
+                labels: MONTHS,
+                datasets: dataForBar
+
+            };
+            var ctx = document.getElementById('canvasForTrading').getContext('2d');
+            window.myBar = new Chart(ctx, {
+                type: 'bar',
+                data: barChartData,
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Trading(Salesperson wise)'
+                    }
+                }
+            });
+
+
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+    $scope.SalesPersonChangeForStore = function () {
+        $("#containerForStore").empty();
+        $("#containerForStore").append('<canvas id="canvasForStore"></canvas>');
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_Dashboard/GetStoreSalesForBarchart",
+            dataType: 'json',
+            data: { id: $scope.S_SalesPersonForStore },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            debugger;
+            var dataForBar = [{
+                label: $("#drpSalesPersonForStore option:selected").text().trim(),
+                backgroundColor: "blue",
+                borderColor: "blue",
+                borderWidth: 1,
+                data: JSON.parse(data),
+            }];
+            var barChartData = {
+                labels: MONTHS,
+                datasets: dataForBar
+
+            };
+            var ctx = document.getElementById('canvasForStore').getContext('2d');
+            window.myBar = new Chart(ctx, {
+                type: 'bar',
+                data: barChartData,
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Trading(Salesperson wise)'
+                    }
+                }
+            });
+
+
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+    function GetSalesPersonList() {
+        var getsalespersonlist = $http.get("/ET_Admin_Dashboard/GetSalesPerson",
+            {
+                params: {
+                    orgtype: 1
+                }
+            });
+        getsalespersonlist.then(function (salespersonlist) {
+            var res = JSON.parse(salespersonlist.data);
+            $scope.salespersons = res;
+            $scope.S_SalesPerson = 0;
+            $scope.SalesPersonChange();
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    function GetSalesPersonListForTrading() {
+        var getsalespersonlist = $http.get("/ET_Admin_Dashboard/GetSalesPerson",
+            {
+                params: {
+                    orgtype: 2
+                }
+            });
+        getsalespersonlist.then(function (salespersonlist) {
+            var res = JSON.parse(salespersonlist.data);
+            $scope.salespersonsForTrading = res;
+            $scope.S_SalesPersonForTrading = 0;
+            $scope.SalesPersonChangeForTrading();
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    function GetSalesPersonListForStore() {
+        var getsalespersonlist = $http.get("/ET_Admin_Dashboard/GetSalesPerson",
+            {
+                params: {
+                    orgtype: 3
+                }
+            });
+        getsalespersonlist.then(function (salespersonlist) {
+            var res = JSON.parse(salespersonlist.data);
+            $scope.salespersonsForStore = res;
+            $scope.S_SalesPersonForStore = 0;
+            $scope.SalesPersonChangeForStore();
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    $scope.$watch("salespersons", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesPerson").val($scope.S_SalesPerson).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("salespersonsForTrading", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesPersonForTrading").val($scope.S_SalesPersonForTrading).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("salespersonsForStore", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesPersonForStore").val($scope.S_SalesPersonForStore).trigger("chosen:updated"); }, 100);
+        }
+    });
+    function SalespersonPieChart() {
+        var getAgencyShipmentDetails = $http.get("/ET_Admin_Dashboard/GetSalespersonPieChart");
+        getAgencyShipmentDetails.then(function (res) {
+            var data2 = JSON.parse(res.data.s5);
+            var data3 = JSON.parse(res.data.s6);
+            $('#AgencyPie').sparkline(data2, {
+                type: 'pie',
+                width: 'auto',
+                height: '250px',
+                tooltipFormat: '{{offset:offset}} ({{percent.1}}%)',
+                tooltipValueLookups: {
+                    'offset': data3
+                },
+                sliceColors: ['#22beef', '#a2d200', '#ffc100', '#ff4a43','#22beef', '#a2d200', '#ffc100', '#ff4a43']
+
+            });
+            TradingSalespersonPieChart();
+        });
+    }
+    function TradingSalespersonPieChart() {
+        var getAgencyShipmentDetails = $http.get("/ET_Admin_Dashboard/GettradingSalespersonPiechart");
+        getAgencyShipmentDetails.then(function (res) {
+            var data2 = JSON.parse(res.data.s5);
+            var data3 = JSON.parse(res.data.s6);
+            $('#TradingPie').sparkline(data2, {
+                type: 'pie',
+                width: 'auto',
+                height: '250px',
+                tooltipFormat: '{{offset:offset}} ({{percent.1}}%)',
+                tooltipValueLookups: {
+                    'offset': data3
+                },
+                sliceColors: ['#22beef', '#a2d200', '#ffc100', '#ff4a43', '#22beef', '#a2d200', '#ffc100', '#ff4a43']
+
+            });
+            StoreSalespersonPieChart();
+        });
+    }
+    function StoreSalespersonPieChart() {
+        var getAgencyShipmentDetails = $http.get("/ET_Admin_Dashboard/GetStoreSalespersonPiechart");
+        getAgencyShipmentDetails.then(function (res) {
+            var data2 = JSON.parse(res.data.s5);
+            var data3 = JSON.parse(res.data.s6);
+            $('#StorePie').sparkline(data2, {
+                type: 'pie',
+                width: 'auto',
+                height: '250px',
+                tooltipFormat: '{{offset:offset}} ({{percent.1}}%)',
+                tooltipValueLookups: {
+                    'offset': data3
+                },
+                sliceColors: ['#22beef', '#a2d200', '#ffc100', '#ff4a43', '#22beef', '#a2d200', '#ffc100', '#ff4a43']
+
+            });
+        });
+    }
+    function GetMonthwiseSalesForAgency() {
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_Dashboard/GetMonthwiseSalesForAgency",
+            dataType: 'json',
+            data: { id: 0 },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            debugger;
+            if (data.TradingsalesMonthWise.length>0) {
+                $("#LblTradingMonthSale").text(data.TradingsalesMonthWise[0].CommissionAmt.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+            }
+            if (data.TradingsalesYearWise.length > 0) {
+                $("#LblTradingYearSale").text(data.TradingsalesYearWise[0].CommissionAmt.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+            }
+            if (data.StoresalesYearWise.length > 0) {
+                $("#LblStoresYearSale").text(data.StoresalesYearWise[0].CommissionAmt.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+            }
+            if (data.StoresalesMonthWise.length > 0) {
+                $("#LblStoresMonthSale").text(data.StoresalesMonthWise[0].CommissionAmt.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+            }
+            if (data.TradingsalesMonthWise.length > 0) {
+                $("#LblTradingMonthSale").text(data.TradingsalesMonthWise[0].CommissionAmt.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+            }
+            if (data.AgencysalesMonthWise.length > 0) {
+                $("#LblagencyMonthSale").text(data.AgencysalesMonthWise[0].CommissionAmt.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+            }
+            if (data.AgencysalesYearWise.length > 0) {
+                $("#LblagencyYearSale").text(data.AgencysalesYearWise[0].CommissionAmt.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+            }
+                       
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+   
+
+}); 

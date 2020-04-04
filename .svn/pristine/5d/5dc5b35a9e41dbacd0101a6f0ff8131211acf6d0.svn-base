@@ -1,0 +1,368 @@
+﻿
+@{
+    ViewBag.Title = "ET_Admin_PaymentTerms";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_PaymentTerms.js"></script>
+}
+
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide display page */
+    //function restoreRecords() {
+    //    $("#div_View").css("display", "none");
+    //    $("#div_Restore").css("display", "block");
+    //}
+    /* This function is used for displaying view page and hide restore and edit page */
+    //function showRecords() {
+    //    $("#div_View").css("display", "block");
+    //    $("#div_Restore").css("display", "none");
+    //    $("#div_Edit").css("display", "none");
+    //}
+    /* This function is used for displaying edit page and hide view and restore page */
+    //function createRecords() {
+    //    $("#div_View").css("display", "none");
+    //    $("#div_Edit").css("display", "block");
+    //};
+
+    //function editRecords(e, f) {
+    //    $("#div_View").css("display", "none");
+    //    $("#div_Edit").css("display", "block");
+    //};
+
+    function deleteRecord(e, f) {
+        if ($(f).attr("id").toString().indexOf("DeleteYes") > -1) {
+            alertmessage(e, $(f).attr("id").toString());
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    //function Restoredeleterecords(id, f) {
+    //      $("#div_View").css("display", "none");
+    //      $("#div_Restore").css("display", "block");
+    //};
+
+    function ViewRecords(e,f) {
+        if ($(f).attr("id").toString().indexOf("ViewYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Bank_View", "ET_Admin_Bank")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: { id: id },
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $('#viewpopup').html(result);
+                        $("#btnviewpopup").trigger("click");
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Payment Terms <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Payment Terms</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <div class="row" ng-controller="AC_PaymentTermsCtrl">
+            <div class="col-md-12">
+                <!--[div_view] is used for displaying View List Page etc-->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Payment Terms</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" ng-click="createnew();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords(this);"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Payment Name</th>
+                                    <th>Discount Type</th>
+                                    <th>Discount (%)</th>
+                                    <th>Discount ($)</th>
+                                    <th>Advance Type</th>
+                                    <th>Advance (%)</th>
+                                    <th>Advance ($)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in paymentslit">
+                                    <td>{{item.PT_Name}}</td>
+                                    <td>{{(item.PT_DiscountType == "1") ? "Persentage Amount" : "Amount"}}</td>
+                                    <td>{{item.PT_DiscountPer}}</td>
+                                    <td>{{item.PT_DiscountAmount}}</td>
+                                    <td>{{(item.PT_AdvanceType == "1") ? "Persentage Amount": "Amount"}}</td>
+                                    <td>{{item.PT_AdvancePer}}</td>
+                                    <td>{{item.PT_AdvanceAmount}}</td>
+                                    <td>
+                                        <a ng-click="editRecords(item.PT_ID);" value="{{ item.PT_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(item.PT_ID);" value="{{ item.PT_ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                        <a ng-click="Restoredeleterecords(item.PT_ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--The user can have a option to create and edit Bank Account Details-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong><span ng-bind="createedit"></span></strong> Payment Terms</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- this is link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div>
+                                    <div class="form-group col-md-6">
+                                        <label for="PaymentCode">Payment Code</label>
+                                        <input type="text" name="txtpamentCode" id="txtpamentCode" ng-model="txtpamentCode" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required />
+                                        <input type="text" name="pamentID" id="pamentID" ng-model="pamentID" class="form-control hidden" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="PaymentName">Payment Name</label>
+                                    <input type="text" name="txtPaymentName" id="txtPaymentName" ng-model="txtPaymentName" class="form-control" placeholder="Payment Name" required />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="DisplayName">Credit Days</label>
+                                    <input type="text" name="txtCreditdays" id="txtCreditdays" ng-model="txtCreditdays" class="form-control" placeholder="Display Name"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits" required />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Discounttype">Discount Type</label>
+                                    <select class="form-control chosen-select" data-ng-model="SelectedDiscounttype" id="drpDiscounttype" ng-change="ChangeDiscounttype();">
+                                        <option value="0">-Select-</option>
+                                        <option value="1"> Percentage </option>
+                                        <option value="2"> Amount </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6 hidden" id="htndiscountpersentage">
+                                    <label for="persentageamount">Percentage </label>
+                                    <input type="text" name="txtpersentageamount" maxlength="2" id="txtpersentageamount" ng-model="txtpersentageamount" class="form-control" placeholder="Persentage Amount"  data-parsley-type="digits" data-parsley-trigger="change"/>
+                                </div>
+                                <div class="form-group col-md-6 hidden" id="htndiscountamount">
+                                    <label for="Amount">Amount</label>
+                                    <input type="text" name="txtAmount" id="txtAmount" ng-model="txtAmount" class="form-control" data-parsley-type="digits" data-parsley-trigger="change" placeholder="Persentage Amount" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="DiscountDays">Discount Days</label>
+                                    <input type="text" name="txtDiscountdays" id="txtDiscountdays" ng-model="txtDiscountdays" class="form-control"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits" placeholder="Discount Days" />                                 
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblSpecificCustomer">Is Advance</label><br />
+                                    <input type="checkbox" name="chk_Advance" id="chk_Advance" ng-model="chk_Advance" ng-change="SpecificAdvance();" />
+                                </div>
+                            </div>
+
+                            <div class="row hidden" id="htnadvancetype">
+                                <div class="form-group col-md-6">
+                                    <label for="Advancetype">Advance Type</label>
+                                    <select class="form-control chosen-select" name="drpAdvancetype" data-ng-model="SelectedAdvancetype" id="drpAdvancetype" ng-change="ChangeAdvancetype();">
+                                        <option value="0">-Select-</option>
+                                        <option value="1"> Percentage </option>
+                                        <option value="2"> Amount </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6 hidden" id="htnadvancepersentage">
+                                    <label for="persentageamount">Percentage </label>
+                                    <input type="text" name="txtAdvancepersentageamount" maxlength="2" id="txtAdvancepersentageamount" ng-model="txtAdvancepersentageamount" class="form-control" placeholder="Persentage Amount" data-parsley-type="digits" data-parsley-trigger="change"/>
+                                </div>
+                                <div class="form-group col-md-6 hidden" id="htnadvanceamount">
+                                    <label for="Amount">Advance Amount</label>
+                                    <input type="text" name="txtAdvanceAmount" id="txtAdvanceAmount" ng-model="txtAdvanceAmount" class="form-control" data-parsley-type="digits" data-parsley-trigger="change" placeholder="Persentage Amount" />
+                                    @*<input type="text" name="txtAmount" id="txtAmount" ng-model="txtAmount" class="form-control" placeholder="Persentage Amount" />*@
+                                </div>
+                            </div>
+
+                            <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                                <!-- SUBMIT BUTTON -->
+                                <!-- Button used for submitting the record -->
+                                <button type="submit" class="btn btn-success" disabled id="formSubmit" ng-click="SubmitClick();" ng-bind="submittext">Submit</button>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <!-- Button used for submitting the record -->
+
+                    
+                    <!-- /tile footer -->
+
+                </section>
+                <!--The user can have a option to restore Bank Account Details-->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>General Offer</strong> </h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Payment Name</th>
+                                    <th>Discount Type</th>
+                                    <th>Discount (%)</th>
+                                    <th>Discount ($)</th>
+                                    <th>Advance Type</th>
+                                    <th>Advance (%)</th>
+                                    <th>Advance ($)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in paymentrestorelist">
+                                    <td>{{item.PT_Name}}</td>
+                                    <td>{{item.PT_DiscountType}}</td>
+                                    <td>{{item.PT_DiscountPer}}</td>
+                                    <td>{{item.PT_DiscountAmount}}</td>
+                                    <td>{{item.PT_AdvanceType}}</td>
+                                    <td>{{item.PT_AdvancePer}}</td>
+                                    <td>{{item.PT_AdvanceAmount}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(item.PT_ID,$event,false);" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+        </div>
+    </div>
+</section>

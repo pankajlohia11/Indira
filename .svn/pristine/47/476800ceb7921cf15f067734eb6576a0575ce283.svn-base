@@ -1,0 +1,737 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Company Details.
+    The user can edit or remove and restore  a record in Company Details.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_Shipment.js"></script>
+    <script type="text/javascript">
+        function chkfobchange() {
+            if ($("#popchkFob").prop('checked')) {
+                $("#div_foblist").css("display", "block");
+            }
+            else {
+                $("#div_foblist").css("display", "none");
+            }
+        }
+        function fobAmountChange(s) {
+            debugger;
+            if (MoneyValidation(s))
+            {
+                var ordAmt = parseFloat($(s).parent().parent().children()[1].innerHTML.split('.').join("").replace(",", "."));
+                var fobAmt = parseFloat($(s).val().split('.').join("").replace(",", "."));
+                if (fobAmt > ordAmt)
+                {
+                    toastr["error"]("FOB Amount cannot be greater than Order Amount", "Notification");
+                    $(s).val("");
+                }
+            }
+        }
+        function schChange() {
+            angular.element(document.getElementById("mainDiv")).scope().ClientSch($("#drpScheduleID").val());
+        }
+        function MoneyValidation(s) {
+            debugger;
+            var re = /^[\d.]+(\,\d*)?$/;
+            var txt = s.value;
+            if (txt != "") {
+                if (!re.test(txt)) {
+                    toastr["error"]("Invalid Data", "Notification");
+                    s.value = '';
+                    return false;
+                }
+                else {
+                    s.value = parseFloat(txt.split('.').join("").replace(",", ".")).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                }
+            }
+            return true;
+        }
+        function PrintPanel() {
+            var panel = document.getElementById("div_PrintContent");
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<html><head><title>Print the Sales OneToOneInvoice</title>');
+            printWindow.document.write('</head><body style="font-family:Arial">');
+            //document.writeln(panel.innerHtml);
+            printWindow.document.write(panel.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            setTimeout(function () {
+                printWindow.print();
+            }, 500);
+            return false;
+        }
+
+        function taxchange() {
+            debugger;
+            if ($("#txtShipmentAmount").val() == "") {
+                $("#txtTax").val("");
+                message = "Please Select Shipment No, Shipment Amount cannot be empty.";
+                toastr["error"](message, "Notification");
+            }
+            else {
+                $("#txtTaxAmt").val((parseFloat($("#txtShipmentAmount").val()) * (parseFloat($("#txtTax").val())) / 100).toFixed(2));
+                $("#txtInvAmt").val((parseFloat($("#txtShipmentAmount").val()) + (parseFloat($("#txtTaxAmt").val()))).toFixed(2));
+            }
+        }
+
+
+        function calinvamount(e) {
+            debugger;
+            if (MoneyValidation(e)) {
+                var td = $(e).parent().parent().find("td");
+                if ($(td[7]).find("input").val() == "")
+                    $(td[7]).find("input").val("0");
+                if ($(td[8]).find("input").val() == "")
+                    $(td[8]).find("input").val("0");
+                if (parseFloat($(td[8]).find("input").val().split('.').join("").replace(",", ".")) > parseFloat($(td[7]).find("input").val().split('.').join("").replace(",", "."))) {
+                    $(e).val("0,000");
+                    toastr["error"]("Shipment Quantity cannot be more than Scheduled Quantity", "Notification");
+                }
+                var tr = $("#shipmentdetailsbody tr");
+                var total = 0;
+                for (var i = 0; i < tr.length; i++) {
+                    var td1 = tr[i].children;
+                    if ($(td1[6]).find("input").val() == "")
+                        $(td1[6]).find("input").val("0");
+                    if ($(td1[8]).find("input").val() == "")
+                        $(td1[8]).find("input").val("0");
+                    total = total + (parseFloat($(td1[8]).find("input").val().split('.').join("").replace(",", ".")) * parseFloat($(td1[6]).find("input").val().split('.').join("").replace(",", ".")));
+                }
+                $("#txtInvoiceAmount").val(total.toLocaleString("es-ES", { minimumFractionDigits: 2 }));
+            }
+            else {
+                $("#txtInvoiceAmount").val("0.000");
+            }
+        }
+        function validateDebitNote() {
+            debugger;
+            if ($("#popchkFob").prop('checked')) {
+                var tr = $("#popupFOBTable").children();
+                var fobamount = "";
+                var orderNos = "";
+                for (var i = 0; i < tr.length; i++) {
+                    var td = tr[i].children;
+                    if ($(td[2].children[0]).val() == "") {
+                        toastr["error"]("Enter FOB Amount at row : "+(i+1), "Notification");
+                        $(td[2].children[0]).val("");
+                        return "error";
+                    }
+                    var ordAmt = parseFloat(td[1].innerHTML.split('.').join("").replace(",", "."));
+                    var fobAmt = parseFloat($(td[2].children[0]).val().split('.').join("").replace(",", "."));
+                    if (fobAmt > ordAmt) {
+                        toastr["error"]("FOB Amount cannot be greater than Order Amount at row : "+(i+1), "Notification");
+                        $(td[2].children[0]).val("");
+                        return "error";
+                    }
+                    else
+                    {
+                        fobamount = fobamount + parseFloat($(td[2].children[0]).val().split('.').join("")) + ",";
+                        orderNos = orderNos + td[0].innerHTML + ",";
+                    }
+                }
+                return fobamount + "|" + orderNos;
+            }
+            else
+            {
+                return "";
+            }
+        }
+        function debitnote() {
+            var fobamt = validateDebitNote();
+            var fabstatus = "0";
+            if ($("#popchkFob").prop('checked')) 
+                fabstatus = "1";
+            if (fobamt != "error") {
+                $.ajax({
+                    type: "GET",
+                    url: '@Url.Action("ET_Sales_Shipment_GenerateDebitNote", "ET_Sales_Shipment")',
+                    data: {
+                        id: $("#popID").val(),
+                        fabamount: fobamt,
+                        invamt: parseFloat($("#popInvoice").val().split('.').join("").replace(",", ".")),
+                        fabstatus: fabstatus
+                    },
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "html",
+                    success: function (result) {
+
+                        if (result.indexOf("ERR") > -1) {
+                            $("#spanErrMessage1").html(result);
+                            $("#spanErrMessage2").html(result);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                            debugger;
+                            message = 'Debit Note Generated Successfully with code :' + result;
+                            toastr["success"](message, "Notification");
+                            angular.element(document.getElementById("mycontroller")).scope().showRecords();
+                            angular.element('#mycontroller').scope().$apply();
+
+                        }
+                    },
+                    error: function (response) {
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                });
+            }
+        }
+        function commissionrecieve() {
+            if ($("#popupCommissionRecieved").val() != "") {
+                if ($("#txtCommissionDate").val() != "") {
+                    if (parseFloat($("#popupCommissionRecieved").val().split('.').join("").replace(",", ".")) <= parseFloat($("#popupCommissionAmt").val().split('.').join("").replace(",", "."))) {
+                        debugger;
+                        $.ajax({
+                            type: "GET",
+                            url: '@Url.Action("ET_Sales_Shipment_CommissionRecieve", "ET_Sales_Shipment")',
+                            data: {
+                                id: $("#popupID").val(),
+                                fabamount:0,
+                                invamt: parseFloat($("#popupInvoiceAmt").val().split('.').join("").replace(",", ".")),
+                                CommissionAmount: parseFloat($("#popupCommissionAmt").val().split('.').join("").replace(",", ".")),
+                                CommissionRecieved: parseFloat($("#popupCommissionRecieved").val().split('.').join("").replace(",", ".")),
+                                CommissionDate: $("#txtCommissionDate").val()
+                            },
+                            contentType: "application/json;charset=utf-8",
+                            dataType: "html",
+                            success: function (result) {
+
+                                if (result.indexOf("ERR") > -1) {
+                                    $("#spanErrMessage1").html(result);
+                                    $("#spanErrMessage2").html(result);
+                                    if ($("#exceptionmessage").length)
+                                        $("#exceptionmessage").trigger("click");
+                                }
+                                else {
+                                    debugger;
+                                    message = 'Commission Recieved Successfully with code :' + result;
+                                    toastr["success"](message, "Notification");
+                                    angular.element(document.getElementById("mycontroller")).scope().showRecords();
+                                    angular.element('#mycontroller').scope().$apply();
+
+                                }
+                            },
+                            error: function (response) {
+                                if ($("#exceptionmessage").length)
+                                    $("#exceptionmessage").trigger("click");
+                            }
+                        });
+                    }
+                    else {
+                        message = "Commission Recieved Amount connot be less than Commission To Be Paid";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+                else {
+                    message = "Please Select Date.";
+                    toastr["error"](message, "Notification");
+                }
+            }
+            else {
+                message = "Please enter Commission Recieved Amount.";
+                toastr["error"](message, "Notification");
+            }
+
+        }      
+    </script>
+}
+                        <!-- ====================================================
+                                   ================= CONTENT ===============================
+                                   ===================================================== -->
+                        <!-- This section is used for displaying link menu on header bar-->
+    <section id="content">
+        <div class="page page-shop-single-order" id="mainDiv" ng-controller="AC_ShipmentCtrl">
+            <div class="pageheader">
+
+                <h2>{{Type}} Shipment<span>@*You can place subtitle here*@</span></h2>
+
+                <div class="page-bar">
+
+                    <ul class="page-breadcrumb">
+                        <li>
+                            <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                        </li>
+                        <li>
+                            <a href="#">Admin</a>
+                        </li>
+                        <li>
+                            <a href="#">{{Type}} Shipment</a>
+                        </li>
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="row" id="mycontroller">
+                <div class="col-md-12">
+                    <section class="tile" id="div_View">
+                        <!--[div_view] All view list contents datas will be written here-->
+                        <!-- tile header -->
+                        <div class="tile-header dvd-btm">
+                            <h1 class="custom-font"><strong>{{Type}} Shipment</strong> List</h1>
+                            <ul class="controls">
+                                <li style="padding:5px">
+                                    <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                    <a tabindex="0" ng-click="createnew()">
+                                        <span class="btn btn-slategray btn-xs mb-10">
+                                            Create
+                                        </span>
+                                    </a>
+                                </li>
+                                <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                                <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                            </ul>
+                        </div>
+                        <!-- /tile header -->
+                        <!-- tile body -->
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-6"><div id="tableTools"></div></div>
+                                <div class="col-md-6"><div id="colVis"></div></div>
+                            </div>
+                            <!-- Table created for displaying View content-->
+                            <table class="table table-custom contattbl" id="advancedusage">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>{{Type=="Agency"?"Supplier":"Customer"}}</th>
+                                        <th>ETD</th>
+                                        <th>ETA</th>
+                                        <th>Invoice Amount</th>
+                                        <td>Action</td>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="shipment in shipmentlist">
+                                        <td>{{shipment.S_Code}}</td>
+                                        <td>{{shipment.COM_DISPLAYNAME}}</td>
+                                        <td>{{shipment.S_ETD.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                        <td>{{shipment.S_ETA.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                        <td style="text-align:right;">{{(shipment.S_INV_AMT).toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                        <td>
+                                            <a ng-click="editRecords(shipment.S_ID);" ng-if="shipment.S_STATUS != 1" value="{{ shipment.S_ID }}" style="color:forestgreen;padding:5px;" title="Edit"><i class="fa fa-edit"></i></a>
+                                            <a ng-click="ViewRecords(shipment.S_ID);" value="{{ shipment.S_ID }}" style="color:darkblue;padding:5px;" title="View"><i class="fa fa-eye"></i></a>
+                                            <a ng-click="Restoredeleterecords(shipment.S_ID,$event,true);" ng-if="shipment.S_STATUS!= 1" style="color:red;padding:5px;" title="Delete"><i class="fa fa-trash"></i></a>
+                                            <a ng-click="generateDebitNote(shipment.S_ID,shipment.S_INV_AMT);" value="{{ shipment.S_ID }}" ng-if="shipment.S_Type=='1' && shipment.S_STATUS == 0" style="color:{{shipment.S_DebitNoteApprovalStatus == 0 ? 'darkgreen' : 'red'}};padding:5px;" title="{{shipment.S_DebitNoteApprovalStatus == 0 ? 'Generate Debit Note' : 'Debit Note Is Rejected. ReGenerate Debit Note.'}}"><i class="fa fa-file-archive-o"></i></a>
+                                            <a ng-click="PrintRecords(shipment.S_ID,'E');" value="{{ shipment.S_ID }}" ng-if="shipment.S_DebitNoteApprovalStatus==1 && shipment.S_Type==1" style="color:darkgreen;padding:5px;" title="Print DebitNote"><i class="fa fa-print"></i></a>
+                                            <a ng-click="CommissionRecieve(shipment.S_ID);" value="{{ shipment.S_ID }}" ng-if="shipment.S_DebitNoteApprovalStatus==1 && shipment.S_CommissionRecievedStatus== false && shipment.S_Type==1" style="color:darkgreen;padding:5px;" title="Commission Recieved"><i class="fa fa-money"></i></a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /tile body -->
+                    </section>
+                    <!--The user can have a option to create and edit records-->
+                    <section class="tile" id="div_Edit" style="display:none">
+                        <!-- tile header -->
+                        <div class="tile-header dvd-btm">
+                            <h1 class="custom-font"><strong ng-bind="createedit"></strong> Shipment</h1>
+                            <ul class="controls">
+                                <li style="padding:5px">
+                                    <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                    <a tabindex="0" ng-click="showRecords();">
+                                        <span class="btn btn-hotpink btn-xs mb-10">
+                                            <i class="fa fa-arrow-left"></i> Back
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- This Below code is used for Tab purpose -->
+                        @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                        </ul>*@
+                        <!-- /tile header -->
+                        <!-- tile body -->
+                        <div class="tile-body">
+                            <div name="form1" role="form" id="form1" data-parsley-validate>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Shipment Code</label>
+                                        <input type="text" name="CompanyCode" id="txtCompanyCode" ng-model="S_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                        <input type="text" name="txtComID" id="txtComID" ng-model="S_ID" class="hidden">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="form-group col-md-6">
+                                        <label for="drpType">Order Type *</label>
+                                        <select data-ng-model="S_Type" id="drpType" data-parsley-trigger="change" class="form-control chosen-select" ng-change="OrderTypeChange()" disabled>
+                                            <option value="">-Select-</option>
+                                            <option value="1">Agency</option>
+                                            <option value="2">Trading(One-One)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-6">
+                                        <label class="control-label">{{CompanyType}}*</label>
+                                        <select data-ng-model="S_CustSup" id="drpCustSup" data-parsley-trigger="change" class="form-control chosen-select" ng-change="CustSupChange()" required>
+                                            <option value="">-Select-</option>
+                                            <option ng-repeat="custsup in custsups" value="{{custsup.COM_ID}}">
+                                                {{custsup.COM_NAME}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Sales Person *</label>
+                                        <select data-ng-model="S_SalesPerson" id="drpSalesPerson" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SalesPersonChange()" required>
+                                            <option value="">-Select-</option>
+                                            <option ng-repeat="salesperson in salespersons" value="{{salesperson.USER_ID}}">
+                                                {{salesperson.DISPLAY_NAME}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-6">
+                                        <label class="control-label">Schedule Code*</label>
+                                        <select data-ng-model="S_ScheduleID" id="drpScheduleID" data-parsley-trigger="change" multiple="" class="form-control chosen-select" ng-change="ScheduleChange()" onchange="schChange();">
+                                            <option ng-repeat="schedule in schedules" value="{{schedule.SH_Code}}">
+                                                {{schedule.SH_Code}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="txtQDate">ETD* </label>
+                                        <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                            <input type='text' id="txtETD" name="txtETD" class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="txtQDate">ETA* </label>
+                                        <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                            <input type='text' id="txtETA" name="txtETA" class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="txtDeparturePort">Departure Port*</label>
+                                        <input type="text" name="txtDeparturePort" id="txtDeparturePort" ng-model="S_DeparturePort" class="form-control" data-parsley-trigger="change" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="txtTotalValue">Arrival Port*</label>
+                                        <input type="text" name="txtTotalValue" id="txtTotalValue" ng-model="S_ArrivalPort" class="form-control" data-parsley-trigger="change" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="txtValidyDays">BL NO*</label>
+                                        <input type="text" name="txtValidyDays" maxlength="50" id="txtValidyDays" ng-model="S_BL_NO" class="form-control" data-parsley-trigger="change" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="txtEnclosures">BL Date*</label>
+                                        <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                            <input type='text' id="txtBLDate" name="txtBLDate" class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="txtValidyDays">Invoice NO*</label>
+                                        <input type="text" name="txtValidyDays" maxlength="50" id="txtValidyDays" ng-model="S_INV_NO" class="form-control" data-parsley-trigger="change" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="txtEnclosures">Invoice Date*</label>
+                                        <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                            <input type='text' id="txtINVDate" name="txtINVDate" class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="txtInvoiceAmount">Invoice Amount</label>
+                                        <input type="text" name="txtInvoiceAmount" style="text-align:right;" id="txtInvoiceAmount" ng-model="S_INV_AMT" class="form-control" readonly="readonly">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="txtTotalValue">Gross Weight*</label>
+                                        <input style="text-align:right;" onchange="MoneyValidation(this);" type="text" name="txtTotalValue" id="txtTotalValue" ng-model="S_GrossWeight" class="form-control" data-parsley-trigger="change" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="txtDeparturePort">Container No</label>
+                                        <input type="text" name="txtDeparturePort" id="txtDeparturePort" ng-model="S_ContainerNo" class="form-control" data-parsley-trigger="change">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="txtTotalValue">Mother Vessel</label>
+                                        <input type="text" name="txtTotalValue" id="txtTotalValue" ng-model="S_MotherVessel" class="form-control" data-parsley-trigger="change">
+                                    </div>
+                                </div>
+
+                                <section class="tile">
+                                    <!-- tile header -->
+                                    <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                        <h1 class="custom-font"><strong>Shipment</strong> Details</h1>
+                                    </div>
+                                    <!-- /tile header -->
+                                    <!-- tile body -->
+                                    <div class="tile-body">
+
+                                        <div class="collapse" id="collapseExample">
+                                            <div class="row">
+                                                <div class="table-responsive">
+                                                    <style type="text/css">
+                                                        #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                            padding: 0px;
+                                                        }
+                                                    </style>
+                                                    <table class="table table-custom" id="editable-usage">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="display:none;"></th>
+                                                                <th style="display:none;"></th>
+                                                                <th style="display:none;"></th>
+                                                                <th>Schedule NO</th>
+                                                                <th>Article No</th>
+                                                                <th>Product Name</th>
+                                                                <th>Price</th>
+                                                                <th>Scheduled Qty</th>
+                                                                <th>Shipment Qty</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="shipmentdetailsbody"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <!-- /tile body -->
+
+                                </section>
+
+
+                            </div>
+
+                        </div>
+                        <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                            <!-- SUBMIT BUTTON -->
+                            <!-- Button used for submitting the record -->
+                            <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                        </div>
+
+                    </section>
+
+                    <section class="tile" id="div_Restore" style="display:none">
+
+                        <!-- tile header -->
+                        <div class="tile-header dvd-btm">
+                            <h1 class="custom-font"><strong>Restore</strong> {{Type}} Shipment</h1>
+                            <ul class="controls">
+                                <li style="padding:5px">
+                                    <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                    <a tabindex="0" ng-click="showRecords();">
+                                        <!-- This is used as a link for back -->
+                                        <span class="btn btn-hotpink btn-xs mb-10">
+                                            <i class="fa fa-arrow-left"></i>Back
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- /tile header -->
+                        <!-- tile body -->
+                        <div class="tile-body">
+                            <div class="row">
+                                <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                                <div class="col-md-6"><div id="colVisRestore"></div></div>
+                            </div>
+                            <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                            <table class="table table-custom" id="advancedusageRestore">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Customer/Supplier</th>
+                                        <th>ETD</th>
+                                        <th>ETA</th>
+                                        <th>Departure Port</th>
+                                        <th>Arrival Port</th>
+                                        <td>Action</td>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="shipmentrestore in shipmentrestorelist">
+                                        <td>{{shipmentrestore.S_Code}}</td>
+                                        <td>{{shipmentrestore.COM_DISPLAYNAME }}</td>
+                                        <td>{{shipmentrestore.S_ETD}}</td>
+                                        <td>{{shipmentrestore.S_ETA}}</td>
+                                        <td>{{shipmentrestore.S_DeparturePort}}</td>
+                                        <td>{{shipmentrestore.S_ArrivalPort }}</td>
+                                        <td>
+                                            <a ng-click="Restoredeleterecords(shipmentrestore.S_ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /tile body -->
+
+                    </section>
+                    <section class="tile" id="div_Print" style="display:none">
+                        <!-- tile header -->
+                        <div class="tile-header dvd-btm">
+                            <h1 class="custom-font"><strong>Print</strong>Shipment Details</h1>
+                            <ul class="controls">
+                                <li style="padding:5px">
+                                    <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                    <a tabindex="0" ng-click="showRecords();">
+                                        <span class="btn btn-hotpink btn-xs mb-10">
+                                            <i class="fa fa-arrow-left"></i> Back
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="tile-body fa-border" id="div_PrintContent1">
+                            <button class="btn bg-blue" ng-click="ChangeLanguage('E');">English</button>
+                            <button class="btn bg-green" ng-click="ChangeLanguage('G');">German</button>
+                            <div class="tile-body fa-border" id="div_PrintContent">
+                            </div>
+                        </div>
+                        <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                            <!-- SUBMIT BUTTON -->
+                            <!-- Button used for submitting the record -->
+                            <button type="submit" class="btn btn-success" id="frmPrint" onclick="PrintPanel();">Print</button>
+
+                        </div>
+
+                    </section>
+
+
+                </div>
+            </div>
+        </div>
+    </section>
+                        @section anypopup
+{
+                            <a id="btnviewdebitnotepopup" data-toggle="modal" data-target="#viewdebitnotepopup" data-options="splash-2 splash-ef-4"></a>
+                            <div class="modal splash fade" id="viewdebitnotepopup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content" style="width:40%;margin-left:30%;">
+                                        <div class="modal-header">
+                                            <h3 class="modal-title custom-font red"><strong style="color:red">Generate Debit Note</strong></h3>
+                                        </div>
+                                        <div class="tile-body">
+                                            <div class="col-md-12">
+                                                Invoice Amount
+                                                <input type="text" style="text-align:right;" id="popInvoice" class="form-control" readonly="readonly" />
+                                            </div>
+                                            <div class="col-md-12">
+                                                Is FOB<input type="checkbox" id="popchkFob" onchange="chkfobchange();"  class="checkbox" />
+                                            </div>
+                                            <div class="row" id="div_foblist">
+                                                <div class="col-md-12">
+                                                    <table class="table table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Order No</th>
+                                                                <th>Order Amount</th>
+                                                                <th>FOB Amount</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="popupFOBTable"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <input type="text" id="popID" class="invisible" />
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-primary" data-dismiss="modal" onclick="debitnote();">Generate Debit Note</button>
+                                            <button class="btn btn-danger" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a id="btncommissionrecievepopup" data-toggle="modal" data-target="#commissionrecievepopup" data-options="splash-2 splash-ef-4"></a>
+                            <div class="modal splash fade" id="commissionrecievepopup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content" style="width:70%;margin-left:10%;">
+                                        <div class="modal-header">
+                                            <h3 class="modal-title custom-font red"><strong style="color:red">Commission Recieved</strong></h3>
+                                        </div>
+                                        <div class="tile-body">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        Invoice Amount
+                                                        <input type="text" style="text-align:right" id="popupInvoiceAmt" class="form-control" readonly="readonly" />
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        Commission Amount
+                                                        <input type="text" style="text-align:right" id="popupCommissionAmt" class="form-control" readonly="readonly" />
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        Commission Recieved
+                                                        <input type="text" onchange="MoneyValidation(this);" style="text-align:right" id="popupCommissionRecieved" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        Date
+                                                        <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                                            <input type='text' id="txtCommissionDate" name="txtCommissionDate" class="form-control" />
+                                                            <span class="input-group-addon">
+                                                                <span class="fa fa-calendar"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <br />
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Order No</th>
+                                                                    <th>Commission(%)</th>
+                                                                    <th><span id="span_commissiontitle"></span></th>
+                                                                    <th>Commission Amount</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="popupCommisionTable"></tbody>
+                                                        </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <input type="text" id="popupID" class="invisible" />
+                                            </div>
+                                            <div class="modal-footer center">
+                                                <div class="col-md-12">
+                                                    <button class="btn btn-success btn-border" data-dismiss="modal" onclick="commissionrecieve();">Submit</button>
+                                                    <button class="btn btn-danger btn-border" data-dismiss="modal">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+  }

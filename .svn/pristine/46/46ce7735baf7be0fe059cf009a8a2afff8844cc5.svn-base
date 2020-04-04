@@ -1,0 +1,291 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using BusinessEntity.EntityModels;
+using BusinessLogic.Admin_BL;
+using BusinessLogic;
+/*Author: Manoj
+ created Date : 18th April 2018
+ Sales Target Controller
+ */
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_SalesTargetController : Controller
+    {
+        public static string prefix = "";
+        public static bool automanual = false;
+
+        // Creating Object for Sales Target Business Logic
+        ET_Admin_SalesTarget_BL objBL = new ET_Admin_SalesTarget_BL();
+        // Creating Object for Business Access Layer
+        BAL bal = new BAL();
+        
+        // Creating Object for Error Master Entity
+        error_master objERR = new error_master();
+        // Creating Object for Log Info Entity
+        tbl_loginfo objLOG = new tbl_loginfo();
+
+        // GET: ET_Admin_SalesTarget
+        public ActionResult ET_Admin_SalesTarget()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+
+                    GetYears();
+                    Binddropdown_Organization();
+                    SetPrivilages();
+                    AutoManual();
+                    var data = objBL.ET_Admin_SalesTargetList_BL();
+                    return View(data);
+                }
+                catch (Exception exe)
+                {
+                    //Insert Error Log
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    ViewBag.Error = errid;
+                    return View();
+                }
+            }
+            else
+            {
+                //Session Expiry
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+            
+        }
+        //Get : Dynamic Years binding for dropdown
+        public void GetYears()
+        {
+            List<int> Years = new List<int>();
+            DateTime startYear = DateTime.Now;
+            while (startYear.Year <= DateTime.Now.AddYears(10).Year)
+            {
+                Years.Add(startYear.Year);
+                startYear = startYear.AddYears(1);
+            }
+            ViewBag.Years = Years;
+        }
+
+        // Bind Dropdown Roles
+        public ActionResult Binddropdown_Organization()
+        {
+            var OrganizationList = objBL.Binddropdown_Organization_BL();
+            ViewBag.Organization = OrganizationList;
+            return View();
+        }
+
+        //Checking privilage
+        public void SetPrivilages()
+        {
+            ViewBag.Create = "CreateNo";
+            ViewBag.Edit = "EditNo";
+            ViewBag.Delete = "DeleteNo";
+            ViewBag.Restore = "RestoreNo";
+            ViewBag.View = "ViewNo";
+            List<Tbl_AccessPermissions> ObjPermissions = bal.GetPrivilages_BL(Convert.ToInt32(Session["UserID"].ToString()), 1008);
+            foreach (var item in ObjPermissions)
+            {
+                if (item.IS_ADD)
+                {
+                    ViewBag.Create = "CreateYes";
+                }
+                if (item.IS_EDIT)
+                {
+                    ViewBag.Edit = "EditYes";
+                }
+                if (item.IS_DELETE)
+                {
+                    ViewBag.Delete = "DeleteYes";
+                }
+                if (item.IS_FULLCONTROL)
+                {
+                    ViewBag.Restore = "RestoreYes";
+                }
+                if (item.IS_VIEW)
+                {
+                    ViewBag.View = "ViewYes";
+                }
+            }
+
+        }
+
+        //Checking Code Auto/Manual
+        private void AutoManual()
+        {
+            ViewBag.AutoManual = false;
+            automanual = false;
+            List<Tbl_Document_Master> ObjDoc = bal.AutoManual_BL(1008);
+            if (ObjDoc.Count > 0)
+            {
+                foreach (var item in ObjDoc)
+                {
+                    if (item.autogen_type == "Automatic")
+                    {
+                        ViewBag.AutoManual = true;
+                        prefix = item.autogen_prefix;
+                        automanual = true;
+                    }
+                    else
+                    {
+                        ViewBag.Required = "required";
+                    }
+                }
+
+            }
+        }
+
+        //Bind Sales Target Employees
+        public ActionResult BindRow_Employees(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    var data = objBL.BindRow_Employees_BL(id);
+                    return PartialView("/Views/Admin/ET_Admin_SalesTarget/_ET_Admin_SalesTarget_Employees.cshtml", data);
+                }
+                catch (Exception exe)
+                {
+                    //Insert Error Log
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                //Session Expire
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        // Server Side Validation for User Master
+        private string validations(int TargetID, int FinYear, int ORG_ID, int Target, int UserID)
+        {
+            if (FinYear.ToString() == "")
+            {
+                return "Choose Finacial Year";
+            }
+            if (ORG_ID.ToString() == "")
+            {
+                return "Choose Saless Organization";
+            }
+            if (Target.ToString() == "" || Target==0)
+            {
+                return "Enter Target";
+            }
+            if (UserID.ToString() == "")
+            {
+                return "User Shouldn't be Empty";
+            }
+            {
+                //Check Financial Year and Organization Exists
+                string valid = objBL.CheckFinancialORGExists_BL(TargetID, FinYear,ORG_ID, UserID);
+                if (valid != "")
+                {
+                    return "Financial Year and Organization Already Exist";
+                }
+            }
+            
+            return "";
+        }
+
+        // Insert / Update Sales Target
+        [HttpGet]
+        public ActionResult ET_Admin_SalesTarget_Add(int TargetID, int FinYear, int ORG_ID, int Target, int UserID, int M1, int M2, int M3, int M4, int M5, int M6, int M7, int M8, int M9, int M10, int M11, int M12)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    string valid = validations(TargetID, FinYear, ORG_ID, Target, UserID);
+                    if (valid == "")
+                    {
+                        Tbl_Sales_Target tbl_Sales_Target = new Tbl_Sales_Target()
+                        {
+                            ST_ID = TargetID,
+                            ST_FINANCIAL_YEAR = FinYear,
+                            ORG_ID = ORG_ID,
+                            ST_EMP_ID = UserID,
+                            ST_M1 = M1,
+                            ST_M2 = M2,
+                            ST_M3 = M3,
+                            ST_M4 = M4,
+                            ST_M5 = M5,
+                            ST_M6 = M6,
+                            ST_M7 = M7,
+                            ST_M8 = M8,
+                            ST_M9 = M9,
+                            ST_M10 = M10,
+                            ST_M11 = M11,
+                            ST_M12 = M12,
+                            ST_TARGET=Target,
+                            CREATED_BY = Convert.ToInt32(Session["UserID"].ToString())
+                        };
+
+                        decimal d = objBL.Tbl_Sales_Target_Add(tbl_Sales_Target);
+                        var json = "Success";
+                        if (d == 0)
+                        {
+                            json = "Failed";
+                        }
+                        else
+                        {
+                            objLOG.log_dockey = "4";
+                            objLOG.log_userid = Session["UserID"].ToString();
+                            objLOG.log_recordkey = d.ToString();
+                            if (UserID == 0)
+                            {
+                                objLOG.log_operation = "Insert";
+                                objLOG.log_Remarks = "Record Inserted Successfully";
+                            }
+                            else
+                            {
+                                objLOG.log_operation = "Update";
+                                objLOG.log_Remarks = "Record Updated Successfully";
+                            }
+                            bal.OperationInsertLogs_BL(objLOG);
+                        }
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var json = "Validation:" + valid;
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    //Insert Error Log
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+    }
+}

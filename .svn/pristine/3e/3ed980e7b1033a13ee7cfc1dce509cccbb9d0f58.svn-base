@@ -1,0 +1,909 @@
+﻿app1.controller("AC_OrderdetailsCtrl", function ($scope, $http, $window, $compile) {
+
+    AC_GetSalesOrder_List();
+    GetPrivilages();
+    Bind_Currency();
+    Customer();
+    Supplier();
+    Salesperson();
+    CusPaymentTerms();
+    SupPaymentTerms();
+    ProductDetails();
+    Bind_Packing();
+    BindQuotation();
+    $scope.showRecords = function () {
+        $("#advancedusage").dataTable().fnDestroy();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+        AC_GetSalesOrder_List();
+    }
+
+    // Restore div in General Offer
+    $scope.restoreRecords = function () {
+        $("#advancedusageRestore").dataTable().fnDestroy();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+        AC_GetOrderRestore_List();
+    }
+
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_General_Order_Details/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+
+    function AC_GetSalesOrder_List() {
+        var getac_salesorderlist = $http.get("/ET_General_Order_Details/Tbl_OrderList",
+            {
+                params: { deleted: false }
+            });
+        getac_salesorderlist.then(function (result) {
+            var res = JSON.parse(result.data);
+            $scope.orderlist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    function BindQuotation() {
+        var getquotationlist = $http.get("/ET_General_Order_Details/GetQuotations");
+        getquotationlist.then(function (result) {
+            var res = JSON.parse(result.data);
+            $scope.QuotationList = res;
+            $scope.SelectedQuotationNo = 0;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    function AC_GetOrderRestore_List() {
+        var getpaymentrestorelist = $http.get("/ET_General_Order_Details/Tbl_OrderList",
+            {
+                params: { deleted: true }
+            });
+        getpaymentrestorelist.then(function (result) {
+            var res = JSON.parse(result.data);
+            $scope.orderRestorelist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+
+    // Create new record in General Offer
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#hdncustomer").addClass("hidden");
+            $("#drpCurrency").val("0").trigger("chosen:updated");
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $("#formSubmit").attr('disabled', "disabled");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+
+            $scope.ORGNAMEText = "";
+            $scope.ORGIDValue = "";
+            OrderCode: $scope.OrderCode = "";
+            OrderID: $scope.OrderID = "0";
+            $scope.SelectedSalesperson = "0";
+            $("#drpSalesperson").val("0").trigger("chosen:updated");
+            $scope.ORGIDValue = "0";
+            $scope.SelectedOredertype = "0";
+            $("#drpOrdertype").val($scope.SelectedOredertype).trigger("chosen:updated");
+            $("#txtorderdate").val("");
+
+            $scope.SelectedQuotationNo = "0";
+            $("#drpQuotationNo").val("0").trigger("chosen:updated");
+
+            $scope.SelectedCustomer = 0;
+            $("#drpCustomer").val("0").trigger("chosen:updated");
+            $scope.SelectedSupplier = 0;
+            $("#drpSupplier").val("0").trigger("chosen:updated");
+
+            $scope.txtcusponumber = "";
+            $("#cuspodate").val("");
+            $scope.txtcusscnumber = "";
+            $("#cusscdate").val("");
+
+            $scope.txtsubponumber = "";
+            $("#subpodate").val("");
+            $scope.txtsubscnumber = "";
+            $("#subscdate").val("");
+
+            $scope.SelectedCusCurrency = 0;
+            $("#drpCusCurrency").val($scope.SelectedCusCurrency).trigger("chosen:updated");
+            $scope.SelectedSupCurrency = 0;
+            $("#drpSupCurrency").val($scope.SelectedSupCurrency).trigger("chosen:updated");
+
+            $scope.txtcommisionagy = "";
+            $scope.txtCusdeliveryterms = "";
+            $scope.txtsupdeliveryterms = "";
+            $scope.remarks = "";
+
+            $scope.SelectedCuspaymenttype = 0;
+            $("#drpCusPaymenttype").val($scope.SelectedCuspaymenttype).trigger("chosen:updated");
+            $scope.SelectedSuppaymenttype = 0;
+            $("#drpSupPaymenttype").val($scope.SelectedSuppaymenttype).trigger("chosen:updated");     
+
+            var Rowhtml = "<tr><td><select class='form-control chosen-select' id='drpProductshortname' onchange='ChangeDetails(this);'><option value='0'>-Select-</option><option data-ng-repeat='st in ProductListshortname' value='{{ st.P_ID }}'>{{ st.P_ArticleNo }}</option></select></td><td><input type='text' id='txtCategory' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtpctname' readonly='readonly' class='form-control' /></td><td><input readonly='readonly' type='text' id='txtUOM' class='form-control' /></td><td><select class='form-control chosen-select'  id='drpCurrency' ><option value='0'>-Select-</option><option data-ng-repeat='CL in Currencylist' value='{{CL.CURRENCY_ID}}'>{{CL.CURRENCY_CODE}}</option></select></td><td><select class='form-control chosen-select' id='drppacking' ><option value='0'>-Select-</option><option data-ng-repeat='st in Packinglist' value='{{ st.LU_Code }}'>{{ st.LU_Description }}</option></select></td><td><input type='number' id='txtqty' class='form-control' /></td><td><input type='number' id='txtTgtpce' class='form-control' /></td><td><input type='number' id='txtprice_0' class='form-control' /></td><td><input type='checkbox' id='chkoffer_0' value='0' onchange='checkoffer(this);'></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var temp = $compile(Rowhtml)($scope);
+            angular.element(document.getElementById('Contactbody')).html("");
+            angular.element(document.getElementById('Contactbody')).append(temp);            
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+
+    function ProductDetails() {
+        var getproductlist = $http.get("/ET_Sales_Quotation/GetProducts");
+        getproductlist.then(function (productlist) {
+            var res = JSON.parse(productlist.data);
+            $scope.ProductListshortname = res;
+        }, function () {
+            alert('Data not found');
+            });
+    }
+
+    function Bind_Packing() {
+       // var id = $scope.SelectedCategory;
+        $http({
+            method: 'POST',
+            url: '/ET_General_Order_Details/Bind_Packing',            
+        }).success(function (data) {
+            var packing = JSON.parse(data)
+            $scope.Packinglist = packing;
+            $scope.PackingChange = 0;
+        });
+    }
+
+    $scope.addnewrow = function (a) {
+        var e = a.target;
+        var tr = $("#Contactbody").find("tr");
+        var txt = "";
+        for (var i = 0; i < tr.length; i++) {
+            var td = tr[i].cells;
+            var Product = $(td[0]).find("select").val();
+            var Currency = $(td[4]).find("select").val();
+            var Packing = $(td[5]).find("select").val();
+            var Qty = $(td[6]).find("input").val();
+            var Price = $(td[7]).find("input").val();
+            if (Product == "0") {
+                message = "Select Product at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            } else if (Currency == "0") {
+                message = "Select Currency at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            }
+            else if (Packing == "") {
+                message = "Enter the Packing at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            }
+            else if (Qty == "") {
+                message = "Enter the Quantity at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            }
+            else if (Price == "") {
+                message = "Enter the Price at row " + (i + 1);
+                toastr["error"](message, "Notification");
+                txt = "asd";
+            } 
+        }
+        if (txt == "") {
+            var Rowhtml = "<tr><td><select class='form-control chosen-select' id='drpProductshortname' onchange='ChangeDetails(this);'><option value='0'>-Select-</option><option data-ng-repeat='st in ProductListshortname' value='{{ st.P_ID }}'>{{ st.P_ArticleNo }}</option></select></td><td><input type='text' id='txtCategory' class='form-control' readonly='readonly'/></td><td><input type='text' id='txtpctname' class='form-control' readonly='readonly' /></td><td><input readonly='readonly' type='text' id='txtUOM' class='form-control' /></td><td><select class='form-control chosen-select'  id='drpCurrency' ><option value='0'>-Select-</option><option data-ng-repeat='CL in Currencylist' value='{{CL.CURRENCY_ID}}'>{{CL.CURRENCY_CODE}}</option></select></td><td><select class='form-control chosen-select' id='drppacking' ><option value='0'>-Select-</option><option data-ng-repeat='st in Packinglist' value='{{ st.LU_Code }}'>{{ st.LU_Description }}</option></select></td><td><input type='number' id='txtqty' class='form-control' /></td><td><input type='number' id='txtTgtpce' class='form-control' /></td><td><input type='number' id='txtprice_" + tr.length + "' class='form-control' /></td><td><input type='checkbox' id='chkoffer_" + tr.length +"' value='0' onchange='checkoffer(this);'></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+            var temp = $compile(Rowhtml)($scope);
+            angular.element(document.getElementById('Contactbody')).append(temp);
+        }
+    }
+
+
+    // Binding the contact details in dynamic table 
+    function OrderDetails(e) {
+        var id = e;
+        $http({
+            method: 'POST',
+            url: '/ET_General_Order_Details/ET_General_Order_Details_Update_Childtable',
+            data: {
+                id: id,
+            },
+        }).success(function (data) {
+            var contactdata = JSON.parse(data)
+            var i = contactdata.length;
+            var j = 0;
+            angular.element(document.getElementById('Contactbody')).html("");
+            while (i != 0) {
+                var Rowhtml = "<tr><td><select class='form-control chosen-select' id='drpProductshortname' onchange='ChangeDetails(this);'><option value='0'>-Select-</option><option data-ng-repeat='st in ProductListshortname' value='{{ st.P_ID }}'>{{ st.P_ArticleNo }}</option></select></td><td><input type='text' id='txtCategory' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtpctname' class='form-control' readonly='readonly' /></td><td><input type='text' id='txtUOM' readonly='readonly' class='form-control' /></td><td><select class='form-control chosen-select'  id='drpCurrency' ><option value='0'>-Select-</option><option data-ng-repeat='CL in Currencylist' value='{{CL.CURRENCY_ID}}'>{{CL.CURRENCY_CODE}}</option></select></td><td><select class='form-control chosen-select' id='drppacking' ><option value='0'>-Select-</option><option data-ng-repeat='st in Packinglist' value='{{ st.LU_Code }}'>{{ st.LU_Description }}</option></select></td><td><input type='number' id='txtqty' class='form-control' /></td><td><input type='number' id='txtTgtpce' class='form-control' /></td><td><input type='number' id='txtprice_"+j+"' class='form-control' /></td><td><input type='checkbox' id='chkoffer_"+j+"' value='0' onchange='checkoffer(this);'></td><td><a style='padding: 5px;' ng-click='addnewrow($event)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' ng-click='deleterow($event)'><i class='fa fa-trash'></i></a></td></tr>";
+                var temp = $compile(Rowhtml)($scope);
+                angular.element(document.getElementById('Contactbody')).append(temp);
+                i--;
+                j++;
+            }
+            $scope.orderdata1 = contactdata;
+        });
+    }
+
+    $scope.deleterow = function (a) {
+        var e = a.target;
+        var len = $("#Contactbody").find("tr").length;
+        if (len != 1) {
+            $(e).parent().parent().parent().fadeOut(300, function () { $(this).remove(); });
+        }
+        else {
+            message = "Atleast one contact required";
+            toastr["error"](message, "Notification");
+        }
+    }
+
+
+    function Salesperson() {
+        $http({
+            method: 'POST',
+            url: '/ET_General_Order_Details/Sales_person_dropdown',
+        }).success(function (data) {
+            var person = JSON.parse(data)
+            $scope.Salesperson = person;
+        });
+    }
+
+    $scope.Salesgroup = function () { 
+        debugger;
+        var id = $scope.SelectedSalesperson;
+        $http({
+            method: 'POST',
+            url: '/ET_General_Order_Details/SalesOrgBind',
+            dataType: 'json',
+            data: {
+                id: id,
+            },
+        }).success(function (data) {
+            debugger;
+            var x = data.split(',');
+            $scope.ORGNAMEText = x[0];
+            $scope.ORGIDValue = x[1];
+        });
+    }
+
+    $scope.changeOrdertyper = function () {
+       // setTimeout(function () { $("#drpOrdertype").val($scope.SelectedOredertype).trigger("chosen:updated"); }, 100);
+
+        if ($scope.SelectedOredertype == "1") {            
+            $("#Cus_po").removeClass("hidden");
+           // $("#Cus_podate").removeClass("hidden");
+            $("#Sup_sc").removeClass("hidden");
+           // $("#Sup_scdate").removeClass("hidden");
+            $("#Cus_name").removeClass("hidden");
+            $("#Cus_currency").removeClass("hidden");
+            $("#commision").removeClass("hidden");
+            $("#Cus_deliterms").removeClass("hidden");
+            $("#Cus_paymet").removeClass("hidden");
+            $("#Sub_name").removeClass("hidden");
+
+            $("#Quote_No").addClass("hidden");
+            $("#Sup_po").addClass("hidden");
+          //  $("#Sup_podate").addClass("hidden");
+            $("#Cus_sc").addClass("hidden");
+          //  $("#Cus_scdate").addClass("hidden");
+            $("#Sup_posc").addClass("hidden");
+            $("#Sup_currency").addClass("hidden");
+            $("#Sup_deliterms").addClass("hidden");
+            $("#Sup_payment").addClass("hidden");
+
+        }
+        else if ($scope.SelectedOredertype == "2") {
+            $("#Cus_po").removeClass("hidden");
+         //   $("#Cus_podate").removeClass("hidden");
+            $("#Cus_name").removeClass("hidden");
+            $("#Cus_currency").removeClass("hidden");
+            $("#commision").addClass("hidden");
+            $("#Cus_deliterms").removeClass("hidden");
+            $("#Cus_paymet").removeClass("hidden");
+            $("#Sub_name").addClass("hidden");
+            $("#Cus_sc").removeClass("hidden");
+            $("#Quote_No").removeClass("hidden");
+         //   $("#Cus_scdate").removeClass("hidden");
+
+
+            $("#Sup_sc").addClass("hidden");
+          //  $("#Sup_scdate").addClass("hidden");
+            $("#Sup_po").addClass("hidden");
+        //    $("#Sup_podate").addClass("hidden");
+            $("#Sup_posc").addClass("hidden");
+            $("#Sup_currency").addClass("hidden");
+            $("#Sup_deliterms").addClass("hidden");
+            $("#Sup_payment").addClass("hidden");
+
+        }
+        else {
+            $("#Cus_name").removeClass("hidden");
+            $("#Cus_currency").removeClass("hidden");
+            $("#commision").addClass("hidden");
+            $("#Cus_deliterms").removeClass("hidden");
+            $("#Cus_paymet").removeClass("hidden");
+            $("#Quote_No").removeClass("hidden");
+            $("#Cus_po").removeClass("hidden");
+            $("#Cus_podate").removeClass("hidden");
+            $("#Sup_sc").removeClass("hidden");
+            $("#Sup_scdate").removeClass("hidden");
+            $("#Cus_sc").removeClass("hidden");
+            $("#Cus_scdate").removeClass("hidden");
+
+            $("#Sup_currency").removeClass("hidden");
+            $("#Sup_deliterms").removeClass("hidden");
+            $("#Sup_payment").removeClass("hidden");
+        }
+    }
+
+    function Bind_Currency() {
+        $http({
+            method: 'GET',
+            url: '/ET_Admin_GeneralOffer/Bind_Currency',
+
+        }).success(function (result) {
+            var res = JSON.parse(result)
+            $scope.Currencylist = res;
+            $scope.SelectedCusCurrency = 0;
+            $scope.SelectedSupCurrency = 0;
+        });
+    }
+
+    $scope.CustomerAdvancetype = function () {
+
+        setTimeout(function () { $("#drpSusAdvancetype").val($scope.SelectedCusAdvancetype).trigger("chosen:updated"); }, 100);
+
+        if ($scope.SelectedAdvancetype != "1") {
+            $("#htnadvancepercentage").addClass("hidden");
+            $("#htnadvanceamount").removeClass("hidden");
+        }
+        else {
+            $("#htnadvancepercentage").removeClass("hidden");
+            $("#htnadvanceamount").addClass("hidden");
+        }
+    }
+
+    $scope.Discounttype = function () {
+
+        setTimeout(function () { $("#drpdiscounttype").val($scope.Selecteddiscounttype).trigger("chosen:updated"); }, 100);
+
+        if ($scope.Selecteddiscounttype != "1") {
+            $("#htndiscountpercentage").addClass("hidden");
+            $("#htndiscountamount").removeClass("hidden");
+        }
+        else {
+            $("#htndiscountpercentage").removeClass("hidden");
+            $("#htndiscountamount").addClass("hidden");
+        }
+    }
+
+    $scope.Supadvancetype = function () {
+
+        setTimeout(function () { $("#drpsupAdvancetype").val($scope.SelectedsupAdvancetype).trigger("chosen:updated"); }, 100);
+
+        if ($scope.SelectedsupAdvancetype != "1") {
+            $("#htnsupradvancepercentage").addClass("hidden");
+            $("#htnsupradvanceamount").removeClass("hidden");
+        }
+        else {
+            $("#htnsupradvancepercentage").removeClass("hidden");
+            $("#htnsupradvanceamount").addClass("hidden");
+        }
+    }
+
+    $scope.Supdiscounttype = function () {
+
+        setTimeout(function () { $("#drpsupdiscounttype").val($scope.Selectedsupdiscounttype).trigger("chosen:updated"); }, 100);
+
+        if ($scope.Selectedsupdiscounttype != "1") {
+            $("#htnsupdiscountpercentage").addClass("hidden");
+            $("#htnsupdiscountamount").removeClass("hidden");
+        }
+        else {
+            $("#htnsupdiscountpercentage").removeClass("hidden");
+            $("#htnsupdiscountamount").addClass("hidden");
+        }
+    }
+
+    function CusPaymentTerms() {
+        $http({
+            method: 'POST',
+            url: '/ET_General_Order_Details/Payment_terms_dropdown',
+        }).success(function (data) {
+            var payment = JSON.parse(data)
+            $scope.Cuspayment = payment;
+        });
+    }
+
+    function SupPaymentTerms() {
+        $http({
+            method: 'POST',
+            url: '/ET_General_Order_Details/Payment_terms_dropdown',
+        }).success(function (data) {
+            var payment = JSON.parse(data)
+            $scope.Suppayment = payment;
+        });
+    }
+
+    // Binding the customer only 
+    function Customer() {
+        var id = "1";
+        $http({
+            method: 'GET',
+            url: '/ET_General_Order_Details/Bind_dropdown_Banknameandcussup',
+            params: {
+                id: id,
+            },
+        }).
+            success(function (data) {
+                var customer = JSON.parse(data)
+                $scope.CustomerList = customer;
+                $scope.SelectedCustomer = 0;
+
+            });
+    }
+
+    // Binding the supplier only
+    function Supplier() {
+        var id1 = 0;
+        $http({
+            method: 'POST',
+            url: '/ET_General_Order_Details/Bind_dropdown_Banknameandcussup',
+            data: {
+                id: id1,
+            },
+        }).
+            success(function (data) {
+                var Supplier = JSON.parse(data)
+                $scope.SupplierList = Supplier;
+                $scope.SelectedSupplier = 0;
+            });
+    }
+
+    function validate() {
+        debugger;
+        var tr = $("#Contactbody").find("tr");
+        var txt = "";
+        for (i = 0; i < tr.length; i++) {
+            var td = $(tr[i]).find("td");
+            var Shortname = $(td[0]).find("select").val();
+            if (Shortname == "0") {
+                message = "Choose Shortname:" + (i + 1);
+                toastr["error"](message, "Notification");
+                return "";
+            }          
+            else {
+                txt = txt + $(td[0]).find("select").val() + "}";
+                txt = txt + $(td[1]).find("input").val() + "}";
+                txt = txt + $(td[2]).find("input").val() + "}";
+                txt = txt + $(td[3]).find("input").val() + "}";
+                txt = txt + $(td[4]).find("select").val() + "}";
+                txt = txt + $(td[5]).find("select").val() + "}";
+                txt = txt + $(td[6]).find("input").val() + "}";
+                txt = txt + $(td[7]).find("input").val() + "}";
+                txt = txt + $(td[8]).find("input").val() + "}";
+                txt = txt + $($(td[9]).find("checkbox").context.lastChild).val() + "|";
+            }
+        }
+        return txt;
+    };
+
+    $scope.SubmitClick = function () {
+        debugger;
+       // var Commision = ;
+        if ($scope.txtcommisionagy == "") {
+            $scope.txtcommisionagy = 0;
+        }
+        var txt = validate();
+        if (txt != "") {
+            var post = $http({
+                method: "POST",
+                url: "/ET_General_Order_Details/ET_General_Order_Details_Add",
+                dataType: 'json',
+                data: {
+                    OrderCode: $scope.OrderCode,
+                    OrderID: $scope.OrderID,
+                    drpSalesperson: $scope.SelectedSalesperson,
+                    ORGIDValue: $scope.ORGIDValue,
+                    drpOrdertype: $scope.SelectedOredertype,
+                    txtorderdate: $("#txtorderdate").val(),
+                    drpCustomer: $scope.SelectedCustomer,
+                    drpSupplier: $scope.SelectedSupplier,
+
+                    txtcusponumber: $scope.txtcusponumber,
+                    cuspodate: $("#cuspodate").val(),
+                    txtcusscnumber: $scope.txtcusscnumber,
+                    cusscdate: $("#cusscdate").val(),
+
+                    txtsubponumber: $scope.txtsubponumber,
+                    subpodate: $("#subpodate").val(),
+                    txtsubscnumber: $scope.txtsubscnumber,
+                    subscdate: $("#subscdate").val(),
+
+                    drpCusCurrency: $scope.SelectedCusCurrency,
+                    drpSupCurrency: $scope.SelectedSupCurrency,
+
+                    txtcommisionagy: $scope.txtcommisionagy,
+
+                    txtCusdeliveryterms: $scope.txtCusdeliveryterms,
+                    txtsupdeliveryterms: $scope.txtsupdeliveryterms,
+
+                    drpCusPaymenttype: $scope.SelectedCuspaymenttype,
+                    drpSupPaymenttype: $scope.SelectedSuppaymenttype,
+                    remarks: $scope.remarks,
+                    quotation: $scope.SelectedQuotationNo,
+                    Orderdetails: txt
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+
+            post.success(function (data, status) {
+
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else if (data.indexOf("Validation") > -1) {
+                    toastr["error"](data, "Notification");
+                }
+                else if (data == "Success") {
+                    if ($scope.txtMaterialID == 0) {
+                        message = 'Record Inserted Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = 'Record Updated Successfully.';
+                        toastr["success"](message, "Notification");
+                    }
+                    $scope.createnew();
+
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+
+        }
+    }
+
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var get = $http({
+                method: "POST",
+                url: "/ET_General_Order_Details/ET_General_Order_Details_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            get.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var res = JSON.parse(data);
+                    debugger;
+                    OrderCode: $scope.OrderCode = res.SO_Code;
+                    OrderID: $scope.OrderID = res.SO_ID;
+                    $scope.SelectedSalesperson = res.SO_SalesPersonID;
+                    $("#drpSalesperson").val($scope.SelectedSalesperson).trigger("chosen:updated");
+                    $scope.Salesgroup($scope.SelectedSalesperson);
+
+                    $scope.ORGIDValue = res.SO_ORGID;
+                    $scope.SelectedOredertype = res.SO_OrderType;
+                    $("#drpOrdertype").val($scope.SO_OrderType).trigger("chosen:updated");
+                    $scope.changeOrdertyper($scope.SelectedOredertype);
+
+                    $scope.SelectedCustomer = res.SO_CutomerID;
+                    $("#drpCustomer").val($scope.SelectedCustomer).trigger("chosen:updated");
+
+                    $scope.SelectedSupplier = res.SO_SupplierID;
+                    $("#drpSupplier").val($scope.SelectedSupplier).trigger("chosen:updated");
+
+                    var Orderdate = new Date(parseInt(res.SO_OrderDate.substr(6)));
+                    var Orderdt = ("0" + (Orderdate.getMonth() + 1)).slice(-2) + "/" + ("0" + Orderdate.getDate()).slice(-2) + "/" + Orderdate.getFullYear();
+                    $scope.txtorderdate = Orderdt;
+
+                    $scope.txtcusponumber = res.SO_CusPONO;
+                    var cuspodate = new Date(parseInt(res.SO_CusPODate.substr(6)));
+                    var Cuspodt = ("0" + (cuspodate.getMonth() + 1)).slice(-2) + "/" + ("0" + cuspodate.getDate()).slice(-2) + "/" + cuspodate.getFullYear();
+                    $scope.cuspodate = Cuspodt;
+
+                    $scope.txtcusscnumber = res.SO_CusSCNO;
+                    var cusscdate = new Date(parseInt(res.SO_CusSCDate.substr(6)));
+                    var Cusscdt = ("0" + (cusscdate.getMonth() + 1)).slice(-2) + "/" + ("0" + cusscdate.getDate()).slice(-2) + "/" + cusscdate.getFullYear();
+                    $scope.cusscdate = Cusscdt;
+
+                    $scope.txtsubponumber = res.SO_SupPONO;
+                    var subpodate = new Date(parseInt(res.SO_SupPODate.substr(6)));
+                    var Suppodt = ("0" + (subpodate.getMonth() + 1)).slice(-2) + "/" + ("0" + subpodate.getDate()).slice(-2) + "/" + subpodate.getFullYear();
+                    $scope.subpodate = Suppodt;
+
+                    $scope.txtsubscnumber = res.SO_SupSCNO;
+                    var subscdate = new Date(parseInt(res.SO_SupSCDate.substr(6)));
+                    var Supscdt = ("0" + (subscdate.getMonth() + 1)).slice(-2) + "/" + ("0" + subscdate.getDate()).slice(-2) + "/" + subscdate.getFullYear();
+                    $scope.subscdate = Supscdt;
+
+                    $scope.SelectedCusCurrency = res.SO_CusCurrency;
+                    $("#drpCusCurrency").val($scope.SelectedCusCurrency).trigger("chosen:updated");
+                    $scope.SelectedSupCurrency = res.SO_SupCurrency;
+                    $("#drpSupCurrency").val($scope.SelectedSupCurrency).trigger("chosen:updated");
+
+                    $scope.txtcommisionagy = res.SO_Commision;
+                    $scope.txtCusdeliveryterms = res.SO_CusDeliveryTerms;
+                    $scope.txtsupdeliveryterms = res.SO_SupDeliveryTerms;
+                    $scope.remarks = res.SO_Remarks;
+
+                    $scope.SelectedQuotationNo = res.SO_QuotationID;
+                    $("#drpQuotationNo").val(res.SO_QuotationID).trigger("chosen:updated");
+
+                    $scope.SelectedCuspaymenttype = res.SO_CusPaymentTermID;
+                    $("#drpCusPaymenttype").val($scope.SelectedCuspaymenttype).trigger("chosen:updated");
+                    $scope.SelectedSuppaymenttype = res.SO_SupPaymentTermID;
+                    $("#drpSupPaymenttype").val($scope.SelectedSuppaymenttype).trigger("chosen:updated");    
+                    
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+
+                    OrderDetails(res.SO_ID);
+                }
+            });
+
+            get.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+
+    // Delete and restore function
+    $scope.Restoredeleterecords = function (a, $event, b) {
+        var res = false;
+        if (b)
+            res = $scope.Isdelete;
+        else
+            res = $scope.Isrestore
+        if (res) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_General_Order_Details/ET_General_Order_Details_Restore_Delete",
+                dataType: 'json',
+                data: {
+                    id: a,
+                    type: b
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (data == "Success") {
+                        $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                        if (b) {
+                            message = "Record Deleted Successfully.";
+                        }
+                        else {
+                            message = "Record Restored Successfully.";
+                        }
+
+                        toastr["success"](message, "Notification");
+
+                        AC_GetPayment_List();
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+
+    // View function in Order details
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_General_Order_Details/ET_General_Order_Details_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+
+    $scope.$watch("QuotationList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpQuotationNo").val($scope.SelectedQuotationNo).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("Currencylist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCusCurrency").val($scope.SelectedCusCurrency).trigger("chosen:updated"); }, 100);
+            setTimeout(function () { $("#drpSupCurrency").val($scope.SelectedSupCurrency).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("CustomerList", function (value) {
+        var val = value || null;
+        if (val) {
+           // alert(val);
+            setTimeout(function () { $("#drpCustomer").val($scope.SelectedCustomer).trigger("chosen:updated"); }, 100);
+        }
+    });   
+
+    $scope.$watch("SupplierList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSupplier").val($scope.SelectedSupplier).trigger("chosen:updated"); }, 100);
+        }
+    });
+
+    $scope.$watch("Salesperson", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSalesperson").val($scope.SelectedSalesperson).trigger("chosen:updated"); }, 100);
+        }
+    });
+
+    $scope.$watch("Cuspayment", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCusPaymenttype").val($scope.SelectedCuspaymenttype).trigger("chosen:updated"); }, 100);  
+        }
+    });
+
+    $scope.$watch("Suppayment", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpSupPaymenttype").val($scope.SelectedSuppaymenttype).trigger("chosen:updated"); }, 100); 
+        }
+    });
+
+    $scope.$watch("Packinglist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drppacking").val($scope.SelectedPacking).trigger("chosen:updated"); }, 100);
+        }
+    });
+
+    $scope.$watch("orderdata1", function (value) {
+        var val = value || null;
+        if (val) {
+            var contactdata = $scope.orderdata1;
+            setTimeout(function () {
+                var tr = $("#Contactbody").find("tr");
+                for (var i = 0; i < tr.length; i++) {
+                    var td = tr[i].cells;
+                    $(td[0]).find("select").val(contactdata[i].PRODUCT_ID).trigger("chosen:updated");
+                    $(td[1]).find("input").val(contactdata[i].CAT_NAME);
+                    $(td[2]).find("input").val(contactdata[i].PRODUCT_Name);
+                    $(td[3]).find("input").val(contactdata[i].UOM_NAME);
+                    $(td[4]).find("select").val(contactdata[i].CURRENCY_ID).trigger("chosen:updated");
+                    $(td[5]).find("select").val(contactdata[i].PACKING).trigger("chosen:updated");                    
+                    $(td[6]).find("input").val(contactdata[i].QUANTITY);
+                    $(td[7]).find("input").val(contactdata[i].Target_Value);
+                    $(td[8]).find("input").val(contactdata[i].PRICE);
+                    if (contactdata[i].SUPPLIEROFFER_ID != 0)
+                        $(td[9]).find("input").prop('checked', true);
+                }
+            }, 1000);
+        }
+    });
+
+    $scope.$watch("SelectedOredertype", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpOrdertype").val($scope.SelectedOredertype).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.QuotationChange = function () {
+    }
+    $scope.Customerchange = function () {
+    }
+    $scope.Supplierchange = function () {
+    }
+    $scope.CurrencyChange = function () {
+    }
+    $scope.CusCurrencyChange = function () {
+    }
+    $scope.SupCurrencyChange = function () {
+    }
+    $scope.PackingChange = function () {
+    }
+    $scope.SupPymtchange = function () {
+    }
+    $scope.CusPymtchange = function () {
+    }
+    $scope.$watch("orderlist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    $scope.$watch("orderRestorelist", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+            }, 5);
+        }
+    });
+   
+});

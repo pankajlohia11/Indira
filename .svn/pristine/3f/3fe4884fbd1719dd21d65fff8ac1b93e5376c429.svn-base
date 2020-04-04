@@ -1,0 +1,458 @@
+﻿app1.controller("AC_ProductCatalogCtrl", function ($scope, $http, $window) {
+    GetPrivilages();
+    GetProductList();
+    GetProductCatalog();
+    GetUOM();
+    // Ger privilages
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_Admin_SystemSetUp/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+
+
+
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    //Get the product catalog list
+    function GetProductCatalog() {
+        var GetProductCatalogList = $http.get("/ET_Admin_ProductCatalog/GetProductCatalogList",
+            {
+                params: { deleted: false }
+            });
+        GetProductCatalogList.then(function (result) {
+            $scope.ProductCatalogLists = result.data;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    //Get the product deleted 
+    function GetProductCatalogrestoreList() {
+        var GetProductCatalogRestoreList = $http.get("/ET_Admin_ProductCatalog/GetProductCatalogRestoreList",
+            {
+                params: { deleted: false }
+            });
+        GetProductCatalogRestoreList.then(function (result) {
+            debugger;
+            $scope.ProductCatalogRestoreLists = result.data;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    //Get the product list
+    function GetProductList() {
+        var getProductllist = $http.get("/ET_Admin_ProductCatalog/GetProductList");
+        getProductllist.then(function (product) {
+            $scope.products = product.data;
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    //Get the UOM list
+    function GetUOM() {
+        var getUOMllist = $http.get("/ET_Admin_ProductCatalog/GetUOMList");
+        getUOMllist.then(function (UOM) {
+            $scope.UOMS = UOM.data;
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    //Get the product details
+    $scope.GetProduct_Details = function () {
+        a = $scope.SelectedProduct;
+        var get = $http({
+            method: "POST",
+            url: "/ET_Admin_ProductCatalog/GetProductDetails",
+            dataType: 'json',
+            data: {
+                id: a
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+        get.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                var res = JSON.parse(data);
+                $scope.txtProductCode = res.P_ArticleNo;
+                $scope.txtProductSpecification = res.P_Description;
+                $scope.SelectedUOM = res.P_UOM;
+                
+
+                $("#drpUOM").val(res.P_UOM).trigger("chosen:updated");
+                $("#div_Edit").css("display", "block");
+              //  $scope.submittext = "Update";
+                $scope.Edit = "Edit";
+                $("#span_tabtext").html("Edit");
+            }
+        });
+
+        get.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+    //Watch for all data binding
+    $scope.$watch("products", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpProduct").val($scope.SelectedProduct).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("UOMS", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpUOM").val($scope.SelectedUOM).trigger("chosen:updated"); }, 100);
+        }
+    });
+    //View the records
+    $scope.showRecords = function () { 
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+        $("#advancedusage").dataTable().fnDestroy();
+        GetProductCatalog();
+    }
+    //View the deleted records
+    $scope.restoreRecords = function () {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+    // Create function
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#htndiscountpersentage").addClass("hidden");
+            $("#htndiscountamount").addClass("hidden");
+            $("#htnadvancetype").addClass("hidden");
+
+            $scope.PriceBookId = 0;
+            $scope.SelectedProduct = "";
+            $("#drpProduct").val("").trigger("chosen:updated");
+            $scope.txtProductCode = "";
+            $scope.txtPriceBookCode = "";
+            $scope.txtProductSpecification = "";
+            $scope.SelectedUOM = "";
+            $("#drpUOM").val("").trigger("chosen:updated");
+            $scope.txtUnitPrice1 = "";
+            $scope.txtUnitPrice2 = "";
+            $scope.txtUnitPrice3 = "";
+            $scope.txtUnitPrice4 = "";
+            $("#txtEnqDate").val("");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+
+    // Insert and Update function
+    $scope.SubmitClick = function () {
+        debugger;
+        $("#div_loadImage").css("display", "block");
+        var date=$("#txtEnqDate").val();
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_ProductCatalog/ET_Admin_ProductCatalog_Add",
+            dataType: 'json',
+            
+            data: {
+                PriceBookId: $scope.PriceBookId,
+                PriceBookCode: $scope.txtPriceBookCode,
+                ProductId: $scope.SelectedProduct,
+                ProductCode: $scope.txtProductCode,
+                ProductSpecification: $scope.txtProductSpecification,
+                uom: $scope.SelectedUOM,
+                unitprice1: parseFloat($scope.txtUnitPrice1.split('.').join("").replace(",", ".")),
+                unitprice2: parseFloat($scope.txtUnitPrice2.split('.').join("").replace(",", ".")),
+                unitprice3: parseFloat($scope.txtUnitPrice3.split('.').join("").replace(",", ".")),
+                unitprice4: parseFloat($scope.txtUnitPrice4.split('.').join("").replace(",", ".")),
+                lastpricerewisedate: date
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+
+        post.success(function (data, status) {
+            $("#div_loadImage").css("display", "none");
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else if (data.indexOf("Validation") > -1) {
+                toastr["error"](data, "Notification");
+            }
+            else if (data.indexOf("Success") > -1) {
+                debugger;
+                var res = data.split(':');
+                if ($scope.PriceBookId == 0) {
+                    message = 'Record Inserted Successfully With Code : ' + res[1].toString();
+                    toastr["success"](message, "Notification");
+                    $scope.createnew();
+                }
+                else {
+                    message = 'Record Updated Successfully With Code : ' + res[1].toString()
+                    toastr["success"](message, "Notification");
+                    $scope.createnew();
+                }
+            }
+        });
+
+        post.error(function (data, status) {
+            $("#div_loadImage").css("display", "none");
+            $window.alert(data.Message);
+        });
+    }
+
+    // Edit function
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var get = $http({
+                method: "POST",
+                url: "/ET_Admin_ProductCatalog/ET_Admin_ProductCatalog_Update_GetbyID",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            get.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var res = JSON.parse(data);
+                    debugger;
+
+                    $scope.PriceBookId = res.PC_ID;
+                    $scope.txtPriceBookCode = res.PC_CODE;
+                    $scope.txtProductCode = res.PC_CODE;
+                    $scope.txtProductSpecification = res.PC_CODE;
+                    $scope.SelectedUOM = res.UOM;
+                   // $("#txtEnqDate").val(res.LAST_PRICE_REWISE_DATE);
+                    var Orderdate = new Date(parseInt(res.LAST_PRICE_REWISE_DATE.substr(6)));
+                    var Orderdt = ("0" + Orderdate.getDate()).slice(-2) + "-" + ("0" + (Orderdate.getMonth() + 1)).slice(-2) + "-" + Orderdate.getFullYear();
+                    $("#txtEnqDate").val(Orderdt);
+                    $("#drpUOM").val(res.UOM).trigger("chosen:updated");
+                    $("#drpProduct").val(res.PRODUCT_ID).trigger("chosen:updated");
+                    $scope.SelectedProduct = res.PRODUCT_ID;
+                    $scope.txtUnitPrice1 = parseFloat(res.UNIT_PRICE1).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                    $scope.txtUnitPrice2 = parseFloat(res.UNIT_PRICE2).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                    $scope.txtUnitPrice3 = parseFloat(res.UNIT_PRICE3).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                    $scope.txtUnitPrice4 = parseFloat(res.UNIT_PRICE4).toLocaleString("es-ES", { minimumFractionDigits: 2 });
+                    $scope.GetProduct_Details();
+
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+                }
+            });
+
+            get.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    //Restore the deleted records
+   
+    //$scope.deleteRecordConfirm = function (e, f) {
+    //    var res = false;
+    //    //if (b)
+    //    //    res = $scope.Isdelete;
+    //    //else
+    //    //    res = $scope.Isrestore
+    //    res = $scope.Isdelete;
+    //    if (res) {
+    //        var post = $http({
+    //            method: "POST",
+    //            url: "/ET_Admin_ProductCatalog/ET_Admin_ProductCatalog_Restore_delete",
+    //            dataType: 'json',
+    //            data: {
+    //                id: a,
+    //                type: true                      
+    //            },
+    //            headers: { "Content-Type": "application/json" }
+    //        });
+    //        post.success(function (data, status) {
+    //            if (data == "Session Expired") {
+    //                $window.location.href = '/ET_Login/ET_SessionExpire';
+    //            }
+    //            else if (data.indexOf("ERR") > -1) {
+    //                $("#spanErrMessage1").html(data);
+    //                $("#spanErrMessage2").html(data);
+    //                if ($("#exceptionmessage").length)
+    //                    $("#exceptionmessage").trigger("click");
+    //            }
+    //            else {
+    //                if (data == "Success") {
+    //                    $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+    //                    if (b) {
+    //                        message = "Record Deleted Successfully.";
+    //                    }
+    //                    else {
+    //                        message = "Record Restored Successfully.";
+    //                    }
+
+    //                    toastr["success"](message, "Notification");
+    //                }
+    //                else {
+    //                    message = "Failed to do this operation.";
+    //                    toastr["error"](message, "Notification");
+    //                }
+    //            }
+    //        });
+    //        post.error(function (data, status) {
+    //            $window.alert(data.Message);
+    //        });
+    //    }
+    //}
+    $scope.PerformRestore = function (a, $event, b) {
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_ProductCatalog/ET_Admin_ProductCatalog_Restore_delete",
+            dataType: 'json',
+            data: {
+                id: a,
+                type: b
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                if (data == "Success") {
+                    $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                    if (b) {
+                        message = "Record Deleted Successfully.";
+                    }
+                    else {
+                        message = "Record Restored Successfully.";
+                    }
+
+                    toastr["success"](message, "Notification");
+                }
+                else {
+                    message = "Failed to do this operation.";
+                    toastr["error"](message, "Notification");
+                }
+            }
+        });
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    };
+    $scope.Restoredeleterecords = function (a, $event, b) {
+        if (b) {
+            alertmessageModified($event, a.toString(),b,'ET_Admin_ProductCatalog', 'ET_Admin_ProductCatalog_Restore_delete');
+        }
+        else
+        {
+            $scope.PerformRestore(a, $event, b);
+            //message = "You don't access to do this operation, please contact admin.";
+            //toastr["error"](message, "Notification");
+        }
+    } 
+    //View: Popup view
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_ProductCatalog/ET_Admin_ProductCatalog_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.$watch("ProductCatalogLists", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+            }, 5);
+        }
+    });
+    
+});

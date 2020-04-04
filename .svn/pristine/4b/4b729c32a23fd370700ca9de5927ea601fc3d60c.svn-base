@@ -1,0 +1,49 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_OneToOneInvoice
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal OTOI_ID { get; set; }
+
+        [StringLength(50)]
+        public string OTOI_Code { get; set; }
+
+        public decimal OTOI_CustomerID { get; set; }
+        public decimal OTOI_SalesPerson { get; set; }
+        public decimal OTOI_ShipmentID { get; set; }
+
+        [Column(TypeName = "date")]
+        public DateTime OTOI_InvoiceDate { get; set; }
+
+        public decimal OTOI_ShipmentAmount { get; set; }
+
+        public decimal OTOI_TaxPer { get; set; }
+
+        public decimal OTOI_TaxAmount { get; set; }
+
+        public decimal OTOI_InvoiceAmount { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public int COM_KEY { get; set; }
+    }
+}

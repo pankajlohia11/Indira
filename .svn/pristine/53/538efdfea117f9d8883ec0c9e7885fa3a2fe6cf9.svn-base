@@ -1,0 +1,244 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.ShipmentView_CM
+@{ BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();}
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.headerObj)
+            {
+                <h5><label><strong>Shipment Details</strong></label></h5>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Email">Shipment Code</label>
+                        <input type="text" value="@item.S_Code" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Type</label>
+                        <select class="form-control chosen-select" name="drpOrdertype" value="@item.SD_Type" disabled>
+                            @if (item.SD_Type == 1)
+            {
+                <option value="1">Agency</option>
+}
+                            @if (item.SD_Type == 2)
+            {
+                <option value="2">Trading</option>
+}
+else
+{
+                <option value="3">Store</option>
+}
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Customer</label>
+                        <input type="text" value="@item.COM_DISPLAYNAME" class="form-control" disabled>
+                    </div>  
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Supplier</label>
+                        <input type="text" value="@item.SuppName" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">ETD</label>
+                        <input type="text" value="@((item.S_ETD??DateTime.Now).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Digits">ETA</label>
+                        <input type="text" value="@((item.S_ETA??DateTime.Now).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+                    </div>
+
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Departure Port</label>
+                        <input type="text" value="@item.S_DeparturePort" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Arrival Port</label>
+                        <input type="text" value="@item.S_ArrivalPort" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Departure Port</label>
+                        <input type="text" value="@item.S_DeparturePort" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Arrival Port</label>
+                        <input type="text" value="@item.S_ArrivalPort" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Departure Port</label>
+                        <input type="text" value="@item.S_BL_NO" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Arrival Port</label>
+                        <input type="text" value="@((item.S_BL_DATE??DateTime.Now).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">BL NO</label>
+                        <input type="text" value="@item.S_INV_NO" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">BL Date</label>
+                        <input type="text" value="@((item.S_INV_DATE??DateTime.Now).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Invoice Amount</label>
+                        <input type="text" style="text-align:right;" value="@(Convert.ToDecimal(item.S_INV_AMT).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Gross Weight</label>
+                        <input type="text" style="text-align:right;" value="@(Convert.ToDecimal(item.S_GrossWeight).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Container No</label>
+                        <input type="text" value="@item.S_ContainerNo" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Mother Vessel</label>
+                        <input type="text" value="@item.S_MotherVessel" class="form-control" disabled>
+                    </div>
+                </div>
+            }
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Schedule Code</th>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>Scheduled Quantity</th>
+                        <th>Shipment Quantity</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.detailsObj)
+                    {
+                        <tr>
+                            <td>@item.SH_Code</td>
+                            <td>@item.SD_ArticleNo</td>
+                            <td>@item.SD_ProductName</td>
+                            <td style="text-align:right;">@(Convert.ToDecimal(item.SD_ScheduledQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                            <td style="text-align:right;">@(Convert.ToDecimal(item.SD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @if (Model.headerObj[0].SD_Type == 1 && Model.headerObj[0].S_STATUS == 1)
+            {
+                if (Model.headerObj[0].S_DebitNoteStatus == false)
+                {
+                    <h4 style="text-align:center;color:orangered">* Debit Note Not Yet Raised *</h4>
+                }
+                else
+                {
+                    <h4 style="color:cornflowerblue"><u>Debit Note Details</u></h4>
+                    //Here debit note details
+                    decimal ShipID = Model.headerObj[0].S_ID;
+                    var debitDetails = dbcontext.Tbl_GenerateDebitNote.Where(a => a.DN_ShipmentID == ShipID).ToList();
+                    <div class="row">
+
+                        <div class="form-group col-md-6">
+                            <label for="Email">DebitNote Code</label>
+                            <input type="text" value="@debitDetails[0].DN_Code" class="form-control" disabled>
+                        </div>
+                        @if (debitDetails[0].DN__FOBStatus == 1)
+                        {
+                            if (debitDetails[0].DN_FOBAmount.Substring(debitDetails[0].DN_FOBAmount.Length - 1) == ",")
+                            {
+                                debitDetails[0].DN_FOBAmount = debitDetails[0].DN_FOBAmount.Substring(0, debitDetails[0].DN_FOBAmount.Length - 1);
+                            }
+                            var FabAmounts = new HashSet<decimal>(debitDetails[0].DN_FOBAmount.Split(',').Select(m => Convert.ToDecimal(m)).ToList()).ToList();
+
+                            if (debitDetails[0].DN_OrderCodes.Substring(debitDetails[0].DN_OrderCodes.Length - 1) == ",")
+                            {
+                                debitDetails[0].DN_OrderCodes = debitDetails[0].DN_OrderCodes.Substring(0, debitDetails[0].DN_OrderCodes.Length - 1);
+                            }
+                            var OrderCodes = debitDetails[0].DN_OrderCodes.Split(',');
+                    <div class="form-group col-md-6">
+                        <table style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Order No
+                                    </th>
+                                    <th>
+                                        Fab Amount
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < FabAmounts.Count(); i++)
+                                {
+                            <tr>
+                                <td>
+                                    @OrderCodes[i]
+                                </td>
+                                <td style="text-align:right;">
+                                    @(Convert.ToDecimal(FabAmounts[i]).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))
+                                </td>
+                            </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+                    </div>
+                        }
+
+                    </div>
+                    if (Model.headerObj[0].S_CommissionRecievedStatus == true)
+                    {
+                        <h4 style="text-align:center;color:green">Commission Raised</h4>
+                        <h4 style="color:cornflowerblue"><u>Commission Details</u></h4>
+                        //Commission details
+                        var debitDetails1 = dbcontext.Tbl_CommissionRecieve.Where(a => a.CR_ShipmentID == ShipID).ToList();
+                        <div class="row">
+
+                            <div class="form-group col-md-6">
+                                <label for="Email">DebitNote Code</label>
+                                <input type="text" value="@debitDetails1[0].CR_Code" class="form-control" disabled>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="Email">Date</label>
+                                <input type="text" value="@((debitDetails1[0].CREATED_DATE??DateTime.Now).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="Url">Commission Amount</label>
+                                <input type="text" style="text-align:right;" value="@(Convert.ToDecimal(debitDetails1[0].CR_CommissionAmount).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" class="form-control" disabled>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="Url">Commission Recieved</label>
+                                <input type="text" style="text-align:right;" value="@(Convert.ToDecimal(debitDetails1[0].CR_CommissionRecieved).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" class="form-control" disabled>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <h4 style="text-align:center;color:orangered">* Commission Not Yet Raised *</h4>
+                    }
+                }
+            }
+        </div>
+    </div>
+</div>

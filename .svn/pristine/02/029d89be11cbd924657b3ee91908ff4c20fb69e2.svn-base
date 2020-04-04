@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+using DataAccess;
+
+namespace BusinessLogic
+{
+    public class BAL
+    {
+        DAL dal = new DAL();
+        public int Authenticate_BL(Tbl_Master_User objBE)
+        {
+            return dal.Authenticate_DA(objBE);
+        }
+    }
+}

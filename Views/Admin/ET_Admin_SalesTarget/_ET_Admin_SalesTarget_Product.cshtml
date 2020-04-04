@@ -1,0 +1,126 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_User>
+@{ 
+    int i = 0;
+    
+}
+<style>
+    #tblSalesTarget tbody tr td{
+        padding:1px;
+    }
+    #tblSalesTarget{
+        overflow-x:auto;
+
+    }
+</style>
+<div class="col-md-12">
+    <div class="tile-body">
+        <div class="row">
+            <div class="col-md-6"><div id="tableTools"></div></div>
+            <div class="col-md-6"><div id="colVis"></div></div>
+        </div>
+        <table class="table table-custom" id="tblSalesTarget">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th><span id="Jan">Jan</span></th>
+                    <th><span id="Feb">Feb</span></th>
+                    <th><span id="Mar">Mar</span></th>
+                    <th><span id="Apr">Apr</span></th>
+                    <th><span id="May">May</span></th>
+                    <th><span id="Jun">Jun</span></th>
+                    <th><span id="Jul">Jul</span></th>
+                    <th><span id="Aug">Aug</span></th>
+                    <th><span id="Sep">Sep</span></th>
+                    <th><span id="Oct">Oct</span></th>
+                    <th><span id="Nov">Nov</span></th>
+                    <th><span id="Dec">Dec</span></th>
+                    <th>Total</th>
+                </tr>
+                </thead>
+            <tbody>
+                @foreach (var item in Model)
+                 {
+            <tr>
+                <td style="width:10%">
+                    <input type="hidden" class="form-control" name="TargetID_@i" id="TargetID_@i" value="0">
+                    <input type="hidden" class="form-control" name="txtUserID_@i" id="txtUserID_@i" value="@item.USER_ID">
+                    <input type="text" class="form-control" name="txtUserID_@i" id="txtUserID_@i" value="@item.DISPLAY_NAME" disabled>
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM1_@i" id="txtM1_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM2_@i" id="txtM2_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM3_@i" id="txtM3_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM4_@i" id="txtM4_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM5_@i" id="txtM5_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM6_@i" id="txtM6_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM7_@i" id="txtM7_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td> 
+                    <input type="text" class="form-control" name="txtM8_@i" id="txtM8_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM9_@i" id="txtM9_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM10_@i" id="txtM10_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM11_@i" id="txtM11_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtM12_@i" id="txtM12_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+                <td>
+                    <input type="text" class="form-control" name="txtTotal_@i" id="txtTotal_@i" disabled
+                           data-parsley-trigger="change" data-parsley-type="digits">
+                </td>
+            </tr>
+i++;
+}
+
+                <tr>
+                    <td><input type="hidden" class="form-control" name="txtLength" id="txtLength" value="@i">
+                        <input type="text" class="form-control" name="txtLabel" id="txtLabel" value="Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM1Total" id="txtM1Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM2Total" id="txtM2Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM3Total" id="txtM3Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM4Total" id="txtM4Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM5Total" id="txtM5Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM6Total" id="txtM6Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM7Total" id="txtM7Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM8Total" id="txtM8Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM9Total" id="txtM9Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM10Total" id="txtM10Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM11Total" id="txtM11Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtM12Total" id="txtM12Total" disabled></td>
+                    <td><input type="text" class="form-control" name="txtTotalTarget" id="txtTotalTarget" disabled></td>
+                </tr>
+            </tbody>
+            
+        </table>
+    </div>
+</div>

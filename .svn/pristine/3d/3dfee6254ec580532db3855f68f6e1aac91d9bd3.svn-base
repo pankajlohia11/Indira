@@ -1,0 +1,35 @@
+﻿
+@model IEnumerable<BusinessEntity.CustomModels.Shipment_CM>
+@foreach (var item in Model)
+{
+
+<tr>
+    <td style="display:none;">
+        <input type='text' id='txtOrderDetailID' class='form-control' readonly='readonly' value="@item.SD_ScheduleID" />
+    </td>
+    <td style="display:none;">
+        <input type='text' id='txtProductID' class='form-control' readonly='readonly' value="@item.SD_OrderDetailID" />
+    </td>
+    <td style="display:none;">
+        <input type='text' id='txtArticleNo' class='form-control' readonly='readonly' value="@item.SD_ProductID" />
+    </td>
+    <td>
+        <input type='text' id='txtProductName' class='form-control' readonly='readonly' value="@item.SH_Code" />
+    </td>
+    <td>
+        <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.SD_ArticleNo" />
+    </td>
+    <td>
+        <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.SD_ProductName" />
+    </td>
+    <td>
+        <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.Price" />
+    </td>
+    <td>
+        <input type='text' id='txtOrderedQuantity' class='form-control' readonly='readonly' value="@item.SD_ScheduledQuantity" />
+    </td>
+    <td>
+        <input type='number' id='txtScheduleQuantity' class='form-control' value="@item.SD_Quantity" onchange="calinvamount(this)"/>
+    </td>
+</tr>
+}

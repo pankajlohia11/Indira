@@ -1,0 +1,237 @@
+﻿
+@{
+    ViewBag.Title = "ET_Sales_DespatchtoOneToManyInvoice";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_DespatchtoOneToManyInvoiceCtrl.js"></script>
+    <script type="text/javascript">
+        function PrintPanel() {
+            var panel = document.getElementById("div_PrintContent");
+            var printWindow = window.open('', '', 'height=400,width=800');
+            printWindow.document.write('<html><head><title>Print the Sales OneToManyInvoice</title>');
+            printWindow.document.write('</head><body style="font-family:Arial">');
+            //document.writeln(panel.innerHtml);
+            printWindow.document.write(panel.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            setTimeout(function () {
+                printWindow.print();
+            }, 500);
+            return false;
+        }
+        function taxchange() {
+            debugger;
+            if ($("#txtShipmentAmount").val() == "") {
+                $("#txtTax").val("");
+                message = "Please Select Shipment No, Shipment Amount cannot be empty.";
+                toastr["error"](message, "Notification");
+            }
+            else {
+                $("#txtTaxAmt").val((parseFloat($("#txtShipmentAmount").val()) * (parseFloat($("#txtTax").val())) / 100).toFixed(3));
+                $("#txtInvAmt").val((parseFloat($("#txtShipmentAmount").val()) + (parseFloat($("#txtTaxAmt").val()))).toFixed(3));
+            }
+        }
+    </script>
+}
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order">
+        <div class="pageheader">
+
+            <h2>Invoice(One-Many) <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Invoice(One-Many)</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_OneToManyInvoiceCtrl">
+            <div class="col-md-12">
+                
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:block;">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> Invoice</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- This Below code is used for Tab purpose -->
+                    @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                            <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                        </ul>*@
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtInvoiceCode">Invoice Code</label>
+                                    <input type="text" name="txtInvoiceCode" id="txtInvoiceCode" ng-model="OTMI_Code" class="form-control" disabled="@ViewBag.AutoManual" @ViewBag.Required>
+                                    <input type="text" name="txtInvoiceID" id="txtInvoiceID" ng-model="OTMI_ID" class="hidden">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtINVDate">Invoice Date* </label>
+                                    <div class='input-group datepicker w-360' style="width:100%" data-format="DD-MM-YYYY">
+                                        <input type='text' id="txtINVDate" name="txtINVDate" class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="drpCustomer">Customer Name*</label>
+                                    <select data-ng-model="OTMI_CustomerID" id="drpCustomer" data-parsley-trigger="change" class="form-control chosen-select" ng-change="CustomerChange()" required>
+                                        <option value="">-Select-</option>
+                                        <option ng-repeat="customer in customers" value="{{customer.COM_ID}}">
+                                            {{customer.COM_DISPLAYNAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-sm-6">
+                                    <label class="control-label">Despatch Code*</label>
+                                    <select data-ng-model="OTMI_DespatchIDs" id="drpDespatchIDs" data-parsley-trigger="change" class="form-control chosen-select" ng-change="DespatchChange()">
+                                        <option ng-repeat="despatch in despatchlist" value="{{despatch.D_ID}}">
+                                            {{despatch.D_Code}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="drpSalesPerson">Sales Person</label>
+                                    <select data-ng-model="OTMI_SalesPerson" id="drpSalesPerson" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SalesPersonChange()" disabled>
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="salesperson in salespersons" value="{{salesperson.USER_ID}}">
+                                            {{salesperson.DISPLAY_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtOrderAmount">Order Amount</label>
+                                    <input type="text" style="text-align:right;" name="txtOrderAmount" readonly="readonly" id="txtOrderAmount" ng-model="OTMI_OrderAmount" class="form-control" data-parsley-trigger="change">
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtTax">Tax *</label>
+                                    <input type="text" style="text-align:right;" name="txtTax" id="txtTax" readonly ng-model="OTMI_TaxPer" class="form-control" maxlength="2" data-parsley-type="digits" data-parsley-trigger="change">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtTaxAmt">Tax Amount</label>
+                                    <input type="text" style="text-align:right;" name="txtTaxAmt" readonly="readonly" id="txtTaxAmt" ng-model="OTMI_TaxAmount" class="form-control" data-parsley-trigger="change">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtInvAmt">Invoice Amount</label>
+                                    <input type="text" style="text-align:right;" name="txtInvAmt" id="txtInvAmt" readonly="readonly" ng-model="OTMI_InvoiceAmount" class="form-control" data-parsley-trigger="change">
+                                </div><div class="form-group col-md-6">
+                                    <label for="txtInvAmt">Payment Terms</label>
+                                    <input type="text" name="txtPaymentTerms" id="txtPaymentTerms" readonly="readonly" ng-model="OTMI_PaymentTerms" class="form-control" data-parsley-trigger="change">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="txtInvAmt">DisCount Amount</label>
+                                    <input type="text" style="text-align:right;" name="txtInvAmt" id="txtInvAmt" readonly="readonly" ng-model="OTMI_DiscountAmt" class="form-control" data-parsley-trigger="change">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="txtInvAmt">freight Cost</label>
+                                    <input type="text" style="text-align:right;" name="txtInvAmt" id="txtFreightCost" ng-model="OTMI_FreightCost" class="form-control" data-parsley-trigger="change">
+                                </div>
+                            </div>
+                            <section class="tile">
+                                <!-- tile header -->
+                                <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                    <h1 class="custom-font"><strong>Invoice</strong> Details</h1>
+                                </div>
+                                <!-- /tile header -->
+                                <!-- tile body -->
+                                <div class="tile-body">
+
+                                    <div class="collapse" id="collapseExample">
+                                        <div class="row">
+                                            <div class="table-responsive">
+                                                <style type="text/css">
+                                                    #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                        padding: 0px;
+                                                    }
+                                                </style>
+                                                <table class="table table-custom" id="editable-usage">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>S.No.</th>
+                                                            <th>Despatch No</th>
+                                                            <th>Article No</th>
+                                                            <th>Product Name</th>
+                                                            <th>UOM</th>
+                                                            <th>Quantity</th>
+                                                            <th>Price</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="invoicedetailsbody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- /tile body -->
+
+                            </section>
+
+
+                        </div>
+
+                    </div>
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                    </div>
+
+                </section>
+
+                
+
+            </div>
+        </div>
+    </div>
+</section>
+

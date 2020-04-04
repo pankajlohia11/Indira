@@ -1,0 +1,58 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+    public partial class StoreMaster
+    {
+        public decimal SM_Id { get; set; }
+        public string SM_Code { get; set; }
+
+        public string SM_Name { get; set; }
+
+        public decimal? SM_Store_User { get; set; }
+
+        public string SM_Addressline1 { get; set; }
+
+        public string SM_Addressline2 { get; set; }
+
+        public string SM_Country { get; set; }
+
+        public string SM_State { get; set; }
+
+        public string SM_City { get; set; }
+
+        public string SM_Zipcode { get; set; }
+
+        public bool? SM_Activeflag { get; set; }
+
+        public string SM_DeleteStatus { get; set; }
+
+        public string SM_EnteredBy { get; set; }
+
+        public DateTime? SM_EnteredDate { get; set; }
+
+        public string SM_UpdatedBy { get; set; }
+
+        public DateTime? SM_UpdatedDate { get; set; }
+
+        public int? SM_CompanyKey { get; set; }
+        public int SD_Id { get; set; } 
+        public int? SD_SM_ID { get; set; } 
+        public decimal? SD_Itemcode { get; set; } 
+        public string SD_ItemDescription { get; set; } 
+        public string SD_UOM { get; set; } 
+        public decimal SD_OpeningStock { get; set; } 
+        public decimal SD_OpeningRate { get; set; }
+
+        public string Product_name { get; set; }
+    }
+    public class Store_View_CM
+    {
+        public List<StoreMaster> storeHeader { get; set; }
+        public List<StoreMaster> storeChild { get; set; }
+    }
+}

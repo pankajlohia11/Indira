@@ -1,0 +1,56 @@
+﻿
+@model IEnumerable<BusinessEntity.EntityModels.Tbl_Category_Details>
+@*@Styles.Render("~/Assets/js/vendor/datatables")*@
+<!-- tile header -->
+<div id="partialdiv">
+    <div class="tile-header dvd-btm">
+        <h1 class="custom-font"><strong>Category</strong> Details</h1>
+        <ul class="controls">
+            <li style="padding:5px">
+                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                <a tabindex="0" onclick="showRecords();">
+                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                    <span class="btn btn-hotpink btn-xs mb-10">
+                        <i class="fa fa-arrow-left"></i>Back
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- /tile header -->
+    <!-- tile body -->
+    <div class="tile-body">
+        <div class="row">
+            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+            <div class="col-md-6"><div id="colVisRestore"></div></div>
+        </div>
+        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+        <table class="table table-custom" id="advancedusageRestore">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Category Details</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                 {
+                <tr>
+                    <td>
+                        @item.CATEGORY
+                    </td>
+                    <td>
+                        @item.SUB_CATEGORY
+                    </td>
+                    <td>
+                        @item.DESCRIPTION
+                    </td>
+                    <td><a onclick="Restoredeleterecords(@item.CAT_DETAILS_ID,this);" style="color:red"><i class="fa fa-undo"></i></a></td>
+                </tr>
+                 }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,777 @@
+﻿@using BusinessEntity.EntityModels
+@model IEnumerable<BusinessEntity.EntityModels.Tbl_BankMaster>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+    This Form is used to create a Bank Account Details for the customer and the supplier.
+    The user can edit or remove and restore  a record in Bank Master.The user can capture Bank Name,Address,City,Country,Account No etc
+
+    Author=jesmi
+    Created Date=31st Mar 2018
+    Bank Master Form view
+    Operations[Add,Edit,Restore]
+-->
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide display page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying view page and hide restore and edit page */
+    function showRecords() {
+        //$("#div_View").css("display", "block");
+        //$("#div_Restore").css("display", "none");
+        //$("#div_Edit").css("display", "none");
+        window.location = "../ET_Admin_bank/ET_Admin_bank";
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+
+        $("#formSubmit").attr('disabled','disabled');
+        $("#formSubmit").html("Submit");
+        $("#span_tabtext").html("Add");
+        $("#txtBankName").val("");
+        $("#txtDisplayName").val("");
+        $("#txtAddress").val("");
+        $("#drpCountry").val("").trigger("chosen:updated");
+        $("#drpState").val("").trigger("chosen:updated");
+        $("#drpCity").val("").trigger("chosen:updated");
+        $("#txtZipCode").val("");
+        $("#txtSWIFT").val("");
+        $("#txtBlz").val("");
+        $("#txtBic").val("");
+        $("#txtIban").val("");
+        $("#txtAccountNo").val("");
+        $("#txtContactName").val("");
+        $("#txtContactNo").val("");
+        $("#txtRemarks").val("");
+        $("#txtBankID").val("0");
+        $("#txtBankCode").val("");
+       // $("#Country").val()
+    };
+
+    // Insert method
+    function InsertRecords() {
+        
+        if ($("#drpCountry").val() != "") {
+            var BankID = $("#txtBankID").val();
+            if (BankID != 0) {
+                BankID = BankID;
+            }
+            else {
+                BankID = "0";
+            }
+
+            var BankCode = $("#txtBankCode").val();
+            if (BankCode != 0) {
+                BankCode = BankCode;
+            }
+            else {
+                BankCode = "0";
+            }
+            var txtBankName = $("#txtBankName").val();
+            var txtDisplayName = $("#txtDisplayName").val();
+            var txtAddress = $("#txtAddress").val();
+            var drpCountry = $("#drpCountry").val();
+            var drpState = $("#drpState").val();
+            var drpCity = $("#drpCity").val();
+            var txtZipCode = $("#txtZipCode").val();
+            var txtSWIFT = $("#txtSWIFT").val();
+            var txtBlz = $("#txtBlz").val();
+            var txtBic = $("#txtBic").val();
+            var txtIban = $("#txtIban").val();
+            var txtAccountNo = $("#txtAccountNo").val();
+            var txtContactName = $("#txtContactName").val();
+            var txtContactNo = $("#txtContactNo").val();
+            var txtRemarks = $("#txtRemarks").val();
+            // var txtBankCode = $("#txtBankCode").val();
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Bank_Add", "ET_Admin_Bank")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {
+                    BankID: BankID,
+                    BankName: txtBankName,
+                    DisplayName: txtDisplayName,
+                    Address: txtAddress,
+                    State: drpState,
+                    Country: drpCountry,
+                    City: drpCity,
+                    ZipCode: txtZipCode,
+                    SWIFT: txtSWIFT,
+                    Blz: txtBlz,
+                    Bic: txtBic,
+                    Iban: txtIban,
+                    AccountNo: txtAccountNo,
+                    ContactName: txtContactName,
+                    ContactNo: txtContactNo,
+                    Remarks: txtRemarks,
+                    Bankcode: BankCode
+                },
+                success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        if (result.indexOf("Success") > -1) {
+                            var res = result.split(':');
+                            if (BankID == 0) {
+                                message = 'Record Inserted Successfully With Code : ' + res[1].toString();
+                                toastr["success"](message, "Notification");
+                            }
+                            else {
+                                message = 'Record Updated Successfully With Code : ' + res[1].toString();
+                                toastr["success"](message, "Notification");
+                            }
+                            createRecords();
+
+                        }
+                        else if (result == "Failed") {
+
+                            message = 'Failed to do this operation.';
+                            toastr["error"](message, "Notification");
+                        }
+                        else if (result.indexOf("Validation") > -1) {
+                            toastr["error"](result, "Notification");
+                        }
+                    }
+                },
+                error: function (response) {
+                    // alert(response);
+                    message = "You don't access to do this operation, please contact admin.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+        }
+        else {
+            message = "Select Country";
+            toastr["error"](message, "Notification");
+        }
+
+    };
+
+    function editRecords(e, f) {
+        if ($(f).attr("id").toString().indexOf("EditYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Bank_Update_GetbyID", "ET_Admin_Bank")',
+                data: { id: id },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    debugger;
+                        if (result.indexOf("ERR") > -1) {
+                            alert("hlw");
+                            $("#spanErrMessage1").html(result);
+                            $("#spanErrMessage2").html(result);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                        var res = JSON.parse(result);
+                        $("#div_View").css("display", "none");
+                            $("#div_Edit").css("display", "block");
+                            $("#formSubmit").removeAttr('disabled');
+                            $("#txtBankID").val(res.BANK_ID); 
+                            $("#txtBankName").val(res.BANK_NAME);
+                            $("#txtDisplayName").val(res.DISPLAY_NAME);
+                            $("#txtAddress").val(res.STREET);
+                            $("#formSubmit").html("Update");
+                            $("#span_tabtext").html("Edit");
+                          //  $("#drpState").val(res.STATE);
+                          //  $("#drpCountry").val(res.COUNTRY);
+                           // $("#drpCity").val(res.CITY);
+                            $("#txtZipCode").val(res.ZIP);
+                            $("#txtSWIFT").val(res.SWIFT);
+                            $("#txtBlz").val(res.BLZ);
+                            $("#txtBic").val(res.BIC);
+                            $("#txtIban").val(res.IBAN);
+                            $("#txtAccountNo").val(res.ACCOUNT);
+                            $("#txtContactName").val(res.CONTACT_NAME);
+                            $("#txtContactNo").val(res.CONTACT_NO);
+                            $("#txtRemarks").val(res.REMARKS);
+                            $("#txtBankCode").val(res.BANK_CODE);
+                            $("#drpCountry").val(res.COUNTRY).trigger("chosen:updated");
+                            State(res.STATE, res.CITY);
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function State(e,f) {
+        var id = ($("#drpCountry").val());
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_State", "ET_Admin_Bank")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+             success: function (result) {
+                 var html = '<option value="">--Select--</option>';
+                 for (i = 0; i < result.length; i++) {
+                     html += '<option value="' + result[i].location_id + '">' + result[i].name + '</option>';
+                 }
+                 html += '</option>';
+
+                 $('#drpState').html(html).trigger("chosen:updated");
+                 $("#drpState").val(e).trigger("chosen:updated");
+                 if(f)
+                    City(f);
+                },
+                error: function (response) {
+                    toastr["error"]("State Not Loading", "Notification");
+                }
+            });
+    };
+
+    function City(f) {
+        var id = ($("#drpState").val());
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_City", "ET_Admin_Bank")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+            success: function (result) {
+                var html = '<option value="">--Select--</option>';
+                for (i = 0; i < result.length; i++) {
+                    html += '<option value="' + result[i].location_id + '">' + result[i].name
+                        + '</option>';
+                }
+                html += '</option>';
+
+                $('#drpCity').html(html).trigger("chosen:updated");
+                $("#drpCity").val(f).trigger("chosen:updated");
+                },
+                error: function (response) {
+                    toastr["error"]("City Not Loading", "Notification");
+                }
+            });
+    };
+
+    function deleteRecord(e, f) {
+        if ($(f).attr("id").toString().indexOf("DeleteYes") > -1) {
+            alertmessage(e, $(f).attr("id").toString());
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function deleteRecordConfirm(e,f) {
+        var id = e;
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ET_Admin_Bank_Delete", "ET_Admin_Bank")',
+            data: { id: id },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (result == "Success") {
+                        message = 'Record Deleted Successfully. You can retrive it from Restore page';
+                        toastr["success"](message, "Notification");
+                        var ctrl = "#" + f;
+                        $(ctrl).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                    }
+                    else {
+                        message = 'Failed To Delete';
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            },
+            error: function (response) {
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+        });
+    };
+
+    function restoreRecords(f) {
+        if ($(f).attr("id").toString().indexOf("RestoreYes") > -1) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Bank_Restore", "ET_Admin_Bank")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $("#div_View").css("display", "none");
+                        $("#div_Restore").css("display", "block");
+                        $('#restorediv').html(result);
+                        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+                    }
+                },
+                error: function (response) {
+                    alert('error');
+                  //  alert(response);
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function Restoredeleterecords(id, f) {
+        var id = id;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Bank_Restore_Insert", "ET_Admin_Bank")',
+                data: {
+                    id: id
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        if (result == "Success") {
+                            $("#div_View").css("display", "none");
+                            $("#div_Restore").css("display", "block");
+
+                            message = 'Record Restored Successfully';
+                            toastr["success"](message, "Notification");
+                            $(f).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                        }
+                        else if (result == "Success") {
+                            message = 'Failed to do this operation.';
+                            toastr["error"](message, "Notification");
+                        }
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+    };
+
+    function ViewRecords(e,f) {
+        if ($(f).attr("id").toString().indexOf("ViewYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Bank_View", "ET_Admin_Bank")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: { id: id },
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $('#viewpopup').html(result);
+                        $("#btnviewpopup").trigger("click");
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Bank Details <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Bank Details</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <!--[div_view] is used for displaying View List Page etc-->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Bank Details</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" onclick="createRecords();" id="@ViewBag.Create">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                       Create
+
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" id="@ViewBag.Restore" onclick="restoreRecords(this);"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Bank Code</th>
+                                    <th>Bank Name</th>
+                                    <th>Diaplay Name</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Country</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            @if (Model != null)
+                            {
+                                int i = 0;
+                                foreach (var item in Model)
+                                {
+                                    BusinessEntity.EntityModels.EntityClasses dbc = new BusinessEntity.EntityModels.EntityClasses();
+                                    var countryname = "";
+                                    var statename = "";
+                                    var cityname = "";
+                                    if (item.COUNTRY != "")
+                                    {
+                                        try
+                                        {
+                                            var CountryID = Convert.ToInt32(item.COUNTRY);
+                                            countryname = (from country in dbc.locations
+                                                           where country.location_id == CountryID
+                                                           select country.name).FirstOrDefault();
+                                        }
+                                        catch { }
+                                    }
+                                    if (item.STATE != "")
+                                    {
+                                        try
+                                        {
+                                            var StateID = Convert.ToInt32(item.STATE);
+                                            statename = (from state in dbc.locations
+                                                         where state.location_id == StateID
+                                                         select state.name).FirstOrDefault();
+                                        }
+                                        catch { }
+                                    }
+                                    if (item.CITY != "")
+                                    {
+                                        try
+                                        {
+                                            var CityID = Convert.ToInt32(item.CITY);
+                                            cityname = (from city in dbc.locations
+                                                        where city.location_id == CityID
+                                                        select city.name).FirstOrDefault();
+                                        }
+                                        catch { }
+                                    }
+                            <tr>
+                                <td>@item.BANK_CODE</td>
+                                <td>@item.BANK_NAME</td>
+                                <td>@item.DISPLAY_NAME</td>
+                                <td>@cityname</td>
+                                <td>@statename</td>
+                                <td>@countryname</td>
+                                <td>
+                                    <a onclick="editRecords(@item.BANK_ID,this);" value="@item.BANK_ID" id="@ViewBag.Edit@i" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                    <a onclick="ViewRecords(@item.BANK_ID,this);" value="@item.BANK_ID" id="@ViewBag.View@i" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                    <a onclick="deleteRecord(@item.BANK_ID,this);" id="@ViewBag.Delete@i" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                </td>
+                            </tr>
+                                    i++;
+                                }
+                            }
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--The user can have a option to create and edit Bank Account Details-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong><span id="span_tabtext"></span></strong> Bank Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- this is link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="BankInfo"><strong>Bank Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div>
+                                    <div class="form-group col-md-6">
+                                        <label for="BankName">Bank Code</label>
+                                        <input type="text" name="txtBankCode" id="txtBankCode" maxlength="50" class="form-control" disabled="@ViewBag.AutoManual" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="BankName">Bank Name *</label>
+                                    <input type="text" name="txtBankName" id="txtBankName" class="form-control" placeholder="Bank Name"
+                                           data-parsley-trigger="change"
+                                           required  maxlength="150">
+                                    <input type="text" name="txtBankID" id="txtBankID" class="form-control hidden" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="DisplayName">Display Name *</label>
+                                    <input type="text" name="txtDisplayName" id="txtDisplayName" class="form-control" placeholder="Display Name"
+                                           data-parsley-trigger="change"
+                                           required maxlength="100">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="AdressInfo"><strong>Address Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Address">Address *</label>
+                                    <textarea name="txtAddress" maxlength="500" rows="4" cols="80" id="txtAddress" class="form-control" placeholder="Address" data-parsley-trigger="change"
+                                              required></textarea>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="Alpha">Country *</label>
+                                    @*<select class="form-control"></select>*@
+                                    @Html.DropDownList("drpCountry", new SelectList(ViewBag.Country, "location_id", "name"),"--Select--", new { @class = "form-control chosen-select", onchange = "State()", @id = "drpCountry"})
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="CityName">State Name *</label>
+
+                                    <select class="form-control chosen-select" data-parsley-trigger="change" name="drpState" id="drpState" onchange="City();" required></select>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="CityName">City Name *</label>
+                                    <select class="form-control chosen-select" data-parsley-trigger="change" name="drpCity" id="drpCity"required ></select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="ZipCode">Zip Code *</label>
+
+                                    <input type="text" name="txtZipCode" id="txtZipCode" class="form-control" placeholder="Zip Code"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="digits"
+                                           required maxlength="20">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="AccountsInfo"><strong>Accounts Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="SWIFT">SWIFT *</label>
+
+                                    <input type="text" name="txtSWIFT" id="txtSWIFT" class="form-control" placeholder="SWIFT"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required maxlength="50">
+
+
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="BLZ">BLZ *</label>
+
+                                    <input type="text" name="txtBlz" id="txtBlz" class="form-control" placeholder="BLZ"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required maxlength="50">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="BIC">BIC * </label>
+
+                                    <input type="text" name="txtBic" id="txtBic" class="form-control" placeholder="BIC"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required maxlength="50">
+
+                                </div>
+
+
+
+                                <div class="form-group col-md-6">
+                                    <label for="IBAN">IBAN *</label>
+
+                                    <input type="text" name="txtIban" id="txtIban" class="form-control" placeholder="IBAN"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required maxlength="50">
+                                </div>
+
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="AccountNo">Account No *</label>
+                                    <input type="text" name="txtAccountNo" id="txtAccountNo" class="form-control" placeholder="Account No"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum"
+                                           required maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="ContactPersonInfo"><strong>Contact Person Info</strong></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="ContactName">Contact Name *</label>
+
+                                    <input type="text" name="txtContactName" id="txtContactName" class="form-control" placeholder="Contact Name"
+                                           data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/" required maxlength="50">
+
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="ContactNo">Contact No*</label>
+
+                                    <input type="text" name="txtContactNo" id="txtContactNo" class="form-control" placeholder="Contact No"
+                                           data-parsley-trigger="change"
+                                           pattern="^[\d\+\-\.\(\)\/\s]*$" maxlength="20">
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Remarks">Remarks</label>
+                                    <textarea name="txtRemarks" rows="4" id="txtRemarks" cols="80" class="form-control" placeholder="Remarks" data-parsley-trigger="change"
+                                              data-parsley-type="alphanum" maxlength="500"></textarea>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <!-- Button used for submitting the record -->
+
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" onclick="InsertRecords();" disabled>Submit</button>
+
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--The user can have a option to restore Bank Account Details-->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <div id="restorediv">
+                    </div><!-- tile header -->
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

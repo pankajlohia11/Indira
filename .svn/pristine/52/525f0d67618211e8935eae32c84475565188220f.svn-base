@@ -1,0 +1,65 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+using BusinessEntity.CustomModels;
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_Material_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+
+        public List<Tbl_Material_Master> ET_Admin_Material_List_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Material_Master.Where(m => m.DELETED == false).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+        public decimal ET_Admin_Material_Add_DL(Tbl_Material_Master_CM obj)
+        {
+            try
+            {
+                if (obj.MATERIAL_ID == 0)
+                {
+                    Tbl_Material_Master objtmm = new Tbl_Material_Master()
+                    {
+                        MATERIAL_NAME = obj.MATERIAL_NAME,
+                        MATERIAL_DESCRIPTION = obj.MATERIAL_DESCRIPTION,
+                        DELETED = false,
+                        CREATED_DATE = DateTime.Now,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                    };
+                    dbcontext.Tbl_Material_Master.Add(objtmm);
+                    obj.MATERIAL_ID = dbcontext.SaveChanges();
+                }
+                else
+                {
+                    Tbl_Material_Master objtmm = dbcontext.Tbl_Material_Master.Single(m => m.MATERIAL_ID == obj.MATERIAL_ID);
+                    {
+                        objtmm.MATERIAL_NAME = obj.MATERIAL_NAME;
+                        objtmm.MATERIAL_DESCRIPTION = obj.MATERIAL_DESCRIPTION;
+                        objtmm.MATERIAL_NAME = obj.MATERIAL_NAME;
+                        objtmm.LAST_UPDATED_DATE = DateTime.Now;
+                    };
+                    obj.MATERIAL_ID = dbcontext.SaveChanges();
+                    
+                }
+                return obj.MATERIAL_ID;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+    }
+}

@@ -1,0 +1,155 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_Merged_Product_Master
+    {
+        [Key]
+        [Column(Order = 0)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal P_ID { get; set; }
+
+        [Key]
+        [Column(Order = 1)]
+        [StringLength(150)]
+        public string P_Code { get; set; }
+
+        public decimal? P_CategoryID { get; set; }
+
+        public decimal? P_SubcategoryID { get; set; }
+
+        [Key]
+        [Column(Order = 2)]
+        [StringLength(500)]
+        public string P_Name { get; set; }
+
+        [Key]
+        [Column(Order = 3)]
+        [StringLength(50)]
+        public string ShortName { get; set; }
+
+        [Key]
+        [Column(Order = 4)]
+        [StringLength(50)]
+        public string Package { get; set; }
+
+        public decimal? P_UOMID { get; set; }
+
+        [StringLength(50)]
+        public string P_Pilecount { get; set; }
+
+        [StringLength(50)]
+        public string P_Weavetype { get; set; }
+
+        [StringLength(20)]
+        public string P_COUNT { get; set; }
+
+        [StringLength(50)]
+        public string P_BLENT_1 { get; set; }
+
+        [StringLength(50)]
+        public string P_BLENT_2 { get; set; }
+
+        [StringLength(50)]
+        public string P_BLENT_3 { get; set; }
+
+        [StringLength(50)]
+        public string P_BLENT_4 { get; set; }
+
+        [StringLength(50)]
+        public string P_SubRange_1 { get; set; }
+
+        [StringLength(50)]
+        public string P_SubRange_2 { get; set; }
+
+        [StringLength(50)]
+        public string P_SubRange_3 { get; set; }
+
+        [StringLength(50)]
+        public string P_SubRange_4 { get; set; }
+
+        [StringLength(50)]
+        public string P_SubRange_5 { get; set; }
+
+        [StringLength(50)]
+        public string P_Cottontype { get; set; }
+
+        [StringLength(50)]
+        public string P_Meterial { get; set; }
+
+        [StringLength(20)]
+        public string P_Warpcount { get; set; }
+
+        [StringLength(20)]
+        public string P_Weftcount { get; set; }
+
+        [StringLength(500)]
+        public string P_EndsPerInch { get; set; }
+
+        [StringLength(50)]
+        public string P_PicksPerInch { get; set; }
+
+        [StringLength(50)]
+        public string P_GSM { get; set; }
+
+        [StringLength(50)]
+        public string P_Length { get; set; }
+
+        [StringLength(50)]
+        public string P_Bredth { get; set; }
+
+        [StringLength(50)]
+        public string P_Specialities { get; set; }
+
+        [StringLength(50)]
+        public string P_BaseYarnCount { get; set; }
+
+        [StringLength(50)]
+        public string P_SubsidaryYarnCount { get; set; }
+
+        [StringLength(50)]
+        public string P_MachineDiameter { get; set; }
+
+        [StringLength(50)]
+        public string P_Gauge { get; set; }
+
+        [StringLength(50)]
+        public string P_KnitType { get; set; }
+
+        public bool? P_SatinBand { get; set; }
+
+        [StringLength(50)]
+        public string P_EAN_No { get; set; }
+
+        [StringLength(50)]
+        public string P_Remarks { get; set; }
+
+        public decimal? P_PA_Code { get; set; }
+
+        [StringLength(300)]
+        public string MACHINE_NAME { get; set; }
+
+        [StringLength(50)]
+        public string IPADDRESS { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+    }
+}

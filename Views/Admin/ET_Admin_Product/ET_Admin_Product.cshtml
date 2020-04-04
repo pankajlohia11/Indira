@@ -1,0 +1,258 @@
+﻿@{
+    /**/
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+
+    This Form is used to create a Product Details.
+    The user can edit or remove and restore  a record in Product.The user can capture Details based on the product category selected etc.
+    Author=jesmi
+    Created Date=4th Apr 2018
+    Product Form view
+    Operations[generate,reset,close,save]
+-->
+<!--this css style will give max width to container class-->
+<style>
+    #P_5_anchor {
+    }
+
+    .container {
+        max-width: 74.9em;
+    }
+</style>
+
+@section angularcontroller
+{
+    <link href="~/Assets/contextmenu/jquery.contextMenu.css" rel="stylesheet" />
+    <script src="~/Content/AngularScripts/AC_ProductMaster.js"></script>
+    <link rel="stylesheet" href="~/Assets/js/vendor/jstree/themes/default/style.min.css">
+    <script type="text/javascript">
+        function StockChange()
+        {
+            if ($(chkIsStock).prop('checked')) {
+                $("#IsStock").css("display", "block");
+            }
+            else
+            {
+                $("#IsStock").css("display", "none");
+            }
+        }
+    </script>
+
+}
+@section specificjs
+{
+    <script src="~/Assets/contextmenu/jquery.contextMenu.js"></script>
+    <script src="~/Assets/contextmenu/jquery.ui.position.min.js"></script>
+    <script src="~/Assets/contextmenu/main.js"></script>
+    <script src="~/Assets/js/vendor/jstree/jstree.js"></script>
+    
+}
+
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Product Master<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Product Master</a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+        <div class="row" id="mainDiv" ng-controller="AC_ProductMaster">
+            <div class="col-md-12">
+                <!--Here user can have to see Product Details -->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Product Master</strong> List</h1>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-4" style="max-height:600px;overflow:auto;">
+                                <a class="btn btn-sm btn-blue" ng-click="NewCategory()">New Category</a>
+                                <br />
+                                <br />
+                                <div id="evts" class="demo"></div>
+                            </div>
+                            <div class="col-md-8" style="height:auto;background-color:lightgoldenrodyellow;">
+                                <div id="div_productcategory" class="tile" style="display:none;background-color:lightgoldenrodyellow;">
+                                    <div class="tile-header dvd-btm">
+                                        <h1 class="custom-font"><strong ng-bind="createeditcat"></strong> {{createeditcat1}} </h1>
+                                    </div>
+                                    <!-- /tile header -->
+                                    <!-- tile body -->
+                                    <div class="tile-body" style="background-color:lightgoldenrodyellow;">
+                                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="ProductCategoryCode">Product Category Code</label>
+                                                    <input type="text" name="ProductCategoryID" id="ProductCategoryID" class="form-control hidden" ng-model="PG_ID">
+                                                    <input type="text" class="form-control" name="ProductCategoryCode" id="ProductCategoryCode" data-parsley-trigger="change" ng-model="PG_CODE" disabled="@ViewBag.CategoryAutoManual"
+                                                           maxlength="10" data-parsley-type="alphanum" @ViewBag.CategoryRequired />
+                                                </div>
+                                                <div class="form-group col-md-6" id="child_cat">
+                                                    <label for="txtCategoryGroup">Category Group</label>
+                                                    <input type="text" name="txtCategoryGroupID" id="txtCategoryGroupID" class="form-control hidden" ng-model="PG_PARENT_ID">
+                                                    <input type="text" class="form-control" name="txtCategoryGroup" id="txtCategoryGroup" ng-model="PG_Parent" data-parsley-trigger="change" disabled />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategoryName">Name Of The Category*</label>
+                                                    <input type="text" class="form-control" maxlength="50" name="txtCategoryName" id="txtCategoryName" ng-model="PG_NAME" data-parsley-trigger="change" required />
+                                                </div>
+                                                <div class="form-group col-md-6" id="parent_cat">
+                                                    <label for="txtIntial">Intial*</label>
+                                                    <input type="text" class="form-control" name="txtIntial" maxlength="2" minlength="1" id="txtIntial" ng-model="PG_Initial" data-parsley-trigger="change" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /tile body -->
+                                    <!-- tile footer -->
+                                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                                        <!-- SUBMIT BUTTON -->
+                                        <!-- Button used for submitting the record -->
+                                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="CategorySubmitClick()" ng-bind="catsubmittext" disabled>Submit</button>
+                                    </div>
+                                </div>
+                                <div id="div_product" style="display:none">
+                                    <div class="tile-header dvd-btm">
+                                        <h1 class="custom-font"><strong ng-bind="createeditpro"></strong> Product </h1>
+                                    </div>
+                                    <!-- /tile header -->
+                                    <!-- tile body -->
+                                    <div class="tile-body">
+                                        <div name="form2" role="form" id="form2" data-parsley-validate>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtProductCode">Product Code</label>
+                                                    <input type="text" name="ProductID" id="ProductID" class="form-control hidden" ng-model="P_ID">
+                                                    <input type="text" class="form-control" name="txtProductCode" id="txtProductCode" data-parsley-trigger="change" ng-model="P_Code" disabled="@ViewBag.ProductAutoManual"
+                                                           maxlength="10" data-parsley-type="alphanum" @ViewBag.ProductRequired />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="ProductCode">Article No</label>
+                                                    <input type="text" class="form-control" name="txtArticleNo" id="txtArticleNo" data-parsley-trigger="change" ng-model="P_ArticleNo" disabled="disabled" />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategory">Product Category</label>
+                                                    <input type="text" name="txtCategoryID" id="txtCategoryID" class="form-control hidden" ng-model="P_CategoryID">
+                                                    <input type="text" class="form-control" name="txtCategory" id="txtCategory" ng-model="P_Category" data-parsley-trigger="change" disabled />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtSubCategoryGroup">Product Sub Category</label>
+                                                    <input type="text" name="txtSubCategoryID" id="txtSubCategoryID" class="form-control hidden" ng-model="P_SubcategoryID">
+                                                    <input type="text" class="form-control" name="txtSubCategory" id="txtSubCategory" ng-model="P_Subcategory" data-parsley-trigger="change" disabled />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategoryName">Name Of The Product*</label>
+                                                    <input type="text" class="form-control" maxlength="500" name="txtProductName" id="txtProductName" ng-model="P_Name" data-parsley-trigger="change" required />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategoryName">Short Name*</label>
+                                                    <input type="text" class="form-control" maxlength="50" name="txtShortName" id="txtShortName" ng-model="P_ShortName" data-parsley-trigger="change" required />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="drpuom">UOM*</label>
+                                                    <select data-ng-model="P_UOM" id="drpuom" ng-change="UOM_Change()" class="form-control chosen-select" data-parsley-trigger="change"
+                                                            required>
+                                                        <option value="0">-Select-</option>
+                                                        <option ng-repeat="uom in uoms" value="{{uom.LU_Code}}">
+                                                            {{uom.LU_Description}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtPackingQuantityUOM">Packing Quantity UOM*</label>
+                                                    <input type="text" class="form-control" name="txtPackingQuantityUOM" id="txtPackingQuantityUOM" ng-model="P_PackingQuantityUOM" data-parsley-trigger="change" required />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtPackingQuantity">Packing Quantity*</label>
+                                                    <input type="text" class="form-control" maxlength="10" name="txtPackingQuantity" data-parsley-type="digits" id="txtPackingQuantity" ng-model="P_PackingQuantity" data-parsley-trigger="change" required />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategoryName">Is Stock</label>
+                                                    <input type="checkbox" class="checkbox-custom-lg" name="chkIsStock" id="chkIsStock" onchange="StockChange();" />
+                                                </div>
+                                            </div>
+                                            <div class="row" id="IsStock">
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtPackingQuantity">ROL*</label>
+                                                    <input type="text" class="form-control" maxlength="10" name="txtROL" data-parsley-type="digits" id="txtROL" ng-model="P_ROL" data-parsley-trigger="change"/>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategoryName">Minimum Stock Level*</label>
+                                                    <input type="text" class="form-control" maxlength="10" name="txtMSL" data-parsley-type="digits" id="txtMSL" ng-model="P_MSL" data-parsley-trigger="change" />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategoryName">Description*</label>
+                                                    <input type="text" class="form-control" name="txtDescription" id="txtDescription" ng-model="P_Description" data-parsley-trigger="change" required />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategoryName">Customer</label>
+                                                    @*<label for="txtCategoryName">Remark 1</label>*@
+                                                    <input type="text" class="form-control" name="txtRemark1" id="txtRemark1" ng-model="P_Remark1" data-parsley-trigger="change" />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategoryName">Supplier</label>
+                                                    @*<label for="txtCategoryName">Remark 2</label>*@
+                                                    <input type="text" class="form-control" name="txtRemark2" id="txtRemark2" ng-model="P_Remark2" data-parsley-trigger="change" />
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label for="txtCategoryName">Remark 3</label>
+                                                    <input type="text" class="form-control" name="txtRemark3" id="txtRemark3" ng-model="P_Remark3" data-parsley-trigger="change" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    <!-- /tile body -->
+                                    <!-- tile footer -->
+                                    <div class="tile-footer text-center lter dvd dvd-top text-center  m-t-20">
+                                        <!-- SUBMIT BUTTON -->
+                                        <!-- Button used for submitting the record -->
+                                        <button type="submit" class="btn btn-success" id="formSubmit1" ng-click="ProductSubmitClick()" ng-bind="prosubmittext" disabled>Submit</button>
+                                    </div>
+                                </div>
+                                </div>
+                        </div>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+
+

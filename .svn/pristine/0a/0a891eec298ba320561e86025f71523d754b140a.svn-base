@@ -1,0 +1,47 @@
+﻿
+@model IEnumerable<BusinessEntity.EntityModels.Tbl_BankMaster>
+
+<div class="tile-header dvd-btm">
+    <h1 class="custom-font"><strong>Restore Bank</strong> Master</h1>
+    <ul class="controls">
+        <li style="padding:5px">
+            <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+            <a tabindex="0" onclick="showRecords();">
+                <!-- This is used as a link for back -->
+                <span class="btn btn-hotpink btn-xs mb-10">
+                    <i class="fa fa-arrow-left"></i>Back
+                </span>
+            </a>
+        </li>
+    </ul>
+</div>
+<!-- /tile header -->
+<!-- tile body -->
+<div class="tile-body">
+    <div class="row">
+        <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+        <div class="col-md-6"><div id="colVisRestore"></div></div>
+    </div>
+    <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+    <table class="table table-custom" id="advancedusageRestore">
+        <thead>
+            <tr>
+                <th>Bank Name</th>
+                <th>Display Name</th>
+                <th>City</th>
+                <th>Country</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.BANK_NAME</td>
+                <td>@item.DISPLAY_NAME</td>
+                <td>@item.CITY</td>
+                <td>@item.COUNTRY</td>
+                <td><a onclick="Restoredeleterecords(@item.BANK_ID,this);" style="color:red"><i class="fa fa-undo"></i></a></td>
+            </tr>
+        }
+    </table>
+</div>

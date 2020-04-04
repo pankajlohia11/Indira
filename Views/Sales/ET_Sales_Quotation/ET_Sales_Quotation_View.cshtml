@@ -1,0 +1,154 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.Quotation_View_CM
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.QHeader)
+            {
+                BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+                <h5><label><strong>Customer Offer Details</strong></label></h5>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Email">Offer Code</label>
+                        <input type="text" value="@item.Q_Code" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Type</label>
+                        @{ string type = "Trading";
+                            if (item.Q_Type == 3)
+                            {
+                                type = "Store";
+                            }
+                        }
+                        <input type="text" value="@type" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Url">Price Type</label>
+                        @{ string pricetype = "";
+                            switch (item.Q_PriceType)
+                            {
+                                case 1:
+                                    pricetype = "German Price";
+                                    break;
+                                case 2:
+                                    pricetype = "Euro Price";
+                                    break;
+                                case 3:
+                                    pricetype = "Exclusive Price 1";
+                                    break;
+                                case 4:
+                                    pricetype = "Exclusive Price 2";
+                                    break;
+                            }
+                        }
+                        <input type="text" value="@pricetype" class="form-control" disabled>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Numbers">Date</label>
+                        <input type="text" value='@item.Q_Date.ToString("dd-MM-yyyy")' class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Digits">Customer</label>
+                        <input type="text" value="@item.Q_CustomerName" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Email">Enquiry No</label>
+                        <input type="text" value="@item.Q_EnquiryCode" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Url">Sales Person</label>
+                        <input type="text" value="@item.Q_SalesPersonName" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Email">Currency</label>
+                        @{ string currency = dbcontext.tbl_LookUp.Single(a => a.LU_Type == 1002 && a.LU_Code == item.Q_CurrencyCode).LU_Description; }
+                        <input type="text" value="@currency" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Url">Delivery Terms</label>
+                        <input type="text" value="@item.Q_DeliveryTerms" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Payment Terms</label>
+                        @{string payment = dbcontext.Tbl_Payment_Terms.Single(a => a.PT_ID == item.Q_PaymentTerms).PT_Name; }
+                        <input type="text" value="@payment" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Validity Days</label>
+                        <input type="text" value="@item.Q_ValidityDays" style="text-align:right;" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Total Value</label>
+                        <input type="text" style="text-align:right;" value="@(Convert.ToDecimal(item.Q_TotalValue).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Freight Cost</label>
+                        <input type="text" style="text-align:right;" value="@(Convert.ToDecimal(item.Q_Freight_Cost).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Enclosures</label>
+                        <input type="text" value="@item.Q_Enclosures" class="form-control" disabled>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="Email">Quote Description</label>
+                        <input type="text" value="@item.Q_Quotedescription" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label for="Url">Special Description</label>
+                        <input type="text" value="@item.Q_specialdescription" class="form-control" disabled>
+                    </div>
+                </div>
+            }
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>UOM</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Description</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @{ var itemIndex = 1;}
+                    @foreach (var item in Model.QChild)
+                    {
+                        
+                    <tr>
+                        <td>@itemIndex</td>
+                        <td>@item.QD_ArticleNo</td>
+                        <td>@item.QD_ProductName</td>
+                        <td>@item.QD_UOM</td>
+                        <td style="text-align:right;">@(Convert.ToDecimal(item.QD_Unit_Price).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td style="text-align:right;">@(Convert.ToDecimal(item.QD_Quantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td style="text-align:right;">@(Convert.ToDecimal(item.QD_Amount).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td>@item.QD_Description</td>
+                    </tr>
+                        itemIndex = itemIndex + 1;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

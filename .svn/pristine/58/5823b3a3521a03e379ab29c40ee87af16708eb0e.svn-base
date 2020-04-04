@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+/*Author: jesmi
+ created Date : 6th April 2018
+ Created for Implementing User Information
+     */
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_User_MasterController : Controller
+    {
+        // GET: ET_Admin_User_Master
+        public ActionResult ET_Admin_User_Master()
+        {
+            return View();
+        }
+    }
+}

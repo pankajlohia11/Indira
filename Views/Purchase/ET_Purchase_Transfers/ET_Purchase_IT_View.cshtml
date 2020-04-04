@@ -1,0 +1,74 @@
+﻿
+@using System.Globalization;
+@model BusinessEntity.CustomModels.ItemTransfer_View_CM
+
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @foreach (var item in Model.ITHeader)
+    {
+        BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+        <h5><label><strong>Item Transfer Details</strong></label></h5>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="Email">Transfer Code</label>
+                <input type="text" value="@item.IT_Code" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Url">Transfer Date</label>
+
+                <input type="text" value="@item.IT_TransferDate.ToString("dd-MM-yyyy")" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="Email">Transfer Code</label>
+                <input type="text" value="@item.FromStoreName" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Url">Transfer Date</label>
+
+                <input type="text" value="@item.ToStoreName" class="form-control" disabled>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="Email">Transfer Code</label>
+                <input type="text" value="@item.IT_TransferReceivedBy" class="form-control" disabled>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="Url">Transfer Date</label>
+
+                <input type="text" value="@item.IT_TransferNote" class="form-control" disabled>
+            </div>
+        </div>
+}
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Product Name</th>
+                        <th>UOM</th>
+                        <th>Transfer Quantity</th>
+                        
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @{var itemIndex = 1;}
+                    @foreach (var item in Model.ITChild)
+            {
+                <tr>
+                    <td>@itemIndex</td>
+                    <td>@item.GD_ProductName</td>
+                    <td>@item.GD_UOM</td>
+                    <td style="text-align:right;">@(Convert.ToDecimal(item.GD_TransferQty).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+
+                </tr>
+                    itemIndex++;
+    }
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>

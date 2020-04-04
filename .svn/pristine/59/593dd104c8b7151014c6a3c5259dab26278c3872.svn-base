@@ -1,0 +1,996 @@
+﻿
+@{
+    ViewBag.Title = "ET_Admin_SupplierModule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_SupplierModel.js"></script>
+
+    <style>
+        .nav-tabs > li.active:after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            margin-left: -4px;
+            height: 0;
+            width: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid #428bca;
+        }
+    </style>
+    <script type="text/javascript">
+
+
+        function changecolor(e) {
+            $(".myIcon").attr("class", "myIcon inactive");
+            $(e).attr("class", "myIcon active");
+        }
+
+        function custIDValidation(modaloffline_tele)
+        {
+            var CusSupID = $('#drpSupplier').val();
+            if (CusSupID == "") {
+                message = "Please select the customer.";
+                toastr["error"](message, "Notification");
+            } else
+            {   if(modaloffline_tele == 1)
+                $("#tele").modal("show");
+            else
+                $("#offline").modal("show");
+            }
+        }
+
+        function SubmitClick(a) {
+            
+            var subject = "";
+            var formdata = new FormData(); //FormData object
+            var file = "";
+            var date_comm = "";
+            var conversation = "";
+            var drpCustID = $('#drpSupplier').val()
+
+            if (a == 1) { subject = $("#subject1").val(); } else { subject = $("#subject0").val(); }
+            
+            if (subject != "") {
+
+                if (a == 1) {
+                    subject = $("#subject1").val();
+                    type = true;
+                    conversation = $("#conversation").val();
+                } else {
+                    subject = $("#subject0").val();
+                    if ($('#filename')[0].files[0].name != "")
+                        formdata.append($('#filename')[0].files[0].name, $('#filename')[0].files[0]);
+                    if ($('#date_comm').val() != "")
+                    date_comm = $('#date_comm').val();
+                    type = false;
+                }
+                formdata.append("PID", drpCustID);    
+                formdata.append("SUBJECT", subject);
+                formdata.append("DATE_COMM", date_comm);
+                formdata.append("CONVERSATION", conversation);
+                formdata.append("TYPE", type);
+                
+                
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("ET_Company_Comm_Add", "ET_Admin_SupplierModule")',
+                        data: formdata,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            debugger;
+                            if (data.indexOf("ERR") > -1) {
+                                $("#spanErrMessage1").html(result);
+                                $("#spanErrMessage2").html(result);
+                                if ($("#exceptionmessage").length)
+                                    $("#exceptionmessage").trigger("click");
+                            }
+                            else if (data != 0) {
+                                debugger;
+                                message = 'Inserted successfully';
+                                toastr["success"](message, "Notification");
+                                if (a == 1)
+                                {
+                                    var teleform = document.getElementById("teleForm");
+                                    teleform.reset();
+                                    $("#teleClose").trigger("click");
+                                }
+                                else
+                                { var offform = document.getElementById("offForm"); offform.reset(); $("#offClose").trigger("click"); }
+                                
+                                //$("#subject1").val("");
+                                //$("#subject0").val("");
+                                //$("#conversation").val("");
+                                //$("#date_comm").val("");
+                                //$("#subject1").val("");
+                                angular.element(document.getElementById('AC_SupplierModel')).scope().GetCompanyCommunication();
+                                angular.element(document.getElementById('AC_SupplierModel')).scope().$apply();
+
+                            }
+                        },
+                        error: function (response) {
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                    });
+                
+            }
+            else {
+                message = "Please enter Subject.";
+                toastr["error"](message, "Notification");
+            }
+
+        }
+    </script>
+
+}
+
+<section id="content">
+
+    <div class="page page-shop-single-order" id="AC_SupplierModel" ng-controller="AC_SupplierModel">
+
+        <div class="pageheader">
+
+            <h2>Company Profile <span></span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="index.html"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="shop-single-order.html">Company Profile</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="pagecontent">
+
+
+            <div class="add-nav">
+                <div class="nav-heading">
+                    <h3>Supplier : <strong class="text-greensea" ng-bind="CM_SupplierName"></strong></h3>
+                    <span class="col-sm-2 controls pull-right">
+                        <select data-ng-model="E_SupplierID" id="drpSupplier" data-parsley-trigger="change" class="form-control chosen-select" ng-change="SupplierChange()" required>
+                            <option value="">-Select-</option>
+                            <option ng-repeat="supplier in suppliers" value="{{supplier.COM_ID}}">
+                                {{supplier.COM_NAME}}
+                            </option>
+                        </select>
+                    </span>
+                </div>
+
+                <div role="tabpanel">
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_general" aria-controls="general" role="tab" data-toggle="tab" class="myIcon active"><i class="fa fa-home"></i></a><br /><a>GENERAL</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_orders" aria-controls="orders" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-shopping-cart"></i></a><br /><a>ORDERS</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_payments" aria-controls="payments" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-money"></i></a><br /><a>PAYMENTS</a></p></li>
+                        <li role="presentation"><p style="text-align:center; display:none;"><a onclick="changecolor(this);" href="#litab_followups" aria-controls="followups" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-phone-square"></i></a><br /><a>FOLLOW UP's</a></p></li>
+
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_schedule" aria-controls="offers" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-truck"></i></a><br /><a>Schedule</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_shipments" aria-controls="shipments" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-ship"></i></a><br /><a>SHIPMENTS</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#company_commu" aria-controls="company_commu" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-phone-square"></i></a><br /><a>COMPANY COMM.</a></p></li>
+                        <li role="presentation"><p style="text-align:center; display:none;"><a onclick="changecolor(this);" href="#litab_dashboards" aria-controls="dashboards" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-bar-chart-o"></i></a><br /><a>DASH BOARDS</a></p></li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane active" id="litab_general">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile time-simple" ng-repeat="item in SupplierMasterList">
+
+
+                                        <!-- tile body -->
+                                        <div class="tile-body">
+
+
+                                            <!-- row -->
+                                            <div class="row">
+
+                                                <!-- col -->
+                                                <div class="col-md-8">
+                                                    <p class="text-default lt">Created:{{item.CREATED_DATE.replace('/Date(','').replace(')/','') | date:'dd-MMM-yyyy HH:mm:ss'}}</p>
+                                                    <p class="text-uppercase text-strong mt-40 mb-0 custom-font">Status</p>
+                                                    <h3 class="text-uppercase text-success mt-0 mb-20">
+                                                        {{item.activeStatus}}
+
+                                                    </h3>
+                                                </div>
+                                                <!-- /col -->
+                                                <!-- col -->
+                                                <div class="col-md-4">
+                                                    <p class="text-uppercase text-strong mb-10 custom-font">Supplier</p>
+                                                    <ul class="list-unstyled text-default lt mb-20">
+                                                        <li><strong class="inline-block w-xs">Name:</strong> {{item.COM_NAME}}</li>
+                                                        <li><strong class="inline-block w-xs">Display Name:</strong> {{item.COM_DISPLAYNAME}}</li>
+                                                        <li><strong class="inline-block w-xs">Phone:</strong> {{item.COM_MOBILE}}</li>
+                                                        <li><strong class="inline-block w-xs">Email:</strong> <a href="javascript:;">{{item.COM_EMAIL}}</a></li>
+                                                    </ul>
+                                                </div>
+                                                <!-- /col -->
+
+                                            </div>
+                                            <!-- /row -->
+                                            <!-- row -->
+                                            <div class="row b-t pt-20">
+
+                                                <!-- col -->
+                                                <div class="col-md-3 b-r">
+                                                    <p class="text-uppercase text-strong mb-10 custom-font">Supplier Info</p>
+                                                    <ul class="list-unstyled text-default lt mb-20">
+                                                        <li><strong>Code:</strong> <a href="javascript:;">{{item.COM_CODE}}</a></li>
+                                                        <li>UstId: {{item.COM_USTID}}</li>
+                                                        <li>Tax No: {{item.Tax_No}}</li>
+                                                    </ul>
+                                                </div>
+                                                <!-- /col -->
+                                                <!-- col -->
+                                                <div class="col-md-6 b-r">
+                                                    <p class="text-uppercase text-strong mb-10 custom-font">
+                                                        Address
+                                                        @*<a href="javascript:;" class="btn btn-default btn-rounded-20 btn-xs pull-right"><i class="fa fa-pencil"></i></a>*@
+                                                    </p>
+
+                                                    <!-- col -->
+                                                    <div class="col-md-6">
+                                                        <ul class="list-unstyled text-default lt mb-20">
+                                                            <li>{{item.COM_STREET}}</li>
+                                                            <li>City    : {{item.city}}</li>
+                                                            <li>State   : {{item.state}}</li>
+                                                            <li>Country : {{item.country}}</li>
+                                                            <li>Zip Code: {{item.COM_ZIP}}</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- /col -->
+                                                    <!-- col -->
+                                                    <div class="col-md-6">
+                                                        <ul class="list-unstyled text-default lt mb-20">
+                                                            <li>{{item.COM_EMAIL}}</li>
+                                                            <li>{{item.COM_MOBILE}}</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- /col -->
+
+                                                </div>
+                                                <!-- /col -->
+                                                <!-- col -->
+                                                <div class="col-md-3">
+                                                    <p class="text-uppercase text-strong mb-10 custom-font">Supplier Type</p>
+                                                    <ul class="list-unstyled text-default lt mb-20">
+                                                        <li>
+                                                            <strong>
+                                                                {{item.CustType}}
+                                                            </strong>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <!-- /col -->
+
+                                            </div>
+                                            <!-- /row -->
+
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+
+                                    <!-- /tile -->
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="col-md-12"><p class="text-uppercase text-strong mt-40 mb-0 custom-font">Contacts :</p></div>
+                                            <br />
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped" id="tblSuppModule_Contact">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>First Name</th>
+                                                            <th>Last Name</th>
+                                                            <th>Job Title</th>
+                                                            <th>Phone</th>
+                                                            <th>Fax</th>
+                                                            <th>Mobile</th>
+                                                            <th>Email</th>
+                                                            <th>Remark</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                        <tr ng-repeat="contact in CompanyContactsList">
+                                                            <td>{{contact.FIRST_NAME}}</td>
+                                                            <td>{{contact.LAST_NAME}}</td>
+                                                            <td>{{contact.JOB_TITLE}}</td>
+                                                            <td>{{contact.PHONE}}</td>
+                                                            <td>{{contact.FAX}}</td>
+                                                            <td>{{contact.MOBILE}}</td>
+                                                            <td>{{contact.EMAIL}}</td>
+                                                            <td>{{contact.REMARKS}}</td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+
+                        </div>
+
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="company_commu">
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+                                            <div class="btn-toolbar">
+                                                <div class="btn-group pull-right">
+                                                    <button class="btn btn-success" style="font-size:20px;" onclick="custIDValidation(1);" title="Create Call Conversation"><i class="fa fa-phone"></i></button>
+                                                    <button class="btn btn-danger" style="font-size:20px;" onclick="custIDValidation(0);"><i class="fa fa-tasks"></i></button>
+                                                </div>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped" id="tblSuppModule_Communication">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date Comm</th>
+                                                            <th>Type</th>
+                                                            <th>Subject</th>
+                                                            <th>Coversation</th>
+                                                            <th>File Name</th>
+
+
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                        <tr ng-repeat="comm in CompanyCommList">
+                                                            <td>{{comm.DATE_COMM.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                            <td><button ng-class="{'btn btn-success btn-sm mb-10': comm.Type == 'Tele', 'btn btn-danger btn-sm mb-10': comm.Type != 'Tele'}"><i ng-class="{'fa fa-phone':comm.Type == 'Tele','fa fa-tasks':comm.Type != 'Tele'}"></i></button></td>
+                                                            <td><a href="javascript:;">{{comm.SUBJECT}}</a></td>
+                                                            <td>{{comm.CONVERSATION}}</td>
+                                                            <td><a href="{{comm.FILE_NAME}}" download="">{{comm.FILE_NAME.replace('/conversationFile/','')}}</a></td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+                            @section anypopup
+{
+                                <!-- Modal Tele Comm -->
+                                <div class="modal fade" id="offline" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-md">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h3 class="modal-title custom-font">Offline Communication</h3>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form name="" role="form" id="offForm" enctype="multipart/form-data" data-parsley-validate>
+
+                                                    <div class="row">
+
+                                                        <div class="form-group col-md-12">
+                                                            <label for="Set Target">Subject*</label>
+                                                            <input type="text" class="form-control" name="subject0" id="subject0"
+                                                                   data-parsley-trigger="change">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label for="txtQDate">Date of Comm </label>
+                                                            <div class='input-group datepicker w-360' data-format="DD-MM-YYYY" style="width:100%">
+                                                                <input type='text' id="date_comm" name="date_comm" class="form-control" />
+                                                                <span class="input-group-addon">
+                                                                    <span class="fa fa-calendar"></span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label for="Pending Target">File Name</label>
+                                                            <input type="file" class="filestyle" data-buttonText="Find file" name="filename" id="filename" data-iconName="fa fa-inbox">
+                                                        </div>
+                                                    </div>
+
+
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-success btn-ef btn-ef-3 btn-ef-3c" id="formSubmit1" onclick="SubmitClick(0)"><i class="fa fa-arrow-right"></i> Submit</button>
+                                                <button class="btn btn-lightred btn-ef btn-ef-4 btn-ef-4c" id="offClose" data-dismiss="modal"><i class="fa fa-arrow-left"></i> Cancel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Offline Comm-->
+                                <div class="modal fade" id="tele" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-md">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h3 class="modal-title custom-font">Tele Communication</h3>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form name="" role="form" id="teleForm" data-parsley-validate>
+
+                                                    <div class="row">
+
+                                                        <div class="form-group col-md-12">
+                                                            <label for="Set Target">Subject*</label>
+                                                            <input type="text" class="form-control" name="subject1" id="subject1" required
+                                                                   data-parsley-trigger="change">
+                                                        </div>
+
+                                                        <div class="form-group col-md-12">
+                                                            <label for="Pending Target">Conversation</label>
+                                                            <textarea class="form-control" id="conversation" rows="6"></textarea>
+                                                        </div>
+                                                    </div>
+
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-success btn-ef btn-ef-3 btn-ef-3c" id="formSubmit0" onclick="SubmitClick(1)"><i class="fa fa-arrow-right"></i> Submit</button>
+                                                <button class="btn btn-lightred btn-ef btn-ef-4 btn-ef-4c" id="teleClose" data-dismiss="modal"><i class="fa fa-arrow-left"></i> Cancel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+
+
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_orders">
+
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- /tile -->
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped" id="tblSuppModule_OrderDetails">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Order No</th>
+                                                            <th>Order Date</th>
+                                                            <th>Order Type</th>
+                                                            <th>Customer PO No</th>
+                                                            <th>Customer PO Date</th>
+                                                            <th>Sales Person</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="order in OrderList">
+                                                            <td>{{order.SO_CODE}}</td>
+                                                            <td class="ng-binding">{{order.SO_OrderDate.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                            <td class="ng-binding">{{order.Type}}</td>
+                                                            <td class="ng-binding">{{order.SO_CusPONO}}</td>
+                                                            <td class="ng-binding">{{order.SO_CusPODate.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                            <td>{{order.USER_NAME}}</td>
+                                                            <td>
+                                                                <a ng-click="ViewOrders(order.SO_ID);" class="btn btn-xs btn-default"><i class="fa fa-search"></i> View</a>
+                                                                <a style="display:none" href="javascript:;" class="btn btn-xs btn-primary"><i class="fa fa-envelope"></i> Send</a>
+                                                                <a style="display:none" href="javascript:;" class="btn btn-xs btn-lightred"><i class="fa fa-times"></i> Delete</a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+
+
+                        </div>
+
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_invoices">
+
+                            <ul class="nav nav-tabs tabs-dark">
+                                <li role="presentation" class="active"><a style="padding:10px 15px;" role="tab" data-toggle="tab" href="#litab_invoices1to1">Invoice(One-One)</a></li>
+                                <li role="presentation"><a style="padding:10px 15px;" role="tab" data-toggle="tab" href="#litab_invoices1toMany">Invoice(One-Many)</a></li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="litab_invoices1to1">
+                                    <!-- row -->
+                                    <div class="row">
+                                        <!-- col -->
+                                        <div class="col-md-12">
+
+                                            <!-- /tile -->
+                                            <!-- tile -->
+                                            <section class="tile tile-simple">
+
+                                                <!-- tile body -->
+                                                <div class="tile-body p-0">
+
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover table-striped" id="tblSuppModule_OneOneInvoice">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Code</th>
+                                                                    <th>Invoice Date</th>
+                                                                    <th>Shipment Code</th>
+                                                                    <th>Supplier Name</th>
+                                                                    <th>Sales Person</th>
+                                                                    <th>Action</th>
+                                                                </tr>
+
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="oneToOne in OneToOneList">
+                                                                    <td>{{oneToOne.OTOI_Code}}</td>
+                                                                    <td>{{oneToOne.OTOI_InvoiceDate.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                                    <td>{{oneToOne.S_Code}}</td>
+                                                                    <td>{{oneToOne.COM_DISPLAYNAME }}</td>
+                                                                    <td>{{oneToOne.USER_NAME }}</td>
+                                                                    <td>
+                                                                        <a ng-click="ViewOneToOne(oneToOne.OTOI_ID);" value="{{ oneToOne.OTOI_ID }}" class="btn btn-xs btn-default"><i class="fa fa-search"></i> View</a>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                                <!-- /tile body -->
+
+                                            </section>
+                                            <!-- /tile -->
+
+
+                                        </div>
+                                        <!-- /col -->
+                                    </div>
+                                    <!-- /row -->
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="litab_invoices1toMany">
+                                    <!-- row -->
+                                    <div class="row">
+                                        <!-- col -->
+                                        <div class="col-md-12">
+
+                                            <!-- /tile -->
+                                            <!-- tile -->
+                                            <section class="tile tile-simple">
+
+                                                <!-- tile body -->
+                                                <div class="tile-body p-0">
+
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover table-striped" id="tblSuppModule_OneManyInvoice">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Code</th>
+                                                                    <th>Invoice Date</th>
+                                                                    <th>Order Code</th>
+                                                                    <th>Supplier Name</th>
+                                                                    <th>Sales Person</th>
+                                                                    <th>Action</th>
+                                                                </tr>
+
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="oneToMany in OneToManyList">
+                                                                    <td>{{oneToMany.OTMI_Code}}</td>
+                                                                    <td>{{oneToMany.OTMI_InvoiceDate.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                                    <td>{{oneToMany.SO_Code}}</td>
+                                                                    <td>{{oneToMany.COM_DISPLAYNAME }}</td>
+                                                                    <td>{{oneToMany.USER_NAME }}</td>
+                                                                    <td><a ng-click="ViewOneToMany(oneToMany.OTMI_ID);" class="btn btn-xs btn-default" value="{{ oneToMany.OTMI_ID }}"><i class="fa fa-search"></i>View</a></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                                <!-- /tile body -->
+
+                                            </section>
+                                            <!-- /tile -->
+
+
+                                        </div>
+                                        <!-- /col -->
+                                    </div>
+                                    <!-- /row -->
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div role="tabpanel" class="tab-pane" id="litab_payments">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped" id="tblSuppModule_Commission">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Shipment Code</th>
+                                                            <th>Commission Code</th>
+                                                            <th>Sipment amount</th>
+                                                            <th>Fab Amount</th>
+                                                            <th>Comission Amount</th>
+                                                            <th>Comission Recieved</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="Payment in PaymentList">
+                                                            <td>{{Payment.S_Code}}</td>
+                                                            <td>{{Payment.CR_Code}}</td>
+                                                            <td style="text-align:right;">{{Payment.CR_ShipmentAmount.toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                                            <td style="text-align:right;">{{Payment.CR_FABAmount.toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                                            <td style="text-align:right;">{{Payment.CR_CommissionAmount.toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                                            <td style="text-align:right;">{{Payment.CR_CommissionRecieved.toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+                        </div>
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_followups">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Follow Up ID</th>
+                                                            <th>Description</th>
+                                                            <th>Date</th>
+                                                            <th>Status</th>
+                                                            <th>Next Follow Up</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><a href="javascript:;">201500156</a></td>
+                                                            <td>Discussed Product Specification</td>
+                                                            <td>Jan 27, 2018</td>
+                                                            <td><span class="label label-success">Call</span></td>
+                                                            <td class="ng-binding">Jan 30, 2018</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td><a href="javascript:;">201500156</a></td>
+                                                            <td>Finalized Specification</td>
+                                                            <td>Jan 30, 2018</td>
+                                                            <td><span class="label label-default">Meeting</span></td>
+                                                            <td class="ng-binding">Feb 10, 2018</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+                                </div>
+                                <!-- /col -->
+
+                            </div>
+                            <!-- /row -->
+
+
+
+                        </div>
+
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_shipments">
+
+
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+
+                                    <!-- tile -->
+                                    <!-- /tile -->
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped" id="tblSuppModule_Shipments">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Code</th>
+                                                            <th>ETD</th>
+                                                            <th>ETA</th>
+                                                            <th>Departure Port</th>
+                                                            <th>Arrival Port</th>
+                                                            <th>Invoice Amount</th>
+                                                            <td>Action</td>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="shipments in ShipmentList">
+                                                            <td>{{shipments.S_Code}}</td>
+                                                            <td>{{shipments.S_ETD.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                            <td>{{shipments.S_ETA.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                            <td>{{shipments.S_DeparturePort}}</td>
+                                                            <td>{{shipments.S_ArrivalPort }}</td>
+                                                            <td>{{shipments.S_INV_AMT.toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                                            <td><a ng-click="ViewShipment(shipments.S_ID);" class="btn btn-xs btn-default" value="{{ shipments.S_ID }}" title="View"><i class="fa fa-search"></i>View</a></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+
+
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="litab_schedule">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped" id="tblSuppModule_Schedules">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Code</th>
+                                                            <th>Schedule Date</th>
+                                                            <th>Order No</th>
+                                                            <th>Sales Person</th>
+                                                            <td>Action</td>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="schedules in ScheduleList">
+                                                            <td>{{schedules.SH_Code}}</td>
+                                                            <td>{{schedules.SH_DATE.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                            <td>{{schedules.SO_Code}}</td>
+                                                            <td>{{schedules.Customer}}</td>
+                                                            <td><a ng-click="ViewSchedule(schedules.SH_Code);" class="btn btn-xs btn-default" value="{{ schedules.SH_Code }}"><i class="fa fa-search"></i>View</a></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+                                </div>
+                                <!-- /col -->
+
+                            </div>
+                            <!-- /row -->
+
+
+
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="litab_dashboards">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+                                            <div style="width:100%">
+                                                <span id="sparkline02" data-values="5,6,17,2,1,4,2,24,6,28,4,5" data-type="bar" data-height="300px"></span>
+                                            </div>
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+                                </div>
+                                <!-- /col -->
+
+                            </div>
+                            <!-- /row -->
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+</section>
+@section dynamictablecreation
+{
+    <script src="~/Asset/js/vendor/flot/jquery.flot.min.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.resize.min.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.orderBars.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.stack.min.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.pie.min.js"></script>
+    <script src="~/Asset/js/vendor/flot-spline/jquery.flot.spline.min.js"></script>
+    <script src="~/Asset/js/vendor/flot-tooltip/jquery.flot.tooltip.min.js"></script>
+
+    <script src="~/Asset/js/vendor/gaugejs/gauge.min.js"></script>
+
+    <script src="~/Asset/js/vendor/raphael/raphael-min.js"></script>
+    <script src="~/Asset/js/vendor/d3/d3.v2.js"></script>
+    <script src="~/Asset/js/vendor/rickshaw/rickshaw.min.js"></script>
+
+    <script src="~/Asset/js/vendor/morris/morris.min.js"></script>
+
+    <script src="~/Asset/js/vendor/easypiechart/jquery.easypiechart.min.js"></script>
+
+    <script src="~/Asset/js/vendor/countTo/jquery.countTo.js"></script>
+    <script type="text/javascript">
+        var $el = $('#sparkline02');
+
+        var values = $el.data('values').split(',').map(parseFloat);
+        var type = $el.data('type') || 'line';
+        var height = $el.data('height') || 'auto';
+
+        var parentWidth = $(document).width() - 100;
+        var valueCount = values.length;
+        var barSpacing = 5;
+        var barWidth = Math.round((parentWidth - (valueCount - 1) * barSpacing) / valueCount);
+
+        $el.sparkline(values, {
+            width: '100%',
+            type: type,
+            height: height,
+            barWidth: barWidth,
+            barSpacing: barSpacing,
+            barColor: '#16a085',
+            negBarColor: '#FF0066'
+        });
+    </script>
+}
+

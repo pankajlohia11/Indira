@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+using BusinessEntity.CustomModels;
+using DataAccess;
+
+namespace BusinessLogic
+{
+    public class ET_Admin_Category_BL
+    {
+
+        ET_Admin_Category_DL ObjDL = new ET_Admin_Category_DL();
+        public List<Tbl_Category_Details> ET_Admin_Category_List_BL(int com_key)
+        {
+            return ObjDL.ET_Admin_Category_List_DL(com_key);
+        }
+
+        public int ET_Admin_Category_Deleted(int id)
+        {
+            return ObjDL.ET_Admin_Category_Deleted(id);
+        }
+        public Tbl_Category_Details ET_Admin_Category_Update_Get_BL(int id)
+        {
+            return ObjDL.ET_Admin_Category_Update_Get_DL(id);
+        }
+        public decimal Tbl_Category_Details_Add_BL(Tbl_Category_Details obj, string prefix, bool automanual)
+        {
+            return ObjDL.Tbl_Category_Details_Add_DL(obj, prefix, automanual);
+        }
+
+        public string CheckDuplicateCode_BL(int CategoryID, string CategoryCode)
+        {
+            return ObjDL.CheckDuplicateCode_DL(CategoryID, CategoryCode);
+        }
+
+        public List<Tbl_Category_Details> ET_Admin_Category_Restore_BL()
+        {
+            return ObjDL.ET_Admin_Category_Restore_DL();
+        }
+        public int ET_Admin_Category_Restore_Insert_BL(int id, decimal updatedby)
+        {
+            return ObjDL.ET_Admin_Category_Restore_Insert_DL(id, updatedby);
+        }
+        public Tbl_Category_Details ET_Admin_Category_View_BL(int id)
+        {
+            return ObjDL.ET_Admin_Category_View_DL(id);
+        }
+
+    }
+}

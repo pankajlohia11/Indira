@@ -1,0 +1,32 @@
+﻿
+@model IEnumerable<BusinessEntity.CustomModels.SalesTarget_CM>
+
+@foreach (var item in Model)
+{
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="Code">Organization Name</label>
+            @Html.TextBoxFor(m => item.ORG_Name, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        <div class="col-md-6">
+            <label for="OrganizationName">Financial Year</label>
+            @Html.TextBoxFor(m => item.ST_FINANCIAL_YEAR, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+
+    <div class="col-md-12">
+
+        <div class="col-md-6">
+            <label for="Code">Organization Name</label>
+            @Html.TextBoxFor(m => item.ST_TARGET, new { @class = "form-control", @readonly = "readonly" })
+        </div>
+        </div>
+        <div class="col-md-12">
+
+        </div>
+
+        }
+
+
+

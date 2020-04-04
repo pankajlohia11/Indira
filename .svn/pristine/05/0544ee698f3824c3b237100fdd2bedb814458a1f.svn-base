@@ -1,0 +1,60 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+using DataAccess;
+using DataAccess.Admin_DA;
+
+namespace BusinessLogic.Admin_BL
+{
+    public class ET_Admin_ProductGroup_BL
+    {
+        ET_Admin_ProductGroup_DL ObjDL = new ET_Admin_ProductGroup_DL();
+
+        public List<Tbl_ProductGroup> ET_Admin_ProductGrouplist_BL()
+        {
+            return ObjDL.ET_Admin_ProductGrouplist_DL();
+        }
+        public decimal ET_Admin_ProductGroup_Add_BL(Tbl_ProductGroup_CM obj, bool automanual, string prefix)
+        {
+            return ObjDL.ET_Admin_ProductGroup_Add_DL(obj, automanual, prefix);
+        }
+        public Tbl_ProductGroup ET_Admin_ProductGroup_Update_GetbyID_BL(int id)
+        {
+            return ObjDL.ET_Admin_ProductGroup_Update_GetbyID_DL(id);
+        }
+
+        public int ET_Admin_ProductGroup_Delete_BL(int id, decimal deleteby)
+        {
+            return ObjDL.ET_Admin_ProductGroup_Delete_DL(id, deleteby);
+        }
+        public List<Tbl_ProductGroup> ET_Admin_ProductGroup_Restore_BL()
+        {
+            return ObjDL.ET_Admin_ProductGroup_Restore_DL();
+        }
+        public int ET_Admin_ProductGroup_Restore_Insert_BL(int id, decimal Updatedby)
+        {
+            return ObjDL.ET_Admin_ProductGroup_Restore_Insert_DL(id, Updatedby);
+        }
+        public Tbl_ProductGroup ET_Admin_ProductGroup_View_BL(int id)
+        {
+            return ObjDL.ET_Admin_ProductGroup_View_DL(id);
+        }
+        public List<Tbl_ProductGroup> BindDropdown_BL()
+        {
+            return ObjDL.BindDropdown_DL();
+        }
+
+        public string CheckDuplicateGroupName_BL(decimal id, string GroupName)
+        {
+            return ObjDL.CheckDuplicateGroupName_DL(id, GroupName);
+        }
+        public string CheckDuplicateCode_BL(decimal id, string GroupCode)
+        {
+            return ObjDL.CheckDuplicateCode_DL(id, GroupCode);
+        }
+    }
+}

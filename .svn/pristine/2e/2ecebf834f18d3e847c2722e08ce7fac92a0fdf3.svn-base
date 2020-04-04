@@ -1,0 +1,11 @@
+Reporting-MTA: dns; p3plsmtpa06-05.prod.phx3.secureserver.net [173.201.192.101]
+Received-From-MTA: dns; www.lyracrm.com [5.189.137.5]
+Arrival-Date: Sun, 24 Jun 2018 00:32:11 -0700
+
+
+Final-recipient: rfc822; torjuncconsstar1996@plusgmail.ru
+Diagnostic-Code: smtp; 550 LTD BeGet: user not found.
+
+Last-attempt-Date: Sun, 24 Jun 2018 00:32:13 -0700
+
+

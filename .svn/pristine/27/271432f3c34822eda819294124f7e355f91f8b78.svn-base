@@ -1,0 +1,75 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+    public class Despatch_CM
+    {
+        public decimal D_ID { get; set; }
+        
+        public string D_Code { get; set; }
+
+        public decimal D_OrderID { get; set; }
+        public decimal DD_OrderDetailID { get; set; }
+        public string D_OrderCode { get; set; }
+        public decimal D_CustomerID { get; set; }
+        public string D_CustomerName { get; set; }
+
+        public decimal D_SalesPerson { get; set; }
+        public string D_SalesPersonName { get; set; }
+
+        public decimal D_StoreID { get; set; }
+        
+        public DateTime D_DespatchDate { get; set; }
+        
+        public string D_ModeOfTransport { get; set; }
+        
+        public string D_VechileNo { get; set; }
+        
+        public string D_TransporterName { get; set; }
+        
+        public string D_DeliveryFrom { get; set; }
+        public string D_DeliveryTo { get; set; }
+        public string D_Remarks { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public int COM_KEY { get; set; }
+        public decimal DD_ID { get; set; }
+
+        public decimal DD_PID { get; set; }
+
+        public decimal DD_ProductID { get; set; }
+        public string DD_ArticleNo { get; set; }
+        public string DD_ProductName { get; set; }
+        public string DD_UOM { get; set; }
+
+
+        public decimal DD_OrderQuantity { get; set; }
+        public decimal? DD_PendingQuantity { get; set; }
+        public decimal? DD_AvailableStock1 { get; set; }
+        public decimal? DD_AvailableStock2 { get; set; }
+        public decimal? DD_AvailableStock3 { get; set; }
+        public decimal? DD_DespatchQuantity { get; set; }
+    }
+    public class DespatchVIew_CM
+    {
+        public List<Despatch_CM> Header { get; set; }
+        public List<Despatch_CM> Details { get; set; }
+    }
+}

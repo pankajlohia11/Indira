@@ -1,0 +1,323 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Material_Master>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+
+    This Form is used to create a material Details.
+    The user can edit or remove and restore  a record in Material.The user can capture Material and other Details etc.
+    Author=jesmi
+    Created Date=31st Mar 2018
+    Material Master Form view
+    Operations[Add,Edit,Restore]
+-->
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide display page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying view page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+
+        $("#txt_Material").val("");
+        $("#txt_Description").val("");
+        $("#chkCotton").val();
+    };
+
+    function InsertRecords() {
+
+        var MaterialID = $("#txt_MaterialID").val();
+        if (MaterialID != 0) {
+            MaterialID = MaterialID;
+        }
+        else {
+            MaterialID = "0";
+        }
+
+        var MaterialCode = $("#txt_MaterialCode").val();
+        if (MaterialCode != 0) {
+            MaterialCode = MaterialCode;
+        }
+        else {
+            MaterialCode = "0";
+        }
+
+        var txt_Material = $("#txt_Material").val();
+        var txt_Description = $("#txt_Description").val();
+        var chkCotton = $("#chkCotton").val();
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("ET_Admin_Material_Add", "ET_Admin_Material")',
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            data: {
+                MaterialID: MaterialID,
+                MaterialCode: MaterialCode,
+                Material: txt_Material,
+                Description: txt_Description,
+                chkCotton: chkCotton
+            },
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (result == "Success") {
+                        createRecords();
+                        if (StoreID == 0) {
+                            message = 'Record Inserted Successfully.';
+                            toastr["success"](message, "Notification");
+                        }
+                        else {
+                            message = 'Record Updated Successfully.';
+                            toastr["success"](message, "Notification");
+                        }
+                    }
+                    else if (result == "Failed") {
+                        message = 'Failed to do this operation.';
+                        toastr["error"](message, "Notification");
+                    }
+                    else if (result.indexOf("Validation") > -1) {
+                        toastr["error"](result, "Notification");
+                    }
+                }
+            },
+            error: function (response) {
+                message = "You don't access to do this operation, please contact admin.";
+                toastr["error"](message, "Notification");
+            }
+        });
+    };
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Material Master <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Material Details</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <!--Here user can have to see Material Details -->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Material Master</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();" id="@ViewBag.Restore"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Material Name</th>
+                                    <th>Material Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            @if (Model != null)
+                            {
+                                int i = 0;
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.MATERIAL_NAME</td>
+                                        <td>@item.MATERIAL_DESCRIPTION</td>
+                                        <td>
+                                            <a onclick="editRecords(@item.MATERIAL_ID,this);" value="@item.MATERIAL_ID" id="@ViewBag.Edit@i" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                            <a onclick="ViewRecords(@item.MATERIAL_ID,this);" value="@item.MATERIAL_ID" id="@ViewBag.View@i" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                            <a onclick="deleteRecord(@item.MATERIAL_ID,this);" id="@ViewBag.Delete@i" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+
+                                        </td>
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--Here user can have to edit Material Details -->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong> Material Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <form name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblMaterialCode">Material Code</label>
+                                    <input type="text" name="txt_MaterialCode" id="txt_MaterialCode" class="form-control" disabled />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="lblMaterial">Material</label>
+                                    <input type="text" name="txt_Material" id="txt_Material" class="form-control" placeholder="Material"
+                                           data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/"
+                                           required />
+                                    <input type="text" name="txt_MaterialID" id="txt_MaterialID" class="form-control hidden" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="lblDescription">Description</label>
+
+                                    <textarea name="txt_Description" rows="3" cols="80" id="txt_Description" class="form-control" placeholder="Description" data-parsley-trigger="change"
+                                              data-parsley-type="alphanum"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="lblCotton">Cotton(100%)</label>
+                                    <input type="checkbox" name="chkCotton" id="chkCotton" />
+                                    @*<label class="checkbox checkbox-custom-alt">
+                                        <input class="chk" type="checkbox" onclick="uncheckall(this);" checked="@item.IS_EDIT"><i></i>
+                                    </label>*@
+                                </div>
+                            </div>
+
+                        </form>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled id="formSubmit">Submit</button>
+
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--Here user can have to restore Material Details -->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Material</strong> Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Material Name</th>
+                                    <th>Material Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

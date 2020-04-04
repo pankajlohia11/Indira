@@ -1,0 +1,95 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+    public class OneToManyInvoice_CM
+    {
+        //SO Serial No for the custom object
+        public int SO_Serial { get; set; }
+        public decimal OTMI_ID { get; set; }
+        public decimal P_ID { get; set; }
+        
+        public string OTMI_Code { get; set; }
+
+        public decimal OTMI_CustomerID { get; set; }
+
+        public string vechicleno { get; set; }
+
+        public string modeoftransport { get; set; }
+
+        public string deliveryfrom { get; set; }
+        public string deliveryto { get; set; }
+        public string remarks { get; set; }
+
+        public decimal OTMI_SalesPerson { get; set; }
+        public string SO_Code { get; set; }
+        public string COM_DISPLAYNAME { get; set; }
+        public string DesignDetail { get; set; }
+        public string CustomerDes { get; set; }
+        public string USER_NAME { get; set; }
+        public decimal OTMI_OrderID { get; set; }
+        
+        public string OTMI_DespatchIDs { get; set; }
+        
+        public DateTime OTMI_InvoiceDate { get; set; }
+
+        public decimal OTMI_OrderAmount { get; set; }
+
+        public decimal OTMI_TaxPer { get; set; }
+
+        public decimal OTMI_TaxAmount { get; set; }
+
+        public decimal OTMI_InvoiceAmount { get; set; }
+        public decimal OTMI_TransportCost { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public int COM_KEY { get; set; }
+        public string ArticleNo { get; set; }
+        public string ProductName { get; set; }
+        public string UOM { get; set; }
+        public string UOM_Code { get; set; }
+        public decimal? SD_Quantity { get; set; }
+        public string Despatch_Code { get; set; }
+        public decimal? price { get; set; }
+        public string Customer { get; set; }
+        public string CompanyCode { get; set; }
+        public string CompanyName { get; set; }
+        public string Street { get; set; }
+        public string CityState { get; set; }
+        public string CountryZip { get; set; }
+        public string USTID { get; set; }
+        public decimal? VatPer { get; set; }
+        public string imgurl { get; set; }
+        public string SystemCompany { get; set; }
+        public string PaymentTerms { get; set; }
+        public decimal Discount { get; set; }
+        public decimal? OTMI_FreightCost { get; set; }
+        public string Description { get; set; }
+        public int? Zipcode { get; set; }
+        public decimal? DiscountPer { get; set; }
+        public string CusPONo { get; set; }
+        public string OrderCode { get; set; }
+    }
+    public class OneToManyInvoiceView_CM
+    {
+        public List<OneToManyInvoice_CM> objHeader { get; set; }
+        public List<OneToManyInvoice_CM> objDetail { get; set; }
+    }
+}

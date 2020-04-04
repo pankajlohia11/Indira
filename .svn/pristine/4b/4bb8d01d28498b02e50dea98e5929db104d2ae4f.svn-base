@@ -1,0 +1,881 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_CompanyDetails>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+This Form is used to create a Company Details.
+    The user can edit or remove and restore  a record in Company Details.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_CompanyMaster.js"></script>
+    <script type="text/javascript">
+        function ValidateEmail(e) {
+            debugger;
+            var expr = /^([\w-\.]+)@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+            if (!expr.test($(e).val()))
+            {
+                $(e).val("");
+                message = "Invalid Email";
+                toastr["error"](message, "Notification");
+            }
+        };
+        function isInteger(s) {
+            var i;
+            var t = s.value;
+            if (s.value != '') {
+                for (i = 0; i < t.length; i++) {
+                    var c = t.charAt(i);
+                    if (isNaN(c)) {
+                        message = "Invalid Phone Number";
+                        toastr["error"](message, "Notification");
+                        s.value = '';
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+    </script>
+}
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+ 
+    /* This function is used for displaying restore page and hide display page */
+    //function restoreRecords() {
+    //    $("#div_View").css("display", "none");
+    //    $("#div_Restore").css("display", "block");
+    //}
+    /* This fuction is to hide and show the divisions in Edit page*/
+    function companydetais() {
+        $("#div_company").css("display", "block");
+       // $("#div_contacts").css("display", "none");
+       // $("#div_BankDetails").css("display", "none");
+    }
+    /* This fuction is to hide and show the divisions in Edit page*/
+    function contactdetails() {
+        $("#div_company").css("display", "none");
+      //  $("#div_contacts").css("display", "block");
+       // $("#div_BankDetails").css("display", "none");
+    }
+    /* This fuction is to hide and show the divisions in Edit page*/
+    function bankdetails() {
+        $("#div_company").css("display", "none");
+      //  $("#div_contacts").css("display", "none");
+       // $("#div_BankDetails").css("display", "block");
+    }
+    /* This function is used for displaying View list pagee */
+    function showRecords() {
+        $("#txtCompanyName").val("");
+        $("#txtDisplayName").val("");
+        $("#UstId").val("");
+        $("#txtTaxNo").val("");
+        $("#txtAddress").val("");
+        $("#drpCountry").val("").trigger("chosen:updated");
+        $("#drpState").val("").trigger("chosen:updated");
+        $("#drpCity").val("").trigger("chosen:updated");
+        $("#txtZip").val("");
+        $("#txtEmail").val("");
+        $("#txtFax").val("");
+        $("#txtPhone").val("");
+        $("#txtMobile").val("");
+        $("#txtRemarks").val("");
+        $("#companytype").val("0");
+        $("#txtComID").val("0");
+        //alert(result);
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+       // $("#div_contacts").css("display", "none");
+    }
+
+    function InsertRecords(txt) {
+      //  if ($(f).attr("id").toString().indexOf("CreateYes") > -1) {
+            var ComID = $("#txtComID").val();
+            if (ComID != 0) {
+                ComID = ComID;
+            }
+            else {
+                ComID = "0";
+        }
+            var CompanyCode = $("#CompanyCode").val();
+            var CompanyName = $("#txtCompanyName").val();
+        var DisplayName = $("#txtDisplayName").val();
+        var drpBank = $("#drpBank").val();
+            var UstId = $("#UstId").val();
+            var TaxNo = $("#txtTaxNo").val();
+            var Address = $("#txtAddress").val();
+        var Country = $("#drpCountry").val();
+            var State = $("#drpState").val();
+            var City = $("#drpCity").val();
+            var Zip = $("#txtZip").val();
+            var Email = $("#txtEmail").val();
+            var Fax = $("#txtFax").val();
+            var Phone = $("#txtPhone").val();
+            var Mobile = $("#txtMobile").val();
+            var Remarks = $("#txtRemarks").val();
+            var companytype = $("#companytype").val();
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Master_Company_Add", "ET_Admin_Company")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {
+                    ComID: ComID,
+                    CompanyCode: CompanyCode,
+                    CompanyName: CompanyName,
+                    DisplayName: DisplayName,
+                    BankID: drpBank,
+                    UstId: UstId,
+                    TaxNo: TaxNo,
+                    Address: Address,
+                    State: State,
+                    Country: Country,
+                    City: City,
+                    Zip: Zip,
+                    Email: Email,
+                    Fax: Fax,
+                    Phone: Phone,
+                    Mobile: Mobile,
+                    Remarks: Remarks,
+                    companytype: companytype,
+                    Contactdata: txt
+                },
+                success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        if (result == "Success") {
+                            $("#div_View").css("display", "none");
+                            $("#div_Edit").css("display", "block");
+                            $("#div_company").css("display", "block");
+
+                            showRecords();
+                            createRecords();
+
+                            message = 'Record Inserted Successfully.';
+                            toastr["success"](message, "Notification");
+                        }
+                        else if (result == "Failed") {
+
+                            message = 'Failed to do this operation.';
+                            toastr["error"](message, "Notification");
+                        }
+                        else if (result.indexOf("Validation") > -1) {
+                            toastr["error"](result, "Notification");
+                        }
+                    }
+
+                },
+                error: function (response) {
+                    message = "You don't access to do this operation, please contact admin.";
+                    toastr["error"](message, "Notification");
+                }
+            });
+       // }
+    };
+
+    function editRecords(e, f) {
+        if ($(f).attr("id").toString().indexOf("EditYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Master_Company_Update_GetbyID", "ET_Admin_Company")',
+                data: { id: id },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                        if (result.indexOf("ERR") > -1) {
+                            alert("hlw");
+                            $("#spanErrMessage1").html(result);
+                            $("#spanErrMessage2").html(result);
+                            if ($("#exceptionmessage").length)
+                                $("#exceptionmessage").trigger("click");
+                        }
+                        else {
+                        var res = JSON.parse(result);
+                        $("#div_View").css("display", "none");
+                        $("#div_Edit").css("display", "block");
+                        $("#div_company").css("display", "block");
+
+                        $("#CompanyCode").val(res.COM_CODE);
+                        $("#txtCompanyName").val(res.COM_NAME);
+                        $("#txtDisplayName").val(res.COM_DISPLAYNAME);
+                        $("#UstId").val(res.COM_USTID);
+                        $("#txtTaxNo").val(res.Tax_No);
+                        $("#txtAddress").val(res.COM_STREET);
+                        $("#drptState").val(res.COM_STATE);
+                        $("#drpCity").val(res.COM_CITY);
+                        $("#txtZip").val(res.COM_ZIP);
+                        $("#txtEmail").val(res.COM_EMAIL);
+                        $("#txtFax").val(res.COM_FAX);
+                        $("#txtPhone").val(res.COM_PHONE);
+                        $("#txtMobile").val(res.COM_MOBILE);
+                        $("#txtRemarks").val(res.COM_REMARKS);
+                        $("#companytype").val(res.Cust_Supp);
+                        $("#txtComID").val(res.COM_ID);
+                        $("#drpBank").val(res.BANK_ID).trigger("chosen:updated");
+                        $("#drpCountry").val(res.COM_COUNTRY).trigger("chosen:updated");
+                        State(res.COM_STATE, res.COM_CITY);
+
+                            $.ajax({
+                                type: "GET",
+                                url: '@Url.Action("ET_Master_Company_ContactsLoad", "ET_Admin_Company")',
+                                data: { id: id },
+                                contentType: "application/json;charset=utf-8",
+                                dataType: "html",
+                                success: function (result) {
+                                    if (result.indexOf("ERR") > -1) {
+                                        $("#spanErrMessage1").html(result);
+                                        $("#spanErrMessage2").html(result);
+                                        if ($("#exceptionmessage").length)
+                                            $("#exceptionmessage").trigger("click");
+                                    }
+                                    else {
+                                        $('#contactbody').html(result);
+                                    }
+                                }
+                                ,
+                                error: function (response) {
+                                    if ($("#exceptionmessage").length)
+                                        $("#exceptionmessage").trigger("click");
+                                }
+                            });
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+        $("#div_company").css("display", "block");
+        $("#drpCountry").val("").trigger("chosen:updated");
+        $("#drpState").val("").trigger("chosen:updated");
+        $("#drpCity").val("").trigger("chosen:updated");
+        $("#contactbody").html("");
+        $("#contactbody").append("<tr><td><select class='form-control' id='drptitle'><option value='1' selected>Mr.</option><option value='2'>Mrs.</option><option value='3'>Dr.</option><option value='4'>Drs.</option></select></td><td><input type='text' id='txtfirstname' class='form-control' /></td><td><input type='text' id='txtlastname' class='form-control' /></td><td><select class='form-control' id='drpjobtitle'><option value='MD'>MD</option><option value='Business Manager'>Business Manager</option><option value='Marketing Manager'>Marketing Manager</option><option value='Managing director'>Managing director</option></select></td><td><input type='text' onchange='isInteger(this);' id='txtphoneno' class='form-control' /></td><td><input type='text' id='txtfaxno' onchange='isInteger(this);' class='form-control' /></td><td><input type='text' onchange='isInteger(this);' id='txtmobileno' class='form-control' /></td><td><input data-parsley-trigger='change' type='email' id='txtemailc' onchange='ValidateEmail(this);' class='form-control' /></td><td><input type='text' id='txtremarksc' class='form-control' /></td><td><a style='padding: 5px;' onclick='addnewrow(this)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' onclick='deleterow(this)'><i class='fa fa-trash'></i></a></td></tr>");
+
+    };
+
+    // Add row dynamic companycontacts
+    function addnewrow(e) {
+        var td = $(e).parent().parent().find("td");
+        var firstname = $(td[1]).find("input").val();
+        var mobile = $(td[6]).find("input").val();
+        var email = $(td[7]).find("input").val();
+        if (firstname == "") {
+            message = "Enter First Name";
+            toastr["error"](message, "Notification");
+        } else if (mobile == "") {
+            message = "Enter Mobile Number";
+            toastr["error"](message, "Notification");
+        }
+        else {
+            $("#contactbody").append("<tr><td><select class='form-control' id='drptitle'><option value='1' selected>Mr.</option><option value='2'>Mrs.</option><option value='3'>Dr.</option><option value='4'>Drs.</option></select></td><td><input type='text' id='txtfirstname' class='form-control' /></td><td><input type='text' id='txtlastname' class='form-control' /></td><td><select class='form-control' id='drpjobtitle'><option value='MD'>MD</option><option value='Business Manager'>Business Manager</option><option value='Marketing Manager'>Marketing Manager</option><option value='Managing director'>Managing director</option></select></td><td><input type='text' onchange='isInteger(this);' id='txtphoneno' class='form-control' /></td><td><input type='text' id='txtfaxno' onchange='isInteger(this);' class='form-control' /></td><td><input type='text' onchange='isInteger(this);' id='txtmobileno' class='form-control' /></td><td><input data-parsley-trigger='change' type='email' id='txtemailc' onchange='ValidateEmail(this);' class='form-control' /></td><td><input type='text' id='txtremarksc' class='form-control' /></td><td><a style='padding: 5px;' onclick='addnewrow(this)'><i class='fa fa-plus'></i></a><a style='padding: 5px;color:red' onclick='deleterow(this)'><i class='fa fa-trash'></i></a></td></tr>");
+        }
+    }
+
+     // Delete row dynamic companycontacts
+    function deleterow(e) {
+        var len = $("#contactbody").find("tr").length;
+        if (len != 1) {
+        $(e).parent().parent().fadeOut(300, function () { $(this).remove(); });
+    }
+        else {
+        message = "Atleast one contact required";
+        toastr["error"](message, "Notification"); }
+    }
+
+    function City(f) {
+        var id = ($("#drpState").val());
+
+
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_City", "ET_Admin_Company")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+            success: function (result) {
+                var html = '<option value="">--Select--</option>';
+                for (i = 0; i < result.length; i++) {
+                    html += '<option value="' + result[i].location_id + '">' + result[i].name
+                        + '</option>';
+                }
+                html += '</option>';
+
+                $('#drpCity').html(html).trigger("chosen:updated");
+                $("#drpCity").val(f).trigger("chosen:updated");
+                },
+                error: function (response) {
+                    toastr["error"]("City Not Loading", "Notification");
+                }
+            });
+    };
+
+    function State(e, f) {
+
+        var id = ($("#drpCountry").val());
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("Binddropdown_State", "ET_Admin_Company")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: {id : id },
+             success: function (result) {
+                 var html = '<option value="">--Select--</option>';
+                 for (i = 0; i < result.length; i++) {
+                     html += '<option value="' + result[i].location_id + '">' + result[i].name + '</option>';
+                 }
+                 html += '</option>';
+
+                 $('#drpState').html(html).trigger("chosen:updated");
+                 $("#drpState").val(e).trigger("chosen:updated");
+                 if(f)
+                    City(f);
+                },
+                error: function (response) {
+                    toastr["error"]("State Not Loading", "Notification");
+                }
+            });
+    };
+
+    function deleteRecord(e, f) {
+        if ($(f).attr("id").toString().indexOf("DeleteYes") > -1) {
+            alertmessage(e, $(f).attr("id").toString());
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+
+    function deleteRecordConfirm(e,f) {
+        var id = e;
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ET_Master_Company_Delete", "ET_Admin_Company")',
+            data: { id: id },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (result == "Success") {
+                        message = 'Record Deleted Successfully. You can retrive it from Restore page';
+                        toastr["success"](message, "Notification");
+                        var ctrl = "#" + f;
+                        $(ctrl).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                    }
+                    else {
+                        message = 'Failed To Delete';
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            },
+            error: function (response) {
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+        });
+    };
+
+    function ViewRecords(e,f) {
+        if ($(f).attr("id").toString().indexOf("ViewYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Master_Company_View", "ET_Admin_Company")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: { id: id },
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $('#viewpopup').html(result);
+                        $("#btnviewpopup").trigger("click");
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function restoreRecords(f) {
+        if ($(f).attr("id").toString().indexOf("RestoreYes") > -1) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Master_Company_Restore", "ET_Admin_Company")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $("#div_View").css("display", "none");
+                        $("#div_Restore").css("display", "block");
+                        $('#restorediv').html(result);
+                        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+                    }
+                },
+                error: function (response) {
+                    alert('error');
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    function Restoredeleterecords(id, f) {
+        debugger;
+        var id = id;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Master_Company_Restore_Insert", "ET_Admin_Company")',
+                data: {
+                    id: id
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        if (result == "Success") {
+                            $("#div_View").css("display", "none");
+                            $("#div_Restore").css("display", "block");
+
+                            message = 'Record Restored Successfully';
+                            toastr["success"](message, "Notification");
+                            $(f).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                        }
+                        else if (result == "Success") {
+                            message = 'Failed to do this operation.';
+                            toastr["error"](message, "Notification");
+                        }
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+    };
+
+    function createcontacttable() {
+            var table = $(this).closest('table');
+        if (table.find('input:text').length < 7) {
+            table.append('<tr><td style="width:200px;" align="right">Name <td> <input type="text" id="current Name" value="" /> </td></tr>');
+        }
+    };
+
+
+</script>
+
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order">
+        <div class="pageheader">
+
+            <h2>Company<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Company Master</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_CompanyMaster">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Company Master</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                       Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Company Name</th>
+                                    <th>Mobile</th>
+                                    <th>Email</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="company in companylist">
+                                    <td>{{company.COM_CODE}}</td>
+                                    <td>{{company.COM_NAME}}</td>
+                                    <td>{{company.COM_MOBILE}}</td>
+                                    <td>{{company.COM_EMAIL}}</td>
+                                    <td>
+                                        <a ng-click="editRecords(company.COM_ID);" value="{{ company.COM_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(company.COM_ID);" value="{{ company.COM_ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                        <a ng-click="Restoredeleterecords(company.COM_ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> Company Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- This Below code is used for Tab purpose -->
+                    @*<ul class="nav nav-tabs tabs-dark" style="width:252px;margin-left:25px;background-color:#fff;">
+                        <li role="presentation"><a style="background-image:url(../../Assets/images/companydetails.png);height:60px;width:84px;" onclick="companydetais();"></a><i class="icon-calculator"></i></li>
+                        <li role="presentation"><a style="background-image:url(../../Assets/images/Contacts.png);height:60px;width:84px;" class="Contacts hidden" onclick="contactdetails();"></a></li>
+                        <li role="presentation"><a style="background-image:url(../../Assets/images/BankAccounts.gif);height:60px;width:84px;margin-top:-4px;" onclick="bankdetails();"></a></li>
+                    </ul>*@
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div id="div_company">
+                        <div class="tile-body">
+                            <div name="form1" role="form" id="form1" data-parsley-validate>
+                                <h5><label><strong>Company Info</strong></label></h5>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Company Code</label>
+                                        <input type="text" name="CompanyCode" id="txtCompanyCode" ng-model="COM_CODE" class="form-control" disabled="@ViewBag.AutoManual"  @ViewBag.Required>
+                                        <input type="text" name="txtComID" id="txtComID" ng-model="COM_ID" class="hidden" >
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Company Name</label>
+                                        <input type="text" name="CompanyName" id="txtCompanyName" ng-model="COM_NAME" class="form-control" data-parsley-trigger="change" required>
+                                    </div>
+
+                                    <div class="form-group col-sm-6">
+                                        <label class="control-label"> Company Type </label>
+                                        <select data-ng-model="selectedcompanytype" ng-change="CompanyTypeChange()"  class="form-control" id="companytype">
+                                            <option name="companytype" value="0">Customer</option>
+                                            <option name="companytype" value="1">Supplier</option>
+                                            <option name="companytype" value="2">Both</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Display Name</label>
+                                        <input type="text" name="DisplayName" id="txtDisplayName" ng-model="COM_DISPLAYNAME" class="form-control" data-parsley-trigger="change" required>
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label for="lblBankName">Bank Name</label>
+                                        <select data-ng-model="selectedbank" id="drpBank" class="form-control chosen-select" ng-change="BankChange()">
+                                            <option value="0">-Select-</option>
+                                            <option ng-repeat="bank in banks" value="{{bank.BANK_ID}}">
+                                                {{bank.BANK_NAME}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="form-group col-md-6">
+                                        <label for="Digits">UstId</label>
+                                        <input type="text" name="UstId" id="UstId" ng-model="COM_USTID" class="form-control">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Numbers">Tax No</label>
+
+                                        <input type="text" name="TaxNo" id="txtTaxNo" ng-model="Tax_No" class="form-control">
+                                    </div>
+                                </div>
+
+                                <h5> <label><strong>Address Info</strong></label></h5>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Alphanumeric">Address</label>
+                                        <input type="text" name="Address" id="txtAddress" ng-model="COM_STREET" class="form-control" data-parsley-trigger="change"required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Alpha">Country</label>
+                                        <select data-ng-model="selectedcountry" id="drpCountry" ng-change="GetState()" class="form-control chosen-select">
+                                            <option value="0">-Select-</option>
+                                            <option ng-repeat="country in countrys" value="{{country.location_id}}">
+                                                {{country.name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Alpha">State</label>
+                                        <select data-ng-model="selectedstate" id="drpstate" ng-change="GetCity()" class="form-control chosen-select">
+                                            <option value="0">-Select-</option>
+                                            <option ng-repeat="state1 in getstates" value="{{state1.location_id}}">
+                                                {{state1.name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Alpha">City</label>
+                                        <select data-ng-model="selectedcity" class="form-control chosen-select" ng-change="CityChange()" id="drpcity">
+                                            <option value="0">-Select-</option>
+                                            <option ng-repeat="city in getcities" value="{{city.location_id}}">
+                                                {{city.name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Alphanumeric">Zip</label>
+                                        <input type="text" name="Zip" id="txtZip" class="form-control" ng-model="COM_ZIP" data-parsley-trigger="change" data-parsley-type="digits" required>
+                                    </div>
+                                </div>
+
+                                <h5><label><strong>Contact Info</strong></label></h5>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="Alphanumeric">Email</label>
+                                        <input type="email" name="Email" id="txtEmail" class="form-control" ng-model="COM_EMAIL" data-parsley-trigger="change" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Alpha">Fax</label>
+
+                                        <input type="text" name="Fax" id="txtFax" class="form-control" ng-model="COM_FAX" data-parsley-trigger="change" data-parsley-type="digits">
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                    <div class="form-group col-md-6">
+                                        <label for="Alphanumeric">Phone</label>
+                                        <input type="text" name="Phone" id="txtPhone" class="form-control" ng-model="COM_PHONE" data-parsley-trigger="change" data-parsley-type="digits">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Alpha">Mobile</label>
+
+                                        <input type="text" name="Mobile" id="txtMobile" class="form-control" ng-model="COM_MOBILE" data-parsley-trigger="change" data-parsley-type="digits">
+                                    </div>
+                                </div>
+                                <div class="row">
+
+
+                                    <div class="form-group col-md-6">
+                                        <label for="Alpha">Remarks</label>
+                                        <input type="text" name="Remarks" id="txtRemarks" class="form-control" ng-model="COM_REMARKS" data-parsley-trigger="change" data-parsley-type="alphanum">
+                                    </div>
+                                </div>
+
+
+                                <section class="tile">
+                                    <!-- tile header -->
+                                    <div style="background-color:cadetblue;color:white;" class="tile-header dvd dvd-btm collapsed" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                        <h1 class="custom-font"><strong>Contact</strong> Details</h1>
+                                    </div>
+                                    <!-- /tile header -->
+                                    <!-- tile body -->
+                                    <div class="tile-body">
+
+                                        <div class="collapse" id="collapseExample">
+                                            <div class="row">
+                                                <div class="table-responsive">
+                                                    <style type="text/css">
+                                                        #editable-usage > tbody > tr td, .table.table-custom > tbody > tr th {
+                                                            padding: 0px;
+                                                        }
+                                                    </style>
+                                                    <table class="table table-custom" id="editable-usage">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 6%;">Title</th>
+                                                                <th>First Name</th>
+                                                                <th>Last Name</th>
+                                                                <th>Job Title</th>
+                                                                <th>Phone</th>
+                                                                <th>Fax</th>
+                                                                <th>Mobile</th>
+                                                                <th>Email</th>
+                                                                <th>Remarks</th>
+                                                                <th style="width: 160px;" class="no-sort">Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="contactbody"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <!-- /tile body -->
+
+                                </section>
+
+                                <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                                    <!-- SUBMIT BUTTON -->
+                                    <!-- Button used for submitting the record -->
+                                    <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext">Submit</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore</strong> Company Master</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Company Name</th>
+                                    <th>Mobile</th>
+                                    <th>Email</th>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="company in companyrestorelist">
+                                    <td>{{company.COM_CODE}}</td>
+                                    <td>{{company.COM_NAME}}</td>
+                                    <td>{{company.COM_MOBILE}}</td>
+                                    <td>{{company.COM_EMAIL}}</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(company.COM_ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+            </div>
+        </div>
+    </div>
+</section>

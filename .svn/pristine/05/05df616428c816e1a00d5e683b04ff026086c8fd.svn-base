@@ -1,0 +1,44 @@
+﻿
+@model BusinessEntity.CustomModels.ShipmentView_CM
+<div class="col-md-12" id="div_company_view">
+
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            <table width="100" align="center">
+
+                <tr>
+                    <td><img src="../Images/euro_logo.png" width="100"></td>
+                    <td><h1 style="font-size:large"><label><strong>EUROTEXTILES</strong></label></h1></td>
+                </tr>
+            </table>
+            <p style="text-align:left;">Dear Sir</p>
+            <p> <span style="text-align:left; padding:10px;">We hereby advice you that we have debited your account for the under mentioned amount being commission due.</span></p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Schedule Code</th>
+                        <th>Article No</th>
+                        <th>Product Name</th>
+                        <th>Scheduled Quantity</th>
+                        <th>Shipment Quantity</th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.detailsObj)
+                    {
+                        <tr>
+                            <td>@item.SH_Code</td>
+                            <td>@item.SD_ArticleNo</td>
+                            <td>@item.SD_ProductName</td>
+                            <td>@item.SD_ScheduledQuantity</td>
+                            <td>@item.SD_Quantity</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

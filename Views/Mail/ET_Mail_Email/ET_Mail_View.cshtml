@@ -1,0 +1,146 @@
+﻿@using System.Globalization;
+@model BusinessEntity.CustomModels.MailContentInfo
+
+@{
+    ViewBag.Title = "Compose Mail";
+}
+<!--
+This Form is used to perform Mail Compose functionality. It can allow From and To Address,
+    Add CC , File Attachments before sending the mail.
+-->
+
+@section angularcontroller
+{
+
+    <style>
+        .unreadClass {
+            font-weight: bold;
+            color: #10acdd;
+        }
+    </style>
+    <script src="~/Content/AngularScripts/AC_Mail_Common.js"></script>
+    <script type="text/javascript">
+
+        var rowCount = 1;
+        function addMoreRows(frm)
+        {
+            alert("Add more Rows");
+            rowCount++;
+            var recRow = '<tr id="rowCount' + rowCount + '"><td><input  id="fileInput" name="file1[]" type="file" size="13%" required/></td><td><a href="javascript:void(0);" onclick="removeRow(' + rowCount + ');" style="color:blue;">Delete</a></td></tr>';
+            jQuery('#addrows').append(recRow);
+        }
+
+        function removeRow(removeNum) {
+            jQuery('#rowCount' + removeNum).remove();
+        }
+
+        window.onload = function ()
+        {
+            alert("window loaded");
+            function inputTags() {
+                $('.select-tags').each(function () {
+                    $(this).tagsinput({
+                        tagClass: 'label label-primary'
+                    });
+                });
+
+            }
+            inputTags();
+            //load wysiwyg editor
+            $('#summernote').summernote({
+                height: 200   //set editable area's height
+            });
+            //*load wysiwyg editor
+        };
+    </script>
+}
+<!--section id="content"-->
+<h2>@Model.Subject</h2>
+<div class="page page-full page-mail" ng-controller="AC_Mail_Common">
+    <div id="Compose">
+        <div class="tcol">
+            <!-- right side body -->
+            <div class="p-15">
+
+                <!--<form name="newMail" class="form-horizontal mt-20">-->
+                <div name="form1" class="form-horizontal mt-20" role="form" id="fileupload" method="POST" enctype="multipart/form-data" data-parsley-validate>
+
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label">To:</label>
+                        <div class="col-lg-8">
+                            <input class="select-tags form-control mail" name="mail" id="mailIds" type="text" value="@Model.ToReceipients" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label">Cc:</label>
+                        <div class="col-lg-8">
+                            <input class="select-tags form-control mail" id="mailCcIds" type="text" value="@Model.CCReceipients">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label">Subject:</label>
+                        <div class="col-lg-8">
+                            <input type="text" class="form-control" id="sub" ng-model="MST_Subject" value="@Model.Subject" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label">Content:</label>
+                        <div class="col-lg-8">
+                            <div id="summernote" required>@Model.MailContent</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label fa fa-paperclip ml-5"> :@Model.MailAttachments.Count.ToString()</label>
+                        <div class="col-lg-8">
+                            @*<div class="thumb thumb-xxl" ng-repeat="attachment in @Model.MailAttachments">
+                                <button ng-click="deleteFiles($event);" class="btn btn-sm btn-default  btn-ef btn-ef-5 btn-ef-5a mb-10">
+                                    <i class="fa fa-close"></i>
+                                    <span ng-bind="attachment.attachmentPath.replace('/Mail/Attachments/','')"></span>
+                                </button>
+                                <input type="text" name="fwdatt[]" id="" value="{{attachment.attachmentPath}}">
+                            </div>*@
+                        </div>
+                    </div>
+
+                    <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                    <div class="row fileupload-buttonbar">
+                        <div class="col-lg-10">
+                            <!-- The fileinput-button span is used to style the file input field as button -->
+                            <span style="float:right;" class="btn btn-success fileinput-button right" onclick="addMoreRows(this.form);">
+                                <i class="glyphicon glyphicon-plus"></i>
+                                <span>Attachment...</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label"></label>
+                        <div class="col-lg-6">
+                            <table class="table" id="addrows"></table>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-8 col-lg-offset-2">
+                            <button class="btn btn-greensea btn-ef btn-ef-7 btn-ef-7b b-0 br-2" id="formSubmit" ng-click="SendClick()"><i class="fa fa-envelope"></i> Send Message</button>
+                        </div>
+                    </div>
+                    <!--div class="form-group p-15 bg-white" style="min-height: 61px">
+                        <button class="btn btn-sm btn-default pull-right visible-sm visible-xs" data-toggle="collapse" data-target="#mail-nav" aria-expanded="false" aria-controls="collapseExample">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <a href="" ng-click="compose();" class="btn btn-sm btn-lightred b-0 br-2 text-strong">Compose</a>
+                    </div-->
+
+                </div>
+                <!-- /right side body -->
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--/section-->
+<!--/ CONTENT -->

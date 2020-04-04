@@ -1,0 +1,83 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.CustomModels;
+using BusinessEntity.EntityModels;
+using DataAccess.Admin_DA;
+using DataAccess;
+
+namespace BusinessLogic.Admin_BL
+{
+    public class ET_Admin_Product_BL
+    {
+        ET_Admin_Product_DL ObjDL = new ET_Admin_Product_DL();
+
+        public List<Tbl_Product_Yarn> Product_Yarn_list()
+        {
+            return ObjDL.Product_Yarn_list();
+        }
+
+        public decimal ET_Admin_Product_Yarn_Add_BL(Tbl_Product_Yarn_CM obj,bool automanual, string prefix)
+        {
+            return ObjDL.ET_Admin_Product_Yarn_Add_DL(obj,automanual,prefix);
+        }
+            public List<Tbl_Product_BedLinen> Product_BedLinen_list()
+        {
+            return ObjDL.Product_BedLinen_list();
+        }
+        public List<Tbl_Product_BathLinen> Product_BathLinen_list()
+        {
+            return ObjDL.Product_BathLinen_list();
+        }
+        public List<Tbl_Product_Fabric> Product_Fabric_list()
+        {
+            return ObjDL.Product_Fabric_list();
+        }
+        public List<Tbl_Product_Linen> Product_Linen_list()
+        {
+            return ObjDL.Product_Linen_list();
+        }
+        public List<Tbl_Master_Products> Master_Products_list()
+        {
+            return ObjDL.Master_Products_list();
+        }
+
+        public int ET_Admin_Product_Yarn_Deleted_BL(int id, decimal deleteby)
+        {
+            return ObjDL.ET_Admin_Product_Yarn_Deleted_DL(id, deleteby);
+        }
+
+        public int ET_Admin_Product_Yarn_Restore_Insert_BL(int id, decimal deleteby)
+        {
+            return ObjDL.ET_Admin_Product_Yarn_Restore_Insert_DL(id,deleteby);
+        }
+
+        public List<Tbl_Product_Yarn> ET_Admin_Product_Yarn_Restore_BL()
+        {
+            return ObjDL.ET_Admin_Product_Yarn_Restore_DL();
+        }
+
+        public Tbl_Product_Yarn ET_Admin_Product_Yarn_View_BL(int id)
+        {
+            return ObjDL.ET_Admin_Product_Yarn_View_DL(id);
+        }
+
+        public Tbl_Product_Yarn ET_Admin_Product_Yarn_Update_GetbyID_BL(int id)
+        {
+            return ObjDL.ET_Admin_Product_Yarn_Update_GetbyID_DL(id);
+        }
+
+
+        //public string Categorylist_BL()
+        //{
+        //    return ObjDL.Categorylist_DL();
+        //}
+        public string Sub_Categorylist_BL()
+        {
+            return ObjDL.Sub_Categorylist_DL();
+        }
+           
+        }
+}

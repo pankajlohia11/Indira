@@ -1,0 +1,401 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_Role>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+
+This Form is used to create a Roles and Privilages Details for the customer and the supplier.
+    The user can edit or remove and restore  a record in Roles and Privilages.
+    Author=RajKumar
+    Date = 31st Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+
+
+    /* This function is used for displaying restore page and hide View List page */
+    //function restoreRecords() {
+    //    $("#div_View").css("display", "none");
+    //    $("#div_Restore").css("display", "block");
+    //    };
+
+    /* This function is used for displaying View List page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+        $("#div_Viewpopup").css("display", "none");
+        };
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+        $("#div_Viewpopup").css("display", "none");
+        $("#txtRolename").val("");
+        $("#txtDescription").val("");
+        $("#drpRoleGroup").val("1");
+        $("#RoleID").val(0);
+    };
+
+    function editRecords(e) {
+        var id = $(e).val();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ET_Admin_Roles_Update_Get", "ET_Admin_Roles")',
+            data: { id: id },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+
+                var res = JSON.parse(result);
+                $("#div_View").css("display", "none");
+                $("#div_Edit").css("display", "block");
+                $("#div_Viewpopup").css("display", "none");
+                $("#txtRolename").val(res.ROLE_NAME);
+                $("#txtDescription").val(res.ROLE_DESCRIPTION);
+                $("#drpRoleGroup").val(res.ROLE_ACCESS);
+                $("#RoleID").val(res.ROLE_ID);
+            },
+            error: function (response) {
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+        });
+    };
+
+    function InsertRecords() {
+        var Rolename = $("#txtRolename").val();
+        var Description = $("#txtDescription").val();
+        var rolegroup = $("#drpRoleGroup").val();
+        var roleID = $("#RoleID").val();
+        if (roleID != 0) {
+            roleID = $("#RoleID").val();
+        }
+        else {
+            roleID = "0";
+        }
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Roles_Add", "ET_Admin_Roles")',
+                data: {
+                    txtRolename: Rolename,
+                    txtDescription: Description,
+                    drpRoleGroup: rolegroup,
+                    RollID: roleID
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    $("#div_View").css("display", "none");
+                    $("#div_Restore").css("display", "block");
+                    $("#div_Viewpopup").css("display", "none");
+
+                    if (result == "Success") {
+                        $("#txtRolename").val("");
+                        $("#txtDescription").val("");
+                        $("#drpRoleGroup").val("1");
+                        $("#RoleID").val(0);
+                        alert(result);
+                    }
+                    else {
+
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+    };
+
+    function restoreRecords() {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Roles_Restore", "ET_Admin_Roles")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (result, textStatus, XMLHttpRequest) {
+                    $("#div_View").css("display", "none");
+                    $("#div_Restore").css("display", "block");
+                    $("#div_Viewpopup").css("display", "none");
+                    $('#restorediv').html(result);
+                    },
+                error: function (response) {
+                    alert('error');
+                }
+            });
+    };
+
+    function Restoredeleterecords(id) {
+        var id = id;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Roles_Restore_Insert", "ET_Admin_Roles")',
+                data: {
+                    id: id
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    $("#div_View").css("display", "none");
+                    $("#div_Restore").css("display", "block");
+                    $("#div_Viewpopup").css("display", "none");
+                    alert(result);
+                    location.reload();
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+    };
+
+    @*function ViewRecords(e) {
+        debugger;
+        var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Roles_View", "ET_Admin_Roles")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: {id:id},
+                success: function (result, textStatus, XMLHttpRequest) {
+                    $("#div_View").css("display", "none");
+                    $("#div_Viewpopup").css("display", "block");
+                    alert(result);
+
+                    $('#viewpopup').html(result);
+                    //$('#viewpopup').modal(options);
+                    //$('#viewpopup').modal('show');
+
+                    },
+                error: function (response) {
+                    alert('error');
+                }
+            });
+    };*@
+
+    function ViewRecords(e) {
+        var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_Roles_View", "ET_Admin_Roles")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: { id: id },
+                success: function (result, textStatus, XMLHttpRequest) {
+                    $("#div_View").css("display", "none");
+                    $("#div_Restore").css("display", "none");
+                    $("#div_Viewpopup").css("display", "block");
+                    debugger;
+                    alert(result);
+                    $('#viewpopup').html(result);
+                   // $('#viewpopup').modal(options);
+                    $('#viewpopup').modal('show');
+                    },
+                error: function (response) {
+                    alert('error');
+                }
+            });
+    };
+
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Roles and Privilege <span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Roles and Privilege</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Roles and Privilege</strong> List</h1>
+                        <ul class="controls">
+                            <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                            <li style="padding:5px">
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" id="restore" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+
+                                <tr>
+                                    <th>Role ID</th>
+                                    <th>Role Name</th>
+                                    <th>Role Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @item.ROLE_ID
+                                </td>
+                                <td>
+                                    @item.ROLE_NAME
+                                </td>
+                                <td>
+                                    @item.ROLE_DESCRIPTION
+                                </td>
+                                <td>
+                                    @*@Html.ActionLink("Edit", "ET_Admin_Roles_Update_Get", "ET_Admin_Roles", new { id = item.ROLE_ID, onclick= "editRecords();" }, null)*@
+                                    <button class="fa fa-caret-right" onclick="editRecords(this);" value="@item.ROLE_ID">Edit</button>
+
+                                    @*<a href="@Url.Action("ET_Admin_Roles_Add", "ET_Admin_Roles", new { id = item.ROLE_ID, @class = "icon-trash" })"><i class="fa fa-caret-right"></i>Delete</a>*@
+                                    @Html.ActionLink("Delete", "ET_Admin_Roles_Delete", "ET_Admin_Roles", new { id = item.ROLE_ID, @class = "icon-trash" }, null)
+
+
+                                    @*<a href="@Url.Action("ET_Admin_Roles_Add", "ET_Admin_Roles", new { id = item.ROLE_ID, @class = "icon-trash" })"><i class="fa fa-caret-right"></i>Delete</a>*@
+                                    <button class="fa fa-caret-right" onclick="ViewRecords(@item.ROLE_ID);" value="@item.ROLE_ID">View</button>
+                                    @*<button class="btn btn-success mb-10" onclick="ViewRecords(@item.ROLE_ID)" data-toggle="modal" data-target="#splash" data-options="splash-2 splash-primary splash-ef-2">Fade in &amp; Scale</button>*@
+
+                                </td>
+                            </tr>
+            }
+        }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore Roles and Privilege</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    @*@using (Html.BeginForm("ET_Admin_Roles_Add", "ET_Admin_Roles", FormMethod.Post))
+            {*@
+
+                    <div class="tile-body">
+
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            @*@foreach (var item in Model)
+                    {*@
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Role Name</label>
+                                    @*@Html.TextBoxFor(m => item.ROLE_NAME, new { @class = "form-control" })*@
+                                    <input type="text" name="RoleID" id="RoleID" class="form-control hidden">
+                                    <input type="text" name="txtRolename" id="txtRolename" class="form-control" data-parsley-trigger="change" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Url">Description</label>
+                                    @*@Html.TextBoxFor(m => item.ROLE_DESCRIPTION, new { @class = "form-control" })*@
+                                    <input type="text" name="txtDescription" id="txtDescription" class="form-control" data-parsley-trigger="change" required>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label for="Email">Role Group</label>
+                                    @*@Html.TextBoxFor(m => item.ROLE_NAME, new { @class = "form-control" })*@
+                                    <select id="drpRoleGroup" class="form-control" name="drpRoleGroup">
+                                        <option value="1">Admin</option>
+                                        <option value="2">Sales Group</option>
+                                        <option value="3">Sales Support</option>
+                                        <option value="4">Others</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="tile-footer text-right bg-tr-black lter dvd dvd-top">
+                                <!-- SUBMIT BUTTON -->
+                                <button type="submit" class="btn btn-lightred" id="formSubmit" onclick="InsertRecords();">Submit</button>
+                            </div>
+                            @*}*@
+                        </div>
+                    </div>
+                    @*}*@
+                </section>
+                <!--The user can have a option to restore-->
+                <section class="tile" id="div_Restore" style="display:none">
+                    <div id="restorediv">
+
+                    </div>
+
+                </section>
+
+                <section class="tile" id="div_Viewpopup" style="display:none">
+                    <div id="viewpopup">
+                        <div class="modal splash fade hidden" id="splash" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                            @*<button class="btn btn-success mb-10" data-toggle="modal" data-target="#splash" data-options="splash-2 splash-primary splash-ef-2">Fade in &amp; Scale</button>*@
+
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</section>

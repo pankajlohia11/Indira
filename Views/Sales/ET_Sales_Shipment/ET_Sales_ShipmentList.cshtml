@@ -1,0 +1,107 @@
+﻿
+@{
+    ViewBag.Title = "ET_Sales_ShipmentList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_ShipmentNotificationList.js"></script>
+    <script type="text/javascript">
+
+    </script>
+}
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+    <div class="page page-shop-single-order" id="mainDiv" ng-controller="AC_ShipmentListCtrl">
+        <div class="pageheader">
+
+            <h2> Shipment<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#"> Shipment</a>
+                        
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" id="mycontroller">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom contattbl" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>ETD</th>
+                                    <th>ETA</th>
+                                    <th>Code</th>
+                                    <th>Customer</th>
+                                    <th>Supplier</th>
+
+                                    <th ng-if="S_Type==1">Invoice No</th>
+                                    <th>Invoice Amount</th>
+                                    <td>Type</td>
+                                    <td>Action</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="shipment in shipmentlist">
+                                    <td>{{shipment.S_ETD.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{shipment.S_ETA.replace('/Date(','').replace(')/','') | date:'yyyy-MM-dd'}}</td>
+                                    <td>{{shipment.S_Code}}</td>
+                                    <td>{{shipment.COM_DISPLAYNAME}}</td>
+                                    <td>{{shipment.SuppName}}</td>
+
+                                    <td ng-if="S_Type==1">{{shipment.S_INV_NO}}</td>
+                                    <td style="text-align:right;">{{(shipment.S_INV_AMT).toLocaleString("es-ES", { minimumFractionDigits: 2 })}} €</td>
+                                    <td ng-if="shipment.S_Type==1">
+                                        Agency
+                                    </td>
+                                    <td ng-if="shipment.S_Type==2">
+                                        Trading
+                                    </td>
+                                    <td>
+
+                                        <a ng-click="ViewRecords(shipment.S_ID);" value="{{ shipment.S_ID }}" style="color:darkblue;padding:5px;" title="View"><i class="fa fa-eye"></i></a>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+                </section>
+                <!--The user can have a option to create and edit records-->
+              
+
+
+            </div>
+        </div>
+    </div>
+</section>
+

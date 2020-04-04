@@ -1,0 +1,127 @@
+﻿@using System.Globalization;
+@model IEnumerable<BusinessEntity.CustomModels.Schedule_CM>
+<div class="col-md-12" id="div_company_view">
+    <div class="tile-body">
+        <div name="form1" role="form" id="form1" data-parsley-validate>
+            @{ int i = 0;}
+            @foreach (var item in Model)
+            {
+                if (i == 0)
+                {
+                    <h5><label><strong>Schedule Details</strong></label></h5>
+                    <div class="row">
+
+                        <div class="form-group col-md-6">
+                            <label for="Email">Schedule Code</label>
+                            <input type="text" value="@item.SH_Code" class="form-control" disabled>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="Email">Schedule Type</label>
+                            @{ string type = "Store";
+                                if (item.SH_Type == 1)
+                                {
+                                    type = "Agency";
+                                }
+                                else if (item.SH_Type == 2)
+                                {
+                                    type = "Trading";
+                                }
+                            }
+                            <input type="text" value="@type" class="form-control" disabled>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="Url">Order Code</label>
+                            <input type="text" value="@item.SO_Code" class="form-control" disabled>
+                        </div>
+                        <div class="form-group col-md-6">
+                                <label for="Url">Customer PO Code</label>
+                                @{
+                                    if (item.SH_Type == 1)
+                                    {
+                                        <input type="text" value=" @item.ScNo" class="form-control" disabled>
+                                    }
+                                    else
+                                    {
+                                        <input type="text" value="@item.poNo" class="form-control" disabled>
+                                    }
+                                }
+                         </div>
+                            <div class="form-group col-md-6">
+                                <label for="Url">Customer Name</label>
+                                <input type="text" value="@item.CustomerName" class="form-control" disabled>
+                            </div>
+                            <div class="form-group col-md-6">
+                                @{
+                                    if (item.SH_Type == 1 || item.SH_Type == 2)
+                                    {
+                                        <label for="Url">Supplier PO Code</label>
+                                        <input type="text" value="@item.SupplierPONo" class="form-control" disabled>
+                                    }
+                                }
+                            </div>
+                            <div class="form-group col-md-6">
+                                @{
+                                    if (item.SH_Type == 1 || item.SH_Type == 2)
+                                    {
+                                        <label for="Url">Supplier Name</label>
+                                        <input type="text" value="@item.SupplierName" class="form-control" disabled>
+                                    }
+                                }
+                            </div>
+                                 
+                            <div class="form-group col-md-6">
+                                @{
+                                    if (item.SH_Type == 1 || item.SH_Type == 2)
+                                    {
+                                        <label for="Url">Sales Person</label>
+                                        <input type="text" value="@item.SalesPerson" class="form-control" disabled>
+                                    }
+                                 }
+                            </div>
+                            <div class="form-group col-md-6">
+                                @{
+                                    if (item.SH_Type == 1 || item.SH_Type == 2)
+                                    {
+                                        <label for="Url">Supplier Schedule Date</label>
+                                        <input type="text" value="@((item.SH_DATE ?? DateTime.Now).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+                                    }
+                                }
+                            </div>
+                            <div class="form-group col-md-6">
+                                @{
+                                    if (item.SH_Type == 1 || item.SH_Type == 2)
+                                    {
+                                        <label for="Url">Customer Schedule Date</label>
+                                        <input type="text" value="@((item.SH_DATE ?? DateTime.Now).ToString("dd-MM-yyyy"))" class="form-control" disabled>
+                                        }
+                                    }
+                            </div>
+                        </div>
+                        }
+                        i++;
+                        }
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Order Quantity</th>
+                                    <th>Scheduled Quantity</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.P_ShortName</td>
+                                        <td style="text-align:right;">@(Convert.ToDecimal(item.SH_OrderQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                                        <td style="text-align:right;">@(Convert.ToDecimal(item.SH_SheduledQuantity).ToString("N2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+
+                    </div>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_UserMaster_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+
+        public List<Tbl_Master_User> ET_Admin_UserList_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_User.Where(m => m.DELETED != true).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        public List<Tbl_Master_Role> Binddropdown_Role_DL()
+        {
+            try
+            {
+                var Roles = dbcontext.Tbl_Master_Role.Where(m => m.DELETED == true).ToList();
+                return Roles;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+    }
+}

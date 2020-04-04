@@ -1,0 +1,822 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Sales_Target>
+@{
+    BusinessEntity.EntityModels.EntityClasses dbcontext = new BusinessEntity.EntityModels.EntityClasses();
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+This Form is used to set the sales target Organization wise.
+    Author=RajKumar
+    Created Date : 4th April 2018
+    Updated Date : 18th April 2018
+    Updated By   : Manoj Arumugam
+    Operation={View,Restore,Create,Edit,Delete}
+-->
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_SalesTarget.js"></script>
+}
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+  
+        /* This function is used for displaying View List page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+
+    }
+
+     /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords(f) {
+        $("#UserID").val("");
+        $("#txtUsercode").val("");
+        $("#txtUserName").val("");
+        $("#txtDisplayName").val("");
+        $("#txtPassword").val("");
+        $("#txtConfirmPassword").val("");
+        $("#drpRole").val("").trigger("chosen:updated");
+        $("#txtStreet").val("");
+        $("#drpCountry").val("").trigger("chosen:updated");
+        $("#drpState").val("").trigger("chosen:updated");
+        $("#drpCity").val("").trigger("chosen:updated");
+        $("#txtZipCode").val("");
+        $("#txtEmail").val("");
+        $("#txtFax").val("");
+        $("#txtPhone").val("");
+        $("#txtMobile").val("");
+        $("#txtRemarks").val("");
+
+        if ($(f).attr("id").toString().indexOf("CreateYes") > -1) {
+
+
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $("#formSubmit").html("Submit");
+            $("#span_tabtext").html("Add");
+
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    };
+
+    //Edit Row Data and Fetch value from ET_Admin_User_Update_Get
+    function editRecords(e,f) {
+        if ($(f).attr("id").toString().indexOf("EditYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesTarget_Update_Get", "ET_Admin_SalesTarget")',
+                data: { id: id },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        debugger;
+                        var res = JSON.parse(result);
+
+                        $("#div_View").css("display", "none");
+                        $("#div_Edit").css("display", "block");
+                        $("#formSubmit").html("Update").removeAttr("disabled")
+                        $("#span_tabtext").html("Edit");
+
+                        $("#drpFinYear").val(res[0].ST_FINANCIAL_YEAR).trigger("chosen:updated");
+                        $("#drpSalesOrganization").val(res[0].ORG_ID).trigger("chosen:updated");
+                        $("#txtTarget").val(res[0].ST_TARGET);
+                        $("#txtPendingTarget").val("0");
+                        BindRow_Employees(res);
+
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+
+    };
+    //Delete Row Access Check
+    function deleteRecord(e, f) {
+        if ($(f).attr("id").toString().indexOf("DeleteYes") > -1) {
+            alertmessage(e, $(f).attr("id").toString());
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    // Delete Row confirm If Yes  Delete the data using ET_Admin_User_Delete
+    function deleteRecordConfirm(e,f) {
+        var id = e;
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ET_Admin_User_Delete", "ET_Admin_User_Master")',
+            data: { id: id },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (result == "Success") {
+                        message = 'Record Deleted Successfully. You can retrive it from Restore page';
+                        toastr["success"](message, "Notification");
+                        var ctrl = "#" + f;
+                        $(ctrl).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                    }
+                    else {
+                        message = 'Failed To Delete';
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            },
+            error: function (response) {
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+        });
+    };
+
+    // Insert/ Update Row using ajax ET_Admin_UserMaster_Add
+    function InsertRecords() {
+
+        var RecordCount = $("#txtLength").val();
+
+        for (var i = 0; i < RecordCount; i++) {
+            var TargetID = $("#TargetID_" + i).val();
+
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesTarget_Add", "ET_Admin_SalesTarget")',
+                data: {
+                    TargetID: TargetID,
+                    FinYear: $("#drpFinYear").val(),
+                    ORG_ID: $("#drpSalesOrganization").val(),
+                    Target: $("#txtTarget").val(),
+                    UserID: $("#txtUserID_" + i).val(),
+                        M1 : $("#txtM1_" + i).val(),
+                        M2 : $("#txtM2_" + i).val(),
+                        M3 : $("#txtM3_" + i).val(),
+                        M4 : $("#txtM4_" + i).val(),
+                        M5 : $("#txtM5_" + i).val(),
+                        M6 : $("#txtM6_" + i).val(),
+                        M7 : $("#txtM7_" + i).val(),
+                        M8 : $("#txtM8_" + i).val(),
+                        M9 : $("#txtM9_" + i).val(),
+                        M10 : $("#txtM10_" + i).val(),
+                        M11 : $("#txtM11_" + i).val(),
+                        M12 : $("#txtM12_" + i).val()
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        if (result == "Success") {
+                            //Clearing Data after update or Insert
+                            $("#drpFinYear").val("").trigger("chosen:updated");
+                            $("#drpSalesOrganization").val("").trigger("chosen:updated");
+                            $("#txtTarget").val("");
+                            $("#txtUserID_" + i).val("");
+                            $("#txtM1_" + i).val("0");
+                            $("#txtM2_" + i).val("0");
+                            $("#txtM3_" + i).val("0");
+                            $("#txtM4_" + i).val("0");
+                            $("#txtM5_" + i).val("0");
+                            $("#txtM6_" + i).val("0");
+                            $("#txtM7_" + i).val("0");
+                            $("#txtM8_" + i).val("0");
+                            $("#txtM9_" + i).val("0");
+                            $("#txtM10_" + i).val("0");
+                            $("#txtM11_" + i).val("0");
+                            $("#txtM12_" + i).val("0");
+
+                            $("#formSubmit").html("Submit");
+                            $("#span_tabtext").html("Add");
+
+                            if (TargetID == 0) {
+                                message = 'Record Inserted Successfully.';
+                                toastr["success"](message, "Notification");
+                            }
+                            else {
+                                message = 'Record Updated Successfully.';
+                                toastr["success"](message, "Notification");
+                            }
+                        }
+                        else if (result == "Failed") {
+
+                            message = 'Failed to do this operation.';
+                            toastr["error"](message, "Notification");
+                        }
+                        else if (result.indexOf("Validation") > -1) {
+                            toastr["error"](result, "Notification");
+                        }
+                    }
+                },
+                error: function (response) {
+
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+
+        }
+
+    };
+
+    //Restore View displaying from partial view using ET_Admin_User_Restore
+    function restoreRecords(f) {
+        if ($(f).attr("id").toString().indexOf("RestoreYes") > -1) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_User_Restore", "ET_Admin_User_Master")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $("#div_View").css("display", "none");
+                        $("#div_Restore").css("display", "block");
+
+                        $('#restorediv').html(result);
+                        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+                    }
+                },
+                error: function (response) {
+                    alert('error');
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+
+    };
+
+    //Restore Data using ET_Admin_User_Restore_Insert function
+    function Restoredeleterecords(id,f) {
+        var id = id;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_User_Restore_Insert", "ET_Admin_User_Master")',
+                data: {
+                    id: id
+                },
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        if (result == "Success") {
+                            $("#div_View").css("display", "none");
+                            $("#div_Restore").css("display", "block");
+
+                            message = 'Record Restored Successfully';
+                            toastr["success"](message, "Notification");
+                            $(f).parent().parent().fadeOut(800, function () { $(this).remove(); })
+                        }
+                        else if (result == "Success") {
+                            message = 'Failed to do this operation.';
+                            toastr["error"](message, "Notification");
+                        }
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+    };
+
+    //View records in popup using ET_Admin_User_View function
+     function ViewRecords(e,f) {
+        if ($(f).attr("id").toString().indexOf("ViewYes") > -1) {
+            var id = e;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Admin_SalesTarget_Update_Get", "ET_Admin_SalesTarget")',
+                contentType: "application/json; charset=utf-8",
+                dataType: "html",
+                data: { id: id },
+                success: function (result, textStatus, XMLHttpRequest) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $('#viewpopup').html(result);
+                        $("#btnviewpopup").trigger("click");
+                    }
+                },
+                error: function (response) {
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+
+    };
+
+    // Bind Employees for Set target / Set selected value
+    function BindRow_Employees(res) {
+        var ORG_ID = $("#drpSalesOrganization").val();
+        var FIN_YEAR = $("#drpFinYear").val();
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("BindRow_Employees", "ET_Admin_SalesTarget")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "html",
+             data: { ORG_ID: ORG_ID, FIN_YEAR: FIN_YEAR },
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#divTarget').html(result);
+                    //if (res.length > 0) {
+
+                    //    for (var i = 0; i < res.length; i++) {
+                    //        $("#TargetID_" + i).val(res[i].ST_ID);
+                    //        $("#txtUserID_" + i).val(res[i].ST_EMP_ID);
+                    //        $("#txtM1_" + i).val(res[i].ST_M1);
+                    //        $("#txtM2_" + i).val(res[i].ST_M2);
+                    //        $("#txtM3_" + i).val(res[i].ST_M3);
+                    //        $("#txtM4_" + i).val(res[i].ST_M4);
+                    //        $("#txtM5_" + i).val(res[i].ST_M5);
+                    //        $("#txtM6_" + i).val(res[i].ST_M6);
+                    //        $("#txtM7_" + i).val(res[i].ST_M7);
+                    //        $("#txtM8_" + i).val(res[i].ST_M8);
+                    //        $("#txtM9_" + i).val(res[i].ST_M9);
+                    //        $("#txtM10_" + i).val(res[i].ST_M10);
+                    //        $("#txtM11_" + i).val(res[i].ST_M11);
+                    //        $("#txtM12_" + i).val(res[i].ST_M12);
+                    //    }
+                    //    SetTotal();
+
+                    //}
+                    //BindLabel_Year();
+                }
+                },
+                error: function (response) {
+                    toastr["error"]("Target Employees Not Loading", "Notification");
+                }
+            });
+    };
+
+
+    // Bind Employees for Set target / Set selected value
+    @*function BindRow_Employees(res) {
+        var id = ($("#drpSalesOrganization").val());
+         $.ajax({
+                type: "GET",
+                url: '@Url.Action("BindRow_Employees", "ET_Admin_SalesTarget")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "html",
+                data: {id : id },
+            success: function (result) {
+                if (result.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(result);
+                    $("#spanErrMessage2").html(result);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#divTarget').html(result);
+                    if (res.length > 0) {
+
+                        for (var i = 0; i < res.length; i++) {
+                            $("#TargetID_" + i).val(res[i].ST_ID);
+                            $("#txtUserID_" + i).val(res[i].ST_EMP_ID);
+                            $("#txtM1_" + i).val(res[i].ST_M1);
+                            $("#txtM2_" + i).val(res[i].ST_M2);
+                            $("#txtM3_" + i).val(res[i].ST_M3);
+                            $("#txtM4_" + i).val(res[i].ST_M4);
+                            $("#txtM5_" + i).val(res[i].ST_M5);
+                            $("#txtM6_" + i).val(res[i].ST_M6);
+                            $("#txtM7_" + i).val(res[i].ST_M7);
+                            $("#txtM8_" + i).val(res[i].ST_M8);
+                            $("#txtM9_" + i).val(res[i].ST_M9);
+                            $("#txtM10_" + i).val(res[i].ST_M10);
+                            $("#txtM11_" + i).val(res[i].ST_M11);
+                            $("#txtM12_" + i).val(res[i].ST_M12);
+                        }
+                        SetTotal();
+
+                    }
+                    BindLabel_Year();
+                }
+                },
+                error: function (response) {
+                    toastr["error"]("Target Employees Not Loading", "Notification");
+                }
+            });
+    };*@
+
+    function SetPendingTarget(e) {
+        debugger;
+        if ($("#txtTarget").val() == "")
+        {
+            $("#txtTarget").val("0");
+        }
+        var txtTarget1 = parseInt( $("#txtTarget").val());
+        var tbl = $("#tblSalesTarget button").length;
+        var totact = 0;
+        for (var i = 0; i < tbl; i++)
+        {
+            var ctrlid = "#txtTar_" + i;
+            if ($(ctrlid).val() == "")
+            {
+                $(ctrlid).val("0");
+            }
+            totact = totact + parseInt( $(ctrlid).val());
+        }
+        $("#txtPendingTarget").val(txtTarget1 - totact);
+        if (e.id.indexOf("txtTar_") != -1)
+        {
+            SetTotal(e.id);
+        }
+    }
+
+    function SetTotal(e) {
+       
+        var num = e.split('_');
+        var tblno = num[1];
+        var tblname = "#tblSalesTarget_" + tblno + " tbody tr";
+        var TotalRow = $(tblname).length-1;
+        var M1 = 0, M2 = 0, M3 = 0, M4 = 0, M5 = 0, M6 = 0, M7 = 0, M8 = 0, M9 = 0, M10 = 0, M11 = 0, M12 = 0;
+        var txtTotal = 0, txtM1Total = 0, txtM2Total = 0, txtM3Total = 0, txtM4Total = 0, txtM5Total = 0, txtM6Total = 0, txtM7Total = 0, txtM8Total = 0, txtM9Total = 0,txtM10Total = 0, txtM11Total = 0, txtM12Total = 0;
+
+        for (var i = 0; i < TotalRow; i++) {
+            var txtrowTotal = "";
+            if ($("#txtM1_"+ tblno  + i).val()!='')
+                M1 = $("#txtM1_"+ tblno  + i).val();
+            if ($("#txtM2_"+ tblno  + i).val()!='')
+                M2 = $("#txtM2_"+ tblno  + i).val();
+            if ($("#txtM3_"+ tblno  + i).val() != '')
+                M3 = $("#txtM3_"+ tblno  + i).val();
+            if ($("#txtM4_"+ tblno  + i).val()!='')
+                M4 = $("#txtM4_"+ tblno  + i).val();
+            if ($("#txtM5_"+ tblno  + i).val()!='')
+                M5 = $("#txtM5_"+ tblno  + i).val();
+            if ($("#txtM6_"+ tblno  + i).val()!='')
+                M6 = $("#txtM6_"+ tblno  + i).val();
+            if ($("#txtM7_"+ tblno  + i).val()!='')
+                M7 = $("#txtM7_"+ tblno  + i).val();
+            if ($("#txtM8_"+ tblno  + i).val()!='')
+                M8 = $("#txtM8_"+ tblno  + i).val();
+            if ($("#txtM9_"+ tblno  + i).val()!='')
+                M9 = $("#txtM9_"+ tblno  + i).val();
+            if ($("#txtM10_"+ tblno  + i).val()!='')
+                M10 = $("#txtM10_"+ tblno  + i).val();
+            if ($("#txtM11_"+ tblno  + i).val())
+                M11 = $("#txtM11_"+ tblno  + i).val();
+            if ($("#txtM12_"+ tblno  + i).val())
+                M12 = $("#txtM12_"+ tblno  + i).val();
+
+            txtrowTotal = parseInt(M1) + parseInt(M2) + parseInt(M3) + parseInt(M4) + parseInt(M5) + parseInt(M6) + parseInt(M7) + parseInt(M8) + parseInt(M9) +
+                parseInt(M10) + parseInt(M11) + parseInt(M12);
+            
+            $("#txtTotal_" + tblno + i).val(txtrowTotal);
+            txtTotal = parseInt(txtTotal) + parseInt($("#txtTotal_"+ tblno  + i).val());
+            txtM1Total = parseInt(txtM1Total) + parseInt(M1);
+            txtM2Total = parseInt(txtM2Total) + parseInt(M2);
+            txtM3Total = parseInt(txtM3Total) + parseInt(M3);
+            txtM4Total = parseInt(txtM4Total) + parseInt(M4);
+            txtM5Total = parseInt(txtM5Total) + parseInt(M5);
+            txtM6Total = parseInt(txtM6Total) + parseInt(M6);
+            txtM7Total = parseInt(txtM7Total) + parseInt(M7);
+            txtM8Total = parseInt(txtM8Total) + parseInt(M8);
+            txtM9Total = parseInt(txtM9Total) + parseInt(M9);
+            txtM10Total = parseInt(txtM10Total) + parseInt(M10);
+            txtM11Total = parseInt(txtM11Total) + parseInt(M11);
+            txtM12Total = parseInt(txtM12Total) + parseInt(M12);
+            M1 = 0, M2 = 0, M3 = 0, M4 = 0, M5 = 0, M6 = 0, M7 = 0, M8 = 0, M9 = 0, M10 = 0, M11 = 0, M12 = 0;
+        }
+        
+        $("#txtPen_" + tblno).val(parseInt($("#txtTar_" + tblno).val()) - txtTotal);
+        $("#txtM1Total_" + tblno).val(txtM1Total);
+        $("#txtM2Total_" + tblno).val(txtM2Total);
+        $("#txtM3Total_" + tblno).val(txtM3Total);
+        $("#txtM4Total_" + tblno).val(txtM4Total);
+        $("#txtM5Total_" + tblno).val(txtM5Total);
+        $("#txtM6Total_" + tblno).val(txtM6Total);
+        $("#txtM7Total_" + tblno).val(txtM7Total);
+        $("#txtM8Total_" + tblno).val(txtM8Total);
+        $("#txtM9Total_" + tblno).val(txtM9Total);
+        $("#txtM10Total_" + tblno).val(txtM10Total);
+        $("#txtM11Total_" + tblno).val(txtM11Total);
+        $("#txtM12Total_" + tblno).val(txtM12Total);
+        $("#txtTotalTarget_" + tblno).val(txtM1Total + txtM2Total + txtM3Total + txtM4Total + txtM5Total + txtM6Total + txtM7Total + txtM8Total + txtM9Total + txtM10Total + txtM11Total + txtM12Total);
+    }
+
+    function BindLabel_Year() {
+        var Year = $("#drpFinYear").val();
+        if (Year != "") {
+            $("#Jan").text("Jan-" + Year);
+            $("#Feb").text("Feb-" + Year);
+            $("#Mar").text("Mar-" + Year);
+            $("#Apr").text("Apr-" + Year);
+            $("#May").text("May-" + Year);
+            $("#Jun").text("Jun-" + Year);
+            $("#Jul").text("Jul-" + Year);
+            $("#Aug").text("Aug-" + Year);
+            $("#Sep").text("Sep-" + Year);
+            $("#Oct").text("Oct-" + Year);
+            $("#Nov").text("Nov-" + Year);
+            $("#Dec").text("Dec-" + Year);
+        }
+    }
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Sales Target<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Sales Target</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_SalesTarget">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Sales Target</strong> List</h1>
+                        <ul class="controls">
+                            <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                            <li style="padding:5px">
+                                <a tabindex="0" ng-click="createnew()">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                       Create
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" ng-click="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Sales Target ID</th>
+                                    <th>Sales Organization</th>
+                                    <th>Financial Year</th>
+                                    <th>Target</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="org in Orglist">
+                                    <td>{{org.SGT_ID}}</td>
+                                    <td>{{org.ORG_NAME}}</td>
+                                    <td>{{org.SGT_FIN_YEAR}}</td>
+                                    <td style="text-align:right;">{{(org.SGT_TARGET).toLocaleString("es-ES", { minimumFractionDigits: 3 })}} €</td>
+                                    <td>
+                                        <a ng-click="editRecords(org.SGT_ID);" value="{{ org.SGT_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                        <a ng-click="ViewRecords(org.SGT_ID);" value="{{ org.SGT_ID }}" style="color:darkblue;padding:5px;display:none;"><i class="fa fa-eye"></i></a>
+
+                                        <a ng-click="Restoredeleterecords(org.SGT_ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong ng-bind="createedit"></strong> Sales Target</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+                            <div class="row">
+                                <input type="text" name="TargetID" id="TargetID" class="form-control hidden" ng-model="SGT_ID">
+                                @*<div class="form-group col-md-6">
+                                        <label for="Sales Target Code">Sales Target Code</label>
+
+                                        <input type="text" name="txtTargetcode" minlength="5" maxlength="10" disabled="@ViewBag.AutoManual" id="txtTargetcode" class="form-control" data-parsley-trigger="change" @ViewBag.Required>
+                                    </div>*@
+                                <div class="form-group col-md-6">
+                                    <label for="Financial Year">Financial Year*</label>
+                                    <select class="form-control chosen-select" data-ng-model="selectedyear" style="width:100%" id="drpFinancialYear" name="drpFinancialYear" ng-change="YearChange()">
+                                        <option value="2018">2018</option>
+                                        <option value="2019">2019</option>
+                                        <option value="2020">2020</option>
+                                        <option value="2018">2021</option>
+                                        <option value="2019">2022</option>
+                                        <option value="2020">2023</option>
+                                        <option value="2018">2024</option>
+                                        <option value="2019">2025</option>
+                                        <option value="2020">2026</option>
+                                        <option value="2018">2027</option>
+                                        <option value="2019">2028</option>
+                                        <option value="2020">2029</option>
+                                        <option value="2020">2030</option>
+                                        <option value="2020">2031</option>
+                                        <option value="2020">2032</option>
+                                        <option value="2020">2033</option>
+                                        <option value="2020">2034</option>
+                                        <option value="2020">2035</option>
+                                    </select>
+                                    @*@Html.DropDownList("Years", new SelectList(ViewBag.Years), "--Select--", new { @class = "form-control chosen-select", onchange = "BindLabel_Year()", @id = "drpFinYear" })*@
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="Sales Organization">Sales Organization*</label>
+                                    <select class="chosen-select" data-ng-model="selectedorg" name="drpOrganization" id="drpOrganization" style="width:100%" ng-change="ORGChange()">
+                                        <option value="0">-Select-</option>
+                                        <option ng-repeat="org in orgData" value="{{org.ORG_ID}}">
+                                            {{org.ORG_NAME}}
+                                        </option>
+                                    </select>
+                                    @*@Html.DropDownList("Organization", new SelectList(ViewBag.Organization, "ORG_ID", "ORG_NAME"), "--Select--", new { @class = "form-control chosen-select", onchange = "BindRow_Employees()", @id = "drpSalesOrganization" })*@
+                                </div>
+
+                            </div>
+                            <div class="row">
+
+                                <div class="form-group col-md-6">
+                                    <label for="Set Target">Set Target*</label>
+                                    <input type="text" class="form-control" name="txtTarget" id="txtTarget" required ng-model="SGT_TARGET"
+                                           data-parsley-trigger="change" data-parsley-type="digits" onchange="SetPendingTarget(this)" onkeypress="return isNumber(event)">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Pending Target">Pending Target</label>
+                                    <input type="text" class="form-control" disabled name="txtPendingTarget" ng-model="SGT_Pending" id="txtPendingTarget" data-parsley-range="[0,0]" data-parsley-trigger="change" />
+                                </div>
+                            </div>
+
+                            <div class="row" id="divTarget">
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick()" ng-bind="submittext" disabled>Submit</button>
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--The user can have a option to restore-->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore Sales Target</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Sales Target ID</th>
+                                    <th>Sales Organization</th>
+                                    <th>Financial Year</th>
+                                    <th>Target</th>
+                                    <th>Action</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="org in Orgrestorelist">
+                                    <td>{{org.SGT_ID}}</td>
+                                    <td>{{org.ORG_NAME}}</td>
+                                    <td>{{org.SGT_FIN_YEAR}}</td>
+                                    <td style="text-align:right;">{{(org.SGT_TARGET).toLocaleString("es-ES", { minimumFractionDigits: 3 })}} €</td>
+                                    <td>
+                                        <a ng-click="Restoredeleterecords(org.SGT_ID,$event,false);" id="sdf" style="color:red"><i class="fa fa-undo"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+

@@ -1,0 +1,100 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using System.Web.Routing;
+using BusinessEntity.EntityModels;
+using BusinessEntity.CustomModels;
+using BusinessLogic.Admin_BL;
+using BusinessLogic;
+
+namespace Euro.Controllers.Calendar
+{
+    public class ET_Documentation_CalendarController : Controller
+    {
+        // GET: ET_Documentation_Calendar
+        error_master objERR = new error_master();
+        BAL bal = new BAL();
+        EntityClasses dbcontext = new EntityClasses();
+        public ActionResult ET_Documentation_Calendar()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+
+                    return View();
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        public ActionResult GetDocShipmentList()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+
+                    int com_key = Convert.ToInt32(Session["Companykey"].ToString());
+                    var days = dbcontext.Tbl_SystemSetUp.Single(m => m.COMPANY_ID == com_key).DOCUMENTDAYS??20;
+                    var data = dbcontext.Tbl_Shipment_Header.Where(m => m.DELETED == false && m.S_STATUS == 1).ToList();
+
+                    string s = "";
+                    for (int i = 0; i < data.Count(); i++)
+                    {
+                        
+                        string classs = "b-l b-2x bg-success";
+                        if(data[i].Doc_Status == false)
+                            classs = "b-l b-2x bg-danger";
+                        if (i == 0)
+                        {
+                            s = s + "[{'title':'" + data[i].S_Code + "','start':'" + DateTime.Parse(data[i].S_ETD.ToString()).AddDays(days).ToString("yyyy-MM-dd") + "','url':'shipping(" + data[i].S_ID + ")','className':'" + classs + "'}";
+                        }
+                        else
+                        {
+                            s = s + ",{'title':'" + data[i].S_Code + "','start':'" + DateTime.Parse(data[i].S_ETD.ToString()).AddDays(days).ToString("yyyy-MM-dd") + "','url':'shipping(" + data[i].S_ID + ")','className':'" + classs + "'}";
+                        }
+                    }
+                    if (data.Count() > 0)
+                        s = s + "]";
+                    s = s.Replace("'", "\"");
+                    var json = new JavaScriptSerializer().Serialize(s);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+
+        }
+    }
+}

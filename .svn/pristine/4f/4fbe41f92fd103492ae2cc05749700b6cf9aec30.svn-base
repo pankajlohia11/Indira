@@ -1,0 +1,66 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BusinessEntity.CustomModels
+{
+    public class ET_TBL_LC_DETAILS_CM
+    {
+        public decimal LC_ID { get; set; }
+
+        public decimal CUST_ID { get; set; }
+
+        [StringLength(10)]
+        public string CUST_SUPP { get; set; }
+
+        public string COM_NAME { get; set; }
+
+        public decimal? CURRENCY_ID { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string LC_NO { get; set; }
+
+        public DateTime LC_DATE { get; set; }
+
+        public DateTime LC_EXPIRYDATE { get; set; }
+
+        public decimal LC_AMOUNT { get; set; }
+
+        public decimal LC_BAL_AMT { get; set; }
+
+        public decimal? LC_CLOSE_AMT { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string LC_BANK_NAME { get; set; }
+
+        public decimal? LC_BANK_ID { get; set; }
+
+        [StringLength(300)]
+        public string MACHINE_NAME { get; set; }
+
+        [StringLength(50)]
+        public string IPADDRESS { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+        public string LC_CODE { get; set; }
+        public decimal COM_KEY { get; set; }
+    }
+}

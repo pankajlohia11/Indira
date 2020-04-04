@@ -1,0 +1,118 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using BusinessEntity.EntityModels;
+using BusinessLogic;
+using System.Web.Script.Serialization;
+
+namespace Euro.Controllers.Admin
+{
+    public class ET_Admin_RolesController : Controller
+    {
+
+        ET_Admin_Roles_BL objBL = new ET_Admin_Roles_BL();
+        // GET: ET_Admin_Roles
+        public ActionResult ET_Admin_Roles(int id = 0)
+        {
+            if (id != 0)
+            {
+                var data = objBL.ET_Admin_Roles_Restore_BL();
+                ViewBag.details = data;
+                TempData["RestoreData"] = data;
+                return View(data);
+            }
+            else
+            {
+                ViewBag.details = null;
+                var data = objBL.ET_Admin_RoleList_BL();
+                return View(data);
+            }
+            //  ViewBag.data = data;
+        }
+        /* Author       = Rajkumar
+         Created Date = 3rd Apr 2018
+         [Action Method=ET_Admin_Roles ]
+         */
+
+        [HttpGet]
+        public ActionResult ET_Admin_Roles_Add(string txtRolename, string txtDescription, int drpRoleGroup,int RollID)
+        {
+            try
+            {
+                Tbl_Master_Role tbl_Master_Role = new Tbl_Master_Role()
+                {
+                    ROLE_ID = RollID,
+                    ROLE_NAME = txtRolename,
+                    ROLE_DESCRIPTION = txtDescription,
+                    ROLE_ACCESS = drpRoleGroup,
+                };
+                decimal d=objBL.Tbl_Master_Role_Add(tbl_Master_Role);
+                var json = "Success";
+                if (d == 0)
+                {
+                    json = "Failed";
+                }
+                return Json(json, JsonRequestBehavior.AllowGet);
+                // return RedirectToAction("ET_Admin_Roles");
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        [HttpGet]
+        public ActionResult ET_Admin_Roles_Update_Get(int id)
+        {
+            var data = objBL.ET_Admin_Roles_Update_Get(id);
+            // TempData["Update"] = data;
+            var json = new JavaScriptSerializer().Serialize(data);
+            return Json(json, JsonRequestBehavior.AllowGet);
+            // return RedirectToAction("ET_Admin_Roles", data);
+        }
+
+        [HttpPost]
+        public ActionResult ET_Admin_Roles_Update(Tbl_Master_Role objtbl_Master_Role)
+        {
+            objBL.ET_Admin_Roles_Update(objtbl_Master_Role);
+            return RedirectToAction("ET_Admin_Roles");
+        }
+        public ActionResult ET_Admin_Roles_Delete(int id)
+        {
+            objBL.ET_Admin_Roles_Deleted_BL(id);
+            return RedirectToAction("ET_Admin_Roles");
+        }
+
+        public ActionResult ET_Admin_Roles_Restore()
+        {
+            var data = objBL.ET_Admin_Roles_Restore_BL();
+            // var json = new JavaScriptSerializer().Serialize(data);
+           // return Json(json, JsonRequestBehavior.AllowGet);
+            return PartialView("/Views/Admin/ET_Admin_Roles/_ET_Admin_Roles_Restore.cshtml", data);
+        }
+        public ActionResult ET_Admin_Roles_Restore_Insert(int id)
+        {
+            var result = objBL.ET_Admin_Roles_Restore_Insert_BL(id);
+            var json = "Failed";
+            // return PartialView("/Views/Admin/ET_Admin_Roles/_ET_Admin_Roles_Restore.cshtml", result);
+            if (result != 0)
+            {
+                json = "Success";
+            }
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult ET_Admin_Roles_View(int id)
+        {
+            var data = objBL.ET_Admin_Roles_View(id);
+            // TempData["Update"] = data;
+           // var json = new JavaScriptSerializer().Serialize(data);
+            return PartialView("/Views/Admin/ET_Admin_Roles/_ET_Admin_Roles_view.cshtml", data);
+            // return Json(json, JsonRequestBehavior.AllowGet);
+            // return RedirectToAction("ET_Admin_Roles", data);
+        }
+    }
+}

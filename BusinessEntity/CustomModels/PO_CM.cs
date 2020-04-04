@@ -1,0 +1,129 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+namespace BusinessEntity.CustomModels
+{
+    public class  PO_CM
+    {
+        //Added to Handle the Serial Number for the Order Details Print
+        //Edit and View.
+        public int SO_Serial { get; set; }
+
+        public decimal? PO_OrderDetailID { get; set; }
+
+        public decimal? PP_ID { get; set; }
+ 
+        public string PO_Code { get; set; }
+
+        public DateTime PO_Date { get; set; }
+
+        public string Po_CurrencyKey { get; set; }
+
+        public decimal? Po_Supplierkey { get; set; }
+
+        public bool? Po_DeliveryShedule { get; set; }
+
+       
+        public decimal? Po_PaymentTerms { get; set; }
+
+        public DateTime Po_DeliveryDate { get; set; }
+
+        public decimal? Po_TotalAmount { get; set; }
+        public decimal? PO_Type { get; set; }
+          
+        public string Po_ShippingAddress { get; set; }
+
+        public decimal? Po_ApprovalStatus { get; set; }
+
+        public decimal? SO_SupplierID { get; set; }
+        public string Po_SupplierAddress { get; set; }
+
+         
+        public string Po_SpecialInstruction { get; set; }
+
+         
+        public string Po_TermsandConditions { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public decimal? COM_KEY { get; set; }
+
+        public decimal PD_ID { get; set; }
+
+        public decimal? PD_PID { get; set; }
+
+        public decimal? PD_ProductID { get; set; }
+        public string PD_ArticleNo { get; set; }
+        public string PD_ShortName { get; set; }
+        public string PD_SuppDef { get; set; }
+        public string PD_UOM { get; set; }
+        public string PD_UOMCode { get; set; }
+
+        public decimal? PD_Quantity { get; set; }
+
+        public decimal? PD_UnitPrice { get; set; }
+        public decimal? OrderPrice { get; set; }
+        public decimal? PD_Tax { get; set; }
+
+        public decimal? PD_TotalAmount { get; set; }
+        public decimal? PO_OrderReference { get; set; }
+        public DateTime? PD_DeliveryDate { get; set; }
+        public string DesignDetail { get; set; }
+        public string remarks { get; set; }
+        public string Description { get; set; }
+        public string PaymentTermsDescription { get; set; }
+        public string Street { get; set; }
+        public string CityState { get; set; }
+        public string CountryZip { get; set; }
+        public string salesPersonName { get; set; }
+        public string imgurl { get; set; }
+        public string SysCompany { get; set; }
+        public string PaymentTerms { get; set; }
+        public int? Zipcode { get; set; }
+        public string CustomerName { get; set; }
+        public decimal? VatPer { get; set; }
+        public string USER_NAME { get; set; }
+        public string SUPPLIER_NAME { get; set; }
+        public int PO_OrderType { get; set; }
+        public string PO_CusDeliveryTerms { get; set; }
+        public string PO_Remarks { get; set; }
+        public decimal? Discount { get; set; }
+        public decimal? DiscountPer { get; set; }
+        public decimal? PO_CutomerID { get; set; }
+        public string PRODUCT_Name { get; set; }
+        public string OrderDescription { get; set; }
+        public string CustomerDesc { get; set; }
+        [StringLength(50)]
+        public string PO_CusPONO { get; set; }
+
+        [StringLength(50)]
+        public string PO_OrderCode { get; set; }
+        public string PO_SCNo { get; set; }
+        public DateTime PO_SCDate { get; set; }
+    }
+    public class POCombo_CM
+    {
+        public List<PO_CM> POHeader { get; set; }
+        public List<PO_CM> PODetails { get; set; }
+    }
+    public class SUppProduct
+    {
+        public decimal PD_ProductID { get; set; }
+    }
+}

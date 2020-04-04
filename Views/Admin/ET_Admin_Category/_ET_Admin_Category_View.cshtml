@@ -1,0 +1,32 @@
+﻿@model BusinessEntity.EntityModels.Tbl_Category_Details
+
+<div class="col-md-12">
+
+    <div name="form1" role="form" id="form1" data-parsley-validate>
+
+        <div class="row">
+            <div class="form-group col-md-6">
+                @*<input type="text" name="txtCategoryCode" id="txtCategoryCode" class="form-control" disabled="@ViewBag.AutoManual" />*@
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="lbl_Category">Category</label>
+                <input type="text" name="txtCategoryCode" id="txtCategoryCode" class="form-control" value="@Model.CATEGORY" disabled />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="lbl_CategoryDetails">Category Details</label>
+                <input type="text" name="txtCategoryCode" id="txtCategoryCode" class="form-control" value="@Model.SUB_CATEGORY" disabled />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label for="lblDescription">Description</label>
+                <textarea id="txtDescription" name="txtDescription" rows="3" cols="80" class="form-control" disabled> @Model.DESCRIPTION </textarea>
+            </div>
+
+        </div>
+    </div>
+
+</div>

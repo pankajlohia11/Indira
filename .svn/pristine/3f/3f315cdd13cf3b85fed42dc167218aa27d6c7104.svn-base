@@ -1,0 +1,38 @@
+﻿@model IEnumerable<BusinessEntity.CustomModels.RoleDetails_Role_Document_CM>
+@foreach (var item in Model)
+{
+<tr class="odd gradeX">
+    <td style="display:none"><input type="text" class="chk" name="@item.FORMS" /></td>
+    <td><input type="text" class="chk" name="@item.FORM_NAME" style="display:none" /> @item.FORM_NAME</td>
+    <td>
+        <label class="checkbox checkbox-custom-alt">
+            <input class="chk" onclick="checkall(this);" type="checkbox" ><i></i>
+        </label>
+    </td>
+    <td>
+        <label class="checkbox checkbox-custom-alt">
+            <input class="chk" type="checkbox" onclick="uncheckall(this);" checked="@item.IS_ADD"><i></i>
+        </label>
+    </td>
+    <td>
+        <label class="checkbox checkbox-custom-alt">
+            <input class="chk" type="checkbox" onclick="uncheckall(this);" checked="@item.IS_EDIT"><i></i>
+        </label>
+    </td>
+    <td>
+        <label class="checkbox checkbox-custom-alt">
+            <input class="chk" type="checkbox" onclick="uncheckall(this);" checked="@item.IS_DELETE"><i></i>
+        </label>
+    </td>
+    <td>
+        <label class="checkbox checkbox-custom-alt">
+            <input class="chk" type="checkbox" onclick="uncheckall(this);" checked="@item.IS_FULLCONTROL"><i></i>
+        </label>
+    </td>
+    <td>
+        <label class="checkbox checkbox-custom-alt">
+            <input class="chk" type="checkbox" onclick="uncheckall(this);" checked="@item.IS_VIEW"><i></i>
+        </label>
+    </td>
+</tr>
+}

@@ -1,0 +1,428 @@
+﻿
+app1.controller("AC_UserMaster", function ($scope, $http, $window, $rootScope) {
+    GetUserList();
+    GetPrivilages();
+    GetCountry();
+    GetRoles();
+    function GetPrivilages() {
+        var getprivilages = $http.get("/ET_Admin_User_Master/GetPrivilages");
+        getprivilages.then(function (privilage1) {
+            var privilage = JSON.parse(privilage1.data);
+            $scope.Iscreate = privilage[0].IS_ADD;
+            $scope.Isedit = privilage[0].IS_EDIT;
+            $scope.Isdelete = privilage[0].IS_DELETE;
+            $scope.Isrestore = privilage[0].IS_FULLCONTROL;
+            $scope.Isview = privilage[0].IS_VIEW;
+        }, function () {
+            alert('Privilages Not Found');
+        }
+        );
+    }
+    function GetUserList() {
+        var getuserllist = $http.get("/ET_Admin_User_Master/GetUserList",
+            {
+                params: { deleted: false }
+            });
+        getuserllist.then(function (user) {
+            var res = JSON.parse(user.data);
+            $scope.userlist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    function GetUserRestoreList() {
+        var getrestoreuserllist = $http.get("/ET_Admin_User_Master/GetUserList",
+            {
+                params: { deleted: true }
+            });
+        getrestoreuserllist.then(function (user) {
+            var res = JSON.parse(user.data);
+            $scope.userrestorelist = res;
+        }, function () {
+            alert("No Data Found");
+        });
+    }
+    function GetCountry() {
+        var getcountryllist = $http.get("/ET_Admin_User_Master/GetCountryList");
+        getcountryllist.then(function (country) {
+            $scope.countrys = country.data;
+            $scope.selectedcountry = "0";
+            $scope.selectedstate = "0";
+            $scope.selectedcity = "0";
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    function GetRoles() {
+        
+        var getrolellist = $http.get("/ET_Admin_User_Master/BindRoles");
+        getrolellist.then(function (role) {
+            $scope.roles = role.data;
+            $scope.selectedrole = "0";
+        }, function () {
+            alert('Data not found');
+        });
+    }
+    $scope.GetState = function () {
+        if ($scope.selectedcountry != "0") {
+            var getstatelist = $http.get("/ET_Admin_User_Master/BindStates",
+                {
+                    params: { id: $scope.selectedcountry }
+                });
+            getstatelist.then(function (state) {
+                $scope.getstates = state.data;
+                $scope.getcities = {};
+            }, function () {
+                alert("No Data Found");
+            });
+        }
+        else
+        {
+            $scope.getstates = {};
+            $scope.getcities = {};
+        }
+    }
+    $scope.GetCity = function () {
+        if ($scope.selectedstate != "0") {
+            var getcitylist = $http.get("/ET_Admin_User_Master/BindCities",
+                {
+                    params: { id: $scope.selectedstate }
+                });
+            getcitylist.then(function (city) {
+                $scope.getcities = city.data;
+            }, function () {
+                alert("No Data Found");
+            });
+        }
+        else { $scope.getcities = {}; }
+    }
+    $scope.CityChange = function () {
+    }
+    $scope.RoleChange = function () {
+    }
+    $scope.showRecords = function () {
+        GetUserList();
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.restoreRecords = function () {
+        GetUserRestoreList();
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+        $("#div_Edit").css("display", "none");
+    }
+    $scope.createnew = function () {
+        if ($scope.Iscreate) {
+            $("#formSubmit").attr('disabled', "disabled");
+            $("#div_View").css("display", "none");
+            $("#div_Edit").css("display", "block");
+            $scope.submittext = "Submit";
+            $scope.createedit = "Create";
+            $scope.USER_ID = "0";
+            $scope.USER_CODE = "";
+            $scope.USER_NAME = "";
+            $scope.DISPLAY_NAME = "";
+            $scope.USER_PASSWORD = "";
+            $scope.USER_STREET = "";
+            $scope.USER_ZIP = "";
+            $scope.USER_EMAIL = "";
+            $scope.USER_FAX = "";
+            $scope.USER_PHONE = "";
+            $scope.USER_MOBILE = "";
+            $scope.USER_REMARKS = "";
+            $("#drpCountry").val("0").trigger("chosen:updated");
+            $("#drpRole").val("0").trigger("chosen:updated");
+            $scope.selectedrole = "0";
+            $scope.selectedcountry = "0";
+            $scope.getstates = {};
+            $scope.selectedstate = "0";
+            $scope.getcities = {};
+            $scope.selectedcity = "0";
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.SubmitClick = function () {
+        debugger;
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_User_Master/ET_Admin_UserMaster_Add",
+            dataType: 'json',
+            data: {
+                UserID: $scope.USER_ID,
+                txtUsercode: $scope.USER_CODE,
+                txtUserName: $scope.USER_NAME,
+                txtDisplayName: $scope.DISPLAY_NAME,
+                txtPassword: $scope.USER_PASSWORD,
+                drpRole: $scope.selectedrole,
+                txtStreet: $scope.USER_STREET,
+                drpCountry: $scope.selectedcountry,
+                drpState: $scope.selectedstate,
+                drpCity: $scope.selectedcity,
+                txtZipCode: $scope.USER_ZIP,
+                txtEmail: $scope.USER_EMAIL,
+                txtFax: $scope.USER_FAX,
+                txtPhone: $scope.USER_PHONE,
+                txtMobile: $scope.USER_MOBILE,
+                txtRemarks: $scope.USER_REMARKS
+            },
+            headers: { "Content-Type": "application/json" }
+        });
+
+        post.success(function (data, status) {
+            debugger;
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else if (data.indexOf("Validation") > -1) {
+                toastr["error"](data, "Notification");
+            }
+            else if (data == "Success") {
+                if ($scope.txtMaterialID == 0) {
+                    message = 'Record Inserted Successfully.';
+                    toastr["success"](message, "Notification");
+                }
+                else {
+                    message = 'Record Updated Successfully.';
+                    toastr["success"](message, "Notification");
+                }
+                $scope.USER_ID = "0";
+                $scope.USER_CODE = "";
+                $scope.USER_NAME = "";
+                $scope.DISPLAY_NAME = "";
+                $scope.USER_PASSWORD = "";
+                $scope.USER_STREET = "";
+                $scope.USER_ZIP = "";
+                $scope.USER_EMAIL = "";
+                $scope.USER_FAX = "";
+                $scope.USER_PHONE = "";
+                $scope.USER_MOBILE = "";
+                $scope.USER_REMARKS = "";
+                $("#drpCountry").val("0").trigger("chosen:updated");
+                $("#drpRole").val("0").trigger("chosen:updated");
+                $scope.selectedrole = "0";
+                $scope.selectedcountry = "0";
+                $scope.getstates = {};
+                $scope.selectedstate = "0";
+                $scope.getcities = {};
+                $scope.selectedcity = "0";
+                $scope.submittext = "Submit";
+                $scope.createedit = "Create";
+                $("#formSubmit").attr('disabled', "disabled");
+            }
+            else {
+                message = "Failed to do this operation.";
+                toastr["error"](message, "Notification");
+            }
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+
+    }
+
+    $scope.editRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isedit) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_User_Master/ET_Admin_User_Update_Get",
+                dataType: 'json',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    var UserByID = JSON.parse(data);
+                    $("#formSubmit").removeAttr('disabled');
+                    $("#div_View").css("display", "none");
+                    $("#div_Edit").css("display", "block");
+                    $scope.submittext = "Update";
+                    $scope.createedit = "Edit";
+                    $("#span_tabtext").html("Edit");
+
+                    $scope.USER_ID = UserByID.USER_ID;
+                    $scope.USER_CODE = UserByID.USER_CODE;
+                    $scope.USER_NAME = UserByID.USER_NAME;
+                    $scope.DISPLAY_NAME = UserByID.DISPLAY_NAME;
+                    $scope.USER_PASSWORD = UserByID.USER_PASSWORD;
+                    $scope.USER_STREET = UserByID.USER_STREET;
+                    $scope.USER_ZIP = UserByID.USER_ZIP;
+                    $scope.USER_EMAIL = UserByID.USER_EMAIL;
+                    $scope.USER_FAX = UserByID.USER_FAX;
+                    $scope.USER_PHONE = UserByID.USER_PHONE;
+                    $scope.USER_MOBILE = UserByID.USER_MOBILE;
+                    $scope.USER_REMARKS = UserByID.USER_REMARKS;
+                    $("#drpCountry").val(UserByID.USER_COUNTRY).trigger("chosen:updated");
+                    $("#drpRole").val(UserByID.ROLE_ID).trigger("chosen:updated");
+                    $scope.selectedrole = UserByID.ROLE_ID;
+                    $scope.selectedcountry = UserByID.USER_COUNTRY;
+                    $scope.selectedstate = UserByID.USER_STATE;
+                    $scope.GetState();
+                    $scope.selectedcity = UserByID.USER_CITY;
+                    $scope.GetCity();
+                    
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.Restoredeleterecords = function (a, $event, b) {
+        debugger;
+        var res = false;
+        if (b)
+            res = $scope.Isdelete;
+        else
+            res = $scope.Isrestore
+        if (res) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_User_Master/ET_Admin_User_Master_RestoreDelete",
+                dataType: 'json',
+                data: {
+                    id: a,
+                    type: b
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    if (data == "Success") {
+                        $($event.target.parentElement.parentElement.parentElement).fadeOut(800, function () { $(this).remove(); });
+                        if (b) {
+                            message = "Record Deleted Successfully.";
+                        }
+                        else {
+                            message = "Record Restored Successfully.";
+                        }
+
+                        toastr["success"](message, "Notification");
+                    }
+                    else {
+                        message = "Failed to do this operation.";
+                        toastr["error"](message, "Notification");
+                    }
+                }
+            });
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+    $scope.ViewRecords = function (a) {
+        a = parseInt(a);
+        if ($scope.Isview) {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Admin_User_Master/ET_Admin_User_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        else {
+            message = "You don't access to do this operation, please contact admin.";
+            toastr["error"](message, "Notification");
+        }
+    }
+    $scope.$watch("getstates", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpstate").val($scope.selectedstate).trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("getcities", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpcity").val($scope.selectedcity).trigger("chosen:updated"); }, 100);
+        }
+    });
+
+    
+});
+
+    //scope.$watch("assignments", function (value) {//I change here
+    //    var val = value || null;
+    //    if (val)
+    //        element.dataTable({ "bDestroy": true });
+    //});
+
+
+//$scope.$watch(
+    //    "selectedcountry",
+    //    function (newValue, oldValue) {
+    //        // Ignore initial setup.
+    //        if (newValue === oldValue) {
+    //            return;
+    //        }
+    //        alert(newValue);
+    //    }
+    //);

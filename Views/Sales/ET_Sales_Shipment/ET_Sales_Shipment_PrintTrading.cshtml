@@ -1,0 +1,191 @@
+﻿
+@using System.Globalization;
+@model BusinessEntity.CustomModels.ShipmentView_CM
+<div name="form1" role="form" id="form1" data-parsley-validate>
+    @*<table name="form1" role="form" id="form1" data-parsley-validate>*@
+        <input id="englishformat" style="display:none;" value="@Model.headerObj[0].S_ID" />
+        <table style="width:100%" align="center">
+            <tr>
+                <td style="text-align:left;width:30%;"></td>
+                <td style="text-align:center;width:40%;">
+                    <img src="@Model.headerObj[0].imgurl">
+                    @*<h1 style="font-size:large"><label><strong>@Model.headerObj[0].SystemCompany</strong></label></h1>*@
+                </td>
+                <td style="text-align:left;width:30%;"></td>
+            </tr>
+        </table>
+        <br />
+        <h2 style="text-align:center;font-size:large;font-weight:bold;"><u>Shipment Details</u></h2>
+        <br />
+        <table style="font-weight: 600;" class='generaltable'>
+            <tr>
+                <td><u>Eurotextiles GmbH & Co. KG, Mammolshainer Weg 14, 61462 Königstein</u></td>
+            </tr>
+            <tr>
+                <td><span><strong>@Model.headerObj[0].CUSTOMER_NAME,</strong></span></td>
+            </tr>
+            <tr>
+                <td><span><label>@Model.headerObj[0].Street,</label></span></td>
+            </tr>
+            <tr>
+                <td><span><label>@Model.headerObj[0].CityState,</label></span></td>
+            </tr>
+            <tr>
+                <td><span><label>@Model.headerObj[0].CountryZip</label></span></td>
+            </tr>
+        </table>
+        <table align="right" style="text-align:right" class='generaltable'>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Customer Code:<strong></strong></td>
+                <td><strong>@Model.headerObj[0].S_CutomerID</strong></td>
+            </tr>
+            @*<tr>
+                    <td>Order No's:<strong>@Model.headerObj[0].OrderCodes</strong></td>
+                </tr>*@
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Processed By::<strong></strong></td>
+                <td><strong>@Model.headerObj[0].salesPersonName</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Date:<strong></strong></td>
+                <td><strong>@((Model.headerObj[0].S_INV_DATE.Value).ToString("dd-MM-yyyy"))</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Order Confirmation No:<strong></strong></td>
+                <td><strong>@Model.headerObj[0].popupOrderNo</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Customer PO No:<strong></strong></td>
+                <td><strong>@Model.headerObj[0].cusPONo</strong></td>
+            </tr>
+        </table>
+        <br />
+        <br />
+        <table align="left">
+            <tr>
+                <td>
+                    <label><strong>Shipment No:</strong></label>
+                    <strong>@Model.headerObj[0].S_Code</strong>
+                </td>
+            </tr>
+        </table>
+        <br />
+        <br />
+        <table border="1" width="100%">
+            <thead>
+                <tr>
+                    <th style="text-align:center"><strong>S.No</strong></th>
+                    <th style="text-align:center" colspan="2"><strong>Quantity</strong></th>
+                    <th style="text-align:center"><strong>Product Description</strong></th>
+                    <th style="text-align:center"><strong>DesignDetail</strong></th>
+                    <th style="text-align:center"><strong>Remarks</strong></th>
+                    @*<th style="text-align:center"><strong>Discount</strong></th>*@
+                    <th style="text-align:center"><strong>Price(€)</strong></th>
+                    <th style="text-align:center"><strong>Total(€)</strong></th>
+
+                </tr>
+            </thead>
+            <tbody>
+
+                @{
+                    int i = 1;
+                    decimal total = 0;
+                    var modelItems = Model.detailsObj.AsEnumerable().Select((orderItem, index) => new { SO_Serial = index + 1, orderItem.SD_Quantity, orderItem.S_Price, orderItem.UOM_NAME, orderItem.PRODUCT_Name, orderItem.DesignDetail, orderItem.CustomerDes });
+                    //var vatPercObj = Model.OHeader[0].VatPer;
+                    //decimal vatPerc = 0;
+                    //var isTaxApplicable = Model.OHeader[0].IS_TAXApplicable;
+                    //decimal vatPerRatio = 0;
+
+                    //if (isTaxApplicable.Value == true)
+                    //{
+                    //    if (vatPercObj == null)
+                    //    {
+                    //        vatPerRatio = 0;
+                    //        vatPerc = 0;
+                    //    }
+                    //    else
+                    //    {
+                    //        if (vatPercObj.Value == 0)
+                    //        {
+                    //            vatPerRatio = 0;
+                    //            vatPerc = 0;
+                    //        }
+
+                    //        else
+                    //        {
+                    //            vatPerc = vatPercObj.Value;
+                    //            vatPerRatio = vatPerc / 100;
+                    //        }
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    vatPerc = 0;
+                    //    vatPerRatio = 0;
+                    //}
+                }
+
+                @foreach (var item1 in Model.detailsObj)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td style="text-align:right">@(Convert.ToDecimal(item1.SD_Quantity).ToString("N3", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td align="center">@item1.UOM_NAME</td>
+                        <td>@item1.OrderDescription</td>
+                        <td>@item1.DesignDetail</td>
+                        <td>@item1.CustomerDes</td>
+                        @*<td>@item1.DiscountPer</td>*@
+                        @*<td>@item1.price</td>
+                <td>@item1.total</td>*@
+                        <td style="text-align:right;">@(Convert.ToDecimal(item1.S_Price).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                        <td style="text-align:right;">@((Convert.ToDecimal(item1.S_Price) * Convert.ToDecimal(item1.SD_Quantity)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    </tr>
+                    //var discountAmount = ((Convert.ToDecimal(item1.price) * Convert.ToDecimal(item1.SD_Quantity)) * Convert.ToDecimal(item1.DiscountPer) / 100);
+                    total = total + Convert.ToDecimal(item1.S_Price) * Convert.ToDecimal(item1.SD_Quantity);
+                    i++;
+                }
+                @*<tr>
+                    <td colspan="8">Net Value</td>
+                    <td colspan="4" style="text-align:right;font-weight:bold;">@total.ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))</td>
+                </tr>*@
+                <tr>
+                    <td colspan="7">Total</td>
+                    <td colspan="3" style="text-align:right;font-weight:bold;">@((Convert.ToDecimal(total)).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE")))</td>
+                    @*<td colspan="3" style="text-align:right;font-weight:bold;">@((Convert.ToDecimal(total + vatPerRatio).ToString("C2", CultureInfo.CreateSpecificCulture("de-DE"))))</td>*@
+                </tr>
+            </tbody>
+        </table>
+        <br />
+        <table style="font-size:12px;">
+            <tr>
+                <td><p>It is the General Terms and Conditions (GTC) of Eurotextiles GmbH & Co. KG. Downgrades of quality / quantity of goods must be given in writing before use, but in any case 7 days after receipt of the goods. Goods that are washed or washed are excluded from the complaint.</p></td>
+            </tr>
+            <tr>
+                <td>
+                    <p>
+                        Note according to the Federal Data Protection Act: We work with EDP and have stored your name and the data otherwise required in the context of the matter. A transmission to third does not take place.
+                    </p>
+                </td>
+            </tr>
+        </table>
+        <br />
+        <p> <hr style="font-weight:bold;border-top:1px solid black;"></p>
+        <table style="font-size:10px;width:100%;">
+            <tr>
+                <td style="text-align:left;padding-right:40px; padding-left:20px;">Eurotextiles GmbH & Co.KG<br />Mammolshainer Weg 14<br />61462 Konigstein im Taunus<br />Fon +49 6174/25980<br />HRA 3451</td>
+                <td style="text-align:left;padding-right:40px; padding-left:20px;">HRA 3451<br />Amtsgericht Kongstein<br />Steuerrnummer 003 315 60117<br />USt-IdNr. DE279479010</td>
+                <td style="text-align:left;padding-right:40px; padding-left:20px;">Kompl. Indra Enterprises GmbH<br />Geshafuher:Krishna Javaji<br />HRB 5137 Amtsgericht Konigstein<br />Steuernummer 003 236 16128</td>
+                <td style="text-align:left;padding-right:40px; padding-left:20px;">Bankverbindung<br />Nassauische Sparkasse<br />IBAN :DE15 5105 0015 0270 0607 06<br />SWIFT:-BIC NASSDE55XXX</td>
+            </tr>
+        </table>
+    </div>

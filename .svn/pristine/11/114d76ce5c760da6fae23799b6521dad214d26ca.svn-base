@@ -1,0 +1,275 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Script.Serialization;
+using System.Web.Routing;
+using BusinessEntity.EntityModels;
+using BusinessEntity.CustomModels;
+using BusinessLogic.Admin_BL;
+using BusinessLogic;
+
+namespace Euro.Controllers.Assignments
+{
+    public class ET_TaskController : Controller
+    {
+        // GET: ET_Task
+        error_master objERR = new error_master();
+        BAL bal = new BAL();
+        tbl_loginfo objLOG = new tbl_loginfo();
+        EntityClasses dbcontext = new EntityClasses();
+        public ActionResult ET_Task()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    int user_id = Convert.ToInt32(Session["UserID"]);
+                    int com_key = Convert.ToInt32(Session["CompanyKey"]);
+                    ViewBag.Login_Name = Session["DisplayName"].ToString();
+                    ViewBag.Users = dbcontext.Tbl_Master_User.Where(m => m.DELETED == false && m.COM_KEY == com_key && m.USER_ID != user_id).ToList();
+                    return View();
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+        private string validations(string Title)
+        {
+
+            if (Title == "")
+            {
+                return "Title";
+            }
+            return "";
+        }
+
+        public JsonResult ET_Task_Add_Update(string Title,int createdBy, string Desc, byte Priority,string Assign,int Type, string ExpecDate,string SubmitText,string Status,decimal TSK_ID)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    string valid = validations(Title);
+                    if (valid == "")
+                    {
+                        decimal data = 0;
+                        DateTime expec_date = DateTime.ParseExact(ExpecDate,"dd-MM-yyyy HH:mm",null);
+                        if (SubmitText == "Submit")
+                        {
+                            Tbl_AssignTask Objmc = new Tbl_AssignTask()
+                            {
+
+                                TSK_Title = Title,
+                                TSK_Desc = Desc,
+                                TSK_Priority = Priority,
+                                TSK_Type = Type == 1 ? true : false,
+                                TSK_AssignTo = Assign,
+                                TSK_Status = "Pending",
+                                Expec_Date = expec_date,
+                                TSK_UserId = Convert.ToInt32(Session["UserID"].ToString()),
+                                CREATED_BY = Convert.ToInt32(Session["UserID"].ToString()),
+                                CREATED_DATE = DateTime.Now,
+                                DELETED = false
+                            };
+                            dbcontext.Tbl_AssignTask.Add(Objmc);
+                            dbcontext.SaveChanges();
+                            data = Objmc.TSK_ID;
+                        } else
+                        {
+                            if (createdBy == 1)
+                            {
+                                Tbl_AssignTask Obj_Tbl_AssignTask = dbcontext.Tbl_AssignTask.Single(m => m.TSK_ID == TSK_ID);
+                                {
+                                    Obj_Tbl_AssignTask.TSK_Title = Title;
+                                    Obj_Tbl_AssignTask.TSK_Desc = Desc;
+                                    Obj_Tbl_AssignTask.TSK_Priority = Priority;
+                                    Obj_Tbl_AssignTask.TSK_AssignTo = Assign;
+                                    Obj_Tbl_AssignTask.TSK_Type = Type == 1 ? true : false;
+                                    Obj_Tbl_AssignTask.TSK_Status = Status;
+                                    Obj_Tbl_AssignTask.Expec_Date = expec_date;
+                                    Obj_Tbl_AssignTask.LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"].ToString());
+                                    Obj_Tbl_AssignTask.LAST_UPDATED_DATE = DateTime.Now;
+                                };
+                                dbcontext.SaveChanges();
+                                data = -1;
+                            }
+                            else
+                            {
+                                Tbl_AssignTask Obj_Tbl_AssignTask = dbcontext.Tbl_AssignTask.Single(m => m.TSK_ID == TSK_ID);
+                                {
+                                    Obj_Tbl_AssignTask.TSK_Status = Status;
+                                    Obj_Tbl_AssignTask.TSK_Compl_Date = DateTime.Now;
+                                    Obj_Tbl_AssignTask.LAST_UPDATED_BY = Convert.ToInt32(Session["UserID"].ToString());
+                                    Obj_Tbl_AssignTask.LAST_UPDATED_DATE = DateTime.Now;
+                                };
+                                dbcontext.SaveChanges();
+                                data = -1;
+                            }
+                        }
+
+                        
+                    if (data != 0)
+                        {
+                            objLOG.log_dockey = "8022";
+                            objLOG.log_userid = Session["UserID"].ToString();
+                            objLOG.log_recordkey = data.ToString();
+                            if (TSK_ID == 0)
+                            {
+                                objLOG.log_operation = "Insert";
+                            objLOG.log_Remarks = "Record Inserted Successfully";
+                        }
+                        else
+                        {
+                            objLOG.log_operation = "Update";
+                            objLOG.log_Remarks = "Record Updated Successfully";
+                        }
+                        bal.OperationInsertLogs_BL(objLOG);
+                        }
+                        var json = new JavaScriptSerializer().Serialize(data);
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                    else
+                    {
+                        var json = "Validation:" + valid;
+                        return Json(json, JsonRequestBehavior.AllowGet);
+                    }
+                }
+                catch (Exception exe)
+                {
+                    //Insert Error Log
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                var json = "Session Expired:";
+                return Json(json, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult GetTaskList()
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    string useridqts = "'" + Session["UserID"].ToString() + "'";
+                    int userId = Convert.ToInt32(Session["UserID"].ToString());
+                    var data = dbcontext.Tbl_AssignTask.Where(m => m.DELETED == false && ((m.TSK_Type == false && m.CREATED_BY == userId) || (m.TSK_Type == true && m.TSK_AssignTo.Contains(useridqts)))).ToList();
+                    string s = "";
+                    for (int i = 0; i < data.Count(); i++)
+                    {
+                        
+                        string classs = "b-l b-2x bg-primary";
+                        if (data[i].TSK_Type == false)
+                            classs = "b-l b-2x bg-dutch";
+                        //if (data[i].TSK_Status == "Completed")
+                        //    classs = classs + "b-success";
+                        //else
+                        //    classs = classs + "b-lightred";
+                        if (i == 0)
+                        {
+                            s = s + "[{'title':'" + data[i].TSK_Title + "','start':'" + DateTime.Parse(data[i].CREATED_DATE.ToString()).ToString("yyyy-MM-dd") + "','url':'shipping(" + data[i].TSK_ID + ")','className':'" + classs + "'}";
+                        }
+                        else
+                        {
+                            s = s + ",{'title':'" + data[i].TSK_Title + "','start':'" + DateTime.Parse(data[i].CREATED_DATE.ToString()).ToString("yyyy-MM-dd") + "','url':'shipping(" + data[i].TSK_ID + ")','className':'" + classs + "'}";
+                        }
+                    }
+                    if (data.Count() > 0)
+                        s = s + "]";
+                    s = s.Replace("'", "\"");
+                    var json = new JavaScriptSerializer().Serialize(s);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json("Expired", JsonRequestBehavior.AllowGet);
+            }
+
+        }
+
+        public ActionResult ET_Task_View(int id)
+        {
+            bool val = Session["UserID"] == null ? false : true;
+            if (val)
+            {
+                try
+                {
+                    dbcontext.Configuration.ProxyCreationEnabled = false;
+                    int userId = Convert.ToInt32(Session["UserID"].ToString());
+                    var data1 = (from a in dbcontext.Tbl_AssignTask
+                                 where a.TSK_ID == id
+                                 select new
+                                 {
+                                     TSK_ID = a.TSK_ID,
+                                     a.TSK_Title,
+                                     a.TSK_Desc,
+                                     a.TSK_Priority,
+                                     a.TSK_Type,
+                                     a.TSK_AssignTo,
+                                     a.Expec_Date,
+                                     Status = a.TSK_Status,
+                                     CreatedBy = a.CREATED_BY == userId ? true : false
+
+
+                                 }).ToList();
+
+
+                    var json = new JavaScriptSerializer().Serialize(data1);
+                    return Json(json, JsonRequestBehavior.AllowGet);
+                }
+                catch (Exception exe)
+                {
+                    string actionName = this.ControllerContext.RouteData.Values["action"].ToString();
+                    string controllerName = this.ControllerContext.RouteData.Values["controller"].ToString();
+                    objERR.err_title = controllerName + "-" + controllerName;
+                    objERR.err_message = "Sorry for the inconvience. Some error has been occured.";
+                    objERR.err_details = exe.Message.Replace("'", "");
+                    int errid = bal.ExceptionInsertLogs_BL(objERR);
+                    return Json("ERR" + errid.ToString(), JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return RedirectToAction("ET_SessionExpire", "ET_Login");
+            }
+        }
+
+    }
+}

@@ -1,0 +1,116 @@
+namespace BusinessEntity.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
+
+    public partial class Tbl_Product_Yarn
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal PRODUCT_YARN_ID { get; set; }
+
+        public decimal PRODUCT_ID { get; set; }
+
+        public decimal CATEGORY { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string SHORT_NAME { get; set; }
+
+        public decimal PRODUCT { get; set; }
+
+        [StringLength(50)]
+        public string MATERIAL { get; set; }
+
+        [StringLength(50)]
+        public string MATERIAL_VAL { get; set; }
+
+        [StringLength(50)]
+        public string BLEND1 { get; set; }
+
+        [StringLength(50)]
+        public string BLEND1_VAL { get; set; }
+
+        [StringLength(50)]
+        public string BLEND2 { get; set; }
+
+        [StringLength(50)]
+        public string BLEND2_VAL { get; set; }
+
+        [StringLength(50)]
+        public string BLEND3 { get; set; }
+
+        [StringLength(50)]
+        public string BLEND3_VAL { get; set; }
+
+        [StringLength(50)]
+        public string BLEND4 { get; set; }
+
+        [StringLength(50)]
+        public string BLEND4_VAL { get; set; }
+
+        [StringLength(50)]
+        public string COUNT { get; set; }
+
+        [StringLength(50)]
+        public string COUNT_VAL { get; set; }
+
+        [StringLength(50)]
+        public string SUB_RANGE1 { get; set; }
+
+        [StringLength(50)]
+        public string SUB_RANGE2 { get; set; }
+
+        [StringLength(50)]
+        public string SUB_RANGE3 { get; set; }
+
+        [StringLength(50)]
+        public string SUB_RANGE4 { get; set; }
+
+        [StringLength(50)]
+        public string SUB_RANGE5 { get; set; }
+
+        [StringLength(50)]
+        public string PACKAGE { get; set; }
+
+        [StringLength(50)]
+        public string COTTON_TYPE { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        public string PRODUCT_NAME { get; set; }
+
+        [StringLength(500)]
+        public string REMARKS { get; set; }
+
+        [StringLength(300)]
+        public string MACHINE_NAME { get; set; }
+
+        [StringLength(50)]
+        public string IPADDRESS { get; set; }
+
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public DateTime? ALterD_DATE { get; set; }
+
+        public decimal? ALterD_BY { get; set; }
+
+        [StringLength(50)]
+        public string PRODUCT_YARN_CODE { get; set; }
+    }
+}

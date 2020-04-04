@@ -1,0 +1,398 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+
+namespace DataAccess
+{
+    public class ET_Admin_Company_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+        // DbContext.Configuration.ProxyCreationEnabled = false;
+        public List<Tbl_Master_CompanyDetails> ET_Admin_Companylist_DL(bool deleted, int com_key)
+        {
+            try
+            {
+                dbcontext.Configuration.ProxyCreationEnabled = false;
+                var data = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.DELETED == deleted && m.COM_KEY == com_key).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public decimal ET_Master_Company_Add_DL(Tbl_Master_CompanyDetails obj, bool automanual, string prefix, string Contactdata)
+        {
+            int k = 0;
+            try
+            {
+                if (obj.COM_ID == 0)
+                {
+                    dbcontext.Tbl_Master_CompanyDetails.Add(obj);
+                    dbcontext.SaveChanges();
+                    if (automanual == true)
+                    {
+                        int len = 10 - (prefix + obj.COM_ID).Length;
+                        string code = prefix + new String('0', len) + obj.COM_ID;
+                        Tbl_Master_CompanyDetails objTbl_Master_CompanyDetails = dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == obj.COM_ID);
+                        {
+                            objTbl_Master_CompanyDetails.COMPANY_CODE = code;
+                        };
+                        dbcontext.SaveChanges();
+                    }
+
+                }
+                else
+                {
+                    Tbl_Master_CompanyDetails ObjTbl_Master_CompanyDetails = dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == obj.COM_ID);
+                    {
+                        ObjTbl_Master_CompanyDetails.COMPANY_CODE = obj.COMPANY_CODE;
+                        ObjTbl_Master_CompanyDetails.COM_KEY = obj.COM_KEY;
+                        ObjTbl_Master_CompanyDetails.BANK_ID = obj.BANK_ID;
+                        ObjTbl_Master_CompanyDetails.COM_NAME = obj.COM_NAME;
+                        ObjTbl_Master_CompanyDetails.COM_USTID = obj.COM_USTID;
+                        ObjTbl_Master_CompanyDetails.COM_DISPLAYNAME = obj.COM_DISPLAYNAME;
+                        ObjTbl_Master_CompanyDetails.Tax_No = obj.Tax_No;
+                        ObjTbl_Master_CompanyDetails.COM_PHONE = obj.COM_PHONE;
+                        ObjTbl_Master_CompanyDetails.COM_MOBILE = obj.COM_MOBILE;
+                        ObjTbl_Master_CompanyDetails.COM_FAX = obj.COM_FAX;
+                        ObjTbl_Master_CompanyDetails.COM_ZIP = obj.COM_ZIP;
+                        ObjTbl_Master_CompanyDetails.Cust_Supp = obj.Cust_Supp;
+                        ObjTbl_Master_CompanyDetails.COM_EMAIL = obj.COM_EMAIL;
+                        ObjTbl_Master_CompanyDetails.COM_REMARKS = obj.COM_REMARKS;
+                        ObjTbl_Master_CompanyDetails.DELETED = obj.DELETED;
+                        ObjTbl_Master_CompanyDetails.IPADDRESS = obj.IPADDRESS;
+                        ObjTbl_Master_CompanyDetails.COM_CITY = obj.COM_CITY;
+                        ObjTbl_Master_CompanyDetails.COM_STATE = obj.COM_STATE;
+                        //ObjTbl_Master_CompanyDetails.LAST_UPDATED_DATE = DateTime.Now;
+                        // ObjTbl_Master_CompanyDetails.LAST_UPDATED_BY = obj.COM_STATE;
+                    };
+                    k = dbcontext.SaveChanges();
+                    // obj.COM_ID = k;
+                }
+
+                // Delete previous contact data
+                Tbl_Master_CompanyContacts objdeletecontact = new Tbl_Master_CompanyContacts();
+                dbcontext.Tbl_Master_CompanyContacts.RemoveRange(dbcontext.Tbl_Master_CompanyContacts.Where(m => m.COM_ID == obj.COM_ID));
+                dbcontext.SaveChanges();
+
+                // Insert new contacts data
+                string[] ChildRow = Contactdata.Split('|');
+                for (int i = 0; i < ChildRow.Length - 1; i++)
+                {
+                    string[] ChildRecord = ChildRow[i].Split(',');
+                    Tbl_Master_CompanyContacts objcontact = new Tbl_Master_CompanyContacts()
+                    {
+                        COM_ID = obj.COM_ID,
+                        DELETED = Convert.ToBoolean(0),
+                        TITLE = ChildRecord[0].ToString(),
+                        FIRST_NAME = ChildRecord[1].ToString(),
+                        LAST_NAME = ChildRecord[2].ToString(),
+                        JOB_TITLE = ChildRecord[3].ToString(),
+                        PHONE = ChildRecord[4].ToString(),
+                        FAX = ChildRecord[5].ToString(),
+                        MOBILE = ChildRecord[6].ToString(),
+                        EMAIL = ChildRecord[7].ToString(),
+                        REMARKS = ChildRecord[8].ToString(),
+                        CREATED_BY = obj.CREATED_BY,
+                        CREATED_DATE = DateTime.Now,
+                        LAST_UPDATED_BY = obj.LAST_UPDATED_BY,
+                        LAST_UPDATED_DATE = DateTime.Now,
+                    };
+                    dbcontext.Tbl_Master_CompanyContacts.Add(objcontact);
+                    dbcontext.SaveChanges();
+                    k = (int)objcontact.COM_ID;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return k;
+        }
+
+        public int ET_Master_Company_Deleted_DL(int id)
+        {
+            int i;
+            try
+            {
+                var find = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID == id).ToList();
+                if (find.Count() != 0)
+                {
+                    Tbl_Master_CompanyDetails delete = dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == id);
+                    delete.DELETED = true;
+                    delete.DELETED_BY = 1;
+                    delete.DELETED_DATE = DateTime.Now;
+                    //dbcontext.Tbl_Master_Role.Add(isdelete);
+                };
+                i = dbcontext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return i;
+        }
+
+        public List<location> Binddropdown_Country_DL()
+        {
+            try
+            {
+                var Country = dbcontext.locations.Where(m => m.location_type == 0).ToList();
+                return Country;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public List<Tbl_Master_CompanyDetails> ET_Master_Company_Restore_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.DELETED == true).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            { throw ex; }
+        }
+
+        public int ET_Master_Company_Restore_Insert_DL(int id, bool type)
+        {
+            int result;
+            try
+            {
+                Tbl_Master_CompanyDetails obj = dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == id );
+                {
+                    obj.CREATED_DATE = DateTime.Now;
+                    obj.DELETED = type;
+                    obj.LAST_UPDATED_DATE = DateTime.Now;
+                    obj.LAST_UPDATED_BY = 1;
+                };
+                result = dbcontext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+        public List<location> Binddropdown_State_DL(int id)
+        {
+            try
+            {
+                var State = dbcontext.locations.Where(m => m.location_type == 1 && m.parent_id == id).ToList();
+                return State;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public List<location> Binddropdown_City_DL(int id)
+        {
+            try
+            {
+                var City = dbcontext.locations.Where(m => m.location_type == 2 && m.parent_id == id).ToList();
+                return City;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public List<Tbl_Master_CompanyDetails> ET_Master_Company_View_DL(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID == id).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public Tbl_Master_CompanyDetails ET_Master_Company_Update_GetbyID(int id)
+        {
+            dbcontext.Configuration.ProxyCreationEnabled = false;
+            try
+            {
+                //  dbcontext.Configuration.ProxyCreationEnabled = false;
+                return dbcontext.Tbl_Master_CompanyDetails.Single(m => m.COM_ID == id);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public List<Tbl_Master_CompanyContacts> ET_Master_Company_Contactsedit_BL(int id)
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_CompanyContacts.Where(m => m.DELETED == false && m.COM_ID == id).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public List<Tbl_Master_CompanyContacts> ET_Master_Company_Contacts_DL(int id)
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_CompanyContacts.Where(m => m.DELETED == false && m.COM_ID == id).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public decimal ET_Admin_Contact_Add_DL(Tbl_Master_CompanyContacts obj)
+        {
+            try
+            {
+                if (obj.CONTACT_ID == 0)
+                {
+                    dbcontext.Tbl_Master_CompanyContacts.Add(obj);
+                    dbcontext.SaveChanges();
+                }
+                else
+                {
+                    Tbl_Master_CompanyContacts ObjTbl_Master_CompanyContacts = dbcontext.Tbl_Master_CompanyContacts.Single(m => m.COM_ID == obj.COM_ID);
+                    {
+                        ObjTbl_Master_CompanyContacts.CREATED_BY = obj.CREATED_BY;
+                        ObjTbl_Master_CompanyContacts.CREATED_DATE = DateTime.Now;
+                        ObjTbl_Master_CompanyContacts.DELETED = false;
+                        ObjTbl_Master_CompanyContacts.EMAIL = obj.EMAIL;
+                        ObjTbl_Master_CompanyContacts.FAX = obj.FAX;
+                        ObjTbl_Master_CompanyContacts.FIRST_NAME = obj.FIRST_NAME;
+                        ObjTbl_Master_CompanyContacts.LAST_NAME = obj.LAST_NAME;
+                        ObjTbl_Master_CompanyContacts.TITLE = obj.TITLE;
+                        ObjTbl_Master_CompanyContacts.PHONE = obj.PHONE;
+                        ObjTbl_Master_CompanyContacts.JOB_TITLE = obj.JOB_TITLE;
+                        ObjTbl_Master_CompanyContacts.MOBILE = obj.MOBILE;
+                        ObjTbl_Master_CompanyContacts.REMARKS = obj.REMARKS;
+                        ObjTbl_Master_CompanyContacts.IPADDRESS = obj.IPADDRESS;
+                        ObjTbl_Master_CompanyContacts.LAST_UPDATED_BY = obj.LAST_UPDATED_BY;
+                        ObjTbl_Master_CompanyContacts.LAST_UPDATED_DATE = DateTime.Now;
+                    };
+                    int i = dbcontext.SaveChanges();
+                    obj.COM_ID = i;
+                }
+            }
+            catch (Exception ex)
+            { throw ex; }
+
+            return obj.COM_ID;
+        }
+
+        public List<Tbl_BankMaster> Bind_dropdown_Bankname_DL(int com_key)
+        {
+            try
+            {
+                var data = dbcontext.Tbl_BankMaster.Where(m => m.DELETED == false && m.COM_KEY == com_key).ToList();
+                return data;
+            }
+            catch (Exception exe)
+            {
+                throw exe;
+            }
+        }
+
+            public string CheckDuplicateCode_DL(int ComID, string CompanyCode)
+        {
+            if (ComID == 0)
+            {
+                var count = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COMPANY_CODE == CompanyCode).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                var count = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID != ComID && m.COMPANY_CODE == CompanyCode).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            return "";
+        }
+        public string CheckDuplicateCompanyName_DL(int ComID, string CompanyName)
+        {
+            if (ComID == 0)
+            {
+                var count = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_NAME == CompanyName).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                var count = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID != ComID && m.COM_NAME == CompanyName).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            return "";
+        }
+        public string CheckDuplicateDisplayName_DL(int ComID, string DisplayName)
+        {
+            if (ComID == 0)
+            {
+                var count = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_DISPLAYNAME == DisplayName).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                var count = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID != ComID && m.COM_DISPLAYNAME == DisplayName).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            return "";
+        }
+
+        public string CheckDuplicateEmail_DL(int ComID, string Email)
+        {
+            if (ComID == 0)
+            {
+                var count = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_EMAIL == Email).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            else
+            {
+                var count = dbcontext.Tbl_Master_CompanyDetails.Where(m => m.COM_ID != ComID && m.COM_EMAIL == Email).ToList().Count();
+                if (count > 0)
+                {
+                    return "exist";
+                }
+            }
+            return "";
+        }
+    }
+}

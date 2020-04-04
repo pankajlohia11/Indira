@@ -1,0 +1,753 @@
+﻿
+@{
+    ViewBag.Title = "ET_Admin_CustomerModule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+@section angularcontroller
+{<script src="~/Content/AngularScripts/AC_CustomerModel.js"></script>
+    
+    
+    <script type="text/javascript">
+        
+        
+        function changecolor(e) {
+            $(".myIcon").attr("class", "myIcon inactive");
+            $(e).attr("class", "myIcon active");
+        }
+    </script>
+
+}
+
+<section id="content">
+
+    <div class="page page-shop-single-order" ng-controller="AC_CustomerModel">
+
+        <div class="pageheader">
+
+            <h2>Company Profile <span></span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="index.html"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="shop-single-order.html">Company Profile</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="pagecontent">
+
+
+            <div class="add-nav">
+                <div class="nav-heading">
+                    <h3>Customer : <strong class="text-greensea" ng-bind="CM_CustomerName"></strong></h3>
+                    <span class="col-sm-2 controls pull-right">
+                        <select data-ng-model="E_CustomerID" id="drpCustomer" data-parsley-trigger="change" class="form-control chosen-select" ng-change="CustomerChange()" required>
+                            <option value="">-Select-</option>
+                            <option ng-repeat="customer in customers" value="{{customer.COM_ID}}">
+                                {{customer.COM_NAME}}
+                            </option>
+                        </select>
+                    </span>
+                </div>
+
+                <div role="tabpanel">
+
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_general" aria-controls="general" role="tab" data-toggle="tab" class="myIcon active"><i class="fa fa-home"></i></a><br /><a>GENERAL</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_orders" aria-controls="orders" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-shopping-cart"></i></a><br /><a>ORDERS</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_invoices" aria-controls="invoices" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-newspaper-o"></i></a><br /><a>INVOICES</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_payments" aria-controls="payments" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-money"></i></a><br /><a>PAYMENTS</a></p></li>
+                        <li role="presentation"><p style="text-align:center; display:none;"><a onclick="changecolor(this);" href="#litab_followups" aria-controls="followups" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-phone-square"></i></a><br /><a>FOLLOW UP's</a></p></li>
+                        
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_schedule" aria-controls="offers" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-truck"></i></a><br /><a>Schedule</a></p></li>
+                        <li role="presentation"><p style="text-align:center;"><a onclick="changecolor(this);" href="#litab_shipments" aria-controls="shipments" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-ship"></i></a><br /><a>SHIPMENTS</a></p></li>
+                        <li role="presentation"><p style="text-align:center; display:none;"><a onclick="changecolor(this);" href="#litab_dashboards" aria-controls="dashboards" role="tab" data-toggle="tab" class="myIcon icon-default transparent icon-ef-1 icon-ef-1a"><i class="fa fa-bar-chart-o"></i></a><br /><a>DASH BOARDS</a></p></li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane active" id="litab_general">
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+                                    
+                                        <!-- tile -->
+                                        <section class="tile time-simple" ng-repeat="item in CustomerMasterList">
+
+
+                                            <!-- tile body -->
+                                            <div class="tile-body">
+
+
+                                                <!-- row -->
+                                                <div class="row">
+
+                                                    <!-- col -->
+                                                    <div class="col-md-8">
+                                                        <p class="text-default lt">Created:{{item.CREATED_DATE.replace('/Date(','').replace(')/','') | date:'dd-MMM-yyyy HH:mm:ss'}}</p>
+                                                        <p class="text-uppercase text-strong mt-40 mb-0 custom-font">Status</p>
+                                                        <h3 class="text-uppercase text-success mt-0 mb-20">{{item.activeStatus}}
+                                                            
+                                                        </h3>
+                                                    </div>
+                                                    <!-- /col -->
+                                                    <!-- col -->
+                                                    <div class="col-md-4">
+                                                        <p class="text-uppercase text-strong mb-10 custom-font">Customer</p>
+                                                        <ul class="list-unstyled text-default lt mb-20">
+                                                            <li><strong class="inline-block w-xs">Name:</strong> {{item.COM_DISPLAYNAME}}</li>
+                                                            <li><strong class="inline-block w-xs">Display Name:</strong> {{item.COM_NAME}}</li>
+                                                            <li><strong class="inline-block w-xs">Phone:</strong> {{item.COM_MOBILE}}</li>
+                                                            <li><strong class="inline-block w-xs">Email:</strong> <a href="javascript:;">{{item.COM_EMAIL}}</a></li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- /col -->
+
+                                                </div>
+                                                <!-- /row -->
+                                                <!-- row -->
+                                                <div class="row b-t pt-20">
+
+                                                    <!-- col -->
+                                                    <div class="col-md-3 b-r">
+                                                        <p class="text-uppercase text-strong mb-10 custom-font">Customer Info</p>
+                                                        <ul class="list-unstyled text-default lt mb-20">
+                                                            <li><strong>Code:</strong> <a href="javascript:;">{{item.COM_CODE}}</a></li>
+                                                            <li>UstId: {{item.COM_USTID}}</li>
+                                                            <li>Tax No: {{item.Tax_No}}</li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- /col -->
+                                                    <!-- col -->
+                                                    <div class="col-md-6 b-r">
+                                                        <p class="text-uppercase text-strong mb-10 custom-font">
+                                                            Address
+                                                            <a href="javascript:;" class="btn btn-default btn-rounded-20 btn-xs pull-right"><i class="fa fa-pencil"></i></a>
+                                                        </p>
+
+                                                        <!-- col -->
+                                                        <div class="col-md-6">
+                                                            <ul class="list-unstyled text-default lt mb-20">
+                                                                <li>{{item.COM_STREET}}</li>
+                                                               
+                                                                <li>City    : {{item.city[0]}}</li>
+                                                                <li>State   : {{item.state[0]}}</li>
+                                                                <li>Country : {{item.country[0]}}</li>
+                                                                <li>Zip Code: {{item.COM_ZIP}}</li>
+                                                            </ul>
+                                                        </div>
+                                                        <!-- /col -->
+                                                        <!-- col -->
+                                                        <div class="col-md-6">
+                                                            <ul class="list-unstyled text-default lt mb-20">
+                                                                <li>{{item.COM_EMAIL}}</li>
+                                                                <li>{{item.COM_MOBILE}}</li>
+                                                            </ul>
+                                                        </div>
+                                                        <!-- /col -->
+
+                                                    </div>
+                                                    <!-- /col -->
+                                                    <!-- col -->
+                                                    <div class="col-md-3">
+                                                        <p class="text-uppercase text-strong mb-10 custom-font">Customer Type</p>
+                                                        <ul class="list-unstyled text-default lt mb-20">
+                                                            <li>
+                                                                <strong>
+                                                                    {{item.CustType}}
+                                                                </strong>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                    <!-- /col -->
+
+                                                </div>
+                                                <!-- /row -->
+
+
+                                            </div>
+                                            <!-- /tile body -->
+
+                                        </section>
+                                    
+                                    <!-- /tile -->
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <p class="text-uppercase text-strong mt-40 mb-0 custom-font">Contacts :</p>
+                                            <br />
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Title</th>
+                                                            <th>First Name</th>
+                                                            <th>Last Name</th>
+                                                            <th>Job Title</th>
+                                                            <th>Phone</th>
+                                                            <th>Fax</th>
+                                                            <th>Mobile</th>
+                                                            <th>Email</th>
+                                                            <th>Remark</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        
+                                                            <tr ng-repeat="contact in CompanyContactsList">
+                                                                <td><a href="javascript:;">{{contact.TITLE}}</a></td>
+                                                                <td>{{contact.FIRST_NAME}}</td>
+                                                                <td>{{contact.LAST_NAME}}</td>
+                                                                <td>{{contact.JOB_TITLE}}</td>
+                                                                <td>{{contact.PHONE}}</td>
+                                                                <td>{{contact.FAX}}</td>
+                                                                <td>{{contact.MOBILE}}</td>
+                                                                <td>{{contact.EMAIL}}</td>
+                                                                <td>{{contact.REMARKS}}</td>
+                                                            </tr>
+                                                        
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+
+                        </div>
+
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_orders">
+
+
+
+
+                            <!-- row -->
+                            <div class="row">
+                                <!-- col -->
+                                <div class="col-md-12">
+
+                                    <!-- /tile -->
+                                    <!-- tile -->
+                                    <section class="tile tile-simple">
+
+                                        <!-- tile body -->
+                                        <div class="tile-body p-0">
+
+                                            <div class="table-responsive">
+                                                <table class="table table-hover table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Order ID</th>
+                                                            <th>Order Date</th>
+                                                            <th>Order Type</th>
+                                                            <th>Customer PO Num</th>
+                                                            <th>Customer PO Date</th>
+                                                            <th>User Name</th>
+                                                            <th>Status</th>
+                                                            <th>Total</th>
+                                                            <th style="width: 260px">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="order in OrderList">
+                                                            <td><a href="javascript:;">{{order.SO_ID}}</a></td>
+                                                            <td class="ng-binding">{{order.SO_OrderDate.replace('/Date(','').replace(')/','') | date:'dd-MMM-yyyy HH:mm:ss'}}</td>
+                                                            <td class="ng-binding">{{order.Type}}</td>
+                                                            <td class="ng-binding">{{order.SO_CusPONO}}</td>
+                                                            <td class="ng-binding">{{order.SO_CusPODate.replace('/Date(','').replace(')/','') | date:'dd-MMM-yyyy HH:mm:ss'}}</td>
+                                                            <td>{{order.USER_NAME}}</td>
+                                                            <td><span class="label label-success">{{order.Status}}</span></td>
+                                                            <td class="ng-binding">21212</td>
+
+                                                            <td>
+                                                                <a ng-click="ViewOrders(order.SO_ID);" class="btn btn-xs btn-default"><i class="fa fa-search"></i> View</a>
+                                                                <a style="display:none" href="javascript:;" class="btn btn-xs btn-primary"><i class="fa fa-envelope"></i> Send</a>
+                                                                <a style="display:none" href="javascript:;" class="btn btn-xs btn-lightred"><i class="fa fa-times"></i> Delete</a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <!-- /tile body -->
+
+                                    </section>
+                                    <!-- /tile -->
+
+
+                                </div>
+                                <!-- /col -->
+                            </div>
+                            <!-- /row -->
+
+
+
+
+                        </div>
+
+                        <!-- tab in tabs -->
+                        <div role="tabpanel" class="tab-pane" id="litab_invoices">
+                            
+                                <ul class="nav nav-tabs tabs-dark">
+                                    <li role="presentation" class="active"><a style="padding:10px 15px;" role="tab" data-toggle="tab" href="#litab_invoices1to1">Invoice(One-One)</a></li>
+                                    <li role="presentation"><a style="padding:10px 15px;" role="tab" data-toggle="tab" href="#litab_invoices1toMany">Invoice(One-Many)</a></li>
+                                </ul>
+                            
+                                <div class="tab-content">
+                                    <div role="tabpanel" class="tab-pane active" id="litab_invoices1to1">
+                                        <!-- row -->
+                                        <div class="row">
+                                            <!-- col -->
+                                            <div class="col-md-12">
+
+                                                <!-- /tile -->
+                                                <!-- tile -->
+                                                <section class="tile tile-simple">
+
+                                                    <!-- tile body -->
+                                                    <div class="tile-body p-0">
+
+                                                        <div class="table-responsive">
+                                                            <table class="table table-hover table-striped">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Code</th>
+                                                                        <th>Invoice Date</th>
+                                                                        <th>Shipment Code</th>
+                                                                        <th>Customer Name</th>
+                                                                        <th>Sales Person</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr ng-repeat="oneToOne in OneToOneList">
+                                                                        <td>{{oneToOne.OTOI_Code}}</td>
+                                                                        <td>{{oneToOne.OTOI_InvoiceDate.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                                        <td>{{oneToOne.S_Code}}</td>
+                                                                        <td>{{oneToOne.COM_DISPLAYNAME }}</td>
+                                                                        <td>{{oneToOne.USER_NAME }}</td>
+                                                                        <td>
+                                                                            <a ng-click="ViewOneToOne(oneToOne.OTOI_ID);" value="{{ oneToOne.OTOI_ID }}" class="btn btn-xs btn-default"><i class="fa fa-search"></i> View</a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+                                                    </div>
+                                                    <!-- /tile body -->
+
+                                                </section>
+                                                <!-- /tile -->
+
+
+                                            </div>
+                                            <!-- /col -->
+                                        </div>
+                                        <!-- /row -->
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane" id="litab_invoices1toMany">
+                                        <!-- row -->
+                                        <div class="row">
+                                            <!-- col -->
+                                            <div class="col-md-12">
+
+                                                <!-- /tile -->
+                                                <!-- tile -->
+                                                <section class="tile tile-simple">
+
+                                                    <!-- tile body -->
+                                                    <div class="tile-body p-0">
+
+                                                        <div class="table-responsive">
+                                                            <table class="table table-hover table-striped">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Code</th>
+                                                                        <th>Invoice Date</th>
+                                                                        <th>Order Code</th>
+                                                                        <th>Customer Name</th>
+                                                                        <th>Sales Person</th>
+                                                                        <th>Action</th>
+                                                                    </tr>
+
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr ng-repeat="oneToMany in OneToManyList">
+                                                                        <td>{{oneToMany.OTMI_Code}}</td>
+                                                                        <td>{{oneToMany.OTMI_InvoiceDate.replace('/Date(','').replace(')/','') | date:'dd-MM-yyyy'}}</td>
+                                                                        <td>{{oneToMany.SO_Code}}</td>
+                                                                        <td>{{oneToMany.COM_DISPLAYNAME }}</td>
+                                                                        <td>{{oneToMany.USER_NAME }}</td>
+                                                                        <td><a ng-click="ViewOneToMany(oneToMany.OTMI_ID);" class="btn btn-xs btn-default" value="{{ oneToMany.OTMI_ID }}"><i class="fa fa-search"></i>View</a></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+                                                    </div>
+                                                    <!-- /tile body -->
+
+                                                </section>
+                                                <!-- /tile -->
+
+
+                                            </div>
+                                            <!-- /col -->
+                                        </div>
+                                        <!-- /row -->
+                                    </div>
+                                    
+                                </div>
+                            </div>
+
+                            <div role="tabpanel" class="tab-pane" id="litab_payments">
+
+
+
+                                <!-- row -->
+                                <div class="row">
+                                    <!-- col -->
+                                    <div class="col-md-12">
+
+                                        <!-- tile -->
+                                        <section class="tile tile-simple">
+
+                                            <!-- tile body -->
+                                            <div class="tile-body p-0">
+
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Shipment Code</th>
+                                                                <th>Commission Code</th>
+                                                                <th>Sipment amount</th>
+                                                                <th>Fab Amount</th>
+                                                                <th>Comission amount</th>
+                                                                <th>Comission Recieve</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="Payment in PaymentList">
+                                                                <td><a href="javascript:;">{{Payment.SH_CODE}}</a></td>
+                                                                <td class="ng-binding">{{Payment.CR_Code}}</td>
+                                                                <td class="ng-binding">{{Payment.CR_ShipmentAmount}}</td>
+                                                                <td class="ng-binding">{{Payment.CR_FABAmount}}</td>
+                                                                <td class="ng-binding">{{Payment.CR_CommissionAmount}}</td>
+                                                                <td>{{Payment.CR_CommissionRecieved}}</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                            <!-- /tile body -->
+
+                                        </section>
+                                        <!-- /tile -->
+
+
+                                    </div>
+                                    <!-- /col -->
+                                </div>
+                                <!-- /row -->
+
+
+                            </div>
+                            <!-- tab in tabs -->
+                            <div role="tabpanel" class="tab-pane" id="litab_followups">
+
+
+
+                                <!-- row -->
+                                <div class="row">
+                                    <!-- col -->
+                                    <div class="col-md-12">
+
+                                        <!-- tile -->
+                                        <section class="tile tile-simple">
+
+                                            <!-- tile body -->
+                                            <div class="tile-body p-0">
+
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Follow Up ID</th>
+                                                                <th>Description</th>
+                                                                <th>Date</th>
+                                                                <th>Status</th>
+                                                                <th>Next Follow Up</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td><a href="javascript:;">201500156</a></td>
+                                                                <td>Discussed Product Specification</td>
+                                                                <td>Jan 27, 2018</td>
+                                                                <td><span class="label label-success">Call</span></td>
+                                                                <td class="ng-binding">Jan 30, 2018</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><a href="javascript:;">201500156</a></td>
+                                                                <td>Finalized Specification</td>
+                                                                <td>Jan 30, 2018</td>
+                                                                <td><span class="label label-default">Meeting</span></td>
+                                                                <td class="ng-binding">Feb 10, 2018</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                            <!-- /tile body -->
+
+                                        </section>
+                                        <!-- /tile -->
+                                    </div>
+                                    <!-- /col -->
+
+                                </div>
+                                <!-- /row -->
+
+
+
+                            </div>
+
+                            <!-- tab in tabs -->
+                            <div role="tabpanel" class="tab-pane" id="litab_shipments">
+
+
+
+
+
+                                <!-- row -->
+                                <div class="row">
+                                    <!-- col -->
+                                    <div class="col-md-12">
+
+
+                                        <!-- tile -->
+                                        <!-- /tile -->
+                                        <!-- tile -->
+                                        <section class="tile tile-simple">
+
+                                            <!-- tile body -->
+                                            <div class="tile-body p-0">
+
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Code</th>
+                                                                <th>Customer/Supplier</th>
+                                                                <th>ETD</th>
+                                                                <th>ETA</th>
+                                                                <th>Departure Port</th>
+                                                                <th>Arrival Port</th>
+                                                                <th>Invoice Amount</th>
+                                                                <td>Action</td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="shipments in ShipmentList">
+                                                                <td>{{shipments.S_Code}}</td>
+                                                                <td>{{shipments.COM_DISPLAYNAME }}</td>
+                                                                <td>{{shipments.S_ETD}}</td>
+                                                                <td>{{shipments.S_ETA}}</td>
+                                                                <td>{{shipments.S_DeparturePort}}</td>
+                                                                <td>{{shipments.S_ArrivalPort }}</td>
+                                                                <td>{{shipments.S_INV_AMT }}</td>
+                                                                <td><a ng-click="ViewShipment(shipments.S_ID);" class="btn btn-xs btn-default" value="{{ shipments.S_ID }}" title="View"><i class="fa fa-search"></i>View</a></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                            <!-- /tile body -->
+
+                                        </section>
+                                        <!-- /tile -->
+
+
+                                    </div>
+                                    <!-- /col -->
+                                </div>
+                                <!-- /row -->
+
+
+
+
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="litab_schedule">
+
+
+
+                                <!-- row -->
+                                <div class="row">
+                                    <!-- col -->
+                                    <div class="col-md-12">
+
+                                        <!-- tile -->
+                                        <section class="tile tile-simple">
+
+                                            <!-- tile body -->
+                                            <div class="tile-body p-0">
+
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Code</th>
+                                                                <th>Schedule Date</th>
+                                                                <th>Order No</th>
+                                                                <td>Action</td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="schedules in ScheduleList">
+                                                                <td>{{schedules.SH_Code}}</td>
+                                                                <td>{{schedules.SH_DATE}}</td>
+                                                                <td>{{schedules.SO_Code}}</td>
+                                                                <td><a ng-click="ViewSchedule(schedules.SH_Code);" class="btn btn-xs btn-default" value="{{ schedules.SH_Code }}"><i class="fa fa-search"></i>View</a></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                            <!-- /tile body -->
+
+                                        </section>
+                                        <!-- /tile -->
+                                    </div>
+                                    <!-- /col -->
+
+                                </div>
+                                <!-- /row -->
+
+
+
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="litab_dashboards">
+
+
+
+                                <!-- row -->
+                                <div class="row">
+                                    <!-- col -->
+                                    <div class="col-md-12">
+
+                                        <!-- tile -->
+                                        <section class="tile tile-simple">
+
+                                            <!-- tile body -->
+                                            <div class="tile-body p-0">
+                                                <div style="width:100%">
+                                                    <span id="sparkline02" data-values="5,6,17,2,1,4,2,24,6,28,4,5" data-type="bar" data-height="300px"></span>
+                                                </div>
+                                            </div>
+                                            <!-- /tile body -->
+
+                                        </section>
+                                        <!-- /tile -->
+                                    </div>
+                                    <!-- /col -->
+
+                                </div>
+                                <!-- /row -->
+
+
+
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+</section>
+@section dynamictablecreation
+{
+    <script src="~/Asset/js/vendor/flot/jquery.flot.min.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.resize.min.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.orderBars.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.stack.min.js"></script>
+    <script src="~/Asset/js/vendor/flot/jquery.flot.pie.min.js"></script>
+    <script src="~/Asset/js/vendor/flot-spline/jquery.flot.spline.min.js"></script>
+    <script src="~/Asset/js/vendor/flot-tooltip/jquery.flot.tooltip.min.js"></script>
+
+    <script src="~/Asset/js/vendor/gaugejs/gauge.min.js"></script>
+
+    <script src="~/Asset/js/vendor/raphael/raphael-min.js"></script>
+    <script src="~/Asset/js/vendor/d3/d3.v2.js"></script>
+    <script src="~/Asset/js/vendor/rickshaw/rickshaw.min.js"></script>
+
+    <script src="~/Asset/js/vendor/morris/morris.min.js"></script>
+
+    <script src="~/Asset/js/vendor/easypiechart/jquery.easypiechart.min.js"></script>
+
+    <script src="~/Asset/js/vendor/countTo/jquery.countTo.js"></script>
+    <script type="text/javascript">
+        var $el = $('#sparkline02');
+
+        var values = $el.data('values').split(',').map(parseFloat);
+        var type = $el.data('type') || 'line';
+        var height = $el.data('height') || 'auto';
+
+        var parentWidth = $(document).width() - 100;
+        var valueCount = values.length;
+        var barSpacing = 5;
+        var barWidth = Math.round((parentWidth - (valueCount - 1) * barSpacing) / valueCount);
+
+        $el.sparkline(values, {
+            width: '100%',
+            type: type,
+            height: height,
+            barWidth: barWidth,
+            barSpacing: barSpacing,
+            barColor: '#16a085',
+            negBarColor: '#FF0066'
+        });
+    </script>
+}

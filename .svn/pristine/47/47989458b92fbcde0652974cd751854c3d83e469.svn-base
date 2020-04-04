@@ -1,0 +1,62 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_User>
+@{ 
+    int i = 0;
+    
+}
+<style>
+    #tblSalesTarget tbody tr td{
+        padding:1px;
+    }
+    #tblSalesTarget{
+        overflow-x:auto;
+
+    }
+</style>
+<div class="col-md-12">
+    <div class="tile-body">
+        <table class="table table-custom" id="tblSalesTarget">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th><span id="Target">Target</span></th>
+                    <th><span id="Target">Pending</span></th>
+                    <th><span id="Action">Action</span></th>
+
+                </tr>
+                </thead>
+            <tbody>
+                @foreach (var item in Model)
+                 {
+                <tr>
+                    <td style="width:40%">
+                        <input type="hidden" class="form-control" name="TargetID_@i" id="TargetID_@i" value="0">
+                        <input type="hidden" class="form-control" name="txtUserID_@i" id="txtUserID_@i" value="@item.USER_ID">
+                        <input type="text" class="form-control" name="txtUserID_@i" id="txtUserID_@i" value="@item.DISPLAY_NAME" disabled>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" name="txtM1_@i" id="txtM1_@i" onchange="SetTotal()" onkeypress="return isNumber(event)" value="0"
+                               data-parsley-trigger="change" data-parsley-type="digits">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control" name="txtM1_@i" id="txtM1_@i"  value="0" disabled
+                               data-parsley-trigger="change" data-parsley-type="digits">
+                    </td>
+                    <td style="width:15%"><button type="button" class="btn btn-primary btn-xs mb-10" data-toggle="collapse" href="#collapseExample_@i" aria-expanded="false" aria-controls="collapseExample_@i" id="btnProductTarget">Set Product / Mth Wise Target</button></td>
+                </tr>
+            <tr>
+                <td colspan="4">
+                    <div class="collapse" id="collapseExample_@i">
+                        <div class="well">
+                            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                        </div>
+                    </div>
+                </td>
+            </tr>
+i++;
+}
+                
+            </tbody>
+            
+        </table>
+    </div>
+</div>

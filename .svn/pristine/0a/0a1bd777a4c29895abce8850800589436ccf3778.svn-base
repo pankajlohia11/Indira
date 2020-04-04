@@ -1,0 +1,172 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using BusinessEntity.EntityModels;
+
+namespace DataAccess.Admin_DA
+{
+    public class ET_Admin_Roles_DL
+    {
+        EntityClasses dbcontext = new EntityClasses();
+
+        public List<Tbl_Master_Role> ET_Admin_RoleList_DL()        
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_Role.Where(m => m.DELETED != true).ToList();
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+        public decimal Tbl_Master_Role_Add(Tbl_Master_Role _tbl_Master_Role)
+        {
+            Tbl_Master_Role tmr = new Tbl_Master_Role();
+            try
+            {
+                if (_tbl_Master_Role.ROLE_ID == 0)
+                {
+                    Tbl_Master_Role Objtmr = new Tbl_Master_Role()
+                    {
+                        ROLE_NAME = _tbl_Master_Role.ROLE_NAME,
+                        ROLE_DESCRIPTION = _tbl_Master_Role.ROLE_DESCRIPTION,
+                        //ROLE_ID = _tbl_Master_Role.ROLE_ID,
+                        ROLE_ACCESS = _tbl_Master_Role.ROLE_ACCESS,
+                        CREATED_BY = 1,
+                        CREATED_DATE = DateTime.Now,
+                        DELETED = false
+                    };
+                    dbcontext.Tbl_Master_Role.Add(Objtmr);
+                    dbcontext.SaveChanges();
+                    tmr.ROLE_ID = Objtmr.ROLE_ID;
+                }
+                else
+                {
+                    Tbl_Master_Role Objtbl_Master_Role = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == _tbl_Master_Role.ROLE_ID);
+                    {
+                        Objtbl_Master_Role.ROLE_NAME = _tbl_Master_Role.ROLE_NAME;
+                        Objtbl_Master_Role.ROLE_DESCRIPTION = _tbl_Master_Role.ROLE_DESCRIPTION;
+                        //ROLE_ID = _tbl_Master_Role.ROLE_ID,
+                        Objtbl_Master_Role.ROLE_ACCESS = _tbl_Master_Role.ROLE_ACCESS;
+                        Objtbl_Master_Role.CREATED_BY = 1;
+                        Objtbl_Master_Role.CREATED_DATE = DateTime.Now;
+                        Objtbl_Master_Role.DELETED = _tbl_Master_Role.DELETED;
+                    };
+                    tmr.ROLE_ID = Objtbl_Master_Role.ROLE_ID;
+                    dbcontext.SaveChanges();                    
+                }                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return tmr.ROLE_ID;
+        }
+
+        public List<Tbl_Master_Role> ET_Admin_Roles_View(int id)
+        {
+            return dbcontext.Tbl_Master_Role.Where(m => m.ROLE_ID == id).ToList();
+            // return data;
+        }
+        public Tbl_Master_Role ET_Admin_Roles_Update_Get(int id)
+        {
+            try
+            {
+                return dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == id);
+                // return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public decimal ET_Admin_Roles_Update(Tbl_Master_Role _tbl_Master_Role)
+        {
+            try
+            {
+                Tbl_Master_Role Objtbl_Master_Role = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == _tbl_Master_Role.ROLE_ID);
+                {
+                    Objtbl_Master_Role.ROLE_NAME = _tbl_Master_Role.ROLE_NAME;
+                    Objtbl_Master_Role.ROLE_DESCRIPTION = _tbl_Master_Role.ROLE_DESCRIPTION;
+                    //ROLE_ID = _tbl_Master_Role.ROLE_ID,
+                    Objtbl_Master_Role.ROLE_ACCESS = _tbl_Master_Role.ROLE_ACCESS;
+                    Objtbl_Master_Role.CREATED_BY = 1;
+                    Objtbl_Master_Role.CREATED_DATE = DateTime.Now;
+                    Objtbl_Master_Role.DELETED = _tbl_Master_Role.DELETED;
+                };
+                dbcontext.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return _tbl_Master_Role.ROLE_ID;
+        }
+        public int ET_Admin_Roles_Deleted_DL(int id)
+        {
+            int result = 0;
+            //int i = 1;
+            try
+            {
+                var find = dbcontext.Tbl_Master_Role.Where(m => m.ROLE_ID == id).ToList();
+                if (find.Count() != 0)
+                {
+                    Tbl_Master_Role delete = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == id);
+                    delete.DELETED = true;
+                    delete.DELETED_BY = 1;
+                    //dbcontext.Tbl_Master_Role.Add(isdelete);
+                    result = dbcontext.SaveChanges();
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+
+        public List<Tbl_Master_Role> ET_Admin_Roles_Restore_DL()
+        {
+            try
+            {
+                var data = dbcontext.Tbl_Master_Role.Where(m => m.DELETED == true).ToList(); 
+                return data;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public decimal ET_Admin_Roles_Restore_Insert_DL(int id)
+        {
+            int result = 0;
+            try
+            {
+                Tbl_Master_Role tmr = dbcontext.Tbl_Master_Role.Single(m => m.ROLE_ID == id);                
+                {
+                    tmr.CREATED_DATE = DateTime.Now;
+                    tmr.DELETED = false;
+                    tmr.LAST_UPDATED_BY = 1;
+                }
+                // dbcontext.Tbl_Master_Role.Add(tmr);
+                result= dbcontext.SaveChanges();
+           
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return result;
+        }
+    }
+}

@@ -1,0 +1,651 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--
+
+    This Form is used to create a Shipment Details.
+    The user can edit or remove and restore  a record in Shipment.The user can capture Shipment Details etc.
+    Author=jesmi
+    Created Date=31st Mar 2018
+    Shipment Form view
+    Operations[Add,Edit,Restore]
+-->
+
+
+
+
+
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide display page */
+    function restoreRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Restore").css("display", "block");
+    }
+    /* This function is used for displaying view page and hide restore and edit page */
+    function showRecords() {
+        $("#div_View").css("display", "block");
+        $("#div_Restore").css("display", "none");
+        $("#div_Edit").css("display", "none");
+    }
+    /* This function is used for displaying edit page and hide view and restore page */
+    function createRecords() {
+        $("#div_View").css("display", "none");
+        $("#div_Edit").css("display", "block");
+        $("#div_Supplier").css("display", "none");
+
+    }
+    function Shwcords() {
+        $("#div_Supplier").css("display", "block");
+
+    }
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Agency Shipment Details<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Agency Shipment Details</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <!--Here user can have to see Shipment Details -->
+                <section class="tile" id="div_View">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Shipment Details</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function createRecords() is used as link for create page-->
+                                <a tabindex="0" onclick="createRecords();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying restore records-->
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Deal No</th>
+                                    <th>SC</th>
+                                    <th>PO</th>
+                                    <th>Schedule</th>
+                                    <th>Invoice</th>
+                                    <th>Invoice Date</th>
+                                    <th>Container No.</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--Here user can have to edit Material Details -->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong>Shipment Details</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- this is link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <form name="form1" role="form" id="form1" data-parsley-validate>
+
+                            <div id="div_Gen">
+                                <div class="row">
+
+                                    <div class="form-group col-md-7">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label for="lblCus">Customer:</label>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-7">
+
+                                                <select tabindex="3" class="chosen-select" style="width:100%">
+                                                    <option value="AK">Alaska</option>
+                                                    <option value="HI">Hawaii</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <a href="#" onclick="Shwcords()">
+                                                    <span class="glyphicon glyphicon-plus"></span>
+                                                </a>
+                                            </div>
+                                            <div class="col-md-2">
+                                                Advance Filter
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+                            <div id="div_Supplier">
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label class="control-label" for="lblSupplier">Supplier</label>
+
+                                        <select tabindex="3" class="chosen-select" style="width:100%">
+                                            <option value="AK">Waxed</option>
+                                            <option value="HI">Hawaii</option>
+                                        </select>
+
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label class="control-label" for="lblSCNo">SC No:</label>
+
+                                        <input type="text" name="txtSCNo" class="form-control" placeholder="SC No"
+                                               data-parsley-trigger="change"
+                                               data-parsley-type="alphanum">
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label class="control-label" for="lblPo">PO No:</label>
+                                        <input type="text" name="txtPo" class="form-control" placeholder="PO No"
+                                               data-parsley-trigger="change"
+                                               data-parsley-type="alphanum">
+                                    </div>
+
+                                </div>
+                            </div>
+                               
+                            <div id="div_Buton">
+                                <div class="row">
+
+                                    <div class="tile-footer text-right bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                                        <!-- SUBMIT BUTTON -->
+                                        <!-- Button used for search the record -->
+                                        <!-- Button used for clear the record -->
+
+
+                                        <button type="button" class="btn btn-info">
+                                            Search
+                                        </button>
+                                        <button type="button" class="btn btn-info">
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblETD">ETD</label>
+
+                                    <div class='input-group datepicker w-360' style="width:100%">
+                                        <input type='text' class="form-control" required />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblETA">ETA</label>
+
+                                    <div class='input-group datepicker w-360' style="width:100%">
+                                        <input type='text' class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblDept">Departure Port</label>
+
+                                    <input type="text" name="txtDept" class="form-control" placeholder="Departure Port"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblArrival">Arrival Port</label>
+
+                                    <input type="text" name="txtArrival" class="form-control" placeholder="Arrival Port"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required>
+                                </div>
+
+
+                            </div>
+
+
+
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblBLNo">Bl No:</label>
+
+                                    <input type="text" name="txtBlNo" class="form-control" placeholder="Bl No:"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblBlDate">BL Date</label>
+
+                                    <div class='input-group datepicker w-360' style="width:100%">
+                                        <input type='text' class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar" required></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+
+
+
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblSupInvoice">Supplier Invoice No:</label>
+
+                                    <input type="text" name="txtSupInv" class="form-control" placeholder="Supplier Invoice No"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblInDate">Invoice Date</label>
+
+                                    <div class='input-group datepicker w-360' style="width:100%">
+                                        <input type='text' class="form-control" />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar" required></span>
+                                        </span>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblInvAmt">Invoice Amount:</label>
+
+                                    <input type="text" name="txtInvAmt" class="form-control" placeholder="Invoice Amount"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblGW">Gross Weight</label>
+
+                                    <input type="text" name="txtGW" class="form-control"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required>
+                                </div>
+
+                            </div>
+
+
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblConNo">Container No:</label>
+
+                                    <input type="text" name="txtConN" class="form-control" placeholder="Container No"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum" required>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label class="control-label" for="lblMotherVesel">Mother Vessel</label>
+
+                                    <input type="text" name="txtMotherVessel" class="form-control" placeholder="Mother Vessel"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum">
+                                </div>
+
+                            </div>
+
+
+                            <div class="row">
+
+                                <div class="form-group col-md-6 col-md-offset-6">
+                                    <label class="control-label" for="lblFleeder">Fleeder Vessel</label>
+
+                                    <input type="text" name="txtFleeder" class="form-control" placeholder="Fleeder Vessel"
+                                           data-parsley-trigger="change"
+                                           data-parsley-type="alphanum">
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="tile-body">
+                                        <div class="row">
+                                            <div class="col-md-6"><div id="tableTools"></div></div>
+                                            <div class="col-md-6"><div id="colVis"></div></div>
+                                        </div>
+                                        <label class="control-label" for="lbl1">List of Shipment Schedule Details</label>
+                                        <table class="table table-custom" id="grdShipmentSchedule">
+                                            <thead>
+                                                <tr>
+                                                    <th>Select</th>
+                                                    <th>Deal No</th>
+                                                    <th>SC No</th>
+                                                    <th>PO No</th>
+                                                    <th>Schedule No</th>
+                                                    <th>Schedule Date</th>
+                                                    <th>Invoice No</th>
+                                                    <th>Invoice Date</th>
+                                                    <th>Container No</th>
+
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="chkSelect" />
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" name="txtDeal" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtSC" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtPO" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtSchedule" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtScheduleDt" class="form-control"
+                                                               data-parsley-trigger="change" data-parsley-type="digits">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtInvoiceno" class="form-control"
+                                                               data-parsley-trigger="change" data-parsley-type="digits"
+                                                               required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtInvoiceDt" class="form-control"
+                                                               data-parsley-trigger="change" data-parsley-type="digits" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtContainer" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-1">
+                                    <button type="button" class="" id="btnShipments">Shipments</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="tile-body">
+                                        <div class="row">
+                                            <div class="col-md-6"><div id="tableTools"></div></div>
+                                            <div class="col-md-6"><div id="colVis"></div></div>
+                                        </div>
+                                        <label class="control-label" for="lbl1">List of Completed Shipment Details</label>
+                                        <table class="table table-custom" id="grdShipment">
+                                            <thead>
+                                                <tr>
+                                                    <th>Select</th>
+                                                    <th>Deal No</th>
+                                                    <th>SC No</th>
+                                                    <th>PO No</th>
+                                                    <th>Schedule No</th>
+                                                    <th>Schedule Date</th>
+                                                    <th>Invoice No</th>
+                                                    <th>Invoice Date</th>
+                                                    <th>Container No</th>
+
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="chk_Select" />
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" name="txtDeal" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtSC" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtPO" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtSchedule" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtScheduleDt" class="form-control"
+                                                               data-parsley-trigger="change" data-parsley-type="digits">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtInvoiceno" class="form-control"
+                                                               data-parsley-trigger="change" data-parsley-type="digits"
+                                                               required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtInvoiceDt" class="form-control"
+                                                               data-parsley-trigger="change" data-parsley-type="digits" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtcontainer" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-1">
+                                    <button type="button" class="" id="btnCompleted">Completed Shipments</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="tile-body">
+                                        <div class="row">
+                                            <div class="col-md-6"><div id="tableTools"></div></div>
+                                            <div class="col-md-6"><div id="colVis"></div></div>
+                                        </div>
+                                        <label class="control-label" for="lbl1">List of Shipment Product Details</label>
+                                        <table class="table table-custom" id="grdShipmentProduct">
+                                            <thead>
+                                                <tr>
+                                                    <th>Deal No</th>
+                                                    <th>Schedule No</th>
+                                                    <th>Product </th>
+                                                    <th>Schedule</th>
+                                                    <th>Del Quantity</th>
+                                                    <th>Price</th>
+                                                    <th>Amount</th>
+
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="text" name="txtdealn" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtschedule" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtpdtname" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtschedul" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtqua" class="form-control"
+                                                               data-parsley-trigger="change" pattern="/^[a-zA-Z]+$/">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtpric" class="form-control"
+                                                               data-parsley-trigger="change" data-parsley-type="digits">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="txtamt" class="form-control"
+                                                               data-parsley-trigger="change" data-parsley-type="digits">
+                                                    </td>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </form>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" disabled id="formSubmit">Submit</button>
+
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--Here user can have to restore Material Details -->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Shipment Details</strong> </h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" onclick="showRecords();">
+                                    <!-- This is used as a link for back -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Deal No</th>
+                                    <th>SC</th>
+                                    <th>PO</th>
+                                    <th>Schedule</th>
+                                    <th>Invoice</th>
+                                    <th>Invoice Date</th>
+                                    <th>Container No.</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+

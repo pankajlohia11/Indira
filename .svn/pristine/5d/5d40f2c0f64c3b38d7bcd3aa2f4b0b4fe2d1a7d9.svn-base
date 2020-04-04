@@ -1,0 +1,192 @@
+﻿
+@{
+    ViewBag.Title = "ET_Shipment_Schedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .fc-title span
+    {
+        font-size:11px;
+    }
+</style>
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_ShipmentScheduleCalendar.js"></script>
+
+    <script>
+       function shipping(a)
+        {
+            debugger;
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ET_Sales_Schedule_View", "ET_Sales_Shedule")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "html",
+                data: { id: a },
+                success: function (result) {
+                    debugger;
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        $('#viewpopup').html(result);
+                        $("#btnviewpopup").trigger("click");       
+                    }
+                },
+                error: function (response) {
+                    
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+        }
+        window.onload = function () {
+            $('.calendar').css('font-size', '18px !important');
+             $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetShipmentScheduleList", "ET_Shipment_Schedule")',
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                 success: function (result) {
+                    if (result.indexOf("ERR") > -1) {
+                        $("#spanErrMessage1").html(result);
+                        $("#spanErrMessage2").html(result);
+                        if ($("#exceptionmessage").length)
+                            $("#exceptionmessage").trigger("click");
+                    }
+                    else {
+                        debugger;
+                        var res = $.parseJSON(JSON.parse(result));
+                        $('#calendar').fullCalendar({
+                            header: {
+                                left: 'prev',
+                                center: 'title',
+                                right: 'next'
+                            },
+                            editable: true,
+                            droppable: true, // this allows things to be dropped onto the calendar
+                            theme: false,
+                            drop: function () {
+                                // is the "remove after drop" checkbox checked?
+                                if ($('#drop-remove').is(':checked')) {
+                                    // if so, remove the element from the "Draggable Events" list
+                                    $(this).remove();
+                                }
+                            },
+                            eventLimit: true, // allow "more" link when too many events
+                            events: res
+                        });
+                    }
+                },
+                error: function (response) {
+
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+            });
+                // Previous month action
+                $('#cal-prev').click(function () {
+                    $('#calendar').fullCalendar('prev');
+                });
+
+                // Next month action
+                $('#cal-next').click(function () {
+                    $('#calendar').fullCalendar('next');
+                });
+
+                // Change to month view
+                $('#change-view-month').click(function () {
+                    $('#calendar').fullCalendar('changeView', 'month');
+
+                    // safari fix
+                    $('#content .main').fadeOut(0, function () {
+                        setTimeout(function () {
+                            $('#content .main').css({ 'display': 'table' });
+                        }, 0);
+                    });
+
+                });
+
+                // Change to week view
+                $('#change-view-week').click(function () {
+                    $('#calendar').fullCalendar('changeView', 'agendaWeek');
+
+                    // safari fix
+                    $('#content .main').fadeOut(0, function () {
+                        setTimeout(function () {
+                            $('#content .main').css({ 'display': 'table' });
+                        }, 0);
+                    });
+
+                });
+
+                // Change to day view
+                $('#change-view-day').click(function () {
+
+                    $('#calendar').fullCalendar('changeView', 'agendaDay');
+
+                    // safari fix
+                    $('#content .main').fadeOut(0, function () {
+                        setTimeout(function () {
+                            $('#content .main').css({ 'display': 'table' });
+                        }, 0);
+                    });
+
+                });
+
+                // Change to today view
+                $('#change-view-today').click(function () {
+                    $('#calendar').fullCalendar('today');
+                });
+        };
+    </script>
+
+}
+
+<!-- ====================================================
+            ================= CONTENT ===============================
+            ===================================================== -->
+<section id="content">
+
+    <div class="page page-full page-calendar" ng-controller="AC_ShipmentScheduleCalendar">
+
+        <div class="tbox tbox-sm">
+            <!-- right side -->
+            <div class="tcol">
+
+                <!-- right side header -->
+                <div class="p-15 bg-white">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-sm btn-default" id="change-view-today">today</button>
+                        <div class="btn-group">
+                            <button class="btn btn-default btn-sm" id="change-view-day">Day</button>
+                            <button class="btn btn-default btn-sm" id="change-view-week">Week</button>
+                            <button class="btn btn-default btn-sm" id="change-view-month">Month</button>
+                        </div>
+                    </div>
+                    <h4 class="custom-font text-default m-0">Schedule Calendar</h4>
+                </div>
+                <!-- /right side header -->
+                <!-- right side body -->
+                <div class="p-15">
+
+                    <div id='calendar'></div>
+
+                </div>
+                <!-- /right side body -->
+
+
+            </div>
+            <!-- /right side -->
+
+
+
+        </div>
+
+    </div>
+
+</section>
+<!--/ CONTENT -->

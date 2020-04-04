@@ -1,0 +1,57 @@
+﻿@model IEnumerable<BusinessEntity.EntityModels.Tbl_Master_CompanyContacts>
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td>
+            <select class='form-control' id='drptitle'>
+                @if (item.TITLE == "0")
+                {
+                    <option value='0' selected>Mr.</option>}
+                else if (item.TITLE == "1")
+                {
+                    <option value='1'>Mrs.</option>}
+                else if (item.TITLE == "2")
+                {
+                    <option value='2'>Dr.</option> }
+                else
+                {
+                    <option value='3'>Drs.</option>
+                }
+            </select>
+        </td>
+        <td>
+            <input type='text' id='txtfirstname' value="@item.FIRST_NAME" class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='txtlastname' value="@item.LAST_NAME"  class='form-control' />
+        </td>
+        <td>
+            <select class='form-control' id='drpjobtitle'>
+                <option value='MD'>MD</option>
+                <option value='Business Manager'>Business Manager</option>
+                <option value='Marketing Manager'>Marketing Manager</option>
+                <option value='Managing director'>Managing director</option>
+            </select>
+        </td>
+        <td>
+            <input type='text' id='txtphoneno' value="@item.PHONE" onchange='isInteger(this);' class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='txtfaxno' value="@item.FAX" onchange='isInteger(this);' class='form-control' />
+        </td>
+        <td>
+            <input type='text' id='txtmobileno' value="@item.MOBILE" class='form-control' onchange='isInteger(this);'/>
+        </td>
+        <td>
+            <input type='text' id='txtemailc' value="@item.EMAIL" onchange="ValidateEmail(this);" class='form-control' data-parsley-trigger="change"/>
+        </td>
+        <td>
+            <input type='text' id='txtremarksc' value="@item.REMARKS" class='form-control' />
+        </td>
+        <td>
+            <a style='padding: 5px;' onclick='addnewrow(this)'><i class='fa fa-plus'></i></a>
+            <a style='padding: 5px;color:red' onclick='deleterow(this)'><i class='fa fa-trash'></i></a>
+        </td>
+    </tr>
+}

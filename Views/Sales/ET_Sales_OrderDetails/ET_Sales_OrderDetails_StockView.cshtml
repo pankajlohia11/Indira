@@ -1,0 +1,47 @@
+﻿@using System.Globalization;
+@model  BusinessEntity.CustomModels.AvailbleStockView
+<div class="row col-md-12">
+    <div class="form-group col-md-6">
+        <h3>Available Stock</h3>
+        <input style="text-align:right;" type="text" class="form-control" name="OrderCode" disabled value="@Model.Head.AvailableQty" />
+    </div>
+</div>
+<div class="tile-body">
+    <div class="col-md-12">
+        <h3>Stock In Transit</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Delivery Date</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Detail.Count() > 0)
+                {
+                    foreach (var item in Model.Detail)
+                    {
+                        <tr>
+                            <td>
+                                <input type='text' id='txtUOM' value="@item.PODate.ToString("dd-MM-yyyy")" disabled class='form-control' />
+                            </td>
+                            <td>
+                                <input type='text' style="text-align:right;" id='txtqty' value="@(Convert.ToDecimal(item.POQty).ToString("N3", CultureInfo.CreateSpecificCulture("de-DE")))" disabled class='form-control' />
+                            </td>
+                        </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="2" style="text-align:center;color:red;font-weight:bold;">
+                        No Transits
+                    </td>
+                </tr>
+        }
+                </tbody>
+            </table>
+        </div>
+    </div>

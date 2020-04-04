@@ -1,0 +1,556 @@
+﻿
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--
+
+Order Details will use for common Agency, PO, and Trading.
+    This page contains Add, Modify, Delete, View and Restore.
+    Author=RajKumar
+    Date = 4th Mar 2018
+    Admin Company View
+    Operation={View,Restore,Create}
+-->
+
+@section angularcontroller
+{
+    <script src="~/Content/AngularScripts/AC_Orderdetails.js"></script>
+}
+
+<script type="text/javascript">
+    /* BEGIN EXTERNAL SOURCE */
+    /* This function is used for window onload */
+    window.onload = function () {
+        dynamicDataTable('#advancedusage', '#tableTools', '#colVis');
+        dynamicDataTable('#advancedusageRestore', '#tableToolsRestore', '#colVisRestore');
+    };
+    /* This function is used for displaying restore page and hide View List page */
+    //function restoreRecords() {
+    //    $("#div_View").css("display", "none");
+    //    $("#div_Restore").css("display", "block");
+    //}
+    ///* This function is used for displaying View List page and hide restore and edit page */
+    //function showRecords() {
+    //    $("#div_View").css("display", "block");
+    //    $("#div_Restore").css("display", "none");
+    //    $("#div_Edit").css("display", "none");
+    //}
+    ///* This function is used for displaying edit page and hide view and restore page */
+    //function createRecords() {
+    //    $("#div_View").css("display", "none");
+    //    $("#div_Edit").css("display", "block");
+    //}
+
+    function ChangeDetails(a) {
+        debugger;
+        var id = $(a).val();
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("ProductDetails", "ET_Admin_GeneralOffer")',
+            data: {id:id},
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                debugger;
+                var res = JSON.parse(result)
+                var td = $(a).parent().parent().find("td");
+                $(td[1]).find("input").val(res.CAT_NAME);
+                $(td[2]).find("input").val(res.PRODUCT_NAME);
+                $(td[3]).find("input").val(res.UOM_Text);
+            },
+            error: function (response) {
+                toastr["error"]("City Not Loading", "Notification");
+            }
+        });
+    }
+
+</script>
+<!-- ====================================================
+           ================= CONTENT ===============================
+           ===================================================== -->
+<!-- This section is used for displaying link menu on header bar-->
+<section id="content">
+
+    <div class="page page-shop-single-order">
+
+        <div class="pageheader">
+
+            <h2>Order Details<span>@*You can place subtitle here*@</span></h2>
+
+            <div class="page-bar">
+
+                <ul class="page-breadcrumb">
+                    <li>
+                        <a href="../Home/Index"><i class="fa fa-home"></i> Indra</a>
+                    </li>
+                    <li>
+                        <a href="#">Admin</a>
+                    </li>
+                    <li>
+                        <a href="#">Order Details</a>
+                    </li>
+                </ul>
+
+            </div>
+
+        </div>
+
+        <div class="row" ng-controller="AC_OrderdetailsCtrl">
+            <div class="col-md-12">
+                <section class="tile" id="div_View">
+                    <!--[div_view] All view list contents datas will be written here-->
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Order Details</strong> List</h1>
+                        <ul class="controls">
+                            <!-- function createRecords() is used for add records. Once click this button it will navigate to Create page.-->
+                            <li style="padding:5px">
+                                <a tabindex="0" ng-click="createnew();">
+                                    <span class="btn btn-slategray btn-xs mb-10">
+                                        <i class="fa fa-plus"></i>
+                                        Add
+                                    </span>
+                                </a>
+                            </li>
+                            <!-- function restoreRecords() is used for displaying Deleted records. Once click on this button it will navigate to restore page.-->
+                            <li style="padding:5px"><a tabindex="0" onclick="restoreRecords();"><span class="btn btn-drank btn-xs mb-10"><i class="fa fa-undo"></i> Restore</span></a></li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableTools"></div></div>
+                            <div class="col-md-6"><div id="colVis"></div></div>
+                        </div>
+                        <!-- Table created for displaying View content-->
+                        <table class="table table-custom" id="advancedusage">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Schedule</th>
+                                    <th>UOM</th>
+                                    <th>Order Quantity</th>
+                                    <th>Delivered</th>
+                                    <th>Selling Price</th>
+                                    <th>Supplier Offer</th>
+                                    <th>Customer offer</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            @*<tbody>
+                                    <tr ng-repeat="item in salesorderlist">
+                                        <td>{{item.PT_Name}}</td>
+                                        <td>{{(item.PT_DiscountType}}</td>
+                                        <td>{{item.PT_DiscountPer}}</td>
+                                        <td>{{item.PT_DiscountAmount}}</td>
+                                        <td>{{(item.PT_AdvanceType}}</td>
+                                        <td>{{item.PT_AdvancePer}}</td>
+                                        <td>{{item.PT_AdvanceAmount}}</td>
+                                        <td>
+                                            <a ng-click="editRecords(item.PT_ID);" value="{{ item.PT_ID }}" style="color:forestgreen;padding:5px;"><i class="fa fa-edit"></i></a>
+
+                                            <a ng-click="ViewRecords(item.PT_ID);" value="{{ item.PT_ID }}" style="color:darkblue;padding:5px;"><i class="fa fa-eye"></i></a>
+
+                                            <a ng-click="Restoredeleterecords(item.PT_ID,$event,true);" style="color:red;padding:5px;"><i class="fa fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                </tbody>*@
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+                <!--The user can have a option to create and edit records-->
+                <section class="tile" id="div_Edit" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Create</strong> Order Details</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i> Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+
+                        <div name="form1" role="form" id="form1" data-parsley-validate>
+
+                            <div class="row">
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="CustomerName">Sales Code</label>
+                                        <input type="text" class="form-control" name="OrderCode" id="OrderCode" disabled="@ViewBag.AutoManual" @ViewBag.Required ng-model="OrderCode" />
+                                        <input type="text" class="form-control hidden" name="OrderID" id="OrderID" ng-model="OrderID" />
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="CustomerName">Sales Person</label>
+                                    <select class="form-control chosen-select" name="drpSalesperson" id="drpSalesperson" ng-model="SelectedSalesperson" ng-change="Salesgroup();" required>
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in Salesperson" value="{{st.USER_ID}}">{{st.USER_NAME}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="SupplierName">Sales Group</label>
+                                    <input type="text" class="form-control" name="ORGNAMEText" id="ORGNAMEText" ng-model="ORGNAMEText" />
+                                    <input type="text" class="form-control hidden" name="ORGIDValue" id="ORGIDValue" ng-model="ORGIDValue" />
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="Ordertype">Order Type</label>
+                                    <select class="form-control chosen-select" name="drpOrdertype" ng-model="SelectedOredertype" id="drpOrdertype" ng-change="changeOrdertyper();" required>
+                                        <option value="0">--Select--</option>
+                                        <option value="1">Agency</option>
+                                        <option value="2">PO</option>
+                                        <option value="3">Trading</option>
+                                    </select>
+                                </div>
+                                @*<div class="form-group col-md-6">
+                <label for="CustomerDeliveryItems">Order No. </label>
+                <input type="text" class="form-control" name="txtOrderno" id="txtOrderno" ng-model="txtOrderno" required />
+            </div>*@
+
+                                <div class="form-group col-md-6">
+                                    <label for="CustomerDeliveryItems">Order Date </label>
+                                    <div class='input-group datepicker w-360' style="width:100%">
+                                        <input type='text' id="txtorderdate" name="txtorderdate" class="form-control" ng-model="txtorderdate" required />
+                                        <span class="input-group-addon">
+                                            <span class="fa fa-calendar"></span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-6 hidden" id="Cus_name">
+                                    <label for="CustomerName">Customer Name</label>
+                                    <select class="form-control chosen-select" name="drpCustomer" id="drpCustomer" ng-model="SelectedCustomer" ng-change="Customerchange();">
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in CustomerList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6 hidden" id="Sub_name">
+                                    <label for="SupplierName">Supplier Name</label>
+                                    <select tabindex="3" class="form-control chosen-select" name="drpSupplier" id="drpSupplier" ng-model="SelectedSupplier" ng-change="Supplierchange();">
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in SupplierList" value="{{st.COM_ID}}">{{st.COM_NAME}}</option>
+                                    </select>
+                                </div>
+
+                                <div id="Cus_po" class="hidden">
+                                    <div class="form-group col-md-6">
+                                        <label for="PONo">Customer PO No</label>
+                                        <input type="text" class="form-control" name="txtcusponumber" id="txtcusponumber" ng-model="txtcusponumber" />
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="PODate">Customer PO Date </label>
+                                        @*<input type="text" class="form-control" name="podate" id="podate" ng-model="podate" />*@
+                                        <div class='input-group datepicker w-360' style="width:100%">
+                                            <input type='text' id="cuspodate" name="cuspodate" class="form-control" ng-model="cuspodate" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="Cus_sc" class="hidden">
+                                    <div class="form-group col-md-6">
+                                        <label for="Email">Customer SC No </label>
+                                        <input type="text" class="form-control" name="txtcusscnumber" id="txtcusscnumber" ng-model="txtcusscnumber" />
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Customer SC Date  </label>
+                                        @*<input type="text" class="form-control" name="scdate" id="scdate" ng-model="scdate" required />*@
+                                        <div class='input-group datepicker w-360' style="width:100%">
+                                            <input type='text' id="cusscdate" name="cusscdate" class="form-control" ng-model="cusscdate" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="Sup_po" class="hidden">
+                                    <div class="form-group col-md-6">
+                                        <label for="PONo">Supplier PO No</label>
+                                        <input type="text" class="form-control" ng-model="txtsubponumber" name="txtsubponumber" id="txtsubponumber" />
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="PODate">Supplier PO Date </label>
+                                        @*<input type="text" class="form-control" ng-model="subpodate" />*@
+                                        <div class='input-group datepicker w-360' style="width:100%">
+                                            <input type='text' id="subpodate" name="subpodate" class="form-control" ng-model="subpodate" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="hidden" id="Sup_sc">
+                                    <div class="form-group col-md-6 ">
+                                        <label for="Email">Supplier SC No </label>
+                                        <input type="text" class="form-control" ng-model="txtsubscnumber" name="txtsubscnumber" id="txtsubscnumber" />
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="Url">Supplier SC Date  </label>
+                                        @*<input type="text" class="form-control" ng-model="subscdate" required />*@
+                                        <div class='input-group datepicker w-360' style="width:100%">
+                                            <input type='text' id="subscdate" name="subscdate" class="form-control" ng-model="subscdate" />
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-group col-md-6 hidden" id="Cus_currency">
+                                    <label for="CustomerDeliveryItems">Customer Currency </label>
+                                    <select class="form-control chosen-select" name="drpCusCurrency" data-ng-model="SelectedCusCurrency" id="drpCusCurrency" ng-change="CusCurrencyChange">
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in Currencylist" value="{{st.CURRENCY_ID}}">{{st.CURRENCY_CODE}}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-6 hidden" id="Sup_currency">
+                                    <label for="CustomerDeliveryItems">Supplier Currency </label>
+                                    <select class="form-control chosen-select" name="drpSupCurrency" data-ng-model="SelectedSupCurrency" id="drpSupCurrency" ng-change="SupCurrencyChange">
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in Currencylist" value="{{st.CURRENCY_ID}}">{{st.CURRENCY_CODE}}</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-6 hidden" id="commision">
+                                    <label for="CustomerPayment">Commision </label>
+                                    <input type="text" class="form-control" name="txtcommisionagy" id="txtcommisionagy" ng-model="txtcommisionagy" />
+                                </div>
+
+                                <div class="form-group col-md-6 hidden" id="Cus_deliterms">
+                                    <label for="CustomerDeliveryItems">Customer Delivery Terms </label>
+                                    <input type="text" class="form-control" name="txtCusdeliveryterms" id="txtCusdeliveryterms" ng-model="txtCusdeliveryterms" />
+                                </div>
+
+                                <div class="form-group col-md-6 hidden" id="Sup_deliterms">
+                                    <label for="CustomerPayment">Supplier Delivery Terms </label>
+                                    <input type="text" class="form-control" ng-model="txtsupdeliveryterms" name="txtsupdeliveryitems" id="txtsupdeliveryitems" />
+                                </div>
+
+                                <div class="form-group col-md-6 hidden" id="Cus_paymet">
+                                    <label for="CustomerPayment">Customer Payment Terms </label>
+                                    <select tabindex="3" class="form-control chosen-select" name="drpCusPaymenttype" ng-model="SelectedCuspaymenttype" id="drpCusPaymenttype" ng-change="CusPymtchange">
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in Cuspayment" value="{{st.PT_ID}}">{{st.PT_Name}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6 hidden" id="Sup_payment">
+                                    <label for="CustomerPayment">Supplier Payment Terms </label>
+                                    <select tabindex="3" class="form-control chosen-select" name="drpSupPaymenttype" ng-model="SelectedSuppaymenttype" id="drpSupPaymenttype" ng-change="SubPymtchange">
+                                        <option value="0">-Select-</option>
+                                        <option data-ng-repeat="st in Cuspayment" value="{{st.PT_ID}}">{{st.PT_NAME}}</option>
+                                    </select>
+                                </div>
+
+                                @*<div class="form-group col-md-6">
+                <label for="CustomerPayment">Customer Credit Days </label>
+                <input type="text" class="form-control" name="txtCuscreditdys" id="txtCuscreditdys" ng-model="txtCuscreditdys" required />
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="CustomerPayment">Supplier Credit Days </label>
+                <input type="text" class="form-control" name="txtSupcreditdys" id="txtSupcreditdys" ng-model="txtSupcreditdys" required />
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="CustomerPayment">Customer Advance Type </label>
+                <select class="form-control chosen-select" name="drpCusAdvancetype" data-ng-model="SelectedCusAdvancetype" id="drpCusAdvancetype" ng-change="CustomerAdvancetype();">
+                    <option value="0">-Select-</option>
+                    <option value="1">Advance Percentage </option>
+                    <option value="2">Advance Amount</option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <div class="hidden" id="htnadvancepercentage">
+                    <label for="CustomerPaymentDays"> Advance Percentage </label>
+                    <input type="text" name="Advancepercentage" class="form-control" ng-model="Advancepercentage" id="Advancepercentage" required />
+                </div>
+                <div class="hidden" id="htnadvanceamount">
+                    <label for="CustomerPaymentDays"> Advance Amount </label>
+                    <input type="text" name="Advanceamount" class="form-control" ng-model="Advanceamount" id="Advanceamount" required />
+                </div>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="CustomerPayment">Supplier Advance Type </label>
+                <select class="form-control chosen-select" name="drpSupAdvancetype" data-ng-model="SelecteSupdAdvancetype" id="drpSupAdvancetype" ng-change="Advancetype();">
+                    <option value="0">-Select-</option>
+                    <option value="1">Advance Percentage </option>
+                    <option value="2">Advance Amount</option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <div class="hidden" id="htnadvancepercentage">
+                    <label for="CustomerPaymentDays"> Advance Percentage </label>
+                    <input type="text" name="Advancepercentage" class="form-control" ng-model="Advancepercentage" id="Advancepercentage" required />
+                </div>
+                <div class="hidden" id="htnadvanceamount">
+                    <label for="CustomerPaymentDays"> Advance Amount </label>
+                    <input type="text" name="Advanceamount" class="form-control" ng-model="Advanceamount" id="Advanceamount" required />
+                </div>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="CustomerPayment">Customer Advance Days </label>
+                <input type="text" class="form-control" name="txtCusadvdys" id="txtCusadvdys" ng-model="txtCusadvdys" required />
+            </div>
+            <div class="form-group col-md-6">
+                <label for="CustomerPayment">Supplier Advance Days </label>
+                <input type="text" class="form-control" name="txtSupadvdys" id="txtSupadvdys" ng-model="txtSupadvdys" required />
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="DiscountType">Customer Discount Type </label>
+                <select tabindex="3" class="form-control chosen-select" name="drpDusdiscounttype" ng-model="SelectedSusdiscounttype" id="drpDusdiscounttype" ng-change="Discounttype();" required>
+                    <option value="0">-Select-</option>
+                    <option value="1">Discount Percentage </option>
+                    <option value="2">Discount Amount</option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <div class="hidden" id="htndiscountpercentage">
+                    <label for="CustomerPaymentDays">Discount Percentage </label>
+                    <input type="text" class="form-control" name="discountpere" id="discountpere" ng-model="discountpercentage" required />
+                </div>
+                <div class="hidden" id="htndiscountamount">
+                    <label for="CustomerPaymentDays">Discount Amount </label>
+                    <input type="text" class="form-control" name="discountamnt" id="discountamnt" ng-model="discountamount" required />
+                </div>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="DiscountType">Supplier Discount Type </label>
+                <select tabindex="3" class="form-control chosen-select" name="drpsupdiscounttype" id="drpsupdiscounttype" ng-model="Selectedsupdiscounttype" ng-change="Supdiscounttype();">
+                    <option value="0">-Select-</option>
+                    <option value="1">Discount Percentage </option>
+                    <option value="2">Discount Amount</option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <div class="hidden" id="htnsupdiscountpercentage">
+                    <label for="CustomerPaymentDays">Discount Percentage </label>
+                    <input type="text" class="form-control" ng-model="discountpercentage" required />
+                </div>
+                <div class="hidden" id="htnsupdiscountamount">
+                    <label for="CustomerPaymentDays">Discount Amount </label>
+                    <input type="text" class="form-control" ng-model="discountamount" required />
+                </div>
+            </div>*@
+
+                                <div class="form-group col-md-6">
+                                    <label for="CustomerPayment">Remarks </label>
+                                    <input type="text" class="form-control" name="remarks" id="remarks" ng-model="remarks" />
+                                </div>
+
+                            </div>
+
+                            <div class="tile-body">
+                                <div class="table-responsive">
+                                    <!-- This table is used for displaying data in the form of grid in the create/edit page-->
+                                    <table class="table table-custom" id="grd_1">
+                                        <thead>
+                                            <tr>
+                                                <th>Short Name</th>
+                                                <th>Category</th>
+                                                <th>Product</th>
+                                                <th>UOM</th>
+                                                <th>Currency</th>
+                                                <th>Packing</th>
+                                                <th>Quantity</th>
+                                                <th>Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="Contactbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                    <!-- /tile body -->
+                    <!-- tile footer -->
+                    <div class="tile-footer text-center bg-tr-black lter dvd dvd-top text-center  m-t-20">
+                        <!-- SUBMIT BUTTON -->
+                        <!-- Button used for submitting the record -->
+                        <button type="submit" class="btn btn-success" id="formSubmit" ng-click="SubmitClick();" ng-bind="submittext">Submit</button>
+                    </div>
+                    <!-- /tile footer -->
+
+                </section>
+                <!--The user can have a option to restore-->
+                <section class="tile" id="div_Restore" style="display:none">
+
+                    <!-- tile header -->
+                    <div class="tile-header dvd-btm">
+                        <h1 class="custom-font"><strong>Restore Order Details</strong> List</h1>
+                        <ul class="controls">
+                            <li style="padding:5px">
+                                <!-- function showRecords() is used for return back to view from the current page.ie it actually hide the other pages except view -->
+                                <a tabindex="0" ng-click="showRecords();">
+                                    <!-- This is used as a link for back. It wil navigates to View List Page -->
+                                    <span class="btn btn-hotpink btn-xs mb-10">
+                                        <i class="fa fa-arrow-left"></i>Back
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- /tile header -->
+                    <!-- tile body -->
+                    <div class="tile-body">
+                        <div class="row">
+                            <div class="col-md-6"><div id="tableToolsRestore"></div></div>
+                            <div class="col-md-6"><div id="colVisRestore"></div></div>
+                        </div>
+                        <!-- This table is used for displaying restore details.here user can able to delete or restore the records -->
+                        <table class="table table-custom" id="advancedusageRestore">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Schedule</th>
+                                    <th>UOM</th>
+                                    <th>Order Quantity</th>
+                                    <th>Delivered</th>
+                                    <th>Selling Price</th>
+                                    <th>Supplier Offer</th>
+                                    <th>Customer offer</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            
+                        </table>
+                    </div>
+                    <!-- /tile body -->
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+

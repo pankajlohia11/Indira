@@ -1,0 +1,86 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BusinessEntity.CustomModels
+{
+    public class Shipment_CM
+    {
+        public decimal S_ID { get; set; }
+        public string S_Code { get; set; }
+        public string COM_DISPLAYNAME { get; set; }
+        public string SH_Code { get; set; }
+        public int S_Type { get; set; }
+
+        public decimal S_OrderID { get; set; }
+
+        public string S_ScheduleID { get; set; }
+
+        public string S_ETD { get; set; }
+
+        public string S_ETA { get; set; }
+
+        public string S_DeparturePort { get; set; }
+
+        public string S_ArrivalPort { get; set; }
+        public string S_BL_NO { get; set; }
+
+        public DateTime? S_BL_DATE { get; set; }
+        public string S_INV_NO { get; set; }
+
+        public DateTime? S_INV_DATE { get; set; }
+
+        public decimal? S_INV_AMT { get; set; }
+
+        public decimal? S_BAL_AMT { get; set; }
+
+        public decimal? S_GrossWeight { get; set; }
+        public string S_ContainerNo { get; set; }
+        public string S_MotherVessel { get; set; }
+        public string S_FleederVessel { get; set; }
+
+        public bool? S_STATUS { get; set; }
+
+        public bool? S_DebitNoteStatus { get; set; }
+
+        public bool? S_CommissionRecievedStatus { get; set; }
+        public int? S_DebitNoteApprovalStatus { get; set; }
+        public decimal? CREATED_BY { get; set; }
+
+        public DateTime? CREATED_DATE { get; set; }
+
+        public decimal? LAST_UPDATED_BY { get; set; }
+
+        public DateTime? LAST_UPDATED_DATE { get; set; }
+
+        public decimal? DELETED_BY { get; set; }
+
+        public DateTime? DELETED_DATE { get; set; }
+
+        public bool? DELETED { get; set; }
+
+        public int COM_KEY { get; set; }
+        public decimal SD_ID { get; set; }
+
+        public decimal SD_PID { get; set; }
+
+        public int SD_Type { get; set; }
+        public decimal SD_ScheduleID { get; set; }
+        public decimal SD_OrderDetailID { get; set; }
+        public decimal SD_ProductID { get; set; }
+        public string SD_ProductName { get; set; }
+        public string SD_ArticleNo { get; set; }
+
+        public decimal SD_ScheduledQuantity { get; set; }
+        public decimal? Price { get; set; }
+        public decimal? SD_Quantity { get; set; }
+
+    }
+    public class ShipmentView_CM
+    {
+        public List<Shipment_CM> headerObj { get; set; }
+        public List<Shipment_CM> detailsObj { get; set; }
+    }
+}

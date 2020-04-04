@@ -1,0 +1,196 @@
+﻿@using BusinessEntity.CustomModels;
+@using BusinessEntity.EntityModels;
+@model IEnumerable<BusinessEntity.CustomModels.SalesTarget_CM>
+@{
+    int i = 0;
+
+}
+<style>
+    #tblSalesTarget tbody tr td {
+        padding: 1px;
+    }
+
+    #tblSalesTarget {
+        overflow-x: auto;
+    }
+</style>
+<div class="col-md-12">
+    <div class="tile-body">
+        <table class="table table-custom" id="tblSalesTarget">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th><span id="Target">Target</span></th>
+                    <th><span id="Target">Pending</span></th>
+                    <th><span id="Action">Action</span></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="width:40%">
+                            <input type="hidden" class="form-control" name="txtUserID_@i" id="txtUserID_@i" value="@item.ST_EMP_ID">
+                            <input type="text" class="form-control" name="txtUserID_@i" id="txtUserName_@i" value="@item.ST_EMP_Name" disabled>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="txtTar_@i" id="txtTar_@i" onchange="SetPendingTarget(this)" onkeypress="return isNumber(event)" value="0"
+                                   data-parsley-trigger="change" data-parsley-type="digits">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="txtPen_@i" id="txtPen_@i" value="0" disabled
+                                   data-parsley-range="[0,0]" data-parsley-trigger="change">
+                        </td>
+                        <td style="width:15%"><button type="button" class="btn btn-primary btn-xs mb-10" data-toggle="collapse" href="#collapseExample_@i" aria-expanded="false" aria-controls="collapseExample_@i" id="btnProductTarget">Set Product / Mth Wise Target</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div class="collapse" id="collapseExample_@i">
+                                <div class="well">
+                                    <table class="table table-custom" id="tblSalesTarget_@i">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th><span id="Jan">Jan</span></th>
+                                                <th><span id="Feb">Feb</span></th>
+                                                <th><span id="Mar">Mar</span></th>
+                                                <th><span id="Apr">Apr</span></th>
+                                                <th><span id="May">May</span></th>
+                                                <th><span id="Jun">Jun</span></th>
+                                                <th><span id="Jul">Jul</span></th>
+                                                <th><span id="Aug">Aug</span></th>
+                                                <th><span id="Sep">Sep</span></th>
+                                                <th><span id="Oct">Oct</span></th>
+                                                <th><span id="Nov">Nov</span></th>
+                                                <th><span id="Dec">Dec</span></th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @{
+
+                                                int j = 0;
+                                                EntityClasses dbcontext = new EntityClasses();
+                                                var data2 = (from u in dbcontext.Tbl_ProductGroup
+                                                             join t in (dbcontext.Tbl_Sales_Target.Where(row => row.ORG_ID == item.ORG_ID && row.ST_EMP_ID == item.ST_EMP_ID && row.ST_FINANCIAL_YEAR==item.ST_FINANCIAL_YEAR))
+                                                             on u.PG_ID equals t.ST_ProductGroupID into s
+                                                             from st in s.DefaultIfEmpty()
+                                                             where u.PG_TYPE == 1 && u.DELETED == false
+                                                             select new SalesTarget_CM
+                                                             {
+                                                                 ST_ProductID = u.PG_ID,
+                                                                 ST_ProductID_Name = u.PG_NAME,
+                                                                 ST_M1 = st.ST_M1 ?? 0,
+                                                                 ST_M2 = st.ST_M2 ?? 0,
+                                                                 ST_M3 = st.ST_M3 ?? 0,
+                                                                 ST_M4 = st.ST_M4 ?? 0,
+                                                                 ST_M5 = st.ST_M5 ?? 0,
+                                                                 ST_M6 = st.ST_M6 ?? 0,
+                                                                 ST_M7 = st.ST_M7 ?? 0,
+                                                                 ST_M8 = st.ST_M8 ?? 0,
+                                                                 ST_M9 = st.ST_M9 ?? 0,
+                                                                 ST_M10 = st.ST_M10 ?? 0,
+                                                                 ST_M11 = st.ST_M11 ?? 0,
+                                                                 ST_M12 = st.ST_M12 ?? 0,
+                                                                 ST_TARGET = st.ST_TARGET ?? 0
+                                                             }).ToList();
+                                            }
+                                        @foreach (var item1 in data2)
+                                        {
+                                            <tr>
+                                                <td style="width:10%">
+                                                    <input type="hidden" class="form-control" name="TargetID_@i@j" id="TargetID_@i@j" value="0">
+                                                    <input type="hidden" class="form-control" name="txtUserID_@i@j" id="txtProductID_@i@j" value="@item1.ST_ProductID">
+                                                    <input type="text" class="form-control" name="txtUserID_@i@j" id="txtProductName_@i@j" value="@item1.ST_ProductID_Name" disabled>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM1_@i@j" id="txtM1_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M1"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM2_@i@j" id="txtM2_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M2"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM3_@i@j" id="txtM3_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M3"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM4_@i@j" id="txtM4_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M4"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM5_@i@j" id="txtM5_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M5"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM6_@i@j" id="txtM6_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M6"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM7_@i@j" id="txtM7_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M7"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM8_@i@j" id="txtM8_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M8"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM9_@i@j" id="txtM9_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M9"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM10_@i@j" id="txtM10_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M10"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM11_@i@j" id="txtM11_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M11"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtM12_@i@j" id="txtM12_@i@j" onchange="SetTotal('txtTar_@i')" onkeypress="return isNumber(event)" value="@item1.ST_M12"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" name="txtTotal_@i@j" id="txtTotal_@i@j" disabled value="@item1.ST_TARGET"
+                                                           data-parsley-trigger="change" data-parsley-type="digits">
+                                                </td>
+                                            </tr>
+                                            j++;
+                                        }
+
+                                        <tr>
+                                            <td>
+                                                <input type="hidden" class="form-control" name="txtLength" id="txtLength" value="@i">
+                                                <input type="text" class="form-control" name="txtLabel" id="txtLabel" value="Total" disabled>
+                                            </td>
+                                            <td><input type="text" class="form-control" name="txtM1Total" id="txtM1Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM2Total" id="txtM2Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM3Total" id="txtM3Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM4Total" id="txtM4Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM5Total" id="txtM5Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM6Total" id="txtM6Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM7Total" id="txtM7Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM8Total" id="txtM8Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM9Total" id="txtM9Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM10Total" id="txtM10Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM11Total" id="txtM11Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtM12Total" id="txtM12Total_@i" disabled></td>
+                                            <td><input type="text" class="form-control" name="txtTotalTarget" id="txtTotalTarget_@i" disabled></td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                i++;
+            }
+
+            </tbody>
+
+        </table>
+    </div>
+</div>

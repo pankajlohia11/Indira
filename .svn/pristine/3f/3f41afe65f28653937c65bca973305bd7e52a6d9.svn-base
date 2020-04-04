@@ -1,0 +1,358 @@
+﻿app1.controller("AC_CustomerModel", function ($scope, $http, $window, $compile) {
+        
+    GetCustomerList();
+    function GetCustomerList() {
+        var post = $http({
+            method: "POST",
+            url: "/ET_Admin_CustomerModule/GetCustomerList",
+            dataType: 'json',
+            headers: { "Content-Type": "application/json" }
+        });
+        post.success(function (data, status) {
+            if (data == "Session Expired") {
+                $window.location.href = '/ET_Login/ET_SessionExpire';
+            }
+            else if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            else {
+                var customerList = JSON.parse(data);
+                $scope.customers = customerList;
+            }
+        });
+
+        post.error(function (data, status) {
+            $window.alert(data.Message);
+        });
+    }
+
+    $scope.GetCompanyCommunication = function ()
+    {
+        var getcustomerinfo = $http.get("/ET_Admin_CustomerModule/GetCompanyCommList",
+            {
+                params: { id: $scope.E_CustomerID }
+            });
+
+        getcustomerinfo.then(function (CompCommList) {
+            var commList = JSON.parse(CompCommList.data);
+            $scope.CompanyCommList = commList;
+            }, function () {
+                alert("No Data Found");
+            });
+    }
+
+    $scope.CustomerChange = function () {
+
+        var getcustomerinfo = $http.get("/ET_Admin_CustomerModule/GetCustomerInfo",
+            {
+                params: { id: $scope.E_CustomerID }
+                });
+        getcustomerinfo.then(function (CustomerMaster) {
+            debugger;
+            $("#cust_contact").dataTable().fnDestroy();
+            $("#advancedusage1").dataTable().fnDestroy();
+            var custMaster = JSON.parse(CustomerMaster.data.Result);
+            var CompContacts = JSON.parse(CustomerMaster.data.Contact);
+            var OrderLi = JSON.parse(CustomerMaster.data.Order);
+            var OneToOneLi = JSON.parse(CustomerMaster.data.OneToOne);
+            var OneToManyLi = JSON.parse(CustomerMaster.data.OneToMany);
+            var PaymentLi = JSON.parse(CustomerMaster.data.Payment);
+            var ScheduleLi = JSON.parse(CustomerMaster.data.Schedule);
+            var ShipmentLi = JSON.parse(CustomerMaster.data.Shipment);
+
+            $scope.CustomerMasterList = custMaster;
+            $scope.CompanyContactsList = CompContacts;
+            $scope.OrderList = OrderLi;
+            $scope.OneToOneList = OneToOneLi;
+            $scope.OneToManyList = OneToManyLi;
+            $scope.PaymentList = PaymentLi;
+            $scope.ScheduleList = ScheduleLi;
+            $scope.ShipmentList = ShipmentLi;
+            $scope.GetCompanyCommunication();
+            if (data.indexOf("ERR") > -1) {
+                $("#spanErrMessage1").html(data);
+                $("#spanErrMessage2").html(data);
+                if ($("#exceptionmessage").length)
+                    $("#exceptionmessage").trigger("click");
+            }
+            
+            }, function () {
+                alert("No Data Found");
+            });
+        
+    }
+    $scope.ViewOneToMany = function (a) {
+        a = parseInt(a);
+        {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OneToManyInvoice/ET_Sales_Invoice_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        
+    }
+    $scope.ViewOneToOne = function (a) {
+        a = parseInt(a);
+         {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_OneToOneInvoice/ET_Sales_Invoice_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        
+    }
+    $scope.ViewSchedule = function (a) {
+        
+        {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shedule/ET_Sales_Schedule_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                    //var privilage = JSON.parse(data);
+                    //$scope.txtMaterialCodeView = privilage[0].MATERIAL_CODE;
+                    //$scope.txtMaterialnameView = privilage[0].MATERIAL_NAME;
+                    //$scope.txtDescriptionView = privilage[0].MATERIAL_DESCRIPTION;
+                    //if (privilage[0].COTTON_PER == 1)
+                    //    $scope.chkCottonView = true;
+                    //else
+                    //    $scope.chkCottonView = false;
+                    //$rootScope.$emit("CallParentMethod", { a: $scope.txtMaterialCodeView, b: $scope.txtMaterialnameView, c: $scope.txtDescriptionView, d: $scope.chkCottonView });
+
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+        
+    }
+    $scope.ViewShipment = function (a) {
+        a = parseInt(a);
+         {
+            var post = $http({
+                method: "POST",
+                url: "/ET_Sales_Shipment/ET_Sales_Shipment_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+       
+    }
+    $scope.ViewOrders = function (a) {
+        a = parseInt(a);
+       {
+            var post = $http({
+                method: "POST",
+                url: "/ET_General_Order_Details/ET_General_Order_Details_View",
+                dataType: 'html',
+                data: {
+                    id: a
+                },
+                headers: { "Content-Type": "application/json" }
+            });
+            post.success(function (data, status) {
+                if (data == "Session Expired") {
+                    $window.location.href = '/ET_Login/ET_SessionExpire';
+                }
+                else if (data.indexOf("ERR") > -1) {
+                    $("#spanErrMessage1").html(data);
+                    $("#spanErrMessage2").html(data);
+                    if ($("#exceptionmessage").length)
+                        $("#exceptionmessage").trigger("click");
+                }
+                else {
+                    $('#viewpopup').html(data);
+                    $("#btnviewpopup").trigger("click");
+                }
+            });
+
+            post.error(function (data, status) {
+                $window.alert(data.Message);
+            });
+        }
+    }
+
+    
+    $scope.$watch("customers", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () { $("#drpCustomer").val("").trigger("chosen:updated"); }, 100);
+        }
+    });
+    $scope.$watch("CompanyContactsList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#cust_contact');
+            }, 5);
+        }
+    }); 
+    $scope.$watch("OrderList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Order_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("OneToOneList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#One_to_one');
+            }, 5);
+        }
+    });
+    $scope.$watch("OneToManyList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#One_ToMany_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("PaymentList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Payment_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("ShipmentList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Shipment_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("ScheduleList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Schedule_List');
+            }, 5);
+        }
+    });
+    $scope.$watch("CompanyCommList", function (value) {
+        var val = value || null;
+        if (val) {
+            setTimeout(function () {
+                dynamicDataTable1('#Company_Comm_List');
+            }, 5);
+        }
+    });
+});
