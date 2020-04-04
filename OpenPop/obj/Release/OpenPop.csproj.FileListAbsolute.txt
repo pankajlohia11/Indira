@@ -1,0 +1,3 @@
+E:\Projects\Indra\OpenPop\bin\Release\OpenPop.dll
+E:\Projects\Indra\OpenPop\obj\Release\OpenPop.csproj.CoreCompileInputs.cache
+E:\Projects\Indra\OpenPop\obj\Release\OpenPop.dll

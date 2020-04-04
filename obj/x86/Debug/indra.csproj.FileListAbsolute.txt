@@ -1,0 +1,2 @@
+D:\projects\github\Indra 16-03-2020\obj\x86\Debug\indra.csprojAssemblyReference.cache
+D:\projects\github\Indra 16-03-2020\obj\x86\Debug\indra.csproj.CoreCompileInputs.cache

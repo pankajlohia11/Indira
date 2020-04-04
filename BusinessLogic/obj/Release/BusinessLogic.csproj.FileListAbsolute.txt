@@ -1,0 +1,15 @@
+E:\Projects\Indra\BusinessLogic\bin\Release\BusinessLogic.dll
+E:\Projects\Indra\BusinessLogic\bin\Release\BusinessLogic.pdb
+E:\Projects\Indra\BusinessLogic\bin\Release\BusinessEntity.dll
+E:\Projects\Indra\BusinessLogic\bin\Release\DataAccess.dll
+E:\Projects\Indra\BusinessLogic\bin\Release\EntityFramework.dll
+E:\Projects\Indra\BusinessLogic\bin\Release\BusinessEntity.pdb
+E:\Projects\Indra\BusinessLogic\bin\Release\BusinessEntity.dll.config
+E:\Projects\Indra\BusinessLogic\bin\Release\DataAccess.pdb
+E:\Projects\Indra\BusinessLogic\bin\Release\DataAccess.dll.config
+E:\Projects\Indra\BusinessLogic\bin\Release\EntityFramework.xml
+E:\Projects\Indra\BusinessLogic\obj\Release\BusinessLogic.csprojAssemblyReference.cache
+E:\Projects\Indra\BusinessLogic\obj\Release\BusinessLogic.csproj.CoreCompileInputs.cache
+E:\Projects\Indra\BusinessLogic\obj\Release\BusinessLogic.csproj.CopyComplete
+E:\Projects\Indra\BusinessLogic\obj\Release\BusinessLogic.dll
+E:\Projects\Indra\BusinessLogic\obj\Release\BusinessLogic.pdb

@@ -1,0 +1,23 @@
+E:\Projects\Indra\BusinessEntity\bin\Release\BusinessEntity.dll.config
+E:\Projects\Indra\BusinessEntity\bin\Release\BusinessEntity.dll
+E:\Projects\Indra\BusinessEntity\bin\Release\BusinessEntity.pdb
+E:\Projects\Indra\BusinessEntity\bin\Release\EntityFramework.dll
+E:\Projects\Indra\BusinessEntity\bin\Release\EntityFramework.SqlServer.dll
+E:\Projects\Indra\BusinessEntity\bin\Release\EntityFramework.xml
+E:\Projects\Indra\BusinessEntity\bin\Release\EntityFramework.SqlServer.xml
+E:\Projects\Indra\BusinessEntity\obj\Release\BusinessEntity.csproj.CoreCompileInputs.cache
+E:\Projects\Indra\BusinessEntity\obj\Release\BusinessEntity.csproj.CopyComplete
+E:\Projects\Indra\BusinessEntity\obj\Release\BusinessEntity.dll
+E:\Projects\Indra\BusinessEntity\obj\Release\BusinessEntity.pdb
+D:\projects\github\Indra 16-03-2020\BusinessEntity\obj\Release\BusinessEntity.dll
+D:\projects\github\Indra 16-03-2020\BusinessEntity\obj\Release\BusinessEntity.pdb
+D:\projects\github\Indra 16-03-2020\BusinessEntity\bin\Release\BusinessEntity.dll.config
+D:\projects\github\Indra 16-03-2020\BusinessEntity\bin\Release\BusinessEntity.dll
+D:\projects\github\Indra 16-03-2020\BusinessEntity\bin\Release\BusinessEntity.pdb
+D:\projects\github\Indra 16-03-2020\BusinessEntity\bin\Release\EntityFramework.dll
+D:\projects\github\Indra 16-03-2020\BusinessEntity\bin\Release\EntityFramework.SqlServer.dll
+D:\projects\github\Indra 16-03-2020\BusinessEntity\bin\Release\EntityFramework.xml
+D:\projects\github\Indra 16-03-2020\BusinessEntity\bin\Release\EntityFramework.SqlServer.xml
+D:\projects\github\Indra 16-03-2020\BusinessEntity\obj\Release\BusinessEntity.csproj.CoreCompileInputs.cache
+D:\projects\github\Indra 16-03-2020\BusinessEntity\obj\Release\BusinessEntity.csprojAssemblyReference.cache
+D:\projects\github\Indra 16-03-2020\BusinessEntity\obj\Release\BusinessEntity.csproj.CopyComplete

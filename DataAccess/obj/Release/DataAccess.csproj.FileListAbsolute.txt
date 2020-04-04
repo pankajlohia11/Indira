@@ -1,0 +1,15 @@
+E:\Projects\Indra\DataAccess\bin\Release\DataAccess.dll.config
+E:\Projects\Indra\DataAccess\bin\Release\DataAccess.dll
+E:\Projects\Indra\DataAccess\bin\Release\DataAccess.pdb
+E:\Projects\Indra\DataAccess\bin\Release\BusinessEntity.dll
+E:\Projects\Indra\DataAccess\bin\Release\EntityFramework.dll
+E:\Projects\Indra\DataAccess\bin\Release\EntityFramework.SqlServer.dll
+E:\Projects\Indra\DataAccess\bin\Release\BusinessEntity.pdb
+E:\Projects\Indra\DataAccess\bin\Release\BusinessEntity.dll.config
+E:\Projects\Indra\DataAccess\bin\Release\EntityFramework.xml
+E:\Projects\Indra\DataAccess\bin\Release\EntityFramework.SqlServer.xml
+E:\Projects\Indra\DataAccess\obj\Release\DataAccess.csprojAssemblyReference.cache
+E:\Projects\Indra\DataAccess\obj\Release\DataAccess.csproj.CoreCompileInputs.cache
+E:\Projects\Indra\DataAccess\obj\Release\DataAccess.csproj.CopyComplete
+E:\Projects\Indra\DataAccess\obj\Release\DataAccess.dll
+E:\Projects\Indra\DataAccess\obj\Release\DataAccess.pdb
